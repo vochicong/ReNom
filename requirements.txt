@@ -1,0 +1,5 @@
+Cython==0.26
+flake8==3.3.0
+ipython==5.4.0
+pytest==3.0.7
+tox==2.7.0
