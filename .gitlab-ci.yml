@@ -16,13 +16,3 @@ pytest:
     - export RENOM_PRECISION=32
     - py.test
 
-pages:
-  script:
-  - pip install sphinx nbsphinx sphinx_rtd_theme
-  - python setup.py build_sphinx 
-  - mv build/sphinx/html/ public/
-  artifacts:
-    paths:
-    - public
-  only:
-  - master
