@@ -1,0 +1,28 @@
+image : python:2
+
+before_script:
+  - apt-get update -qq && apt-get install -y -qq python-pip pandoc
+  - pip install -r requirements.txt
+  - pip install -e .
+
+flake8:
+  script:
+    - flake8 .
+
+pytest:
+  script:
+    - export RENOM_PRECISION=64
+    - py.test
+    - export RENOM_PRECISION=32
+    - py.test
+
+pages:
+  script:
+  - pip install sphinx nbsphinx sphinx_rtd_theme
+  - python setup.py build_sphinx 
+  - mv build/sphinx/html/ public/
+  artifacts:
+    paths:
+    - public
+  only:
+  - master
