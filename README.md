@@ -21,7 +21,7 @@ First clone the ReNom repository.
 
 Then move to the ReNomAd folder, install the module using pip.
 
-	cd ReNomAd
+	cd ReNom
 	pip install -e .
 
 To activate CUDA, you have to build cuda modules before `pip install -e .` 
