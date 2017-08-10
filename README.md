@@ -47,10 +47,6 @@ Default case, the precision is float32.
 
 ## License
 
-本ソフトウェア「ReNom」は、株式会社グリッドが提供する有償のソフトウェアとなり、商用目的でのご利用は有償で提供しています。
-
-お客様が個人目的で利用、学術・教育目的で利用、または製品評価の目的で利用する場合（商用目的でない利用）については無償で提供しています。
-
-本ソフトウェアはサブスクリプションでのご提供となり、お客様がサブスクリプションをご利用、もしくは更新をもって発効され、お客様はサブスクリプション契約の内容・条件に同意したものとみなされます。ご利用に必要な有償ライセンスの購入については、当社または当社が指定する販売会社へ所定の手続きの上、ご購入ください。
-
-※サブスクリプション契約の内容については、お客様への事前の予告なく変更される場合があります。本ソフトウェアをご利用される場合、お客様自身の責任と負担において最新契約内容をwww.renom.jpより必ずご確認の上ご利用ください。
+“ReNom” is provided by GRID inc., as subscribed software.  By downloading ReNom, you are agreeing to be bound by our ReNom Subscription agreement between you and GRID inc.
+To use ReNom for commercial purpose, you shall be required to obtain paid license. Please contact us or one of our resellers.  If you are an individual, wishing to use ReNom for academic, educational and product evaluation purpose, you are allowed to use ReNom loyalty free.
+ReNom Subscription agreement are subject to change without prior notice. You agree to be bound by any such revisions. By your own responsibilities, you should visit www.renom.jp to determine the latest terms to which you are bound.
