@@ -63,11 +63,11 @@ N = len(X_train)
 
 nn = MNist()
 
-for i in xrange(epoch):
+for i in range(epoch):
     start_t = time.time()
     perm = np.random.permutation(N)
     loss = 0
-    for j in xrange(0, N // batch):
+    for j in range(0, N // batch):
         train_batch = X_train[perm[j * batch:(j + 1) * batch]]
         responce_batch = labels_train[perm[j * batch:(j + 1) * batch]]
 
