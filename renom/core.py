@@ -14,7 +14,7 @@ from renom.cuda import *
 class Grads:
     '''This class contains gradients of each Node object.
 
-    When the function ``grad`` witch is instance of Node class called,
+    When the function ``grad`` which is instance of Node class called,
     an instance of Grads is returned.
 
     Example:
@@ -847,7 +847,7 @@ class Variable(Node):
 
     Args:
         value (Variable,ndarray): Input array.
-        auto_update (bool): Auto update flug.
+        auto_update (bool): Auto update flag.
 
     Example:
         >>> import numpy as np
