@@ -1,3 +1,4 @@
+import contextlib
 from cpython cimport Py_buffer, PyObject_GetBuffer, PyBuffer_Release
 
 cdef class _VoidPtr:
@@ -8,4 +9,4 @@ cdef class _VoidPtr:
 
     def __dealloc__(self):
         PyBuffer_Release(&(self.buf))
-        
+

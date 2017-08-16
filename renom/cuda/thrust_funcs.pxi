@@ -9,8 +9,12 @@
 import numpy as np
 from libc.stdint cimport uintptr_t
 
+import cuda_base
+
 
 def cunegate(input, result):
+    cuda_base.check_heap_device(input, result)
+
     cdef VALUE_TYPE * first = <VALUE_TYPE * > < uintptr_t > input._ptr
     cdef VALUE_TYPE * last = first + <size_t > input.size
     cdef VALUE_TYPE * output = <VALUE_TYPE * > < uintptr_t > result._ptr
@@ -18,6 +22,8 @@ def cunegate(input, result):
 
 
 def curelu_foward(gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
@@ -25,6 +31,8 @@ def curelu_foward(gpu_value1, gpu_value2):
 
 
 def curelu_backard(gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
@@ -32,6 +40,8 @@ def curelu_backard(gpu_value1, gpu_value2):
 
 
 def culeaky_leru_forward(s, gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
@@ -39,6 +49,8 @@ def culeaky_leru_forward(s, gpu_value1, gpu_value2):
 
 
 def culeaky_leru_backward(s, gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
@@ -46,6 +58,8 @@ def culeaky_leru_backward(s, gpu_value1, gpu_value2):
 
 
 def cueru_forward(s, gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
@@ -53,6 +67,8 @@ def cueru_forward(s, gpu_value1, gpu_value2):
 
 
 def cueru_backward(s, gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
@@ -60,6 +76,8 @@ def cueru_backward(s, gpu_value1, gpu_value2):
 
 
 def cusigmoid(gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
@@ -67,6 +85,8 @@ def cusigmoid(gpu_value1, gpu_value2):
 
 
 def cutanh(gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
@@ -74,6 +94,8 @@ def cutanh(gpu_value1, gpu_value2):
 
 
 cdef basic_operation(Operation op, gpu_value1, gpu_value2, gpu_value3):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
+
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2
     cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > gpu_value3._ptr
@@ -91,30 +113,37 @@ cdef basic_operation(Operation op, gpu_value1, gpu_value2, gpu_value3):
 
 
 def cumul(gpu_value1, gpu_value2, gpu_value3):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
     basic_operation(Operation.MUL, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cuadd(gpu_value1, gpu_value2, gpu_value3):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
     basic_operation(Operation.ADD, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cusub(gpu_value1, gpu_value2, gpu_value3):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
     basic_operation(Operation.SUB, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cudiv(gpu_value1, gpu_value2, gpu_value3):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
     basic_operation(Operation.DIV, gpu_value1, gpu_value2, gpu_value3)
 
 
 def curdiv(gpu_value1, gpu_value2, gpu_value3):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
     basic_operation(Operation.RDIV, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cupow(gpu_value1, gpu_value2, gpu_value3):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
     basic_operation(Operation.POW, gpu_value1, gpu_value2, gpu_value3)
 
 
 def curpow(gpu_value1, gpu_value2, gpu_value3):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
     basic_operation(Operation.RPOW, gpu_value1, gpu_value2, gpu_value3)
 
 
@@ -122,6 +151,8 @@ def cufill(value, gpu_value):
     cdef int size = <int > gpu_value.size
     cdef VALUE_TYPE v = <VALUE_TYPE > value
     cdef VALUE_TYPE * ptr = <VALUE_TYPE * > < uintptr_t > gpu_value._ptr
+
+    cuda_base.check_heap_device(gpu_value)
     thrust_fill(v, ptr, size)
 
 
@@ -129,6 +160,8 @@ def culoge(gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_loge(ptr1, ptr2, size)
 
 
@@ -143,6 +176,8 @@ def cusqrt(gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_sqrt(ptr1, ptr2, size)
 
 
@@ -151,6 +186,8 @@ def cucross_entropy(gpu_value1, gpu_value2, gpu_value3):
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
     cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > gpu_value3._ptr
+
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
     thrust_cross_entropy(ptr1, ptr2, ptr3, size)
 
 
@@ -159,6 +196,8 @@ def cubroadcast(gpu_value1, gpu_value2):
     cdef int size_2 = <int > gpu_value2.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_broad_cast(size_1, ptr1, size_2, ptr2)
 
 
@@ -166,6 +205,8 @@ def cuabs_forward(gpu_value1, gpu_value2):
     cdef int size = gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_abs_forward(ptr1, ptr2, size)
 
 
@@ -173,6 +214,8 @@ def cuabs_backward(gpu_value1, gpu_value2):
     cdef int size = gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_abs_backward(ptr1, ptr2, size)
 
 
@@ -180,6 +223,8 @@ def cusum(gpu_value1, gpu_value2=None, axis=None):
     cdef int size = gpu_value1.size
     cdef VALUE_TYPE * ptr1
     cdef VALUE_TYPE * ptr2
+
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
     if axis is None:
         ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
         return thrust_all_reduce(ptr1, size)
@@ -207,6 +252,8 @@ def cumin(value, gpu_value1, gpu_value2=None):
     cdef VALUE_TYPE * ptr1 = < VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = < VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
     cdef VALUE_TYPE v = <VALUE_TYPE > value
+
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_min(v, ptr1, ptr2, size)
 
 
@@ -215,6 +262,8 @@ def cumax(value, gpu_value1, gpu_value2=None):
     cdef VALUE_TYPE * ptr1 = < VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = < VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
     cdef VALUE_TYPE v = <VALUE_TYPE > value
+
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_max(v, ptr1, ptr2, size)
 
 

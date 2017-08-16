@@ -160,3 +160,30 @@ def test_update():
 
     grad.update(models=[nn])
     assert np.allclose(cur.as_ndarray() - grad.get(nn.params.w), nn.params.w.as_ndarray())
+
+
+def test_multi_gpu():
+    nn = rm.Dense(2)
+    nn.set_gpu(0)
+
+    nn2 = rm.Dense(2)
+    nn.set_gpu(0)
+
+    for i in range(2):
+        nn2.dup(nn)
+
+        x = np.random.rand(100, 2)
+        with nn.train():
+            ret1 = nn(x[:50])
+            loss1 = rm.softmax_cross_entropy(ret1, np.random.rand(50, 2))
+
+        with nn2.train():
+            ret2 = nn(x[50:])
+            loss2 = rm.softmax_cross_entropy(ret2, np.random.rand(50, 2))
+
+        nn.sync()
+        nn2.sync()
+
+        grad1 = loss1.grad()
+        nn.join_grads(grad1, [nn2.get_grads(loss2)])
+        grad1.update(models=[nn])
