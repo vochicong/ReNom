@@ -85,7 +85,7 @@ class Trainer(object):
     """Trainer class.
 
     This class owns train loop. It executes forward propagation,
-    back propagation and updating of weight parameters for the 
+    back propagation and updating of weight parameters for the
     specified number of times.
 
     Args:
