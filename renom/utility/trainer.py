@@ -82,6 +82,44 @@ def default_event_end_epoch(trainer):
 
 
 class Trainer(object):
+    """Trainer class.
+
+    This class owns train loop. It executes forward propagation,
+    back propagation and updating of weight parameters for the 
+    specified number of times.
+
+    Args:
+        model (Model): Model to be trained.
+        num_epoch (int): Numer of iteration.
+        loss_func (Node): Loss function.
+        batch_size (int): Batch size.
+        optimizer (Optimizer): Gradient descent algorithm.
+        shuffle (bool): If it's true, mini batch is created randomly.
+        events (dict): Dictionary of function.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> from renom.utility.trainer import Trainer
+        >>> from renom.utility.distributor import NdarrayDistributor
+        >>> x = np.random.rand(300, 50)
+        >>> y = np.random.rand(300, 1)
+        >>> model = rm.Dense(1)
+        >>> trainer = Trainer(model, 10, rm.mean_squared_error, 3, rm.Sgd(0.1))
+        >>> trainer.train(NdarrayDistributor(x, y))
+        epoch  0: avg loss 0.1597: 100%|██████████| 100/100.0 [00:00<00:00, 1167.85it/s]
+        epoch  1: avg loss 0.1131: 100%|██████████| 100/100.0 [00:00<00:00, 1439.25it/s]
+        epoch  2: avg loss 0.1053: 100%|██████████| 100/100.0 [00:00<00:00, 1413.42it/s]
+        epoch  3: avg loss 0.0965: 100%|██████████| 100/100.0 [00:00<00:00, 1388.67it/s]
+        epoch  4: avg loss 0.0812: 100%|██████████| 100/100.0 [00:00<00:00, 1445.61it/s]
+        epoch  5: avg loss 0.0937: 100%|██████████| 100/100.0 [00:00<00:00, 1432.99it/s]
+        epoch  6: avg loss 0.0891: 100%|██████████| 100/100.0 [00:00<00:00, 1454.68it/s]
+        epoch  7: avg loss 0.0992: 100%|██████████| 100/100.0 [00:00<00:00, 1405.73it/s]
+        epoch  8: avg loss 0.0933: 100%|██████████| 100/100.0 [00:00<00:00, 1401.55it/s]
+        epoch  9: avg loss 0.1090: 100%|██████████| 100/100.0 [00:00<00:00, 1343.97it/s]
+
+    """
+
     def __init__(self, model, num_epoch, loss_func, batch_size,
                  optimizer=None, shuffle=True, events=None):
 
@@ -112,6 +150,14 @@ class Trainer(object):
             handler(self)
 
     def train(self, train_distributor, test_distributor=None):
+        """Train method.
+        This method executes train loop.
+        If test_distributor is given, validation loss will be calculated.
+
+        Args:
+            train_distributor (Distributor): Distributor for yielding train data.
+            test_distributor (Distributor): Distributor for yielding test data.
+        """
         self.epoch = 0
         self.train_distributor = train_distributor
         self.test_distributor = test_distributor
@@ -158,5 +204,11 @@ class Trainer(object):
             self.avg_test_loss = self.avg_train_loss = None
 
     def test(self, data):
+        """Test method.
+        This method executes forward propagation for given data.
+
+        Args:
+            data (ndarray): Input data.
+        """
         ret = self.model(data)
         return ret
