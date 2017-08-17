@@ -69,7 +69,7 @@ def default_event_end_epoch(trainer):
         for i, (data, target) in enumerate(test_distributor.batch(trainer.batch_size, trainer.shuffle)):
             test_loss = trainer.loss_func(trainer.model(data), target)
             avg_test_loss += (test_loss - avg_test_loss) / (i + 1)
-        msg = "epoch%3d: avg loss %6.4f avg test loss %6.4f" % \
+        msg = "epoch%3d: avg loss %6.4f: avg test loss %6.4f" % \
             (epoch, avg_train_loss, avg_test_loss)
 
     if bar is not None:
@@ -167,7 +167,6 @@ class Trainer(object):
             self.on_event('start_epoch')
             self.nth = 0
             self.avg_train_loss = 0
-            self.avg_test_loss = 0
 
             for i, (data, target) in enumerate(self.train_distributor.batch(self.batch_size, self.shuffle)):
                 self.data = data
@@ -191,17 +190,11 @@ class Trainer(object):
                 self.data = self.target = None
                 self.output = self.loss = self.grads = None
 
-            if self.test_distributor:
-                for i, (data, target) in enumerate(self.test_distributor.batch(self.batch_size, self.shuffle)):
-                    test_loss = self.loss_func(self.model(data), target)
-                    self.avg_test_loss += (test_loss -
-                                           self.avg_test_loss) / (i + 1)
-
             self.on_event('end_epoch')
             self.epoch += 1
 
             # release objects
-            self.avg_test_loss = self.avg_train_loss = None
+            self.avg_train_loss = None
 
     def test(self, data):
         """Test method.
