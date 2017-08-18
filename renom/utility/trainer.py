@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
+import time
 
 class _EventHandlers(object):
     def __init__(self, events):
@@ -51,7 +51,7 @@ def default_event_updated(trainer):
     bar = getattr(trainer, "bar", None)
     if bar is not None:
         epoch = trainer.epoch
-        train_loss = trainer.loss
+        train_loss = trainer.loss.as_ndarray()
         msg = "epoch%3d: loss %6.4f" % (epoch, train_loss)
         bar.set_description(msg)
         bar.update(1)
@@ -61,16 +61,20 @@ def default_event_end_epoch(trainer):
     epoch = trainer.epoch
     bar = getattr(trainer, "bar", None)
     test_distributor = trainer.test_distributor
-    avg_train_loss = trainer.avg_train_loss
+    avg_train_loss = trainer.avg_train_loss.as_ndarray()
     avg_test_loss = 0
     msg = "epoch%3d: avg loss %6.4f" % (epoch, avg_train_loss)
-
+    
     if test_distributor:
+        trainer.model.set_models(inference=True)
         for i, (data, target) in enumerate(test_distributor.batch(trainer.batch_size, trainer.shuffle)):
             test_loss = trainer.loss_func(trainer.model(data), target)
             avg_test_loss += (test_loss - avg_test_loss) / (i + 1)
         msg = "epoch%3d: avg loss %6.4f: avg test loss %6.4f" % \
             (epoch, avg_train_loss, avg_test_loss)
+        trainer.model.set_models(inference=False)
+        trainer.test_loss_list.append(avg_test_loss)
+    trainer.train_loss_list.append(avg_train_loss)
 
     if bar is not None:
         bar.set_description(msg)
@@ -129,6 +133,8 @@ class Trainer(object):
         self.batch_size = batch_size
         self.optimizer = optimizer
         self.shuffle = shuffle
+        self.train_loss_list = []
+        self.test_loss_list = []       
 
         if events:
             self._events = events.copy()
@@ -162,27 +168,31 @@ class Trainer(object):
         self.train_distributor = train_distributor
         self.test_distributor = test_distributor
         self.on_event('start')
-
+        self.train_loss_list = []
+        self.test_loss_list = []
+        
         while self.epoch < self.num_epoch:
             self.on_event('start_epoch')
             self.nth = 0
             self.avg_train_loss = 0
 
             for i, (data, target) in enumerate(self.train_distributor.batch(self.batch_size, self.shuffle)):
+                start_t = time.time()
                 self.data = data
                 self.target = target
-
                 self.on_event('forward')
+
+                self.model.set_models(inference=False)
+
                 with self.model.train():
                     self.output = self.model(self.data)
                     self.loss = self.loss_func(self.output, self.target)
-                    self.avg_train_loss += (self.loss -
-                                            self.avg_train_loss) / (i + 1)
+                self.avg_train_loss += (self.loss -
+                                        self.avg_train_loss) / (i + 1)
 
                 self.on_event('backward')
                 self.grads = self.loss.grad()
                 self.grads.update(self.optimizer)
-
                 self.on_event('updated')
                 self.nth += 1
 
@@ -203,5 +213,9 @@ class Trainer(object):
         Args:
             data (ndarray): Input data.
         """
-        ret = self.model(data)
+        bs = self.batch_size
+        N = len(data) - 1 + bs
+        self.model.set_models(inference=True)
+        ret = np.vstack([self.model(data[bs*i:bs*(i+1)]) for i in range(N//bs)])
+        self.model.set_models(inference=False)
         return ret
