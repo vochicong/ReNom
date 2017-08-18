@@ -69,7 +69,7 @@ def default_event_end_epoch(trainer):
     if test_distributor:
         trainer.model.set_models(inference=True)
         for i, (data, target) in enumerate(test_distributor.batch(trainer.batch_size, trainer.shuffle)):
-            test_loss = trainer.loss_func(trainer.model(data), target)
+            test_loss = trainer.loss_func(trainer.model(data), target).as_ndarray()
             avg_test_loss += (test_loss - avg_test_loss) / (i + 1)
         msg = "epoch%3d: avg loss %6.4f: avg test loss %6.4f" % \
             (epoch, avg_train_loss, avg_test_loss)
@@ -212,10 +212,14 @@ class Trainer(object):
 
         Args:
             data (ndarray): Input data.
+
+        Returns:
+            ndarray
         """
         bs = self.batch_size
         N = len(data) - 1 + bs
         self.model.set_models(inference=True)
-        ret = np.vstack([self.model(data[bs * i:bs * (i + 1)]) for i in range(N // bs)])
+        ret = np.vstack([self.model(data[bs * i:bs * (i + 1)]).as_ndarray()
+                         for i in range(N // bs)])
         self.model.set_models(inference=False)
         return ret
