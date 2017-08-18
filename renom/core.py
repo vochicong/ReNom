@@ -130,6 +130,27 @@ class Grads:
                     if id(node) in self.variables:
                         self.update_node(node, opt)
 
+    def join(self, model, others):
+        """Merge gradients of other models.
+        Merged models should have same structure with model."""
+
+        values = dict(model.flatten_values())
+        for o in others:
+            for (name, attrname), diff in o.items():
+                obj = values[name][attrname]
+                curdiff = self.get(obj, None)
+                if curdiff is not None:
+                    if isinstance(curdiff, GPUValue):
+                        with use_device(curdiff.device_id):
+                            if diff.device_id != curdiff.device_id:
+                                diff = diff.copy()
+                            newdiff = curdiff + diff
+                    else:
+                        newdiff = curdiff + diff
+
+                    self.set(obj, newdiff)
+
+
 
 # todo: move this method to Cython
 def calc_broadcast_shape(s1, s2):

@@ -163,11 +163,27 @@ def test_update():
 
 
 def test_multi_gpu():
-    nn = rm.Dense(2)
-    nn.set_gpu(0)
+    class NN2(rm.Model):
+        def __init__(self):
+            super(NN2, self).__init__()
+            self.layer1 = rm.Dense(output_size=2)
+            self.layer2 = rm.Dense(output_size=2)
 
-    nn2 = rm.Dense(2)
+
+        def forward(self, x):
+            return self.layer2(rm.relu(self.layer1(x)))
+
+        def weight_initiallize(self, input_size):
+            self.layer1.weight_initiallize(input_size)
+            self.layer2.weight_initiallize(input_size)
+
+
+    nn = NN2()
     nn.set_gpu(0)
+    nn.weight_initiallize((2,))
+
+    nn2 = NN2()
+    nn2.set_gpu(0)
 
     for i in range(2):
         nn2.dup(nn)
@@ -178,12 +194,24 @@ def test_multi_gpu():
             loss1 = rm.softmax_cross_entropy(ret1, np.random.rand(50, 2))
 
         with nn2.train():
-            ret2 = nn(x[50:])
+            ret2 = nn2(x[50:])
             loss2 = rm.softmax_cross_entropy(ret2, np.random.rand(50, 2))
 
         nn.sync()
         nn2.sync()
 
         grad1 = loss1.grad()
-        nn.join_grads(grad1, [nn2.get_grads(loss2)])
+
+        grad2 = loss2.grad()
+        grad2.get(nn2.layer1.params.w)
+
+        org_l1_w = grad1.get(nn.layer1.params.w)
+
+        nn.join_grads(grad1, [(nn2, grad2)])
+
+        assert np.allclose(grad1.get(nn.layer1.params.w),
+                           org_l1_w + grad2.get(nn2.layer1.params.w))
+
+
+
         grad1.update(models=[nn])

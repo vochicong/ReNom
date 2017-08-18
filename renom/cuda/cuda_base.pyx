@@ -211,7 +211,6 @@ class allocator(object):
         if pool is None:
             ptr = cuMalloc(nbytes)
             pool = GPUHeap(nbytes=nbytes, ptr=ptr, device_id=cuGetDevice())
-            print("malloc")
         return pool
 
     def free(self, pool):

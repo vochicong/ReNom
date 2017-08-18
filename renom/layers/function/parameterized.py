@@ -81,6 +81,7 @@ class Model(with_metaclass(ABCMeta, object)):
 
                 for k, v in values.items():
                     layer.params[k] = v.copy()
+                    layer.params[k]._auto_update = v._auto_update
 
     def sync(self):
         if is_cuda_active():
@@ -215,9 +216,8 @@ class Model(with_metaclass(ABCMeta, object)):
         flatten(('root',), values)
         return value_list
 
-    def get_grads(self, node):
+    def _get_grads(self, grads):
         "Get gradients of attribute of this model"
-        grads = node.grad()
         value_list = self.flatten_values()
 
         for name, values in value_list:
@@ -230,10 +230,13 @@ class Model(with_metaclass(ABCMeta, object)):
 
     def join_grads(self, grads, others):
         """Merge gradients of other models.
-        Merged models should have same structure with self."""
+        Others is a list of tuple of (model, grads) to be merged.
+        Models listed in the others should have same structure with self."""
 
         values = dict(self.flatten_values())
-        for o in others:
+        for model, _grads in others:
+            o = model._get_grads(_grads)
+
             for (name, attrname), diff in o.items():
                 obj = values[name][attrname]
                 curdiff = grads.get(obj, None)
