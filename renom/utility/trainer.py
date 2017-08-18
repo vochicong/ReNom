@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import time
+import numpy as np
+
 
 class _EventHandlers(object):
     def __init__(self, events):
@@ -64,7 +65,7 @@ def default_event_end_epoch(trainer):
     avg_train_loss = trainer.avg_train_loss.as_ndarray()
     avg_test_loss = 0
     msg = "epoch%3d: avg loss %6.4f" % (epoch, avg_train_loss)
-    
+
     if test_distributor:
         trainer.model.set_models(inference=True)
         for i, (data, target) in enumerate(test_distributor.batch(trainer.batch_size, trainer.shuffle)):
@@ -134,7 +135,7 @@ class Trainer(object):
         self.optimizer = optimizer
         self.shuffle = shuffle
         self.train_loss_list = []
-        self.test_loss_list = []       
+        self.test_loss_list = []
 
         if events:
             self._events = events.copy()
@@ -170,14 +171,13 @@ class Trainer(object):
         self.on_event('start')
         self.train_loss_list = []
         self.test_loss_list = []
-        
+
         while self.epoch < self.num_epoch:
             self.on_event('start_epoch')
             self.nth = 0
             self.avg_train_loss = 0
 
             for i, (data, target) in enumerate(self.train_distributor.batch(self.batch_size, self.shuffle)):
-                start_t = time.time()
                 self.data = data
                 self.target = target
                 self.on_event('forward')
@@ -216,6 +216,6 @@ class Trainer(object):
         bs = self.batch_size
         N = len(data) - 1 + bs
         self.model.set_models(inference=True)
-        ret = np.vstack([self.model(data[bs*i:bs*(i+1)]) for i in range(N//bs)])
+        ret = np.vstack([self.model(data[bs * i:bs * (i + 1)]) for i in range(N // bs)])
         self.model.set_models(inference=False)
         return ret
