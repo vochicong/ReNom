@@ -241,15 +241,16 @@ class Model(with_metaclass(ABCMeta, object)):
                 obj = values[name][attrname]
                 curdiff = grads.get(obj, None)
                 if curdiff is not None:
-                    if isinstance(curdiff, GPUValue):
-                        with use_device(curdiff.device_id):
-                            if diff.device_id != curdiff.device_id:
-                                diff = diff.copy()
-                            newdiff = curdiff + diff
-                    else:
+                    if not isinstance(curdiff, Node):
+                        curdiff = Node(curdiff)
+                    if not isinstance(diff, Node):
+                        diff = Node(diff)
+                    with use_device(curdiff.device_id):
+                        if diff.device_id != curdiff.device_id:
+                            diff = Node(diff.get_gpu().copy())
                         newdiff = curdiff + diff
 
-                    grads.set(obj, newdiff)
+                grads.set(obj, newdiff)
 
     def save(self, filename):
         """Save model weights.

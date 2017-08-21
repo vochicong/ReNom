@@ -518,6 +518,16 @@ class Node(np.ndarray):
     def prevent_update(self, value):
         raise Exception()
 
+    @property
+    def device_id(self):
+        if self._gpu:
+            return self._gpu.device_id
+
+        if self._model:
+            return self._model._device_id
+
+        return 0
+
     def set_model(self, model):
         self._model = model
 
