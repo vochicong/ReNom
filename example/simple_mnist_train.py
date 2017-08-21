@@ -41,7 +41,7 @@ class MNist(Model):
 train_dist, test_dist = NdarrayDistributor(X, labels).split(0.9)
 
 num_gpu = cuda.cuGetDeviceCount() or 1
-trainer = Trainer(MNist(), num_epoch=20, loss_func=softmax_cross_entropy,
+trainer = Trainer(MNist(), num_epoch=10, loss_func=softmax_cross_entropy,
                   batch_size=100, optimizer=Sgd(), num_gpu=num_gpu)
 
 loss = 0
@@ -49,37 +49,37 @@ learning_curve = []
 test_learning_curve = []
 
 
-@trainer.events.start_epoch
-def start_epoch(trainer):
-    global loss, start_t
-    loss = 0
-    start_t = time.time()
-
-
-@trainer.events.updated
-def updated(trainer):
-    global loss
-    loss += trainer.losses[0]
-
-
-@trainer.events.end_epoch
-def end_epoch(trainer):
-    train_loss = loss / (trainer.nth + 1)
-    learning_curve.append(train_loss)
-
-    test_loss = 0
-
-    trainer.model.set_models(inference=True)
-    for i, (x, y) in enumerate(test_dist.batch(128)):
-        test_result = trainer.test(x)
-        test_loss += trainer.loss_func(test_result, y)
-    trainer.model.set_models(inference=False)
-
-    test_loss /= i + 1
-    test_learning_curve.append(test_loss)
-
-    print("epoch %03d train_loss:%f test_loss:%f took time:%f" %
-          (trainer.epoch, train_loss, test_loss, time.time() - start_t))
+#@trainer.events.start_epoch
+#def start_epoch(trainer):
+#    global loss, start_t
+#    loss = 0
+#    start_t = time.time()
+#
+#
+#@trainer.events.updated
+#def updated(trainer):
+#    global loss
+#    loss += trainer.losses[0]
+#
+#
+#@trainer.events.end_epoch
+#def end_epoch(trainer):
+#    train_loss = loss / (trainer.nth + 1)
+#    learning_curve.append(train_loss)
+#
+#    test_loss = 0
+#
+#    trainer.model.set_models(inference=True)
+#    for i, (x, y) in enumerate(test_dist.batch(128)):
+#        test_result = trainer.test(x)
+#        test_loss += trainer.loss_func(test_result, y)
+#    trainer.model.set_models(inference=False)
+#
+#    test_loss /= i + 1
+#    test_learning_curve.append(test_loss)
+#
+#    print("epoch %03d train_loss:%f test_loss:%f took time:%f" %
+#          (trainer.epoch, train_loss, test_loss, time.time() - start_t))
 
 
 trainer.train(train_dist)
