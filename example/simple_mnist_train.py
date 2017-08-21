@@ -39,8 +39,10 @@ class MNist(Model):
 
 
 train_dist, test_dist = NdarrayDistributor(X, labels).split(0.9)
-trainer = Trainer(MNist(), num_epoch=10, loss_func=softmax_cross_entropy,
-                  batch_size=100, optimizer=Sgd())
+
+num_gpu = cuda.cuGetDeviceCount() or 1
+trainer = Trainer(MNist(), num_epoch=20, loss_func=softmax_cross_entropy,
+                  batch_size=100, optimizer=Sgd(), num_gpu=num_gpu)
 
 loss = 0
 learning_curve = []

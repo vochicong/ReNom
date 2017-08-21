@@ -70,6 +70,9 @@ class Trainer(object):
                 targetlen = len(target) // len(models)
                 self.targets = [target[i:i + targetlen] for i in range(0, len(target), targetlen)]
 
+                for gpu in range(1, self.num_gpu):
+                    models[gpu].dup(models[0])
+
                 self.on_event('forward')
                 self.outputs = []
 
