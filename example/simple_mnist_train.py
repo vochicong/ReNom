@@ -57,7 +57,7 @@ def start_epoch(trainer):
 @trainer.events.updated
 def updated(trainer):
     global loss
-    loss += trainer.loss
+    loss += trainer.losses[0]
 
 
 @trainer.events.end_epoch

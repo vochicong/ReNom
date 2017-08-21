@@ -64,7 +64,7 @@ opt = Sgd()
 
 N = len(X_train)
 
-NUM_GPU = cuGetDeviceCount()
+NUM_GPU = cuGetDeviceCount() or 1
 
 models = [MNist() for i in range(NUM_GPU)]
 for x in range(NUM_GPU):
