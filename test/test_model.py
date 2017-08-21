@@ -169,14 +169,12 @@ def test_multi_gpu():
             self.layer1 = rm.Dense(output_size=2)
             self.layer2 = rm.Dense(output_size=2)
 
-
         def forward(self, x):
             return self.layer2(rm.relu(self.layer1(x)))
 
         def weight_initiallize(self, input_size):
             self.layer1.weight_initiallize(input_size)
             self.layer2.weight_initiallize(input_size)
-
 
     nn = NN2()
     nn.set_gpu(0)
@@ -211,7 +209,5 @@ def test_multi_gpu():
 
         assert np.allclose(grad1.get(nn.layer1.params.w),
                            org_l1_w + grad2.get(nn2.layer1.params.w))
-
-
 
         grad1.update(models=[nn])

@@ -35,8 +35,6 @@ X = X.astype(np.float32)
 X /= X.max()
 
 
-
-
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1)
 labels_train = LabelBinarizer().fit_transform(y_train).astype(np.float32)
 labels_test = LabelBinarizer().fit_transform(y_test).astype(np.float32)
@@ -105,13 +103,10 @@ for i in range(epoch):
                 grad = l.grad()
                 grads.append(grad)
 
-
         models[0].join_grads(grads[0], zip(models[1:], grads[1:]))
 
         grads[0].update(opt)
         loss += losses[0]
-
-
 
     train_loss = loss / (N // batch)
 

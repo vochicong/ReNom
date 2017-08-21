@@ -49,44 +49,44 @@ learning_curve = []
 test_learning_curve = []
 
 
-#@trainer.events.start_epoch
-#def start_epoch(trainer):
-#    global loss, start_t
-#    loss = 0
-#    start_t = time.time()
-#
-#
-#@trainer.events.updated
-#def updated(trainer):
-#    global loss
-#    loss += trainer.losses[0]
-#
-#
-#@trainer.events.end_epoch
-#def end_epoch(trainer):
-#    train_loss = loss / (trainer.nth + 1)
-#    learning_curve.append(train_loss)
-#
-#    test_loss = 0
-#
-#    trainer.model.set_models(inference=True)
-#    for i, (x, y) in enumerate(test_dist.batch(128)):
-#        test_result = trainer.test(x)
-#        test_loss += trainer.loss_func(test_result, y)
-#    trainer.model.set_models(inference=False)
-#
-#    test_loss /= i + 1
-#    test_learning_curve.append(test_loss)
-#
-#    print("epoch %03d train_loss:%f test_loss:%f took time:%f" %
-#          (trainer.epoch, train_loss, test_loss, time.time() - start_t))
+@trainer.events.start_epoch
+def start_epoch(trainer):
+    global loss, start_t
+    loss = 0
+    start_t = time.time()
+
+
+@trainer.events.updated
+def updated(trainer):
+    global loss
+    loss += trainer.losses[0]
+
+
+@trainer.events.end_epoch
+def end_epoch(trainer):
+    train_loss = loss / (trainer.nth + 1)
+    learning_curve.append(train_loss)
+
+    test_loss = 0
+
+    trainer.model.set_models(inference=True)
+    for i, (x, y) in enumerate(test_dist.batch(128)):
+        test_result = trainer.test(x)
+        test_loss += trainer.loss_func(test_result, y)
+    trainer.model.set_models(inference=False)
+
+    test_loss /= i + 1
+    test_learning_curve.append(test_loss)
+
+    print("epoch %03d train_loss:%f test_loss:%f took time:%f" %
+          (trainer.epoch, train_loss, test_loss, time.time() - start_t))
 
 
 trainer.train(train_dist)
 
 # Test
 trainer.model.set_models(inference=True)
-ret = np.vstack((trainer.test(x).as_ndarray() for x, _ in test_dist.batch(128, shuffle=False)))
+ret = np.vstack((trainer.test(x) for x, _ in test_dist.batch(128, shuffle=False)))
 predictions = np.argmax(np.array(ret), axis=1)
 label = np.argmax(test_dist.y, axis=1)
 

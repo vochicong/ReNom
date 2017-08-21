@@ -202,7 +202,6 @@ class Model(with_metaclass(ABCMeta, object)):
         self._get_values(ret)
         return ret
 
-
     def flatten_values(self):
         values = self.values()
         value_list = []

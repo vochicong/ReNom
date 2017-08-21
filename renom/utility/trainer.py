@@ -5,6 +5,7 @@ import numpy as np
 import numpy as np
 from renom.cuda import use_device
 
+
 class _EventHandlers(object):
     def __init__(self, events):
         super(_EventHandlers, self).__setattr__('_events', events)
@@ -177,7 +178,7 @@ class Trainer(object):
 
         models = [self.model]
         if self.num_gpu > 1:
-            models.extend([self.model.__class__() for _ in range(self.num_gpu-1)])
+            models.extend([self.model.__class__() for _ in range(self.num_gpu - 1)])
             for n in range(self.num_gpu):
                 models[n].set_gpu(n)
 
@@ -185,7 +186,6 @@ class Trainer(object):
             self.on_event('start_epoch')
             self.nth = 0
             self.avg_train_loss = 0
-
 
             for i, (data, target) in enumerate(self.train_distributor.batch(self.batch_size, self.shuffle)):
 

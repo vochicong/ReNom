@@ -11,7 +11,6 @@ from numbers import Number
 from renom.cuda import *
 
 
-
 class Grads:
     '''This class contains gradients of each Node object.
 
@@ -149,7 +148,6 @@ class Grads:
                         newdiff = curdiff + diff
 
                     self.set(obj, newdiff)
-
 
 
 # todo: move this method to Cython
