@@ -65,7 +65,7 @@ def default_event_end_epoch(trainer):
     epoch = trainer.epoch
     bar = getattr(trainer, "bar", None)
     test_distributor = trainer.test_distributor
-    avg_train_loss = trainer.avg_train_loss.as_ndarray()
+    avg_train_loss = trainer.avg_train_loss#.as_ndarray()
     avg_test_loss = 0
     msg = "epoch%3d: avg loss %6.4f" % (epoch, avg_train_loss)
 
@@ -88,6 +88,14 @@ def default_event_end_epoch(trainer):
     else:
         print(msg)
 
+DEFAULT_EVENTS = {
+    "start": default_event_start,
+    "start_epoch": default_event_start_epoch,
+    "forward": default_event_forward,
+    "backward": default_event_backward,
+    "updated": default_event_updated,
+    "end_epoch": default_event_end_epoch
+}
 
 class Trainer(object):
     """Trainer class.
@@ -144,21 +152,20 @@ class Trainer(object):
         if events:
             self._events = events.copy()
         else:
-            self._events = {
-                "start": default_event_start,
-                "start_epoch": default_event_start_epoch,
-                "forward": default_event_forward,
-                "backward": default_event_backward,
-                "updated": default_event_updated,
-                "end_epoch": default_event_end_epoch
-            }
+            self._events = {}
 
         self.events = _EventHandlers(self._events)
 
     def on_event(self, event):
-        handler = self._events.get(event)
+        if not self._events:
+            events = DEFAULT_EVENTS
+        else:
+            events = self._events
+
+        handler = events.get(event)
         if handler:
             handler(self)
+
 
     def train(self, train_distributor, test_distributor=None):
         """Train method.
@@ -169,6 +176,7 @@ class Trainer(object):
             train_distributor (Distributor): Distributor for yielding train data.
             test_distributor (Distributor): Distributor for yielding test data.
         """
+
         self.epoch = 0
         self.train_distributor = train_distributor
         self.test_distributor = test_distributor
@@ -188,6 +196,7 @@ class Trainer(object):
             self.avg_train_loss = 0
 
             for i, (data, target) in enumerate(self.train_distributor.batch(self.batch_size, self.shuffle)):
+                self.on_event('start')
 
                 datalen = len(data) // len(models)
                 self.data = [data[i:i + datalen] for i in range(0, len(data), datalen)]
