@@ -4,11 +4,13 @@ from renom.config import precision
 from libc.stdint cimport uintptr_t
 from cuda_utils import _VoidPtr
 
+cudand_generator = None
+
 def curand_check(curandStatus_t status):
     if status==CURAND_STATUS_SUCCESS:
         return
     else:
-        raise Exception("An error occurred in curand. Error status {}".format(status))
+        raise Exception("An error has occurred in curand. Error code {}".format(status))
 
 cdef createCurandGenerator(rng_type):
     cdef curandGenerator_t gen
@@ -22,9 +24,9 @@ cdef destroyCurandGenerator(generator):
 
 class CuRandGen(object):
 
-    def __init__(self, rng_type=CURAND_RNG_PSEUDO_DEFAULT):
-        self.gen = createCurandGenerator(rng_type)
-        self.set_seed(np.random.randint(0, 10000))
+    def __init__(self, seed=None, rng_type=CURAND_RNG_PSEUDO_DEFAULT):
+        self.r_type = rng_type
+        self.set_seed(seed)
 
     def rand_uniform(self, gpu_value):
         cdef curandGenerator_t gen = <curandGenerator_t><uintptr_t>self.gen
@@ -51,10 +53,17 @@ class CuRandGen(object):
     def rand_bernoulli(self, gpu_value, prob=0.5):
         self.rand_uniform(gpu_value)
         cubinarize(gpu_value, prob, gpu_value)
+        return
 
     def set_seed(self, seed):
-        cdef curandGenerator_t gen = <curandGenerator_t><uintptr_t>self.gen
-        curand_check(curandSetPseudoRandomGeneratorSeed(gen, <unsigned long long>seed))
+        gen = getattr(self, "gen", None) 
+        if gen:
+            destroyCurandGenerator(gen)
+        gen = createCurandGenerator(self.r_type)
+        cdef curandGenerator_t generator = <curandGenerator_t><uintptr_t>gen
+        curand_check(curandSetPseudoRandomGeneratorSeed(generator, <unsigned long long>seed))
+        self.gen = gen
+        return
 
     def __del__(self):
         destroyCurandGenerator(self.gen)

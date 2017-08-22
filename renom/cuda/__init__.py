@@ -1,3 +1,4 @@
+import numpy as np
 import traceback
 import contextlib
 import warnings
@@ -6,9 +7,10 @@ try:
     from renom.cuda.cublas import *
     from renom.cuda.thrust import *
     from renom.cuda.curand import *
+    curand_generator = CuRandGen(np.random.randint(0, int(1e5)))
     _has_cuda = True
 except ImportError as e:
-    print(e)
+    curand_generator = None
     _has_cuda = False
 
 _cuda_is_active = False
@@ -84,3 +86,8 @@ def use_device(device_id):
     finally:
         if active:
             cuSetDevice(cur)   # restore device
+
+
+def set_curand_seed(seed):
+    if has_cuda:
+        curand_generator.set_seed(seed)

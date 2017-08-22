@@ -173,7 +173,6 @@ class GPUValue(object):
         self.itemsize = np.dtype(self.dtype).itemsize
         self.nbytes = np.prod(self.shape) * self.itemsize
         self.size = np.prod(self.shape) if self.shape else 1
-
         self._ptr = ptr
         if array is not None:
             self.to_gpu(array)

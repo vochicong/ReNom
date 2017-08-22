@@ -5,6 +5,7 @@ import numpy as np
 import renom as rm
 from renom.core import Variable, to_value, DEBUG_GRAPH_INIT, DEBUG_NODE_GRAPH
 from renom.cuda.cuda import set_cuda_active
+import test_utility
 
 set_cuda_active(True)
 
@@ -162,6 +163,8 @@ def test_update():
     assert np.allclose(cur.as_ndarray() - grad.get(nn.params.w), nn.params.w.as_ndarray())
 
 
+@test_utility.skipgpu
+@test_utility.skipmultigpu
 def test_multi_gpu():
     class NN2(rm.Model):
         def __init__(self):

@@ -3,8 +3,9 @@
 
 from __future__ import division
 import numpy as np
-from renom.core import Node, get_gpu, precision
+from renom.core import Node, get_gpu, precision, GPUValue
 from renom.layers.function.parameterized import Model
+from renom.cuda import curand_generator
 
 
 class dropout(Node):
@@ -26,9 +27,10 @@ class dropout(Node):
 
     @classmethod
     def _oper_gpu(cls, x, dropout_ratio):
-        mask = np.array(np.random.rand(*x.shape) < dropout_ratio, dtype=precision) / dropout_ratio
-        value = get_gpu(x) * get_gpu(mask)
-
+        mask = get_gpu(x).empty_like_me()
+        curand_generator.rand_bernoulli(mask, 1 - dropout_ratio)
+        mask = mask / dropout_ratio
+        value = get_gpu(x) * mask
         ret = cls._create_node(value)
         ret.attrs._x = x
         ret.attrs._mask = mask
@@ -66,9 +68,11 @@ class spatial_dropout(dropout):
 
     @classmethod
     def _oper_gpu(cls, x, drop_out_ratio):
-        mask = np.array(np.random.rand(*x.shape[:2]) < drop_out_ratio,
-                        dtype=precision)[:, :, None, None] / drop_out_ratio
-        mask = mask * np.ones(x.shape, dtype=precision)
+        shape = (x.shape[0], x.shape[1], 1, 1)
+        mask = GPUValue(shape=shape)
+        curand_generator.rand_bernoulli(mask, 1 - drop_out_ratio)
+        mask = mask / drop_out_ratio
+        mask = mask * get_gpu(x).ones_like_me()
         value = get_gpu(x) * get_gpu(mask)
         ret = cls._create_node(value)
         ret.attrs._x = x

@@ -565,6 +565,7 @@ def test_gpu_node_tanh(a):
     close(c_g1, g_g1)
 
 
+@pytest.mark.skip()
 @test_utility.skipgpu
 @pytest.mark.parametrize("a", [
     rand((1, 3)),
@@ -595,6 +596,7 @@ def test_gpu_node_dropout(a):
     close(c_g1, g_g1)
 
 
+@pytest.mark.skip()
 @test_utility.skipgpu
 @pytest.mark.parametrize("a", [
     rand((4, 3, 3, 3)),

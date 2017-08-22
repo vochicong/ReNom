@@ -33,7 +33,7 @@ from renom.layers.function.batch_normalize import BatchNormalize,\
 from renom.layers.function.lrn import Lrn
 from test_utility import auto_diff, numeric_diff
 
-from renom.cuda.cuda import set_cuda_active
+from renom.cuda import set_cuda_active, set_curand_seed
 from test_utility import skipgpu
 
 if precision is not np.float64:
@@ -464,7 +464,10 @@ def test_dropout(node, seed, use_gpu):
     layer = Dropout()
 
     def func(node):
-        np.random.seed(seed)
+        if use_gpu:
+            set_curand_seed(seed)
+        else:
+            np.random.seed(seed)
         return sum(layer(node))
     compare(func, node, node)
 
@@ -481,7 +484,10 @@ def test_spatial_dropout(node, seed, use_gpu):
     layer = SpatialDropout()
 
     def func(node):
-        np.random.seed(seed)
+        if use_gpu:
+            set_curand_seed(seed)
+        else:
+            np.random.seed(seed)
         return sum(layer(node))
     compare(func, node, node)
 
