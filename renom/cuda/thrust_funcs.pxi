@@ -298,3 +298,12 @@ def culstm_backward(u, du, s, ps, e, pgf, dou, dou_n):
     cdef VALUE_TYPE * ptr_dou = < VALUE_TYPE * > < uintptr_t > dou._ptr
     cdef VALUE_TYPE * ptr_dou_n = < VALUE_TYPE * > < uintptr_t > dou_n._ptr
     thrust_backward_lstm(N, M, ptr_u, ptr_du, ptr_s, ptr_ps, ptr_e, ptr_pgf, ptr_dou, ptr_dou_n)
+
+
+def cubinarize(gpu_value1, th, gpu_value2):
+    cdef int N = gpu_value1.size
+    cdef VALUE_TYPE * gpu_ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * gpu_ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+    cdef VALUE_TYPE threathold = th
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+    thrust_binarize(gpu_ptr1, threathold, N, gpu_ptr2)

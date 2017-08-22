@@ -548,6 +548,20 @@ namespace renom{
 		cuda_backward_lstm <<<ceil((N*M/4)/256.0), 256>>> (N, M, u, du, s, ps, e, pfg, dou, next_dou);
 	}
 	
-	
+    // Binarize
+    __global__ void cuda_binalize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b){
+		int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if(idx >= size)return;
+
+        if(a[idx] < prob){
+            b[idx] = 0.0;
+        }else{
+            b[idx] = 1.0;
+        }
+    }
+
+    void thrust_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b){
+        cuda_binalize <<<ceil(size/256.0), 256>>>(a, prob, size, b);
+    }
 
 }

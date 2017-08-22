@@ -5,8 +5,10 @@ try:
     from renom.cuda.cuda_base import *
     from renom.cuda.cublas import *
     from renom.cuda.thrust import *
+    from renom.cuda.curand import *
     _has_cuda = True
 except ImportError as e:
+    print(e)
     _has_cuda = False
 
 _cuda_is_active = False
