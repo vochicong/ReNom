@@ -39,8 +39,10 @@ class MNist(Model):
 
 
 train_dist, test_dist = NdarrayDistributor(X, labels).split(0.9)
+
+num_gpu = cuda.cuGetDeviceCount() or 1
 trainer = Trainer(MNist(), num_epoch=10, loss_func=softmax_cross_entropy,
-                  batch_size=100, optimizer=Sgd())
+                  batch_size=100, optimizer=Sgd(), num_gpu=num_gpu)
 
 loss = 0
 learning_curve = []
@@ -57,7 +59,7 @@ def start_epoch(trainer):
 @trainer.events.updated
 def updated(trainer):
     global loss
-    loss += trainer.loss
+    loss += trainer.losses[0]
 
 
 @trainer.events.end_epoch
@@ -84,7 +86,7 @@ trainer.train(train_dist)
 
 # Test
 trainer.model.set_models(inference=True)
-ret = np.vstack((trainer.test(x).as_ndarray() for x, _ in test_dist.batch(128, shuffle=False)))
+ret = np.vstack((trainer.test(x) for x, _ in test_dist.batch(128, shuffle=False)))
 predictions = np.argmax(np.array(ret), axis=1)
 label = np.argmax(test_dist.y, axis=1)
 

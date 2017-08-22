@@ -43,6 +43,8 @@ cdef extern from "cuda_runtime.h":
     cudaError_t cudaMalloc(void ** ptr, size_t size)
     cudaError_t cudaMallocHost(void ** ptr, size_t size, unsigned int flags)
     cudaError_t cudaSetDevice(int size)
+    cudaError_t cudaGetDevice(int *device)
+    cudaError_t cudaDeviceSynchronize()
     cudaError_t cudaFree(void * ptr)
     const char * cudaGetErrorString(cudaError_t erorr)
 

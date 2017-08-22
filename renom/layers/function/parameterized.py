@@ -7,7 +7,10 @@ from contextlib import contextmanager
 import inspect
 import weakref
 import numpy as np
-from renom.core import Node, Variable
+from renom.core import Node, Variable, GPUValue
+from renom.operation import sum
+import renom.cuda
+from renom.cuda import use_device, is_cuda_active
 from future.utils import with_metaclass
 
 
@@ -28,6 +31,8 @@ class ModelParams(dict):
         super(ModelParams, self).__setitem__(name, value)
         if isinstance(value, Node):
             value.set_model(self.model)
+        else:
+            raise ValueError('Attribute must be Node type, not %s' % type(value))
 
     def __getattr__(self, name):
         try:
@@ -42,6 +47,7 @@ class Model(with_metaclass(ABCMeta, object)):
     auto_update = False
     _prevent_update = False
     _parameters = None
+    _device_id = 0
 
     @property
     def params(self):
@@ -55,11 +61,37 @@ class Model(with_metaclass(ABCMeta, object)):
         self._parameters.update(map)
 
     def __call__(self, *args, **kwargs):
-        return self.forward(*args, **kwargs)
+        with use_device(self._device_id):
+            return self.forward(*args, **kwargs)
+
+    def set_gpu(self, device_id):
+        self.set_models(_device_id=device_id)
 
     @abstractmethod
     def forward(self):
         pass
+
+    def dup(self, model):
+        value_list = model.flatten_values()
+        with use_device(self._device_id):
+            for names, values in value_list:
+                layer = self
+                for name in names[1:]:
+                    layer = getattr(layer, name)
+
+                for k, v in values.items():
+                    layer.params[k] = v.copy()
+                    layer.params[k]._auto_update = v._auto_update
+
+    def sync(self):
+        if is_cuda_active():
+            done = set()
+            for m in self.iter_models():
+                device_id = m._device_id
+                if device_id not in done:
+                    done.add(device_id)
+                    with use_device(m._device_id):
+                        renom.cuda.cuDeviceSynchronize()
 
     @contextmanager
     def train(self):
@@ -126,8 +158,6 @@ class Model(with_metaclass(ABCMeta, object)):
     def _get_values(self, values):
         if self.params:
             for k, v in self.params.items():
-                if isinstance(v, Node):
-                    v.to_cpu()
                 values[1][k] = v
 
         for k, v in self.__dict__.items():
@@ -172,6 +202,55 @@ class Model(with_metaclass(ABCMeta, object)):
         self._get_values(ret)
         return ret
 
+    def flatten_values(self):
+        values = self.values()
+        value_list = []
+
+        def flatten(names, values):
+            value_list.append((names, values[1]))
+
+            for name, child_values in values[0].items():
+                flatten(names + (name,), child_values)
+
+        flatten(('root',), values)
+        return value_list
+
+    def _get_grads(self, grads):
+        "Get gradients of attribute of this model"
+        value_list = self.flatten_values()
+
+        for name, values in value_list:
+            d = {}
+            for k, v in values.items():
+                diff = grads.get(v, None)
+                if diff is not None:
+                    d[(name, k)] = diff
+        return d
+
+    def join_grads(self, grads, others):
+        """Merge gradients of other models.
+        Others is a list of tuple of (model, grads) to be merged.
+        Models listed in the others should have same structure with self."""
+
+        values = dict(self.flatten_values())
+        for model, _grads in others:
+            o = model._get_grads(_grads)
+
+            for (name, attrname), diff in o.items():
+                obj = values[name][attrname]
+                curdiff = grads.get(obj, None)
+                if curdiff is not None:
+                    if not isinstance(curdiff, Node):
+                        curdiff = Node(curdiff)
+                    if not isinstance(diff, Node):
+                        diff = Node(diff)
+                    with use_device(curdiff.device_id):
+                        if diff.device_id != curdiff.device_id:
+                            diff = Node(diff.get_gpu().copy())
+                        newdiff = curdiff + diff
+
+                grads.set(obj, newdiff)
+
     def save(self, filename):
         """Save model weights.
 
@@ -184,17 +263,7 @@ class Model(with_metaclass(ABCMeta, object)):
         """
         import h5py
 
-        values = self.values()
-        value_list = []
-
-        def flatten(names, values):
-            value_list.append((names, values[1]))
-
-            for name, child_values in values[0].items():
-                flatten(names + (name,), child_values)
-
-        flatten(('root',), values)
-
+        value_list = self.flatten_values()
         with h5py.File(filename, 'w') as f:
             values_grp = f.create_group('values')
             types_grp = f.create_group('types')
@@ -204,6 +273,7 @@ class Model(with_metaclass(ABCMeta, object)):
                 t = types_grp.create_group('.'.join(names))
 
                 for propname, propvalue in values.items():
+                    propvalue.to_cpu()
                     g[propname] = propvalue
 
                     if isinstance(propvalue, Variable):
@@ -335,9 +405,10 @@ class Parametrized(Model):
         raise NotImplementedError
 
     def __call__(self, x, *args, **kwargs):
-        if not self.params:
-            self.weight_initiallize(x.shape[1:])
-        return super(Parametrized, self).__call__(x, *args, **kwargs)
+        with use_device(self._device_id):
+            if not self.params:
+                self.weight_initiallize(x.shape[1:])
+            return super(Parametrized, self).__call__(x, *args, **kwargs)
 
     def truncate(self):
         pass

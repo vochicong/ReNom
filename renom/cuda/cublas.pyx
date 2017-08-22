@@ -2,6 +2,7 @@ import contextlib
 import numpy as np
 from cublas import *
 from libc.stdint cimport uintptr_t
+import cuda_base
 
 cublas_handle = []
 
@@ -33,6 +34,7 @@ def cublas_scal(alpha, gpu_value):
     cdef int size = gpu_value.size
     cdef uintptr_t ptr = <uintptr_t>gpu_value._ptr
     
+    cuda_base.check_heap_device(gpu_value)
     if dtype == np.float32:
         cublasSscal(size, <float>alpha, <float*>ptr, 1)
     elif gpu_value1.dtype == np.float64:
@@ -45,6 +47,7 @@ def cublas_axpy(gpu_value1, gpu_value2):
     cdef uintptr_t ptr1 = <uintptr_t>gpu_value1._ptr
     cdef uintptr_t ptr2 = <uintptr_t>gpu_value2._ptr
     
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
     if gpu_value1.dtype == np.float32:
         cublasSaxpy(n, <float>1.0, <const float*>ptr1, 1, <float*>ptr2, 1)
     elif gpu_value1.dtype == np.float64:
@@ -53,6 +56,8 @@ def cublas_axpy(gpu_value1, gpu_value2):
 
 # GEMM
 def cublas_gemm(gpu_value1, t1, gpu_value2, t2, gpu_value3):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
+
     shape1 = gpu_value1.shape or (1, 1)
     shape2 = gpu_value2.shape or (1, 1)
     
@@ -88,6 +93,7 @@ def cublas_geam(handle, a, gpu_value1, t1, b, gpu_value2, t2, gpu_value3):
     cdef cublasOperation_t c1 = CUBLAS_OP_T if t1 == 1 else CUBLAS_OP_N
     cdef cublasOperation_t c2 = CUBLAS_OP_T if t2 == 1 else CUBLAS_OP_N
 
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
     shape1 = gpu_value1.shape or (1, 1)
     shape2 = gpu_value2.shape or (1, 1)
     
@@ -110,6 +116,7 @@ def cublas_geam(handle, a, gpu_value1, t1, b, gpu_value2, t2, gpu_value3):
     return
 
 def cublas_transpose(handle, gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
     cublas_geam(handle, 1.0, gpu_value1, 1, 0.0, gpu_value1, 1, gpu_value2)
 
 
