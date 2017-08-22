@@ -185,6 +185,14 @@ def setup_cuda():
                           include_dirs=includes,
                           )
 
+    ext_curand = Extension('renom.cuda.curand',
+                          sources=['renom/cuda/curand.pyx'],
+                          libraries=['curand', 'cuda', 'cudart', 'cudnn'],
+                          library_dirs=libraries,
+                          language='c++',
+                          include_dirs=includes,
+                          )
+
     ext_thrust_float = Extension('renom.cuda.thrust_float',
                                  sources=['renom/cuda/thrust_float.pyx'],
                                  libraries=['cublas', 'cuda', 'cudart'],
@@ -203,7 +211,13 @@ def setup_cuda():
 
     global ext_modules, cuda_sources
 
-    ext_modules = [ext_base, ext_utils, ext_cublas, ext_cudnn, ext_thrust_float, ext_thrust_double]
+    ext_modules = [ext_base, 
+                   ext_utils, 
+                   ext_cublas,
+                   ext_cudnn,
+                   ext_curand,
+                   ext_thrust_float,
+                   ext_thrust_double]
 
     cuda_sources = [('cuda_misc_a',
                      {'sources': [
