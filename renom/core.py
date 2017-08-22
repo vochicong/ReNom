@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*.t-
+# -*- coding: utf-8 -*-
 from __future__ import print_function, division
 import collections
 import weakref
@@ -33,7 +33,7 @@ class Grads:
     '''
 
     def __init__(self):
-        self.strage = {}
+        self.stroage = {}
         self.variables = {}
         self._auto_updates = []
 
@@ -48,11 +48,11 @@ class Grads:
 
     def store(self, node, dy):
         selfid = id(node)
-        self.strage[selfid] = Node(dy)  # if cuda active, dy must be GPUValue type.
+        self.stroage[selfid] = Node(dy)  # if cuda active, dy must be GPUValue type.
 
     def restore(self, node, default=None):
         selfid = id(node)
-        return self.strage.get(selfid, default)
+        return self.stroage.get(selfid, default)
 
     def add(self, node, dy):
         selfid = id(node)
@@ -71,7 +71,9 @@ class Grads:
             if node._auto_update:
                 self._auto_updates.append(node)
 
-    def get(self, node):
+    _omit = object()
+
+    def get(self, node, default=_omit):
         '''This function returns the gradient of the given node.
 
         Args:
@@ -80,7 +82,13 @@ class Grads:
         Return:
             ndarray,Node,None: This method returns gradient of passed node object.
         '''
-        return self.variables.get(id(node))
+        if default is self._omit:
+            return self.variables[id(node)]
+        else:
+            return self.variables.get(id(node), default)
+
+    def set(self, node, diff):
+        self.variables[id(node)] = diff
 
     def update_node(self, node, opt=None):
         if node.prevent_update:
@@ -121,6 +129,26 @@ class Grads:
                     if id(node) in self.variables:
                         self.update_node(node, opt)
 
+    def join(self, model, others):
+        """Merge gradients of other models.
+        Merged models should have same structure with model."""
+
+        values = dict(model.flatten_values())
+        for o in others:
+            for (name, attrname), diff in o.items():
+                obj = values[name][attrname]
+                curdiff = self.get(obj, None)
+                if curdiff is not None:
+                    if isinstance(curdiff, GPUValue):
+                        with use_device(curdiff.device_id):
+                            if diff.device_id != curdiff.device_id:
+                                diff = diff.copy()
+                            newdiff = curdiff + diff
+                    else:
+                        newdiff = curdiff + diff
+
+                    self.set(obj, newdiff)
+
 
 # todo: move this method to Cython
 def calc_broadcast_shape(s1, s2):
@@ -151,6 +179,8 @@ class GPUValue(object):
             self.to_gpu(array)
         elif not self._ptr:
             self.alloc()
+        else:
+            self.device_id = cuGetDevice()
 
         if self.ACTIVE_GPU is not None:
             self.ACTIVE_GPU[id(self)] = self
@@ -162,6 +192,7 @@ class GPUValue(object):
         if self._ptr:
             gpu_allocator.free(self._ptr)
         self._ptr = gpu_allocator.malloc(self.nbytes)
+        self.device_id = cuGetDevice()
 
     def free(self):
         if self._ptr:
@@ -178,6 +209,7 @@ class GPUValue(object):
         ptr = value._ptr
         self.detach()
         self._ptr = ptr
+        self.device_id = value.device_id
 
     def detach(self):
         if self._ptr:
@@ -189,8 +221,13 @@ class GPUValue(object):
         return self
 
     def copy(self):
-        ret = GPUValue(shape=self.shape)
-        cuMemcpyD2D(self._ptr, ret._ptr, self.nbytes)
+        if cuGetDevice() == self.device_id:
+            ret = GPUValue(shape=self.shape)
+            self._ptr.memcpyD2D(ret._ptr, self.nbytes)
+        else:
+            with use_device(self.device_id):
+                arr = self.new_array()
+            ret = GPUValue(arr)
         return ret
 
     def empty_like_me(self):
@@ -209,28 +246,32 @@ class GPUValue(object):
 
     def new_array(self):
         em = np.empty(self.shape, dtype=self.dtype)
-        gpu_allocator.memcpyD2H(self._ptr, em, em.nbytes)
+        self._ptr.memcpyD2H(em, em.nbytes)
         return em
 
     def to_cpu(self, value):
         assert self._ptr
         assert tuple(value.shape) == tuple(self.shape), "{} {}".format(value.shape, self.shape)
         assert value.dtype == self.dtype
-        gpu_allocator.memcpyD2H(self._ptr, value, value.nbytes)
+        self._ptr.memcpyD2H(value, value.nbytes)
         return value
 
     def to_gpu(self, value):
         if value.dtype.type is not self.dtype:
             value = value.astype(self.dtype)
 
-        assert not self._ptr
         assert value.shape == self.shape, "{} {}".format(value.shape, self.shape)
+
         if self._ptr:
             ptr = self._ptr
         else:
             ptr = gpu_allocator.malloc(value.nbytes)
+            self.device_id = cuGetDevice()
+
         # todo: value.flatten() copies buffer
-        gpu_allocator.memcpyH2D(value.flatten(), ptr, value.nbytes)
+        with use_device(self.device_id):
+            ptr.memcpyH2D(value.flatten(), value.nbytes)
+
         self._ptr = ptr
 
     def __pos__(self):
@@ -242,106 +283,123 @@ class GPUValue(object):
         return ret
 
     def __add__(self, other):
-        new_shape = calc_broadcast_shape(self, other)
-        ret = GPUValue(shape=new_shape)
-        # Only data type float32 is acceptable.
-        cuadd(self, other, ret)
-        return ret
+        with use_device(self.device_id):
+            new_shape = calc_broadcast_shape(self, other)
+            ret = GPUValue(shape=new_shape)
+            # Only data type float32 is acceptable.
+            cuadd(self, other, ret)
+            return ret
 
     def __iadd__(self, other):
-        assert getattr(self, "shape", (1,)) == getattr(self, "shape", (1,))
-        cublas_axpy(get_gpu(other), get_gpu(self))
-        return self
+        with use_device(self.device_id):
+            assert getattr(self, "shape", (1,)) == getattr(self, "shape", (1,))
+            cublas_axpy(get_gpu(other), get_gpu(self))
+            return self
 
     def __mul__(self, other):
-        new_shape = calc_broadcast_shape(self, other)
-        ret = GPUValue(shape=new_shape)
-        cumul(self, other, ret)
-        return ret
+        with use_device(self.device_id):
+            new_shape = calc_broadcast_shape(self, other)
+            ret = GPUValue(shape=new_shape)
+            cumul(self, other, ret)
+            return ret
 
     def __rmul__(self, other):
-        return self.__mul__(other)
+        with use_device(self.device_id):
+            return self.__mul__(other)
 
     def __div__(self, other):
-        return self.__truediv__(other)
+        with use_device(self.device_id):
+            return self.__truediv__(other)
 
     def __rdiv__(self, other):
-        return self.__rtruediv__(other)
+        with use_device(self.device_id):
+            return self.__rtruediv__(other)
 
     def __idiv__(self, other):
-        return self.__itruediv__(other)
+        with use_device(self.device_id):
+            return self.__itruediv__(other)
 
     def __truediv__(self, other):
-        new_shape = calc_broadcast_shape(self, other)
-        ret = GPUValue(shape=new_shape)
-        cudiv(self, other, ret)
-        return ret
+        with use_device(self.device_id):
+            new_shape = calc_broadcast_shape(self, other)
+            ret = GPUValue(shape=new_shape)
+            cudiv(self, other, ret)
+            return ret
 
     def __rtruediv__(self, other):
-        new_shape = calc_broadcast_shape(self, other)
-        ret = GPUValue(shape=new_shape)
-        curdiv(self, other, ret)
-        return ret
+        with use_device(self.device_id):
+            new_shape = calc_broadcast_shape(self, other)
+            ret = GPUValue(shape=new_shape)
+            curdiv(self, other, ret)
+            return ret
 
     def __itruediv__(self, other):
-        assert getattr(self, "shape", (1,)) == getattr(self, "shape", (1,))
-        new_shape = calc_broadcast_shape(self, other)
-        ret = GPUValue(shape=new_shape)
-        cudiv(self, other, ret)
-        return ret
+        with use_device(self.device_id):
+            assert getattr(self, "shape", (1,)) == getattr(self, "shape", (1,))
+            new_shape = calc_broadcast_shape(self, other)
+            ret = GPUValue(shape=new_shape)
+            cudiv(self, other, ret)
+            return ret
 
     def __sub__(self, other):
-        new_shape = calc_broadcast_shape(self, other)
-        ret = GPUValue(shape=new_shape)
-        cusub(self, other, ret)
-        return ret
+        with use_device(self.device_id):
+            new_shape = calc_broadcast_shape(self, other)
+            ret = GPUValue(shape=new_shape)
+            cusub(self, other, ret)
+            return ret
 
     def __isub__(self, other):
-        assert getattr(self, "shape", (1,)) == getattr(self, "shape", (1,))
-        cublas_axpy(-get_gpu(other), get_gpu(self))
-        return self
+        with use_device(self.device_id):
+            assert getattr(self, "shape", (1,)) == getattr(self, "shape", (1,))
+            cublas_axpy(-get_gpu(other), get_gpu(self))
+            return self
 
     def __pow__(self, other):
-        s_shape = getattr(self, "shape", 1)
-        o_shape = getattr(other, "shape", 1)
-        new_shape = (np.empty(s_shape, dtype=np.bool) ** np.zeros(o_shape)).shape
-        ret = GPUValue(shape=new_shape)
-        cupow(self, other, ret)
-        return ret
+        with use_device(self.device_id):
+            s_shape = getattr(self, "shape", 1)
+            o_shape = getattr(other, "shape", 1)
+            new_shape = (np.empty(s_shape, dtype=np.bool) ** np.zeros(o_shape)).shape
+            ret = GPUValue(shape=new_shape)
+            cupow(self, other, ret)
+            return ret
 
     def __rpow__(self, other):
-        s_shape = getattr(self, "shape", 1)
-        o_shape = getattr(other, "shape", 1)
-        new_shape = (np.empty(s_shape, dtype=np.bool) ** np.zeros(o_shape)).shape
-        ret = GPUValue(shape=new_shape)
-        curpow(self, other, ret)
-        return ret
+        with use_device(self.device_id):
+            s_shape = getattr(self, "shape", 1)
+            o_shape = getattr(other, "shape", 1)
+            new_shape = (np.empty(s_shape, dtype=np.bool) ** np.zeros(o_shape)).shape
+            ret = GPUValue(shape=new_shape)
+            curpow(self, other, ret)
+            return ret
 
     def __getitem__(self, index):
-        arry = self.new_array()
-        arry = arry[index]
-        ret = GPUValue(arry)
-        return ret
+        with use_device(self.device_id):
+            arry = self.new_array()
+            arry = arry[index]
+            ret = GPUValue(arry)
+            return ret
 
     def __setitem__(self, index, value):
-        arry = self.new_array()
-        arry[index] = get_gpu(value).new_array()
-        self.free()
-        self.to_gpu(arry)
+        with use_device(self.device_id):
+            arry = self.new_array()
+            arry[index] = get_gpu(value).new_array()
+            self.free()
+            self.to_gpu(arry)
 
     @property
     def T(self):
-        n = len(self.shape)
-        assert n < 3
-        clone = self.zeros_like_me()
-        if n == 2:
-            new_shape = list(clone.shape)
-            with cublas_handler() as cublas_handle:
-                cublas_transpose(cublas_handle, self, clone)
-            new_shape[0] = clone.shape[1]
-            new_shape[1] = clone.shape[0]
-            clone.shape = tuple(new_shape)
-        return clone
+        with use_device(self.device_id):
+            n = len(self.shape)
+            assert n < 3
+            clone = self.zeros_like_me()
+            if n == 2:
+                new_shape = list(clone.shape)
+                with cublas_handler() as cublas_handle:
+                    cublas_transpose(cublas_handle, self, clone)
+                new_shape[0] = clone.shape[1]
+                new_shape[1] = clone.shape[0]
+                clone.shape = tuple(new_shape)
+            return clone
 
 
 def to_value(array):
@@ -405,15 +463,13 @@ class Node(np.ndarray):
             ret = value.astype(precision).view(cls)
         elif isinstance(value, GPUValue):
             ret = super(Node, cls).__new__(
-                cls, shape=value.shape, dtype=value.dtype).astype(precision)
+                cls, shape=value.shape, dtype=value.dtype)
             ret._gpu = value
 
         elif isinstance(value, Number):
             ret = np.array(value, dtype=precision).view(cls)
         else:
-            ret = super(Node, cls).__new__(
-                cls, shape=value.shape, dtype=value.dtype, buffer=value).astype(precision)
-            ret._gpu = value._gpu
+            raise ValueError('Invalid Node value: %r' % value)
 
         assert ret.dtype == precision, (
             "Type miss matched. Required is {}, actual is {}".format(
@@ -460,6 +516,16 @@ class Node(np.ndarray):
     def prevent_update(self, value):
         raise Exception()
 
+    @property
+    def device_id(self):
+        if self._gpu:
+            return self._gpu.device_id
+
+        if self._model:
+            return self._model._device_id
+
+        return 0
+
     def set_model(self, model):
         self._model = model
 
@@ -483,6 +549,12 @@ class Node(np.ndarray):
             self._gpu.to_gpu(self)
         else:
             self._gpu = GPUValue(self)
+
+    def copy(self):
+        if self._gpu:
+            return self.__class__(self._gpu.copy())
+        else:
+            return np.ndarray.copy(self)
 
     def as_ndarray(self):
         '''This method returns itself as ndarray object.'''
@@ -570,7 +642,11 @@ class Node(np.ndarray):
             return
 
         if is_cuda_active():
-            return self._backward_gpu(context, dy)
+            if self._gpu:
+                with use_device(self._gpu.device_id):
+                    return self._backward_gpu(context, dy)
+            else:
+                return self._backward_gpu(context, dy)
         else:
             return self._backward_cpu(context, dy)
 

@@ -5,6 +5,7 @@ from libc.stdint cimport uintptr_t
 from renom.core import get_gpu
 from renom.config import precision
 from cuda_utils cimport _VoidPtr
+import cuda_base
 
 cdef cudnnTensorFormat_t tensor_format = cd.cudnnTensorFormat_t.CUDNN_TENSOR_NCHW
 cudnn_handle = []
@@ -146,6 +147,7 @@ def cuPoolingForward(handle, pool_desc, x, y):
     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
 
+    cuda_base.check_heap_device(x, y)
     check(cudnnPoolingForward(
         handler,
         <cudnnPoolingDescriptor_t> <uintptr_t> pool_desc,
@@ -165,6 +167,7 @@ def cuPoolingBackward(handle, pool_desc, x, y, dy, dx):
     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
 
+    cuda_base.check_heap_device(x, y, dy, dx)
     check(cudnnPoolingBackward(
         handler,
         <cudnnPoolingDescriptor_t> <uintptr_t> pool_desc,
@@ -205,6 +208,8 @@ def cuBatchNormalizatoinForward(handle, x, mean, var, w, b, y, rm, rv, momentum=
 
     cdef double epsilon = eps
     cdef double exponentialAverageFactor = momentum
+
+    cuda_base.check_heap_device(x, mean, var, w, b, y, rm, rv)
 
     md = cudnnBatchNormMode_t.CUDNN_BATCHNORM_SPATIAL if mode == 1 else cudnnBatchNormMode_t.CUDNN_BATCHNORM_PER_ACTIVATION
 
@@ -259,6 +264,7 @@ def cuBatchNormalizatoinBackward(handle, x, w, dy, saved_mean, saved_var, dx, dw
 
     md = cudnnBatchNormMode_t.CUDNN_BATCHNORM_SPATIAL if mode == 1 else cudnnBatchNormMode_t.CUDNN_BATCHNORM_PER_ACTIVATION
 
+    cuda_base.check_heap_device(x, w, dy, saved_mean, saved_var, dx, dw, db)
     check(cudnnBatchNormalizationBackward(
         handler,
         md,
@@ -315,6 +321,7 @@ def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):
     cdef cudnnConvolutionFwdAlgo_t algo = cudnnConvolutionFwdAlgo_t.CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM
     cdef int workSpace = 0
 
+    cuda_base.check_heap_device(x, w, y)
     check(cudnnConvolutionForward(
         handler,
         alf.ptr,
@@ -343,6 +350,7 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
     cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
     cdef int workSpace = 0
 
+    cuda_base.check_heap_device(x, w, dy, dw, db, dx)
     check(cudnnConvolutionBackwardFilter(
         handler,
         alf.ptr,
@@ -393,6 +401,7 @@ def cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, dy, dx):
     cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
     cdef int workSpace = 0
 
+    cuda_base.check_heap_device(w, dy, dx)
     check(cudnnConvolutionBackwardData(
         handler,
         alf.ptr,
@@ -419,6 +428,7 @@ def cuConvolutionBackwardFilter(handle, conv_desc, filter_desc, x, dy, dw):
     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
     cdef int workSpace = 0
 
+    cuda_base.check_heap_device(x, dy, dw)
     check(cudnnConvolutionBackwardFilter(
         handler,
         alf.ptr,
@@ -443,6 +453,7 @@ def cuConvolutionBackwardBias(handle, dy, db):
     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
     cdef TensorDesc dbDesc = TensorDesc(db.shape, dtype=db.dtype)
 
+    cuda_base.check_heap_device(dy, db)
     check(cudnnConvolutionBackwardBias(
         handler,
         alf.ptr,
@@ -461,6 +472,7 @@ def cuSoftmaxForward(handle, x, y, mode=0):
     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
     cdef cd.cudnnSoftmaxMode_t md = cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_CHANNEL if mode == 1 else cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_INSTANCE
 
+    cuda_base.check_heap_device(x, y)
     check(cd.cudnnSoftmaxForward(
         handler,
         cd.cudnnSoftmaxAlgorithm_t.CUDNN_SOFTMAX_ACCURATE,
@@ -482,6 +494,7 @@ def cuLocalResponseNormalizationForward(handle, lrn_desc, x, y):
     cdef _VoidPtr d = _VoidPtr(np.array([1.0], dtype=x.dtype))
     cdef _VoidPtr e = _VoidPtr(np.array([0.0], dtype=x.dtype))
 
+    cuda_base.check_heap_device(x, y)
     check(cudnnLRNCrossChannelForward(
         handler,
         <cudnnLRNDescriptor_t> <uintptr_t> lrn_desc,
@@ -503,6 +516,7 @@ def cuLocalResponseNormalizationBackward(handle, lrn_desc, x, y, dx, dy):
     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=x.dtype))
     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=x.dtype))
 
+    cuda_base.check_heap_device(x, y, dx, dy)
     check(cudnnLRNCrossChannelBackward(
         handler,
         <cudnnLRNDescriptor_t> <uintptr_t> lrn_desc,

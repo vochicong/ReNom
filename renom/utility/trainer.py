@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 
+import numpy as np
+from renom.cuda import use_device
+
 
 class _EventHandlers(object):
     def __init__(self, events):
@@ -52,7 +55,7 @@ def default_event_updated(trainer):
     bar = getattr(trainer, "bar", None)
     if bar is not None:
         epoch = trainer.epoch
-        train_loss = trainer.loss.as_ndarray()
+        train_loss = trainer.losses[0].as_ndarray()
         msg = "epoch%3d: loss %6.4f" % (epoch, train_loss)
         bar.set_description(msg)
         bar.update(1)
@@ -126,7 +129,7 @@ class Trainer(object):
     """
 
     def __init__(self, model, num_epoch, loss_func, batch_size,
-                 optimizer=None, shuffle=True, events=None):
+                 optimizer=None, shuffle=True, events=None, num_gpu=1):
 
         self.model = model
         self.num_epoch = num_epoch
@@ -134,6 +137,7 @@ class Trainer(object):
         self.batch_size = batch_size
         self.optimizer = optimizer
         self.shuffle = shuffle
+        self.num_gpu = num_gpu
         self.train_loss_list = []
         self.test_loss_list = []
 
@@ -172,33 +176,69 @@ class Trainer(object):
         self.train_loss_list = []
         self.test_loss_list = []
 
+        models = [self.model]
+        if self.num_gpu > 1:
+            models.extend([self.model.__class__() for _ in range(self.num_gpu - 1)])
+            for n in range(self.num_gpu):
+                models[n].set_gpu(n)
+
         while self.epoch < self.num_epoch:
             self.on_event('start_epoch')
             self.nth = 0
             self.avg_train_loss = 0
 
             for i, (data, target) in enumerate(self.train_distributor.batch(self.batch_size, self.shuffle)):
-                self.data = data
-                self.target = target
+
+                datalen = len(data) // len(models)
+                self.data = [data[i:i + datalen] for i in range(0, len(data), datalen)]
+
+                targetlen = len(target) // len(models)
+                self.targets = [target[i:i + targetlen] for i in range(0, len(target), targetlen)]
+
+                for gpu in range(1, self.num_gpu):
+                    models[gpu].dup(models[0])
+
+                for gpu in range(0, self.num_gpu):
+                    models[gpu].set_models(inference=False)
+
                 self.on_event('forward')
+                self.outputs = []
 
-                self.model.set_models(inference=False)
+                for gpu in range(self.num_gpu):
+                    model = models[gpu]
+                    with model.train():
+                        self.outputs.append(model(self.data[gpu]))
 
-                with self.model.train():
-                    self.output = self.model(self.data)
-                    self.loss = self.loss_func(self.output, self.target)
-                self.avg_train_loss += (self.loss -
+                self.on_event('loss')
+                self.losses = []
+
+                for gpu in range(self.num_gpu):
+                    model = models[gpu]
+                    with use_device(gpu):
+                        self.losses.append(self.loss_func(self.outputs[gpu], self.targets[gpu]))
+
+                self.avg_train_loss += (self.losses[0] -
                                         self.avg_train_loss) / (i + 1)
 
                 self.on_event('backward')
-                self.grads = self.loss.grad()
-                self.grads.update(self.optimizer)
+                self.grads = []
+
+                for gpu in range(self.num_gpu):
+                    model = models[gpu]
+                    with use_device(gpu):
+                        self.grads.append(self.losses[gpu].grad())
+
+                if self.num_gpu > 1:
+                    models[0].join_grads(self.grads[0], zip(models[1:], self.grads[1:]))
+
+                self.grads[0].update(self.optimizer)
+
                 self.on_event('updated')
                 self.nth += 1
 
                 # release objects
                 self.data = self.target = None
-                self.output = self.loss = self.grads = None
+                self.outputs = self.losses = self.grads = None
 
             self.on_event('end_epoch')
             self.epoch += 1
