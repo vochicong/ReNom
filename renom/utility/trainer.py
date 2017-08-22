@@ -63,7 +63,7 @@ def default_event_end_epoch(trainer):
     epoch = trainer.epoch
     bar = getattr(trainer, "bar", None)
     test_distributor = trainer.test_distributor
-    avg_train_loss = trainer.avg_train_loss#.as_ndarray()
+    avg_train_loss = trainer.avg_train_loss  # .as_ndarray()
     avg_test_loss = 0
     msg = "epoch%3d: avg loss %6.4f" % (epoch, avg_train_loss)
 
@@ -86,6 +86,7 @@ def default_event_end_epoch(trainer):
     else:
         print(msg)
 
+
 DEFAULT_EVENTS = {
     "start": default_event_start,
     "start_epoch": default_event_start_epoch,
@@ -94,6 +95,7 @@ DEFAULT_EVENTS = {
     "updated": default_event_updated,
     "end_epoch": default_event_end_epoch
 }
+
 
 class Trainer(object):
     """Trainer class.
@@ -163,7 +165,6 @@ class Trainer(object):
         handler = events.get(event)
         if handler:
             handler(self)
-
 
     def train(self, train_distributor, test_distributor=None):
         """Train method.
