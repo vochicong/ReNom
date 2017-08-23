@@ -6,8 +6,9 @@ import renom.cuda as cuda
 from renom.utility.reinforcement.replaybuffer import ReplayBuffer
 
 skipgpu = pytest.mark.skipif(not cuda.has_cuda(), reason="cuda is not installed")
-skipmultigpu = pytest.mark.skipif(cuda.cuGetDeviceCount() < 2,
-                                  reason="Number of gpu card is less than 2.")
+skipmultigpu = pytest.mark.skipif(
+    not cuda.has_cuda() or (cuda.cuGetDeviceCount() < 2),
+    reason="Number of gpu card is less than 2.")
 
 np.random.seed(9)
 

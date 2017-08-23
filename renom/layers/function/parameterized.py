@@ -60,6 +60,10 @@ class Model(with_metaclass(ABCMeta, object)):
         self._parameters = ModelParams(self)
         self._parameters.update(map)
 
+    @property
+    def device_id(self):
+        return self._device_id
+
     def __call__(self, *args, **kwargs):
         with use_device(self._device_id):
             return self.forward(*args, **kwargs)
@@ -80,7 +84,11 @@ class Model(with_metaclass(ABCMeta, object)):
                     layer = getattr(layer, name)
 
                 for k, v in values.items():
-                    layer.params[k] = v.copy()
+                    if k in layer.params:
+                        layer.params[k].copy_from(v)
+                    else:
+                        layer.params[k] = v.copy()
+
                     layer.params[k]._auto_update = v._auto_update
 
     def sync(self):
@@ -379,7 +387,8 @@ class Sequential(Model):
             setattr(self, "l%d" % (i), ly)
 
     def __call__(self, x):
-        return self.forward(x)
+        with use_device(self._device_id):
+            return self.forward(x)
 
     def summary(self):
         print("---------------------------------")

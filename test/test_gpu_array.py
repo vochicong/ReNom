@@ -4,7 +4,7 @@
 from __future__ import division, print_function
 import numpy as np
 import pytest
-from renom.cuda import set_cuda_active, use_cuda, disable_cuda
+from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device, cuGetDeviceCount
 from renom.core import to_value, Variable, get_gpu
 from renom.operation import dot, sum, sqrt
 from renom.config import precision
@@ -1015,3 +1015,42 @@ def test_where(node):
 
     close(g3, c3)
     close(c_g1, g_g1)
+
+
+@test_utility.skipgpu
+def test_copy_from_cpu():
+    src = Variable(rand((100,)))
+
+    dest = Variable(rand((100,)))
+    dest.copy_from(src)
+
+    close(src, dest)
+
+@test_utility.skipgpu
+def test_copy_from_gpu():
+    src = Variable(rand((100,)))
+    src.to_gpu()
+
+    dest = Variable(rand((100,)))
+    dest.to_gpu()
+
+    dest.copy_from(src)
+    close(src, dest)
+
+    close(src._gpu.new_array(), dest._gpu.new_array())
+
+
+@test_utility.skipmultigpu
+def test_copy_from_another_gpu():
+    src = Variable(rand((100,)))
+    src.to_gpu()
+
+    with use_device(1):
+        dest = Variable(rand((100,)))
+        dest.to_gpu()
+
+    dest.copy_from(src)
+    close(src, dest)
+
+    close(src._gpu.new_array(), dest._gpu.new_array())
+

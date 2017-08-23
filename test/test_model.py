@@ -4,7 +4,8 @@ import pytest
 import numpy as np
 import renom as rm
 from renom.core import Variable, to_value, DEBUG_GRAPH_INIT, DEBUG_NODE_GRAPH
-from renom.cuda.cuda import set_cuda_active
+from renom.cuda.cuda import set_cuda_active, cuGetDeviceCount
+from renom.cuda import use_device
 import test_utility
 
 set_cuda_active(True)
@@ -164,7 +165,6 @@ def test_update():
 
 
 @test_utility.skipgpu
-@test_utility.skipmultigpu
 def test_multi_gpu():
     class NN2(rm.Model):
         def __init__(self):
@@ -184,18 +184,22 @@ def test_multi_gpu():
     nn.weight_initiallize((2,))
 
     nn2 = NN2()
-    nn2.set_gpu(0)
+    nn2.set_gpu(cuGetDeviceCount()-1)
+
 
     for i in range(2):
         nn2.dup(nn)
-
         x = np.random.rand(100, 2)
         with nn.train():
             ret1 = nn(x[:50])
+
+        with use_device(nn.device_id):
             loss1 = rm.softmax_cross_entropy(ret1, np.random.rand(50, 2))
 
         with nn2.train():
             ret2 = nn2(x[50:])
+
+        with use_device(nn2.device_id):
             loss2 = rm.softmax_cross_entropy(ret2, np.random.rand(50, 2))
 
         nn.sync()
@@ -203,14 +207,15 @@ def test_multi_gpu():
 
         grad1 = loss1.grad()
 
-        grad2 = loss2.grad()
-        grad2.get(nn2.layer1.params.w)
+        with use_device(nn2.device_id):
+            grad2 = loss2.grad()
 
+        grad2.get(nn2.layer1.params.w)
         org_l1_w = grad1.get(nn.layer1.params.w)
 
         nn.join_grads(grad1, [(nn2, grad2)])
 
         assert np.allclose(grad1.get(nn.layer1.params.w),
-                           org_l1_w + grad2.get(nn2.layer1.params.w))
+                           org_l1_w + grad2.get(nn2.layer1.params.w).copy())
 
         grad1.update(models=[nn])

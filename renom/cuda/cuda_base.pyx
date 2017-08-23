@@ -195,6 +195,28 @@ class GPUHeap(object):
         with renom.cuda.use_device(self.device_id):
             cuMemcpyD2D(self.ptr, gpu_ptr.ptr, nbytes)
 
+    def copy_from(self, other, nbytes):
+        cdef void *buf
+
+        n = min(self.nbytes, other.nbytes)
+        if self.device_id == other.device_id:
+            self.memcpyD2D(other, n)
+        elif cudaDeviceCanAccessPeer(self.device_id, other.device_id):
+            self.cudaMemcpyPeer(other, n)
+        else:
+            buf = malloc(n)
+            if not buf:
+                raise MemoryError()
+            try:
+                with renom.cuda.use_device(other.device_id):
+                    cuMemcpyD2H(other.ptr, buf, n)
+
+                with renom.cuda.use_device(self.device_id):
+                    cuMemcpyH2D(buf, self.ptr, n)
+
+            finally:
+                free(buf)
+
 
 class allocator(object):
 

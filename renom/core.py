@@ -273,6 +273,9 @@ class GPUValue(object):
 
         self._ptr = ptr
 
+    def copy_from(self, other):
+        self._ptr.copy_from(other._ptr, self.nbytes)
+
     def __pos__(self):
         return self.copy()
 
@@ -554,6 +557,26 @@ class Node(np.ndarray):
             return self.__class__(self._gpu.copy())
         else:
             return np.ndarray.copy(self)
+
+    def copy_from(self, other):
+        assert self.shape == other.shape
+        assert self.dtype == other.dtype
+
+        if self._gpu:
+            if other._gpu:
+                self._gpu.copy_from(other._gpu)
+                return
+
+        if hasattr(self, "setflags"):
+            writable = self.flags.writeable
+            self.setflags(write=True)
+
+        try:
+            self[...] = other
+        finally:
+            if hasattr(self, "setflags"):
+                self.setflags(write=writable)
+
 
     def as_ndarray(self):
         '''This method returns itself as ndarray object.'''
