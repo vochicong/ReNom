@@ -4,6 +4,7 @@ import numpy as np
 from renom.cuda import use_device, cuDeviceSynchronize, is_cuda_active
 from renom.core import Node
 
+
 class _EventHandlers(object):
     def __init__(self, events):
         super(_EventHandlers, self).__setattr__('_events', events)
@@ -204,7 +205,6 @@ class Trainer(object):
                     for n, d in enumerate(self.data):
                         with use_device(n):
                             d.to_gpu()
-
 
                 targetlen = len(target) // len(models)
                 self.targets = [target[i:i + targetlen] for i in range(0, len(target), targetlen)]
