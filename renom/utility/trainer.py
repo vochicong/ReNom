@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
-from renom.cuda import use_device
-
+from renom.cuda import use_device, cuDeviceSynchronize, is_cuda_active
+from renom.core import Node
 
 class _EventHandlers(object):
     def __init__(self, events):
@@ -194,14 +194,25 @@ class Trainer(object):
             self.nth = 0
             self.avg_train_loss = 0
 
-            for i, (data, target) in enumerate(self.train_distributor.batch(self.batch_size, self.shuffle)):
+            for iteration, (data, target) in enumerate(self.train_distributor.batch(self.batch_size, self.shuffle)):
                 self.on_event('start')
 
                 datalen = len(data) // len(models)
                 self.data = [data[i:i + datalen] for i in range(0, len(data), datalen)]
+                if is_cuda_active():
+                    self.data = [Node(d) for d in self.data]
+                    for n, d in enumerate(self.data):
+                        with use_device(n):
+                            d.to_gpu()
+
 
                 targetlen = len(target) // len(models)
                 self.targets = [target[i:i + targetlen] for i in range(0, len(target), targetlen)]
+                if is_cuda_active():
+                    self.targets = [Node(d) for d in self.targets]
+                    for n, d in enumerate(self.targets):
+                        with use_device(n):
+                            d.to_gpu()
 
                 for gpu in range(1, self.num_gpu):
                     models[gpu].dup(models[0])
@@ -235,6 +246,8 @@ class Trainer(object):
                     model = models[gpu]
                     with use_device(gpu):
                         self.grads.append(self.losses[gpu].grad())
+
+                self.on_event('grad')
 
                 if self.num_gpu > 1:
                     models[0].join_grads(self.grads[0], zip(models[1:], self.grads[1:]))

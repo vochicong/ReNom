@@ -1028,6 +1028,8 @@ def test_copy_from_cpu():
 
 @test_utility.skipgpu
 def test_copy_from_gpu():
+    set_cuda_active(True)
+
     src = Variable(rand((100,)))
     src.to_gpu()
 
@@ -1042,6 +1044,8 @@ def test_copy_from_gpu():
 
 @test_utility.skipmultigpu
 def test_copy_from_another_gpu():
+    set_cuda_active(True)
+
     src = Variable(rand((100,)))
     src.to_gpu()
 

@@ -326,7 +326,7 @@ class sqrt(UnaryOp):
 
     @classmethod
     def _oper_gpu(cls, arg):
-        ret = GPUValue(arg)
+        ret = GPUValue(shape=arg.shape)
         cusqrt(get_gpu(arg), ret)
         return ret
 

@@ -52,6 +52,8 @@ class conv2d(Node):
             if b is not None:
                 cu.cuadd(get_gpu(y), get_gpu(b), get_gpu(y))
 
+        assert type(x) is not np.ndarray
+
         ret = cls._create_node(y)
         ret.attrs._conv_desc = conv_desc
         ret.attrs._filter_desc = filter_desc

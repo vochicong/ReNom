@@ -166,6 +166,7 @@ class Adam(Optimizer):
                                  "ganma": g * self._g,
                                  "u": u,
                                  "r": r}
+
         ret = self._lr * u / (sqrt(r / (1 - g)) + self._epsilon) / (1 - b)
         if isinstance(ret, Node):
             ret.detach_graph()

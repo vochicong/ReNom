@@ -197,25 +197,34 @@ class GPUHeap(object):
 
     def copy_from(self, other, nbytes):
         cdef void *buf
+        cdef int ret
+        cdef uintptr_t src, dest
+
+        assert nbytes <= self.nbytes
+        assert nbytes <= other.nbytes
 
         n = min(self.nbytes, other.nbytes)
         if self.device_id == other.device_id:
             self.memcpyD2D(other, n)
-        elif cudaDeviceCanAccessPeer(self.device_id, other.device_id):
-            self.cudaMemcpyPeer(other, n)
         else:
-            buf = malloc(n)
-            if not buf:
-                raise MemoryError()
-            try:
-                with renom.cuda.use_device(other.device_id):
-                    cuMemcpyD2H(other.ptr, buf, n)
+            runtime_check(cudaDeviceCanAccessPeer(&ret, self.device_id, other.device_id))
+            if ret:
+                src = other.ptr
+                dest = self.ptr
+                runtime_check(cudaMemcpyPeer(<void *>dest, self.device_id, <void*>src, other.device_id, nbytes))
+            else:
+                buf = malloc(n)
+                if not buf:
+                    raise MemoryError()
+                try:
+                    with renom.cuda.use_device(other.device_id):
+                        cuMemcpyD2H(other.ptr, buf, n)
 
-                with renom.cuda.use_device(self.device_id):
-                    cuMemcpyH2D(buf, self.ptr, n)
+                    with renom.cuda.use_device(self.device_id):
+                        cuMemcpyH2D(buf, self.ptr, n)
 
-            finally:
-                free(buf)
+                finally:
+                    free(buf)
 
 
 class allocator(object):
@@ -244,7 +253,7 @@ class allocator(object):
     def getAvailablePool(self, size):
         pool = None
         min = size
-        max = size * 1.5
+        max = size * 2 + 4096
 
         device = cuGetDevice()
         pools = self._pool_lists[device]
