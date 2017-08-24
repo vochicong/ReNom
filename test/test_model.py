@@ -4,7 +4,7 @@ import pytest
 import numpy as np
 import renom as rm
 from renom.core import Variable, to_value, DEBUG_GRAPH_INIT, DEBUG_NODE_GRAPH
-from renom.cuda.cuda import set_cuda_active, cuGetDeviceCount
+from renom.cuda.cuda import set_cuda_active
 from renom.cuda import use_device
 import test_utility
 
@@ -166,6 +166,8 @@ def test_update():
 
 @test_utility.skipgpu
 def test_multi_gpu():
+    from renom.cuda.cuda import cuGetDeviceCount
+
     class NN2(rm.Model):
         def __init__(self):
             super(NN2, self).__init__()

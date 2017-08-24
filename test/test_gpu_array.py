@@ -4,7 +4,7 @@
 from __future__ import division, print_function
 import numpy as np
 import pytest
-from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device, cuGetDeviceCount
+from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device
 from renom.core import to_value, Variable, get_gpu
 from renom.operation import dot, sum, sqrt
 from renom.config import precision

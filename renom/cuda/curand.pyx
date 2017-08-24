@@ -2,7 +2,6 @@ import numpy as np
 from renom.cuda.thrust import cubinarize
 from renom.config import precision
 from libc.stdint cimport uintptr_t
-from cuda_utils import _VoidPtr
 
 cudand_generator = None
 
