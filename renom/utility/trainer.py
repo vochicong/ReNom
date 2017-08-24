@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
-from renom.cuda import use_device, cuDeviceSynchronize, is_cuda_active
+from renom.cuda import use_device, is_cuda_active
 from renom.core import Node
 
 

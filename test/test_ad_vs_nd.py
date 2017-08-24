@@ -33,7 +33,7 @@ from renom.layers.function.batch_normalize import BatchNormalize,\
 from renom.layers.function.lrn import Lrn
 from test_utility import auto_diff, numeric_diff
 
-from renom.cuda import set_cuda_active, curand_generator
+from renom.cuda import is_cuda_active, set_cuda_active, curand_generator
 from test_utility import skipgpu
 
 if precision is not np.float64:
@@ -458,6 +458,7 @@ def test_average_pool2d(node, use_gpu):
     [Variable(rand((2, 5))), 2],
 ])
 def test_dropout(node, seed, use_gpu):
+    use_gpu = use_gpu and is_cuda_active()
     node = Variable(node)
     set_cuda_active(use_gpu)
 
@@ -478,6 +479,7 @@ def test_dropout(node, seed, use_gpu):
     [Variable(rand((2, 2, 3, 3))), 3]
 ])
 def test_spatial_dropout(node, seed, use_gpu):
+    use_gpu = use_gpu and is_cuda_active()
     node = Variable(node)
     set_cuda_active(use_gpu)
 
