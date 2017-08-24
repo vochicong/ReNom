@@ -220,3 +220,10 @@ def test_multi_gpu():
                            org_l1_w + grad2.get(nn2.layer1.params.w).copy())
 
         grad1.update(models=[nn])
+
+
+def test_clone():
+    nn = rm.Sequential([rm.Dense(output_size=2), rm.Dense(output_size=2)])
+    for nn in nn.clone(3):
+        assert len(nn._layers) == 2 and all(isinstance(l, rm.Dense) for l in nn._layers)
+        print(nn)

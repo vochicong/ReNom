@@ -34,6 +34,9 @@ class Dense(Parametrized):
         self._initializer = initializer
         super(Dense, self).__init__(input_size)
 
+    def clone(self, n):
+        return [self.__class__(self._output_size) for _ in range(n)]
+
     def weight_initiallize(self, input_size):
         size_i = input_size[0] if isinstance(input_size, tuple) else input_size
         size_o = self._output_size

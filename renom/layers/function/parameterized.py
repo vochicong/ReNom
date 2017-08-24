@@ -6,6 +6,7 @@ from abc import ABCMeta, abstractmethod
 from contextlib import contextmanager
 import inspect
 import weakref
+import copy
 import numpy as np
 from renom.core import Node, Variable, GPUValue
 from renom.operation import sum
@@ -75,7 +76,10 @@ class Model(with_metaclass(ABCMeta, object)):
     def forward(self):
         pass
 
-    def dup(self, model):
+    def clone(self, num):
+        return [copy.copy(self) for _ in range(num)]
+
+    def copy_attr(self, model):
         value_list = model.flatten_values()
         with use_device(self._device_id):
             for names, values in value_list:
