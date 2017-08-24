@@ -5,7 +5,11 @@ from __future__ import division
 import numpy as np
 from renom.core import Node, get_gpu, precision, GPUValue
 from renom.layers.function.parameterized import Model
-from renom.cuda import curand_generator, cuGetDevice
+
+try:
+    from renom.cuda import curand_generator
+except ImportError:
+    pass
 
 
 class dropout(Node):
