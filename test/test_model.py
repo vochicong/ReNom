@@ -184,8 +184,7 @@ def test_multi_gpu():
     nn.weight_initiallize((2,))
 
     nn2 = NN2()
-    nn2.set_gpu(cuGetDeviceCount()-1)
-
+    nn2.set_gpu(cuGetDeviceCount() - 1)
 
     for i in range(2):
         nn2.dup(nn)

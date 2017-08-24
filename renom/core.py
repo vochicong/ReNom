@@ -577,7 +577,6 @@ class Node(np.ndarray):
             if hasattr(self, "setflags"):
                 self.setflags(write=writable)
 
-
     def as_ndarray(self):
         '''This method returns itself as ndarray object.'''
         self.to_cpu()

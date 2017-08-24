@@ -7,7 +7,6 @@ try:
     from renom.cuda.cublas import *
     from renom.cuda.thrust import *
     from renom.cuda.curand import *
-    curand_generator = CuRandGen(np.random.randint(0, int(1e5)))
     _has_cuda = True
 except ImportError as e:
     curand_generator = None
@@ -88,6 +87,16 @@ def use_device(device_id):
             cuSetDevice(cur)   # restore device
 
 
-def set_curand_seed(seed):
-    if has_cuda:
-        curand_generator.set_seed(seed)
+_CuRandGens = {}
+
+
+def curand_generator(seed=None):
+    deviceid = cuGetDevice()
+    if deviceid in _CuRandGens:
+        return _CuRandGens[deviceid]
+
+    if seed is None:
+        seed = np.random.randint(0, int(1e5))
+    ret = CuRandGen(seed)
+    _CuRandGens[deviceid] = ret
+    return ret

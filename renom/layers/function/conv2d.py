@@ -45,6 +45,7 @@ class conv2d(Node):
         N = x.shape[0]
         conv_desc = cu.createConvplutionDescriptor(padding, stride, precision)
         filter_desc = cu.createFilterDescriptor(w.shape, precision)
+
         # TODO: dirty code
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:

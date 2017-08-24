@@ -1026,6 +1026,7 @@ def test_copy_from_cpu():
 
     close(src, dest)
 
+
 @test_utility.skipgpu
 def test_copy_from_gpu():
     set_cuda_active(True)
@@ -1057,4 +1058,3 @@ def test_copy_from_another_gpu():
     close(src, dest)
 
     close(src._gpu.new_array(), dest._gpu.new_array())
-
