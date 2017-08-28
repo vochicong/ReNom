@@ -8,19 +8,6 @@ from cuda_utils cimport _VoidPtr
 import cuda_base
 
 cdef cudnnTensorFormat_t tensor_format = cd.cudnnTensorFormat_t.CUDNN_TENSOR_NCHW
-cudnn_handle = []
-
-
-@contextlib.contextmanager
-def cudnn_handler(device=None):
-    global cudnn_handle
-    handler = None
-    if cudnn_handle:
-        handler = cudnn_handle[0]
-    else:
-        handler = createCudnnHandler()
-        cudnn_handle.append(handler)
-    yield <uintptr_t> handler
 
 
 def check(cd.cudnnStatus_t status):
@@ -31,20 +18,16 @@ def check(cd.cudnnStatus_t status):
         raise Exception(error)
 
 
-def createCudnnHandler():
+@contextlib.contextmanager
+def cudnn_handler():
     cdef cudnnHandle_t handle
-    cudnnCreate( & handle)
-    return <uintptr_t> handle
+    check(cudnnCreate(&handle))
 
+    try:
+        yield <uintptr_t> handle
+    finally:
+        check(cudnnDestroy(handle))
 
-def createTensorDescriptor(shape, dtype=np.float32):
-    cdef cudnnTensorDescriptor_t desc
-    cdef int n, c, h, w
-    n, c, h, w = list(shape) + [1] * (4 - len(shape))
-    check(cd.cudnnCreateTensorDescriptor(& desc))
-    check(cd.cudnnSetTensor4dDescriptor(desc, tensor_format,
-                                        data_type(dtype), n, c, h, w))
-    return <uintptr_t> desc
 
 
 cdef data_type(dtype):
@@ -60,23 +43,24 @@ cdef data_type(dtype):
 
 cdef class TensorDesc(object):
 
-    cdef cudnnTensorDescriptor_t _desc
+    cdef cudnnTensorDescriptor_t tensor_desc
 
     def __init__(self, shape, dtype=precision):
-        cdef cudnnTensorDescriptor_t desc
         cdef int n, c, h, w
         n, c, h, w = list(shape) + [1] * (4 - len(shape))
-        check(cd.cudnnCreateTensorDescriptor(& desc))
-        check(cd.cudnnSetTensor4dDescriptor(desc, tensor_format,
-                                            data_type(dtype), n, c, h, w))
-        self._desc = <cudnnTensorDescriptor_t> <uintptr_t> desc
 
-    cdef cudnnTensorDescriptor_t desc(self):
-        return self._desc
+        check(cd.cudnnCreateTensorDescriptor(&(self.tensor_desc)))
+        check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,
+                                            data_type(dtype), n, c, h, w))
 
     def __del__(self):
-        check(cd.cudnnDestroyTensorDescriptor(self._desc))
-        
+        if self.tensor_desc:
+            check(cd.cudnnDestroyTensorDescriptor(self.tensor_desc))
+            self.tensor_desc = NULL
+
+    def __int__(self):
+        return <uintptr_t>self.tensor_desc
+
 
 cdef getTensorDescriptor(desc):
     cdef int n, c, h, w, ns, cs, hs, ws
@@ -96,46 +80,73 @@ cdef getTensorDescriptor(desc):
     return n, c, h, w, ns, cs, hs, ws, <int> dtype
 
 
-def createConvplutionDescriptor(padding, stride, dtype):
+cdef class ConvolutionDescriptor:
     cdef cudnnConvolutionDescriptor_t conv_desc
-    cdef int pad_h, pad_w, u, v, upscalex, upscaley
-    cdef cudnnConvolutionMode_t mode
 
-    pad_h, pad_w = padding
-    u, v = stride
-    upscalex, upscaley = 1, 1
+    def __init__(self, padding, stride, dtype):
+        cdef int pad_h, pad_w, u, v, upscalex, upscaley
+        cdef cudnnConvolutionMode_t mode
 
-    check(cudnnCreateConvolutionDescriptor(& conv_desc))
-    check(cudnnSetConvolution2dDescriptor_v5(
-        conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
-    return <uintptr_t> conv_desc
+        pad_h, pad_w = padding
+        u, v = stride
+        upscalex, upscaley = 1, 1
+
+        check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))
+        check(cudnnSetConvolution2dDescriptor_v5(
+            self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
+
+    def __del__(self):
+        if self.conv_desc:
+            check(cudnnDestroyConvolutionDescriptor(self.conv_desc))
+            self.conv_desc = NULL
+
+    def __int__(self):
+        return <uintptr_t>self.conv_desc
 
 
-def createPoolingDescriptor(filter, padding, stride, pool_mode):
+cdef class PoolingDescriptor:
     cdef cudnnPoolingDescriptor_t pool_desc
-    cdef int pad_h, pad_w, u, v, upscalex, upscaley
-    cdef cudnnPoolingMode_t mode = cudnnPoolingMode_t.CUDNN_POOLING_MAX if pool_mode == 0 else \
-                                        cudnnPoolingMode_t.CUDNN_POOLING_AVERAGE_COUNT_INCLUDE_PADDING
-    cdef cudnnNanPropagation_t nan_prop = cudnnNanPropagation_t.CUDNN_NOT_PROPAGATE_NAN
 
-    w, h = filter
-    pad_h, pad_w = padding
-    u, v = stride
+    def __init__(self, filter, padding, stride, pool_mode):
+        cdef int pad_h, pad_w, u, v, upscalex, upscaley
+        cdef cudnnPoolingMode_t mode = cudnnPoolingMode_t.CUDNN_POOLING_MAX if pool_mode == 0 else \
+                                            cudnnPoolingMode_t.CUDNN_POOLING_AVERAGE_COUNT_INCLUDE_PADDING
+        cdef cudnnNanPropagation_t nan_prop = cudnnNanPropagation_t.CUDNN_NOT_PROPAGATE_NAN
 
-    check(cudnnCreatePoolingDescriptor(& pool_desc))
-    check(cudnnSetPooling2dDescriptor(
-        pool_desc, mode, nan_prop, w, h, pad_h, pad_w, u, v))
-    return <uintptr_t> pool_desc
+        w, h = filter
+        pad_h, pad_w = padding
+        u, v = stride
+
+        check(cudnnCreatePoolingDescriptor(& self.pool_desc))
+        check(cudnnSetPooling2dDescriptor(
+            self.pool_desc, mode, nan_prop, w, h, pad_h, pad_w, u, v))
+
+    def __del__(self):
+        if self.conv_desc:
+            check(cudnnDestroyPoolingDescriptor(self.pool_desc))
+            self.pool_desc= NULL
+
+    def __int__(self):
+        return <uintptr_t>self.pool_desc
 
 
-def createLRNDescriptor(n, a, b, k):
+cdef class LRNDescriptor:
     cdef cudnnLRNDescriptor_t lrn_desc
-    cdef cudnnConvolutionMode_t mode
 
-    check(cudnnCreateLRNDescriptor(& lrn_desc))
-    check(cudnnSetLRNDescriptor(
-        lrn_desc, n, a, b, k))
-    return <uintptr_t> lrn_desc
+    def __init__(self, n, a, b, k):
+        cdef cudnnConvolutionMode_t mode
+
+        check(cudnnCreateLRNDescriptor(&self.lrn_desc))
+        check(cudnnSetLRNDescriptor(
+            self.lrn_desc, n, a, b, k))
+
+    def __del__(self):
+        if self.lrn_desc:
+            check(cudnnDestroyLRNDescriptor(self.lrn_desc))
+            self.lrn_desc= NULL
+
+    def __int__(self):
+        return <uintptr_t>self.lrn_desc
 
 
 def cuPoolingForward(handle, pool_desc, x, y):
@@ -152,10 +163,10 @@ def cuPoolingForward(handle, pool_desc, x, y):
         handler,
         <cudnnPoolingDescriptor_t> <uintptr_t> pool_desc,
         alf.ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(x)._ptr,
         bt.ptr,
-        yDesc.desc(),
+        yDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(y)._ptr))
 
 
@@ -172,25 +183,35 @@ def cuPoolingBackward(handle, pool_desc, x, y, dy, dx):
         handler,
         <cudnnPoolingDescriptor_t> <uintptr_t> pool_desc,
         alf.ptr,
-        yDesc.desc(),
+        yDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(y)._ptr,
-        yDesc.desc(),
+        yDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(dy)._ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(x)._ptr,
         bt.ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(dx)._ptr))
 
 
-def createFilterDescriptor(shape, dtype):
+cdef class FilterDescriptor:
     cdef cudnnFilterDescriptor_t filter_desc
-    cdef int k, c, h, w
-    k, c, h, w = list(shape) + [1] * (4 - len(shape))
-    check(cudnnCreateFilterDescriptor(& filter_desc))
-    check(cudnnSetFilter4dDescriptor(filter_desc, data_type(
-        dtype), tensor_format, k, c, h, w))
-    return <uintptr_t> filter_desc
+
+    def __init__(self, shape, dtype):
+        cdef cudnnFilterDescriptor_t filter_desc
+        cdef int k, c, h, w
+        k, c, h, w = list(shape) + [1] * (4 - len(shape))
+        check(cudnnCreateFilterDescriptor(&self.filter_desc))
+        check(cudnnSetFilter4dDescriptor(self.filter_desc, data_type(
+            dtype), tensor_format, k, c, h, w))
+
+    def __del__(self):
+        if self.filter_desc:
+            check(cudnnDestroyFilterDescriptor(self.filter_desc))
+            self.filter_desc= NULL
+
+    def __int__(self):
+        return <uintptr_t>self.filter_desc
 
 
 def cuBatchNormalizatoinForward(handle, x, mean, var, w, b, y, rm, rv, momentum=0.0, mode=None, inference=False, eps=1e-5):
@@ -219,11 +240,11 @@ def cuBatchNormalizatoinForward(handle, x, mean, var, w, b, y, rm, rv, momentum=
             md,
             alf.ptr,
             bt.ptr,
-            xDesc.desc(),
+            xDesc.tensor_desc,
             <const void *> <uintptr_t> get_gpu(x)._ptr,
-            yDesc.desc(),
+            yDesc.tensor_desc,
             <void *> <uintptr_t> get_gpu(y)._ptr,
-            wDesc.desc(),
+            wDesc.tensor_desc,
             <const void *> <uintptr_t> get_gpu(w)._ptr,
             <const void *> <uintptr_t> get_gpu(b)._ptr,
             exponentialAverageFactor,
@@ -238,11 +259,11 @@ def cuBatchNormalizatoinForward(handle, x, mean, var, w, b, y, rm, rv, momentum=
             md,
             alf.ptr,
             bt.ptr,
-            xDesc.desc(),
+            xDesc.tensor_desc,
             <const void *> <uintptr_t> get_gpu(x)._ptr,
-            yDesc.desc(),
+            yDesc.tensor_desc,
             <void *> <uintptr_t> get_gpu(y)._ptr,
-            wDesc.desc(),
+            wDesc.tensor_desc,
             <const void *> <uintptr_t> get_gpu(w)._ptr,
             <const void *> <uintptr_t> get_gpu(b)._ptr,
             mean_ptr,
@@ -272,13 +293,13 @@ def cuBatchNormalizatoinBackward(handle, x, w, dy, saved_mean, saved_var, dx, dw
         bt.ptr,
         alf.ptr,
         bt.ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(x)._ptr,
-        dyDesc.desc(),
+        dyDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(dy)._ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(dx)._ptr,
-        dwDesc.desc(),
+        dwDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(w)._ptr,
         <void *> <uintptr_t> get_gpu(dw)._ptr,
         <void *> <uintptr_t> get_gpu(db)._ptr,
@@ -298,10 +319,10 @@ def cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y):
 
     check(cudnnGetConvolutionForwardAlgorithm(
         handler,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         wDesc,
         convDesc,
-        yDesc.desc(),
+        yDesc.tensor_desc,
         pref,
         0,
         & algo))
@@ -325,7 +346,7 @@ def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):
     check(cudnnConvolutionForward(
         handler,
         alf.ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(x)._ptr,
         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,
         <void *> <uintptr_t> get_gpu(w)._ptr,
@@ -334,7 +355,7 @@ def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):
         <void *>workSpace,
         0,
         bt.ptr,
-        yDesc.desc(),
+        yDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(y)._ptr))
 
 
@@ -354,9 +375,9 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
     check(cudnnConvolutionBackwardFilter(
         handler,
         alf.ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(x)._ptr,
-        dyDesc.desc(),
+        dyDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(dy)._ptr,
         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,
         algo_filter,
@@ -371,23 +392,23 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
         alf.ptr,
         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,
         <void *> <uintptr_t> get_gpu(w)._ptr,
-        dyDesc.desc(),
+        dyDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(dy)._ptr,
         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,
         algo_data,
         <void *>workSpace,
         0,
         bt.ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(dx)._ptr))
 
     check(cudnnConvolutionBackwardBias(
         handler,
         alf.ptr,
-        dyDesc.desc(),
+        dyDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(dy)._ptr,
         bt.ptr,
-        dbDesc.desc(),
+        dbDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(db)._ptr))
 
 
@@ -407,14 +428,14 @@ def cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, dy, dx):
         alf.ptr,
         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,
         <void *> <uintptr_t> get_gpu(w)._ptr,
-        dyDesc.desc(),
+        dyDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(dy)._ptr,
         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,
         algo_data,
         <void *>workSpace,
         0,
         bt.ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(dx)._ptr))
 
 
@@ -432,9 +453,9 @@ def cuConvolutionBackwardFilter(handle, conv_desc, filter_desc, x, dy, dw):
     check(cudnnConvolutionBackwardFilter(
         handler,
         alf.ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(x)._ptr,
-        dyDesc.desc(),
+        dyDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(dy)._ptr,
         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,
         algo_filter,
@@ -457,10 +478,10 @@ def cuConvolutionBackwardBias(handle, dy, db):
     check(cudnnConvolutionBackwardBias(
         handler,
         alf.ptr,
-        dyDesc.desc(),
+        dyDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(dy)._ptr,
         bt.ptr,
-        dbDesc.desc(),
+        dbDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(db)._ptr))
 
 
@@ -478,10 +499,10 @@ def cuSoftmaxForward(handle, x, y, mode=0):
         cd.cudnnSoftmaxAlgorithm_t.CUDNN_SOFTMAX_ACCURATE,
         md,
         <const void *> a.ptr,
-        yDesc.desc(),
+        yDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(x)._ptr,
         <const void *> b.ptr,
-        yDesc.desc(),
+        yDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(y)._ptr))
 
 
@@ -500,10 +521,10 @@ def cuLocalResponseNormalizationForward(handle, lrn_desc, x, y):
         <cudnnLRNDescriptor_t> <uintptr_t> lrn_desc,
         mode,
         d.ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(x)._ptr,
         e.ptr,
-        yDesc.desc(),
+        yDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(y)._ptr))
 
 
@@ -522,12 +543,12 @@ def cuLocalResponseNormalizationBackward(handle, lrn_desc, x, y, dx, dy):
         <cudnnLRNDescriptor_t> <uintptr_t> lrn_desc,
         mode,
         a.ptr,
-        yDesc.desc(),
+        yDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(y)._ptr,
-        yDesc.desc(),
+        yDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(dy)._ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(x)._ptr,
         b.ptr,
-        xDesc.desc(),
+        xDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(dx)._ptr))

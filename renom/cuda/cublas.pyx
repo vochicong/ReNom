@@ -4,8 +4,6 @@ from cublas import *
 from libc.stdint cimport uintptr_t
 import cuda_base
 
-cublas_handle = []
-
 
 def create_cublasHander():
     cdef cublasHandle_t handle
@@ -13,21 +11,22 @@ def create_cublasHander():
     return < uintptr_t > handle
 
 
-@contextlib.contextmanager
-def cublas_handler(device=None):
-    global cublas_handle
-    handler = None
-    if cublas_handle:
-        handler = cublas_handle[0]
-    else:
-        handler = create_cublasHander()
-        cublas_handle.append(handler)
-    yield < uintptr_t > handler
-
-
 def check(cublasStatus_t status):
     if status != CUBLAS_STATUS_SUCCESS:
         raise Exception("An error has occurred in cuBlas function. Error code %d."%status)
+
+
+@contextlib.contextmanager
+def cublas_handler():
+
+    cdef cublasHandle_t handle
+    check(cublasCreate_v2(&handle))
+
+    try:
+        yield <uintptr_t>handle
+    finally:
+        check(cublasDestroy_v2( handle))
+
 
 # Scal
 def cublas_scal(alpha, gpu_value):

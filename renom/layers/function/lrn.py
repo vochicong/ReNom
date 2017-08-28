@@ -50,7 +50,7 @@ class lrn(Node):
 
     @classmethod
     def _oper_gpu(cls, x, n, k, a, b):
-        lrn_desc = cu.createLRNDescriptor(n, a, b, k)
+        lrn_desc = cu.LRNDescriptor(n, a, b, k)
         y = get_gpu(x).empty_like_me()
         with cu.cudnn_handler() as handle:
             cu.cuLocalResponseNormalizationForward(handle, lrn_desc, x, y)

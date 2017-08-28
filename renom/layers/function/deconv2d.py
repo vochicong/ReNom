@@ -37,8 +37,8 @@ class deconv2d(Node):
 
     @classmethod
     def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding):
-        conv_desc = cu.createConvplutionDescriptor(padding, stride, precision)
-        filter_desc = cu.createFilterDescriptor(w.shape, precision)
+        conv_desc = cu.ConvolutionDescriptor(padding, stride, precision)
+        filter_desc = cu.FilterDescriptor(w.shape, precision)
         N = x.shape[0]
         # TODO: dirty code
         z = GPUValue(shape=tuple([N, ] + list(out_shape)))
