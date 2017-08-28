@@ -257,14 +257,12 @@ class Trainer(object):
                 self.on_event('updated')
                 self.nth += 1
 
-                # release objects
-                self.data = self.target = None
-                self.outputs = self.losses = self.grads = None
-
             self.on_event('end_epoch')
             self.epoch += 1
 
             # release objects
+            self.data = self.target = None
+            self.outputs = self.losses = self.grads = None
             self.avg_train_loss = None
 
     def test(self, data):
