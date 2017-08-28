@@ -186,7 +186,7 @@ class Trainer(object):
 
         models = [self.model]
         if self.num_gpu > 1:
-            models.extend(self.model.clone(self.num_gpu - 1))
+            models.extend([self.model.__class__() for _ in range(self.num_gpu - 1)])
             for n in range(self.num_gpu):
                 models[n].set_gpu(n)
 

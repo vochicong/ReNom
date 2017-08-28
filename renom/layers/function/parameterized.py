@@ -76,9 +76,6 @@ class Model(with_metaclass(ABCMeta, object)):
     def forward(self):
         pass
 
-    def clone(self, num):
-        return [copy.copy(self) for _ in range(num)]
-
     def copy_attr(self, model):
         value_list = model.flatten_values()
         with use_device(self._device_id):
@@ -231,8 +228,8 @@ class Model(with_metaclass(ABCMeta, object)):
         "Get gradients of attribute of this model"
         value_list = self.flatten_values()
 
+        d = {}
         for name, values in value_list:
-            d = {}
             for k, v in values.items():
                 diff = grads.get(v, None)
                 if diff is not None:
