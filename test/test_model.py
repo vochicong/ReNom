@@ -189,7 +189,7 @@ def test_multi_gpu():
     nn2.set_gpu(cuGetDeviceCount() - 1)
 
     for i in range(2):
-        nn2.dup(nn)
+        nn2.copy_attr(nn)
         x = np.random.rand(100, 2)
         with nn.train():
             ret1 = nn(x[:50])
@@ -222,8 +222,3 @@ def test_multi_gpu():
         grad1.update(models=[nn])
 
 
-def test_clone():
-    nn = rm.Sequential([rm.Dense(output_size=2), rm.Dense(output_size=2)])
-    for nn in nn.clone(3):
-        assert len(nn._layers) == 2 and all(isinstance(l, rm.Dense) for l in nn._layers)
-        print(nn)
