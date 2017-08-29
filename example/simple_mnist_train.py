@@ -26,9 +26,8 @@ y = mnist.target
 
 labels = LabelBinarizer().fit_transform(y).astype(np.float32)
 
-X = np.concatenate([X]*5)
-labels = np.concatenate([labels]*5)
-
+X = np.concatenate([X] * 5)
+labels = np.concatenate([labels] * 5)
 
 
 class MNist(Model):
@@ -47,7 +46,7 @@ class MNist(Model):
 
 train_dist, test_dist = NdarrayDistributor(X, labels).split(0.9)
 
-num_gpu = 1#cuda.cuGetDeviceCount() or 1
+num_gpu = 1  # cuda.cuGetDeviceCount() or 1
 trainer = Trainer(MNist(), num_epoch=10, loss_func=softmax_cross_entropy,
                   batch_size=20000, optimizer=Sgd(), num_gpu=num_gpu)
 
