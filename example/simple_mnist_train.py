@@ -26,23 +26,30 @@ y = mnist.target
 
 labels = LabelBinarizer().fit_transform(y).astype(np.float32)
 
+X = np.concatenate([X]*5)
+labels = np.concatenate([labels]*5)
+
+
 
 class MNist(Model):
     def __init__(self):
         super(MNist, self).__init__()
-        self.layer1 = Dense(output_size=100)
-        self.layer2 = Dense(output_size=10)
+        self.layer1 = Dense(output_size=2000)
+        self.layer2 = Dense(output_size=2000)
+        self.layer3 = Dense(output_size=2000)
+        self.layer4 = Dense(output_size=10)
         self.bn = BatchNormalize()
 
     def forward(self, x):
-        return self.layer2(relu(self.bn(self.layer1(x))))
+        ret = self.layer2(relu(self.layer1(x)))
+        return self.layer4(relu(self.layer3(ret)))
 
 
 train_dist, test_dist = NdarrayDistributor(X, labels).split(0.9)
 
-num_gpu = cuda.cuGetDeviceCount() or 1
+num_gpu = 1#cuda.cuGetDeviceCount() or 1
 trainer = Trainer(MNist(), num_epoch=10, loss_func=softmax_cross_entropy,
-                  batch_size=100, optimizer=Sgd(), num_gpu=num_gpu)
+                  batch_size=20000, optimizer=Sgd(), num_gpu=num_gpu)
 
 loss = 0
 learning_curve = []
