@@ -220,5 +220,3 @@ def test_multi_gpu():
                            org_l1_w + grad2.get(nn2.layer1.params.w).copy())
 
         grad1.update(models=[nn])
-
-
