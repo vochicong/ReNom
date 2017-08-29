@@ -492,6 +492,7 @@ cdef extern from "cublas.h":
     #
 
     cublasStatus_t cublasCreate_v2(cublasHandle_t * handle)
+    cublasStatus_t cublasDestroy_v2 (cublasHandle_t handle);
 
     # ---------------- CUBLAS BLAS-like extension ----------------
     # GEAM
