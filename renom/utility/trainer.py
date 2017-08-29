@@ -237,7 +237,7 @@ class Trainer(object):
                         self.losses.append(self.loss_func(self.outputs[gpu], self.targets[gpu]))
 
                 self.avg_train_loss += (self.losses[0] -
-                                        self.avg_train_loss) / (i + 1)
+                                        self.avg_train_loss) / (iteration + 1)
 
                 self.on_event('backward')
                 self.grads = []
