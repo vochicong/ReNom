@@ -18,16 +18,21 @@ def check(cd.cudnnStatus_t status):
         raise Exception(error)
 
 
+_cudnn_handlers = {}
+
 @contextlib.contextmanager
 def cudnn_handler():
     cdef cudnnHandle_t handle
-    check(cudnnCreate(&handle))
+
+    device_id = cuda_base.cuGetDevice()
+    if device_id not in _cudnn_handlers:
+        check(cudnnCreate(&handle))
+        _cudnn_handlers[device_id] =  <uintptr_t> handle
 
     try:
-        yield <uintptr_t> handle
+        yield _cudnn_handlers[device_id]
     finally:
-        check(cudnnDestroy(handle))
-
+        pass
 
 
 cdef data_type(dtype):

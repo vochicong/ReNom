@@ -4,6 +4,7 @@ from cublas import *
 from libc.stdint cimport uintptr_t
 import cuda_base
 
+_cublas_handlers = {}
 
 def create_cublasHander():
     cdef cublasHandle_t handle
@@ -20,13 +21,16 @@ def check(cublasStatus_t status):
 def cublas_handler():
 
     cdef cublasHandle_t handle
-    check(cublasCreate_v2(&handle))
+
+    device_id = cuda_base.cuGetDevice()
+    if device_id not in _cublas_handlers:
+        check(cublasCreate_v2(&handle))
+        _cublas_handlers[device_id] =  <uintptr_t>handle
 
     try:
-        yield <uintptr_t>handle
+        yield _cublas_handlers[device_id]
     finally:
-        check(cublasDestroy_v2( handle))
-
+        pass
 
 # Scal
 def cublas_scal(alpha, gpu_value):
