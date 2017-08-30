@@ -520,12 +520,12 @@ def cuSoftmaxBackward(handle, y, dy, dx, mode=0):
         cd.cudnnSoftmaxAlgorithm_t.CUDNN_SOFTMAX_ACCURATE,
         md,
         <const void *> a.ptr,
-        dyDesc.desc(),
+        dyDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(y)._ptr,
-        dyDesc.desc(),
+        dyDesc.tensor_desc,
         <const void *> <uintptr_t> get_gpu(dy)._ptr,
         <const void *> b.ptr,
-        dyDesc.desc(),
+        dyDesc.tensor_desc,
         <void *> <uintptr_t> get_gpu(dx)._ptr))
 
 
