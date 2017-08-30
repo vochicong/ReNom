@@ -319,6 +319,21 @@ def test_leaky_relu_activation(node, use_gpu):
     compare(func, node, node)
 
 
+@pytest.mark.parametrize("node, x", [
+    [Variable(rand((2, 2))), onehot((2, 2))],
+    [Variable(rand((2, 3))), onehot((2, 3))],
+    [Variable(rand((1, 2))), onehot((1, 2))],
+    [Variable(rand((2, 2, 3, 3))), onehot((2, 2, 3, 3))],
+])
+def test_softmax(node, x, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.cross_entropy(rm.softmax(node), x)
+    compare(func, node, node, x)
+
+
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
     Variable(rand((2, 1))),
@@ -580,6 +595,19 @@ def test_mean_squared_error(node, x, use_gpu):
 
     def func(node, x):
         return rm.mean_squared_error(node, x)
+    compare(func, node, node, x)
+
+
+@pytest.mark.parametrize("node, x", [
+    [Variable(rand((1, 2))), Variable(randInteger((1, 2)))],
+    [Variable(rand((2, 2))), Variable(randInteger((2, 2)))],
+])
+def test_cross_entropy(node, x, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.cross_entropy(node, x)
     compare(func, node, node, x)
 
 
