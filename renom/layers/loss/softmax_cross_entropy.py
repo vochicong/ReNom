@@ -3,6 +3,7 @@
 from __future__ import print_function, division
 import numpy as np
 from renom.core import Node, get_gpu
+from renom.layers.activation import softmax
 from renom.cuda import cuda as cu
 
 
@@ -15,15 +16,7 @@ class softmax_cross_entropy(Node):
     @classmethod
     def _oper_cpu(cls, lhs, rhs):
         N = len(lhs)
-        a = 1
-        maxes = np.max(lhs, axis=a, keepdims=True)
-        if maxes.ndim == 1:
-            maxes = maxes[:, None]
-        u = np.exp(lhs - maxes)
-        summed = np.sum(u, axis=a, keepdims=True)
-        if summed.ndim == 1:
-            summed = summed[:, None]
-        z = u / (summed + 1e-8)
+        z = softmax(lhs)
         loss = -np.sum(rhs * np.log(z + 1e-8)) / N
         ret = cls._create_node(loss)
         ret.attrs._z = z
@@ -34,10 +27,8 @@ class softmax_cross_entropy(Node):
     @classmethod
     def _oper_gpu(cls, lhs, rhs):
         N = lhs.shape[0]
-        z = get_gpu(lhs).empty_like_me()
+        z = softmax(lhs)
         tmp1 = get_gpu(lhs).empty_like_me()
-        with cu.cudnn_handler() as handle:
-            cu.cuSoftmaxForward(handle, lhs, z, mode=1)
         cu.cucross_entropy(get_gpu(z), get_gpu(rhs), get_gpu(tmp1))
         loss = -cu.cusum(get_gpu(tmp1)) / N
         ret = cls._create_node(loss)

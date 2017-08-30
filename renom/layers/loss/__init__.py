@@ -6,3 +6,4 @@ from .sigmoid_cross_entropy import SigmoidCrossEntropy, sigmoid_cross_entropy
 from .sigmoid_cross_entropy import sigmoid_cross_entropy as sgce
 from .clipped_mean_squared_error import ClippedMeanSquaredError, clipped_mean_squared_error
 from .clipped_mean_squared_error import clipped_mean_squared_error as cmse
+from .cross_entropy import cross_entropy, CrossEntropy
