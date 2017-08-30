@@ -332,10 +332,10 @@ def test_gpu_node_square(a):
 @test_utility.skipgpu
 @pytest.mark.parametrize("a, b", [
     [rand((1, 3)), randInt((1, 3))],
-    #    [rand((2, 3)), randInt((2, 3))],
-    #    [rand((1, 3, 3, 3)), randInt((1, 3, 3, 3))],
+    [rand((2, 3)), randInt((2, 3))],
+    [rand((1, 3, 3, 3)), randInt((1, 3, 3, 3))],
 ])
-def test_gpu_node_softmax(a, b):
+def test_gpu_node_softmax_cross_entropy(a, b):
     set_cuda_active(True)
 
     g1 = Variable(a)
@@ -558,6 +558,32 @@ def test_gpu_node_tanh(a):
 
     set_cuda_active(False)
     c3 = rm.sum(rm.tanh(g1))
+    c = c3.grad()
+    c_g1 = c.get(g1)
+
+    close(g3, c3)
+    close(c_g1, g_g1)
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a", [
+    rand((1, 3)),
+    rand((1, 1)),
+    rand((3, 1)),
+    rand((1, 3, 3, 3)),
+])
+def test_gpu_node_softmax(a):
+    set_cuda_active(True)
+
+    g1 = Variable(a)
+
+    g3 = rm.sum(rm.softmax(g1))
+    g = g3.grad()
+    g_g1 = g.get(g1)
+    g3.to_cpu()
+
+    set_cuda_active(False)
+    c3 = rm.sum(rm.softmax(g1))
     c = c3.grad()
     c_g1 = c.get(g1)
 

@@ -358,8 +358,6 @@ class GPUValue(object):
 
     def __pow__(self, other):
         with use_device(self.device_id):
-            s_shape = getattr(self, "shape", 1)
-            o_shape = getattr(other, "shape", 1)
             new_shape = calc_broadcast_shape(self, other)
             ret = GPUValue(shape=new_shape)
             cupow(self, other, ret)
@@ -367,9 +365,7 @@ class GPUValue(object):
 
     def __rpow__(self, other):
         with use_device(self.device_id):
-            s_shape = getattr(self, "shape", 1)
-            o_shape = getattr(other, "shape", 1)
-            new_shape = (np.empty(s_shape, dtype=np.bool) ** np.zeros(o_shape)).shape
+            new_shape = calc_broadcast_shape(self, other)
             ret = GPUValue(shape=new_shape)
             curpow(self, other, ret)
             return ret
