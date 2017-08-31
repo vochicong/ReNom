@@ -353,6 +353,22 @@ def test_dense(node, use_gpu):
 
 
 @pytest.mark.parametrize("node", [
+    Variable(randInteger((2, 2))),
+])
+def test_embedding(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = Dense(output_size=2)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
+    compare(func, layer.params["b"], node)
+
+
+@pytest.mark.parametrize("node", [
     Variable(rand((2, 1))),
     Variable(rand((2, 2))),
     Variable(rand((20, 2))),

@@ -1,6 +1,22 @@
 #include <stdio.h>
 #include "thrust_funcs.h"
 
+
+/*__device__ double atomicAdd(double* address, double val)
+{
+    unsigned long long int* address_as_ull = (unsigned long long int*)address;
+
+    unsigned long long int old = *address_as_ull, assumed;
+
+    do{ assumed = old;
+        old = atomicCAS(address_as_ull, assumed,__double_as_longlong(val +__longlong_as_double(assumed)));
+    } while (assumed != old);
+
+    return __longlong_as_double(old);
+}*/
+
+
+
 namespace renom{
 
 	/////////////// Basic operaion
@@ -564,4 +580,49 @@ namespace renom{
         cuda_binalize <<<ceil(size/256.0), 256>>>(a, prob, size, b);
     }
 
+    // Embedding
+    __global__ void cuda_embedding_forward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *w, VALUE_TYPE *y)
+    {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if(idx >= N)return;
+        for(int i=0; i<M; i++)
+        {
+            y[idx*M + i] = w[(int)(a[idx])*M + i];
+        }
+    }
+
+    void thrust_embedding_forward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *w, VALUE_TYPE *y)
+    {
+        cuda_embedding_forward <<<ceil(N/256.0), 256>>> (N, K, M, a, w, y);
+    }
+
+
+__device__ double atomicAdd(double* address, double val)
+{
+    unsigned long long int* address_as_ull = (unsigned long long int*)address;
+
+    unsigned long long int old = *address_as_ull, assumed;
+
+    do{ assumed = old;
+        old = atomicCAS(address_as_ull, assumed,__double_as_longlong(val +__longlong_as_double(assumed)));
+    } while (assumed != old);
+
+    return __longlong_as_double(old);
+}
+
+
+    __global__ void cuda_embedding_backward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *dy, VALUE_TYPE *dx)
+    {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if(idx >= N)return;
+        for(int i=0; i<M; i++)
+        {
+            atomicAdd(&dx[(int)(a[idx])*M + i], dy[idx*M+i]);
+        }
+    }
+    
+    void thrust_embedding_backward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *dy, VALUE_TYPE *dx)
+    {
+        cuda_embedding_backward <<<ceil(N/256.0), 256>>> (N, K, M, a, dy, dx);
+    }
 }
