@@ -9,6 +9,7 @@ Documents are available on the ReNom.jp web site.
 - python2.7, 3.4
 - numpy 1.13.0 1.12.1
 - pytest 3.0.7
+- cython 0.24
 - cuda-toolkit 8.0
 - cudnn 5.1
 
