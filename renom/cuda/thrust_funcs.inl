@@ -588,10 +588,10 @@ namespace renom{
         if(idx >= N)return;
         for(int i=0; i<M; i++)
         {
-#ifndef NO_ATOMICADD
-            atomicAdd(&dx[(int)(a[idx])*M + i], dy[idx*M+i]);
-#else
+#ifdef USE_RENOM_ATOMICADD
             renom_atomicAdd(&dx[(int)(a[idx])*M + i], dy[idx*M+i]);
+#else
+            atomicAdd(&dx[(int)(a[idx])*M + i], dy[idx*M+i]);
 #endif
         }
     }
