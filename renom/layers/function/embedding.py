@@ -8,6 +8,7 @@ from renom.layers.function.parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
 from renom.cuda import cuda as cu
 
+
 class embedding(Node):
 
     def __new__(cls, x, w):
@@ -36,7 +37,7 @@ class embedding(Node):
     def _backward_cpu(self, context, dy):
         if isinstance(self.attrs._w, Node):
             N = len(self.attrs._index)
-            dx = np.zeros(self.attrs._w.shape, dtype = self.attrs._w.dtype)
+            dx = np.zeros(self.attrs._w.shape, dtype=self.attrs._w.dtype)
             for i in range(N):
                 dx[self.attrs._index[i]] += dy[i]
             self.attrs._w._update_diff(context, dx)
@@ -50,7 +51,7 @@ class embedding(Node):
 
 class Embedding(Parametrized):
 
-    def __init__(self, output_size, input_size = None, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size=None, initializer=GlorotNormal()):
         self._output_size = output_size
         self._initializer = initializer
         super(Embedding, self).__init__(input_size)
@@ -63,7 +64,3 @@ class Embedding(Parametrized):
 
     def forward(self, x):
         return embedding(x, self.params.w)
-
-
-    
-   
