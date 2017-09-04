@@ -45,14 +45,14 @@ class conv2d(Node):
         N = x.shape[0]
         conv_desc = cu.ConvolutionDescriptor(padding, stride, precision)
         filter_desc = cu.FilterDescriptor(w.shape, precision)
-        # TODO: dirty code
+
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y)
             if b is not None:
                 cu.cuadd(get_gpu(y), get_gpu(b), get_gpu(y))
 
-        assert type(x) is not np.ndarray
+        # assert type(x) is not np.ndarray
 
         ret = cls._create_node(y)
         ret.attrs._conv_desc = conv_desc

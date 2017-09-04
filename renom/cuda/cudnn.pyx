@@ -511,6 +511,29 @@ def cuSoftmaxForward(handle, x, y, mode=0):
         <void *> <uintptr_t> get_gpu(y)._ptr))
 
 
+def cuSoftmaxBackward(handle, y, dy, dx, mode=0):
+    cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=dy.dtype))
+    cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=dy.dtype))
+
+    cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
+    cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
+    cdef cd.cudnnSoftmaxMode_t md = cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_CHANNEL if mode == 1 else cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_INSTANCE
+
+    cuda_base.check_heap_device(dx, dy)
+    check(cd.cudnnSoftmaxBackward(
+        handler,
+        cd.cudnnSoftmaxAlgorithm_t.CUDNN_SOFTMAX_ACCURATE,
+        md,
+        <const void *> a.ptr,
+        dyDesc.tensor_desc,
+        <const void *> <uintptr_t> get_gpu(y)._ptr,
+        dyDesc.tensor_desc,
+        <const void *> <uintptr_t> get_gpu(dy)._ptr,
+        <const void *> b.ptr,
+        dyDesc.tensor_desc,
+        <void *> <uintptr_t> get_gpu(dx)._ptr))
+
+
 def cuLocalResponseNormalizationForward(handle, lrn_desc, x, y):
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
     cdef cudnnLRNMode_t mode = cudnnLRNMode_t.CUDNN_LRN_CROSS_CHANNEL_DIM1

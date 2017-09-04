@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "thrust_funcs.h"
 
+
 namespace renom{
 
 	/////////////// Basic operaion
@@ -564,4 +565,39 @@ namespace renom{
         cuda_binalize <<<ceil(size/256.0), 256>>>(a, prob, size, b);
     }
 
+    // Embedding
+    __global__ void cuda_embedding_forward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *w, VALUE_TYPE *y)
+    {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if(idx >= N)return;
+        for(int i=0; i<M; i++)
+        {
+            y[idx*M + i] = w[(int)(a[idx])*M + i];
+        }
+    }
+
+    void thrust_embedding_forward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *w, VALUE_TYPE *y)
+    {
+        cuda_embedding_forward <<<ceil(N/256.0), 256>>> (N, K, M, a, w, y);
+    }
+
+
+    __global__ void cuda_embedding_backward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *dy, VALUE_TYPE *dx)
+    {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if(idx >= N)return;
+        for(int i=0; i<M; i++)
+        {
+#ifdef USE_RENOM_ATOMICADD
+            renom_atomicAdd(&dx[(int)(a[idx])*M + i], dy[idx*M+i]);
+#else
+            atomicAdd(&dx[(int)(a[idx])*M + i], dy[idx*M+i]);
+#endif
+        }
+    }
+    
+    void thrust_embedding_backward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *dy, VALUE_TYPE *dx)
+    {
+        cuda_embedding_backward <<<ceil(N/256.0), 256>>> (N, K, M, a, dy, dx);
+    }
 }

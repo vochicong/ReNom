@@ -307,3 +307,25 @@ def cubinarize(gpu_value1, th, gpu_value2):
     cdef VALUE_TYPE threathold = th
     cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_binarize(gpu_ptr1, threathold, N, gpu_ptr2)
+
+
+def cuembedding_forward(gpu_value1, weight, gpu_value2):
+    cdef int N = gpu_value1.shape[0]
+    cdef int K = weight.shape[0]
+    cdef int M = weight.shape[1]
+    cdef VALUE_TYPE * gpu_ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * gpu_ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+    cdef VALUE_TYPE * weight_ptr = <VALUE_TYPE * > < uintptr_t > weight._ptr
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, weight)
+    thrust_embedding_forward(N, K, M, gpu_ptr1, weight_ptr, gpu_ptr2)
+
+
+def cuembedding_backward(gpu_index, gpu_dy, gpu_dx):
+    cdef int N = gpu_index.shape[0]
+    cdef int K = gpu_dx.shape[0]
+    cdef int M = gpu_dx.shape[1]
+    cdef VALUE_TYPE * index_ptr = <VALUE_TYPE * > < uintptr_t > gpu_index._ptr
+    cdef VALUE_TYPE * dy_ptr = <VALUE_TYPE * > < uintptr_t > gpu_dy._ptr
+    cdef VALUE_TYPE * dx_ptr = <VALUE_TYPE * > < uintptr_t > gpu_dx._ptr
+    cuda_base.check_heap_device(gpu_dy, gpu_index, gpu_dx)
+    thrust_embedding_backward(N, K, M, index_ptr, dy_ptr, dx_ptr)

@@ -4,3 +4,4 @@ from .tanh import Tanh, tanh
 from .leaky_relu import LeakyRelu, leaky_relu
 from .elu import elu, Elu
 from .selu import selu, Selu
+from .softmax import softmax, Softmax
