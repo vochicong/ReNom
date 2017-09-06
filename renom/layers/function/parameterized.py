@@ -383,13 +383,17 @@ class Sequential(Model):
     """
 
     def __init__(self, layers, loss_function=None):
-        self._layers = layers
+        self._layers = list(layers)
         for i, ly in enumerate(layers):
             setattr(self, "l%d" % (i), ly)
 
     def __call__(self, x):
         with use_device(self._device_id):
             return self.forward(x)
+
+    def append(self, layer):
+        setattr(self, "l%d" % (len(self._layers)), layer)
+        self._layers.append(layer)
 
     def summary(self):
         print("---------------------------------")

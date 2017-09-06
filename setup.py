@@ -125,7 +125,7 @@ class build_ext(orig_build_ext):
 
 
 requires = [
-    "numpy", "scikit-image", "scikit-learn", "Cython", "Pillow", "future"
+    "numpy", "scikit-image", "scikit-learn", "Cython>=0.24.0", "Pillow", "future"
 ]
 
 
