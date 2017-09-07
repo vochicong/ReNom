@@ -26,10 +26,10 @@ class max_unpool2d(Node):
     def _oper_gpu(cls, x, index, in_shape, out_shape, karnel, stride, padding):
         pass
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         pass
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         pass
 
 

@@ -49,11 +49,11 @@ class reshape(Node):
         ret.attrs._shape = array.shape
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._array, Node):
             self.attrs._array._update_diff(context, dy.reshape(self.attrs._shape))
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._array, Node):
             self.attrs._array._update_diff(context, get_gpu(dy).reshape(self.attrs._shape))
 
@@ -105,12 +105,12 @@ class sum(Node):
         ret.attrs._arg = arg
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             dx = np.ones_like(self.attrs._arg) * dy
             self.attrs._arg._update_diff(context, dx)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             dx = get_gpu(self.attrs._arg).ones_like_me() * get_gpu(dy)
             self.attrs._arg._update_diff(context, dx)
@@ -149,14 +149,14 @@ class dot(BinOp):
                     get_gpu(ret))
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._lhs, Node):
             self.attrs._lhs._update_diff(context, np.dot(dy, to_value(self.attrs._rhs).T))
 
         if isinstance(self.attrs._rhs, Node):
             self.attrs._rhs._update_diff(context, np.dot(to_value(self.attrs._lhs).T, dy))
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         lhs = self.attrs._lhs
         rhs = self.attrs._rhs
         if isinstance(self.attrs._lhs, Node):
@@ -217,7 +217,7 @@ class concat(BinOp):
         ret.attrs._index = lhs.shape[1]
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         ldy, rdy = np.hsplit(to_value(dy), [self.attrs._index])
         if isinstance(self.attrs._lhs, Node):
             self.attrs._lhs._update_diff(context, ldy)
@@ -225,7 +225,7 @@ class concat(BinOp):
         if isinstance(self.attrs._rhs, Node):
             self.attrs._rhs._update_diff(context, rdy)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         ldy, rdy = np.hsplit(get_gpu(dy).new_array(), [self.attrs._index])
         if isinstance(self.attrs._lhs, Node):
             self.attrs._lhs._update_diff(context, GPUValue(ldy))
@@ -276,7 +276,7 @@ class where(Node):
         ret.attrs._a, ret.attrs._b = a, b
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._a, Node):
             ldy = np.zeros_like(self.attrs._a)
             ldy[self.attrs._condition] = dy[self.attrs._condition]
@@ -287,7 +287,7 @@ class where(Node):
             rdy[- self.attrs._condition] = dy[- self.attrs._condition]
             self.attrs._b._update_diff(context, rdy)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._a, Node):
             ldy = get_gpu(self.attrs._a).zeros_like_me()
             ldy[self.attrs._condition] = dy[self.attrs._condition]
@@ -330,12 +330,12 @@ class sqrt(UnaryOp):
         cusqrt(get_gpu(arg), ret)
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             dx = np.power(self, -0.5) / 2
             self.attrs._arg._update_diff(context, dx)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             dx = (self**-0.5) * 0.5
             self.attrs._arg._update_diff(context, dx)
@@ -359,11 +359,11 @@ class log(UnaryOp):
         culoge(get_gpu(arg), ret)
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, dy / self.attrs._arg)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, dy / get_gpu(self.attrs._arg))
 
@@ -386,11 +386,11 @@ class exp(UnaryOp):
         cuexp(get_gpu(arg), ret)
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, dy * self)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, dy * get_gpu(self))
 

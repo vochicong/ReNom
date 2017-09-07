@@ -29,16 +29,15 @@ def activation_diff(x):
 
 
 class lstm(Node):
-    def __new__(cls, x, pz, ps, parameter):
-        return cls.calc_value(x, pz, ps, parameter)
+    def __new__(cls, x, pz, ps, w, wr, b):
+        return cls.calc_value(x, pz, ps, w, wr, b)
 
     @classmethod
-    def _oper_cpu(cls, x, pz, ps, parameter):
-        p = parameter
-        s = np.zeros((x.shape[0], p["w"].shape[1] // 4), dtype=precision) if ps is None else ps
-        z = np.zeros((x.shape[0], p["w"].shape[1] // 4), dtype=precision) if pz is None else pz
+    def _oper_cpu(cls, x, pz, ps, w, wr, b):
+        s = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if ps is None else ps
+        z = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if pz is None else pz
 
-        u = dot(x, p["w"]) + dot(z, p["wr"]) + p["b"]
+        u = dot(x, w) + dot(z, wr) + b
         m = u.shape[1] // 4
         u, gated = np.split(u, [m, ], axis=1)
         u = tanh(u)
@@ -50,12 +49,14 @@ class lstm(Node):
 
         ret = cls._create_node(z)
         ret.attrs._x = x
-        ret.attrs._p = parameter
+        ret.attrs._w = w
+        ret.attrs._wr = wr
+        ret.attrs._b = b
+        ret.attrs._pz = pz
         ret.attrs._u = u
         ret.attrs._pstate = ps
         ret.attrs._state = state
         ret.attrs._gated = gated
-        ret.attrs._dt_d = [p[k] for k in ["wr", "w"]]
         ret._state = state
 
         if isinstance(pz, Node):
@@ -85,11 +86,13 @@ class lstm(Node):
 
         ret = cls._create_node(z)
         ret.attrs._x = x
-        ret.attrs._p = parameter
+        ret.attrs._w = w
+        ret.attrs._wr = wr
+        ret.attrs._b = b
+        ret.attrs._pz = pz
         ret.attrs._u = u
         ret.attrs._pstate = s_p
         ret.attrs._state = state
-        ret.attrs._dt_d = [p[k] for k in ["wr", "w"]]
         ret._state = state
 
         if isinstance(pz, Node):
@@ -97,9 +100,13 @@ class lstm(Node):
 
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         n, m = dy.shape
-        p = self.attrs._p
+
+        w = self.attrs._w
+        wr = self.attrs._wr
+        b = self.attrs._b
+        
         u = self.attrs._u
         s = tanh(self.attrs._state)
 
@@ -107,69 +114,79 @@ class lstm(Node):
         gd = gate_diff(gated)
         ps = self.attrs._pstate
 
-        drt = context.restore(p["wr"], np.zeros((n, m * 4), dtype=dy.dtype))
-        dou = context.restore(p["w"], np.zeros((n, m), dtype=dy.dtype))
+        drt = context.restore(wr, np.zeros((n, m * 4), dtype=dy.dtype))
+        dou = context.restore(w, np.zeros((n, m), dtype=dy.dtype))
 
         pfg = getattr(self.attrs, "_pfgate", np.zeros_like(self))
 
-        e = dy + np.dot(drt, p["wr"].T)
+        e = dy
 
         do = e * s * gd[:, 2 * m:]
-        dou = e * gated[:, 2 * m:] * activation_diff(s) + pfg * dou
+        dou = e * gated[:, 2 * m:] * activation_diff(s) + (pfg * dou if dt else 0)
 
         df = dou * gd[:, :m] * ps if ps is not None else np.zeros_like(dou)
         di = dou * gd[:, m:2 * m] * u
         dc = dou * activation_diff(u) * gated[:, m:2 * m]
 
         dr = np.hstack((dc, df, di, do))
-        dx = np.dot(dr, p["w"].T)
+        dx = np.dot(dr, w.T)
 
-        context.store(p["wr"], dr)
-        context.store(p["w"], dou)
+        context.store(wr, dr)
+        context.store(w, dou)
 
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx)
 
-        if isinstance(p["w"], Node):
-            p["w"]._update_diff(context, np.dot(self.attrs._x.T, dr))
+        if isinstance(w, Node):
+            w._update_diff(context, np.dot(self.attrs._x.T, dr))
 
-        if isinstance(p["wr"], Node):
-            p["wr"]._update_diff(context, np.dot(self.T, drt))
+        if isinstance(wr, Node):
+            wr._update_diff(context, np.dot(self.T, drt))
 
-        if isinstance(p["b"], Node):
-            p["b"]._update_diff(context, np.sum(dr, axis=0, keepdims=True))
+        if isinstance(b, Node):
+            b._update_diff(context, np.sum(dr, axis=0, keepdims=True))
 
-    def _backward_gpu(self, context, dy):
-        p = self.attrs._p
+        if isinstance(self.attrs._pz, Node):
+            self.attrs._pz._update_diff(context, np.dot(dr, wr.T), True)
+
+
+    def _backward_gpu(self, context, dy, dt=None):
+        w = self.attrs._w
+        wr = self.attrs._wr
+        b = self.attrs._b
+        
         u = self.attrs._u
         s = tanh(self.attrs._state)
         ps = self.attrs._pstate
 
-        drt = context.restore(p["wr"], get_gpu(u).zeros_like_me())
-        dou = context.restore(p["w"], get_gpu(dy).zeros_like_me())
+        drt = context.restore(wr, get_gpu(u).zeros_like_me())
+        dou = context.restore(w, get_gpu(dy).zeros_like_me())
         pfg = getattr(self.attrs, "_pfgate", get_gpu(u).zeros_like_me())
 
-        e = get_gpu(dy) + get_gpu(dot(drt, p["wr"].T))
+        e = get_gpu(dy)
 
         dr, dou_n = (get_gpu(a).empty_like_me() for a in (drt, dou))
-        cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n)))
+        cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n, dt)))
 
-        dx = dot(dr, p["w"].T)
+        dx = dot(dr, w.T)
 
-        context.store(p["wr"], dr)
-        context.store(p["w"], dou_n)
+        context.store(wr, dr)
+        context.store(w, dou_n)
 
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx)
 
-        if isinstance(p["w"], Node):
-            p["w"]._update_diff(context, dot(self.attrs._x.T, dr))
+        if isinstance(w, Node):
+            w._update_diff(context, dot(self.attrs._x.T, dr))
 
-        if isinstance(p["wr"], Node):
-            p["wr"]._update_diff(context, dot(self.T, drt))
+        if isinstance(wr, Node):
+            wr._update_diff(context, dot(self.T, drt))
 
-        if isinstance(p["b"], Node):
-            p["b"]._update_diff(context, sum(dr, axis=0))
+        if isinstance(b, Node):
+            b._update_diff(context, sum(dr, axis=0))
+
+        if isinstance(self.attrs._pz, Node):
+            self.attrs._pz._update_diff(context, dot(dr, wr.T), True)
 
 
 class Lstm(Parametrized):
@@ -235,7 +252,9 @@ class Lstm(Parametrized):
     def forward(self, x):
         ret = lstm(x, getattr(self, "_z", None),
                    getattr(self, "_state", None),
-                   self.params)
+                   self.params.w,
+                   self.params.wr,
+                   self.params.b)
         self._z = ret
         self._state = getattr(ret, '_state', None)
         return ret

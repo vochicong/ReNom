@@ -62,7 +62,7 @@ class conv2d(Node):
         ret.attrs._b = b
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         dy = to_value(dy)
         if isinstance(self.attrs._x, Node):
             dx = np.tensordot(self.attrs._w, dy, (0, 1))
@@ -78,7 +78,7 @@ class conv2d(Node):
         if isinstance(self.attrs._b, Node):
             self.attrs._b._update_diff(context, np.sum(dy, (0, 2, 3), keepdims=True))
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         dw, db, dx = (get_gpu(g).empty_like_me()
                       for g in (self.attrs._w, self.attrs._b, self.attrs._x))
 

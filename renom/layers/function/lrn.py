@@ -32,7 +32,7 @@ class lrn(Node):
         ret.attrs._scale = scale
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._x, Node):
             dy = to_value(dy)
             unit_scale = self.attrs._unit_scale
@@ -59,7 +59,7 @@ class lrn(Node):
         ret.attrs._lrn_desc = lrn_desc
         return ret
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._x, Node):
             dx = get_gpu(self).empty_like_me()
             with cu.cudnn_handler() as handle:

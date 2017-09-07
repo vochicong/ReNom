@@ -40,12 +40,12 @@ class dropout(Node):
         ret.attrs._mask = mask
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._x, Node):
             dx = self.attrs._mask * dy
             self.attrs._x._update_diff(context, dx)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._x, Node):
             dx = get_gpu(self.attrs._mask) * get_gpu(dy)
             self.attrs._x._update_diff(context, dx)

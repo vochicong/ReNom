@@ -22,13 +22,13 @@ class softmax(UnaryOp):
             cu.cuSoftmaxForward(handle, arg, z, mode=1)
         return z
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             dx = self * dy
             summed = dx - np.sum(dx, axis=1, keepdims=True)
             self.attrs._arg._update_diff(context, ((1.0 - self) * dy + summed) * self)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             with cu.cudnn_handler() as handle:
                 dx = get_gpu(self).empty_like_me()

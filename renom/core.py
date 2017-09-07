@@ -597,9 +597,9 @@ class Node(np.ndarray):
             self.detach_graph()
         return context
 
-    def _update_diff(self, context, dy):
+    def _update_diff(self, context, dy, dt=None):
         context.add(self, dy)
-        self.backward(context, dy)
+        self.backward(context, dy, dt)
 
     def _get_graph(self):
         if self.attrs:
@@ -634,18 +634,18 @@ class Node(np.ndarray):
         if self.attrs:
             self.attrs.clear()
 
-    def backward(self, context, dy):
+    def backward(self, context, dy, dt=None):
         if self._no_backward:
             return
 
         if is_cuda_active():
             if self._gpu:
                 with use_device(self._gpu.device_id):
-                    return self._backward_gpu(context, dy)
+                    return self._backward_gpu(context, dy, dt)
             else:
-                return self._backward_gpu(context, dy)
+                return self._backward_gpu(context, dy, dt)
         else:
-            return self._backward_cpu(context, dy)
+            return self._backward_cpu(context, dy, dt)
 
     def __neg__(self):
         return Neg(self)
@@ -935,7 +935,7 @@ class Variable(Node):
         ret._auto_update = auto_update
         return ret
 
-    def backward(self, context, dy):
+    def backward(self, context, dy, dt=None):
         pass
 
 
@@ -957,11 +957,11 @@ class Pos(UnaryOp):
     def _oper_gpu(cls, arg):
         return +get_gpu(arg.get_gpu())
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, dy)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, get_gpu(dy))
 
@@ -976,11 +976,11 @@ class Neg(UnaryOp):
     def _oper_gpu(cls, arg):
         return -(get_gpu(arg))
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, -dy)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, -get_gpu(dy))
 
@@ -997,14 +997,14 @@ class Abs(UnaryOp):
         cuabs_forward(get_gpu(arg), new_ptr)
         return new_ptr
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             arg = to_value(self.attrs._arg)
             # TODO: 原点における劣微分の定義
             mask = np.where(arg > 0, 1, -1)
             self.attrs._arg._update_diff(context, mask * dy)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             new_ptr = get_gpu(dy).empty_like_me()
             cuabs_backward(get_gpu(self.attrs._arg), new_ptr)
@@ -1017,10 +1017,10 @@ class Invert(UnaryOp):
     def _oper_cpu(cls, arg):
         return np.ndarray.__invert__(arg)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         self.attrs._arg._update_diff(context, dy)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         return self.attrs._backward_cpu(context, dy)
 
 
@@ -1075,7 +1075,7 @@ class Add(BinOp):
         # TODO:scal vs scalの定義
         return get_gpu(lhs) + get_gpu(rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         # 次元が異なる場合の足し算を定義
 
         if isinstance(self.attrs._rhs, Node):
@@ -1086,7 +1086,7 @@ class Add(BinOp):
             l_dx = broad_cast(self.attrs._lhs, dy)
             self.attrs._lhs._update_diff(context, l_dx)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         gdy = get_gpu(dy)
 
         if isinstance(self.attrs._rhs, Node):
@@ -1129,7 +1129,7 @@ class Sub(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return get_gpu(lhs) - get_gpu(rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._lhs, Node):
             l_dx = broad_cast(self.attrs._lhs, dy)
             self.attrs._lhs._update_diff(context, l_dx)
@@ -1138,7 +1138,7 @@ class Sub(BinOp):
             r_dx = broad_cast(self.attrs._rhs, -dy)
             self.attrs._rhs._update_diff(context, r_dx)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._lhs, Node):
             new_l_dx = get_gpu(self.attrs._lhs).zeros_like_me()
             dxl = get_gpu(dy)
@@ -1173,7 +1173,7 @@ class Mul(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return get_gpu(lhs) * get_gpu(rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         lhs = to_value(self.attrs._lhs)
         rhs = to_value(self.attrs._rhs)
 
@@ -1185,7 +1185,7 @@ class Mul(BinOp):
             l_dx = broad_cast(lhs, rhs * dy)
             self.attrs._lhs._update_diff(context, l_dx)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
 
         if isinstance(self.attrs._rhs, Node):
             new_r_dx = get_gpu(self.attrs._rhs).zeros_like_me()
@@ -1222,7 +1222,7 @@ class Div(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return get_gpu(lhs) / get_gpu(rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
 
         lhs = to_value(self.attrs._lhs)
         rhs = to_value(self.attrs._rhs)
@@ -1236,7 +1236,7 @@ class Div(BinOp):
             r_dx = broad_cast(rhs, lhs * n * dy)
             self.attrs._rhs._update_diff(context, r_dx)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
 
         if isinstance(self.attrs._lhs, Node):
             new_l_dx = get_gpu(self.attrs._lhs).zeros_like_me()
@@ -1297,10 +1297,10 @@ class Mod(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return cls._oper_cpu(lhs, rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         pass
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         self._backward_cpu(context, dy)
 
 
@@ -1324,10 +1324,10 @@ class DivMod(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return cls._oper_cpu(lhs, rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         pass
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         self._backward_cpu(context, dy)
 
 
@@ -1349,7 +1349,7 @@ class Pow(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return get_gpu(lhs) ** get_gpu(rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         lhs = to_value(self.attrs._lhs)
         rhs = to_value(self.attrs._rhs)
 
@@ -1359,7 +1359,7 @@ class Pow(BinOp):
         if isinstance(self.attrs._rhs, Node):
             self.attrs._rhs._update_diff(context, dy * self * np.log(lhs))
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
 
         if isinstance(self.attrs._lhs, Node):
             rhs = get_gpu(self.attrs._rhs)
@@ -1398,10 +1398,10 @@ class Lshift(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return cls._oper_cpu(lhs, rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         pass
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         self._backward_cpu(context, dy)
 
 
@@ -1428,10 +1428,10 @@ class Rshift(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return cls._oper_cpu(lhs, rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         pass
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         self._backward_cpu(context, dy)
 
 
@@ -1458,10 +1458,10 @@ class And(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return cls._oper_cpu(lhs, rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         pass
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         self._backward_cpu(context, dy)
 
 
@@ -1475,7 +1475,7 @@ class RAnd(Lshift):
     def _oper_gpu(cls, lhs, rhs):
         return cls._oper_cpu(lhs, rhs)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         self._backward_cpu(context, dy)
 
 # TODO:微分定義
@@ -1491,10 +1491,10 @@ class Xor(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return cls._oper_cpu(lhs, rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         pass
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         self._backward_cpu(context, dy)
 
 
@@ -1520,10 +1520,10 @@ class Or(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return cls._oper_cpu(lhs, rhs)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         pass
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         self._backward_cpu(context, dy)
 
 
@@ -1548,13 +1548,13 @@ class GetItem(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         return get_gpu(lhs)[rhs]
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._lhs, Node):
             zero = np.zeros_like(np.array(self.attrs._lhs))
             zero[self.attrs._rhs] = np.array(dy)
             self.attrs._lhs._update_diff(context, zero)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._lhs, Node):
             zero = get_gpu(self.attrs._lhs).zeros_like_me()
             zero[self.attrs._rhs] = dy
@@ -1577,13 +1577,13 @@ class GetSlice(Node):
         ret.attrs._i, ret.attrs._j = i, j
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._arg, Node):
             zero = np.zeros_like(np.array(self.attrs._arg))
             zero[self.attrs._i:self.attrs._j] = np.array(dy)
             self.attrs._arg._update_diff(context, zero)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         self._backward_cpu(context, dy)
 
 

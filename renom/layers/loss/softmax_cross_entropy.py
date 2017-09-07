@@ -37,13 +37,13 @@ class softmax_cross_entropy(Node):
         ret.attrs._rhs = rhs
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._lhs, Node):
             N = len(self.attrs._lhs)
             sub = self.attrs._z - self.attrs._rhs
             self.attrs._lhs._update_diff(context, sub * dy / N)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         if isinstance(self.attrs._lhs, Node):
             N = len(self.attrs._lhs)
             sub = get_gpu(self.attrs._z) - get_gpu(self.attrs._rhs)

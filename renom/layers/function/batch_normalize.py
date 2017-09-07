@@ -79,7 +79,7 @@ class batch_normalize(Node):
             ret.attrs._mov_v = mv_v
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         a = self.attrs._axs
         sq_var = self.attrs._v
         meaned = self.attrs._x - self.attrs._m
@@ -99,7 +99,7 @@ class batch_normalize(Node):
         if isinstance(self.attrs._b, Node):
             self.attrs._b._update_diff(context, np.sum(dy, axis=a, keepdims=True))
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         gw, gx, gdy, gm, gv = map(get_gpu, (self.attrs._w, self.attrs._x,
                                             dy, self.attrs._m, self.attrs._v))
         dx, dw, db = (g.ones_like_me() for g in (gx, gw, gw))

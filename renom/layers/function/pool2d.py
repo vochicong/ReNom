@@ -17,7 +17,7 @@ class pool_base(Node):
         out_shape.extend(out_size(x.shape[2:], filter, stride, padding))
         return cls.calc_value(x, in_shape, out_shape, filter, stride, padding)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, dt=None):
         dx = get_gpu(self.attrs._x).empty_like_me()
         with cu.cudnn_handler() as handle:
             cu.cuPoolingBackward(handle, self.attrs._pool_desc, self.attrs._x, self, dy, dx)
@@ -57,7 +57,7 @@ class max_pool2d(pool_base):
         ret.attrs._x = x
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._x, Node):
             N = len(dy)
             index = self.attrs._index
@@ -101,7 +101,7 @@ class average_pool2d(pool_base):
         ret.attrs._x = x
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, dt=None):
         if isinstance(self.attrs._x, Node):
             N = len(dy)
             col = np.zeros((N, self.attrs._in_shape[0], self.attrs._kernel[0],
