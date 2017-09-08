@@ -163,7 +163,7 @@ class lstm(Node):
         e = get_gpu(dy)
 
         dr, dou_n = (get_gpu(a).empty_like_me() for a in (drt, dou))
-        cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n)), temporal)
+        cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n, temporal)))
 
         dx = dot(dr, w.T)
 
