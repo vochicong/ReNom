@@ -32,7 +32,7 @@ class lrn(Node):
         ret.attrs._scale = scale
         return ret
 
-    def _backward_cpu(self, context, dy, dt=None):
+    def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
             dy = to_value(dy)
             unit_scale = self.attrs._unit_scale
@@ -46,7 +46,7 @@ class lrn(Node):
             for i in range(1, n // 2 + 1):
                 sum2[:, i:, :, :] += sum1[:, :-i, :, :]
                 sum2[:, :-i, :, :] += sum1[:, i:, :, :]
-            self.attrs._x._update_diff(context, dy * scale - 2 * a * b * x * sum2)
+            self.attrs._x._update_diff(context, dy * scale - 2 * a * b * x * sum2, **kwargs)
 
     @classmethod
     def _oper_gpu(cls, x, n, k, a, b):
@@ -59,13 +59,13 @@ class lrn(Node):
         ret.attrs._lrn_desc = lrn_desc
         return ret
 
-    def _backward_gpu(self, context, dy, dt=None):
+    def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
             dx = get_gpu(self).empty_like_me()
             with cu.cudnn_handler() as handle:
                 cu.cuLocalResponseNormalizationBackward(
                     handle, self.attrs._lrn_desc, self.attrs._x, self, dx, dy)
-            self.attrs._x._update_diff(context, dx)
+            self.attrs._x._update_diff(context, dx, **kwargs)
 
 
 class Lrn:

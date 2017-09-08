@@ -20,17 +20,17 @@ class mean_squared_error(BinOp):
         N = len(lhs)
         return cu.cusum(get_gpu((get_gpu(lhs) - get_gpu(rhs)) ** 2)) / (N * 2)
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, **kwargs):
         sub = self.attrs._lhs - self.attrs._rhs
         if isinstance(self.attrs._lhs, Node):
             N = len(self.attrs._lhs)
-            self.attrs._lhs._update_diff(context, sub * dy / N)
+            self.attrs._lhs._update_diff(context, sub * dy / N, **kwargs)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._lhs, Node):
             N = len(self.attrs._lhs)
             sub = get_gpu(self.attrs._lhs) - get_gpu(self.attrs._rhs)
-            self.attrs._lhs._update_diff(context, sub * get_gpu(dy) / N)
+            self.attrs._lhs._update_diff(context, sub * get_gpu(dy) / N, **kwargs)
 
 
 class MeanSquaredError(object):

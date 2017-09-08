@@ -34,19 +34,19 @@ class embedding(Node):
         ret.attrs._w = w
         return ret
 
-    def _backward_cpu(self, context, dy, dt=None):
+    def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._w, Node):
             N = len(self.attrs._index)
             dx = np.zeros(self.attrs._w.shape, dtype=self.attrs._w.dtype)
             for i in range(N):
                 dx[self.attrs._index[i]] += dy[i]
-            self.attrs._w._update_diff(context, dx)
+            self.attrs._w._update_diff(context, dx, **kwargs)
 
-    def _backward_gpu(self, context, dy, dt=None):
+    def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._w, Node):
             dx = get_gpu(self.attrs._w).zeros_like_me()
             cu.cuembedding_backward(get_gpu(self.attrs._x), get_gpu(dy), dx)
-            self.attrs._w._update_diff(context, dx)
+            self.attrs._w._update_diff(context, dx, **kwargs)
 
 
 class Embedding(Parametrized):

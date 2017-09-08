@@ -32,20 +32,20 @@ class selu(UnaryOp):
         ret.attrs._lmda = lmda
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             alpha = self.attrs._alpha
             lmda = self.attrs._lmda
             self.attrs._arg._update_diff(context, np.where(
-                self > 0, dy, (alpha + self) * dy) * lmda)
+                self > 0, dy, (alpha + self) * dy) * lmda, **kwargs)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             alpha = self.attrs._alpha
             lmda = self.attrs._lmda
             dx = get_gpu(self.attrs._arg).empty_like_me()
             cu.cueru_backward(alpha, get_gpu(self.attrs._arg), dx)
-            self.attrs._arg._update_diff(context, dx * get_gpu(dy) * lmda)
+            self.attrs._arg._update_diff(context, dx * get_gpu(dy) * lmda, **kwargs)
 
 
 class Selu:

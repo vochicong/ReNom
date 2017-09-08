@@ -62,37 +62,37 @@ class conv2d(Node):
         ret.attrs._b = b
         return ret
 
-    def _backward_cpu(self, context, dy, dt=None):
+    def _backward_cpu(self, context, dy, **kwargs):
         dy = to_value(dy)
         if isinstance(self.attrs._x, Node):
             dx = np.tensordot(self.attrs._w, dy, (0, 1))
             dx = np.rollaxis(dx, 3)
             dx = col2im(dx, self.attrs._in_shape[1:],
                         self.attrs._stride, self.attrs._padding)
-            self.attrs._x._update_diff(context, dx)
+            self.attrs._x._update_diff(context, dx, **kwargs)
 
         if isinstance(self.attrs._w, Node):
             self.attrs._w._update_diff(context, np.tensordot(
-                dy, self.attrs._col, ([0, 2, 3], [0, 4, 5])))
+                dy, self.attrs._col, ([0, 2, 3], [0, 4, 5])), **kwargs)
 
         if isinstance(self.attrs._b, Node):
-            self.attrs._b._update_diff(context, np.sum(dy, (0, 2, 3), keepdims=True))
+            self.attrs._b._update_diff(context, np.sum(dy, (0, 2, 3), keepdims=True), **kwargs)
 
-    def _backward_gpu(self, context, dy, dt=None):
+    def _backward_gpu(self, context, dy, **kwargs):
         dw, db, dx = (get_gpu(g).empty_like_me()
                       for g in (self.attrs._w, self.attrs._b, self.attrs._x))
 
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionBackward(handle, self.attrs._conv_desc, self.attrs._filter_desc,
-                                     self.attrs._x, self.attrs._w, dy, dw, db, dx)
+                                     self.attrs._x, self.attrs._w, dy, dw, db, dx, **kwargs)
         if isinstance(self.attrs._w, Node):
-            self.attrs._w._update_diff(context, dw)
+            self.attrs._w._update_diff(context, dw, **kwargs)
 
         if isinstance(self.attrs._x, Node):
-            self.attrs._x._update_diff(context, dx)
+            self.attrs._x._update_diff(context, dx, **kwargs)
 
         if isinstance(self.attrs._b, Node):
-            self.attrs._b._update_diff(context, db)
+            self.attrs._b._update_diff(context, db, **kwargs)
 
 
 class Conv2d(Parametrized):

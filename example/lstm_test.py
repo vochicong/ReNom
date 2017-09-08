@@ -8,6 +8,7 @@ model = rm.Lstm(1)
 
 eps = np.sqrt(np.finfo(np.float32).eps)
 
+
 def auto_diff(function, node, *args):
     loss = function(*args)
     return loss.grad().get(node)
@@ -54,10 +55,13 @@ def func(x):
     model.truncate()
     return z
 
+
 print(auto_diff(func, x, x))
 print(numeric_diff(func, x, x))
+print(auto_diff(func, model.params.wr, x))
+print(numeric_diff(func, model.params.wr, x))
+
 print(np.allclose(auto_diff(func, x, x), numeric_diff(func, x, x)))
 print(np.allclose(auto_diff(func, model.params.w, x), numeric_diff(func, model.params.w, x)))
 print(np.allclose(auto_diff(func, model.params.b, x), numeric_diff(func, model.params.b, x)))
 print(np.allclose(auto_diff(func, model.params.wr, x), numeric_diff(func, model.params.wr, x)))
-

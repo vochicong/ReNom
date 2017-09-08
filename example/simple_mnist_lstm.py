@@ -15,7 +15,7 @@ from renom.utility.initializer import Gaussian
 from renom.utility.trainer import Trainer
 from renom.utility.distributor import NdarrayDistributor
 
-cuda.set_cuda_active(False)
+cuda.set_cuda_active(True)
 
 mnist = fetch_mldata('MNIST original', data_home="dataset")
 
@@ -32,14 +32,14 @@ class MNist(Model):
     def __init__(self):
         super(MNist, self).__init__()
         self.layer0 = Dense(output_size=50)
-        self.layer1 = Lstm(output_size=50, initializer=Gaussian(std=0.01))
+        self.layer1 = Lstm(output_size=50)
         self.layer2 = Dense(output_size=10)
 
     def forward(self, x):
         self.truncate()
         ret = 0
         for i in range(28):
-            lstm = self.layer1(self.layer0(x[:, i]))
+            lstm = self.layer1(x[:, i])
             ret = self.layer2(lstm)
         return ret
 

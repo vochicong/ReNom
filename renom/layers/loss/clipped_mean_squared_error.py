@@ -33,15 +33,15 @@ class clipped_mean_squared_error(Node):
         ret.attrs._clip = clip
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, **kwargs):
         sub = self.attrs._lhs - self.attrs._rhs
         if isinstance(self.attrs._lhs, Node):
             N = len(self.attrs._lhs)
             clip = self.attrs._clip
             dx = np.clip(sub * dy, clip[0], clip[1])
-            self.attrs._lhs._update_diff(context, dx / N)
+            self.attrs._lhs._update_diff(context, dx / N, **kwargs)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._lhs, Node):
             N = len(self.attrs._lhs)
             clip = self.attrs._clip
@@ -49,7 +49,7 @@ class clipped_mean_squared_error(Node):
             dx = sub * get_gpu(dy)
             cu.cumin(clip[1], dx, dx)
             cu.cumax(clip[0], dx, dx)
-            self.attrs._lhs._update_diff(context, dx / N)
+            self.attrs._lhs._update_diff(context, dx / N, **kwargs)
 
 
 class ClippedMeanSquaredError:

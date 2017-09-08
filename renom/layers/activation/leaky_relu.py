@@ -28,17 +28,17 @@ class leaky_relu(UnaryOp):
         ret.attrs._slope = slope
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             slope = self.attrs._slope
-            self.attrs._arg._update_diff(context, np.where(self > 0, dy, dy * slope))
+            self.attrs._arg._update_diff(context, np.where(self > 0, dy, dy * slope), **kwargs)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             slope = self.attrs._slope
             dx = get_gpu(self.attrs._arg).empty_like_me()
             cu.culeaky_leru_backward(slope, get_gpu(self.attrs._arg), dx)
-            self.attrs._arg._update_diff(context, dx * get_gpu(dy))
+            self.attrs._arg._update_diff(context, dx * get_gpu(dy), **kwargs)
 
 
 class LeakyRelu:

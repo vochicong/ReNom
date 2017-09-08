@@ -17,12 +17,12 @@ class pool_base(Node):
         out_shape.extend(out_size(x.shape[2:], filter, stride, padding))
         return cls.calc_value(x, in_shape, out_shape, filter, stride, padding)
 
-    def _backward_gpu(self, context, dy, dt=None):
+    def _backward_gpu(self, context, dy, **kwargs):
         dx = get_gpu(self.attrs._x).empty_like_me()
         with cu.cudnn_handler() as handle:
             cu.cuPoolingBackward(handle, self.attrs._pool_desc, self.attrs._x, self, dy, dx)
         if isinstance(self.attrs._x, Node):
-            self.attrs._x._update_diff(context, dx)
+            self.attrs._x._update_diff(context, dx, **kwargs)
 
 
 class max_pool2d(pool_base):
@@ -57,7 +57,7 @@ class max_pool2d(pool_base):
         ret.attrs._x = x
         return ret
 
-    def _backward_cpu(self, context, dy, dt=None):
+    def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
             N = len(dy)
             index = self.attrs._index
@@ -68,7 +68,7 @@ class max_pool2d(pool_base):
             for i in np.ndindex(N, self.attrs._in_shape[0], self.attrs._out_shape[1], self.attrs._out_shape[2]):
                 col_k[index[i]][i] = dy[i]
             dx = col2im(col, self.attrs._in_shape[1:], self.attrs._stride, self.attrs._padding)
-            self.attrs._x._update_diff(context, dx)
+            self.attrs._x._update_diff(context, dx, **kwargs)
 
 
 class average_pool2d(pool_base):
@@ -101,7 +101,7 @@ class average_pool2d(pool_base):
         ret.attrs._x = x
         return ret
 
-    def _backward_cpu(self, context, dy, dt=None):
+    def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
             N = len(dy)
             col = np.zeros((N, self.attrs._in_shape[0], self.attrs._kernel[0],
@@ -110,7 +110,7 @@ class average_pool2d(pool_base):
                 N, self.attrs._in_shape[0], -1, self.attrs._out_shape[1], self.attrs._out_shape[2]), 2)
             col_k[:] = dy / float(len(col_k))
             dx = col2im(col, self.attrs._in_shape[1:], self.attrs._stride, self.attrs._padding)
-            self.attrs._x._update_diff(context, dx)
+            self.attrs._x._update_diff(context, dx, **kwargs)
 
 
 class PoolBase(object):

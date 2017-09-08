@@ -31,19 +31,19 @@ class cross_entropy(Node):
         ret.attrs._lhs = lhs
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._rhs, Node):
-            self.attrs._rhs._update_diff(context, -dy * self.attrs._log_lhs)
+            self.attrs._rhs._update_diff(context, -dy * self.attrs._log_lhs, **kwargs)
 
         if isinstance(self.attrs._lhs, Node):
-            self.attrs._lhs._update_diff(context, -dy * self.attrs._rhs / self.attrs._lhs)
+            self.attrs._lhs._update_diff(context, -dy * self.attrs._rhs / self.attrs._lhs, **kwargs)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._rhs, Node):
-            self.attrs._rhs._update_diff(context, -dy * self.attrs._log_lhs)
+            self.attrs._rhs._update_diff(context, -dy * self.attrs._log_lhs, **kwargs)
 
         if isinstance(self.attrs._lhs, Node):
-            self.attrs._lhs._update_diff(context, -dy * self.attrs._rhs / self.attrs._lhs)
+            self.attrs._lhs._update_diff(context, -dy * self.attrs._rhs / self.attrs._lhs, **kwargs)
 
 
 class CrossEntropy:

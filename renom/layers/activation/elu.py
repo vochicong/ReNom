@@ -28,17 +28,18 @@ class elu(UnaryOp):
         ret.attrs._alpha = alpha
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             alpha = self.attrs._alpha
-            self.attrs._arg._update_diff(context, np.where(self > 0, dy, (alpha + self) * dy))
+            self.attrs._arg._update_diff(context, np.where(
+                self > 0, dy, (alpha + self) * dy), **kwargs)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             alpha = self.attrs._alpha
             dx = get_gpu(self.attrs._arg).empty_like_me()
             cu.cueru_backward(alpha, get_gpu(self.attrs._arg), dx)
-            self.attrs._arg._update_diff(context, dx * get_gpu(dy))
+            self.attrs._arg._update_diff(context, dx * get_gpu(dy), **kwargs)
 
 
 class Elu:

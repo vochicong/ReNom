@@ -65,18 +65,16 @@ class lstm(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, pz, ps, parameter):
-        p = parameter
-
+    def _oper_gpu(cls, x, pz, ps, w, wr, b):
         if ps is None:
-            tmp = GPUValue(shape=(x.shape[0], p["w"].shape[1] // 4))
+            tmp = GPUValue(shape=(x.shape[0], w.shape[1] // 4))
             s_p = tmp.zeros_like_me()
             z_p = tmp.zeros_like_me()
         else:
             s_p = ps
             z_p = get_gpu(pz)
 
-        u = dot(x, p["w"]) + dot(z_p, p["wr"]) + p["b"]
+        u = dot(x, w) + dot(z_p, wr) + b
 
         z = get_gpu(z_p).empty_like_me()
         state = get_gpu(s_p).empty_like_me()
@@ -100,13 +98,13 @@ class lstm(Node):
 
         return ret
 
-    def _backward_cpu(self, context, dy, dt=None):
+    def _backward_cpu(self, context, dy, temporal=False, **kwargs):
         n, m = dy.shape
 
         w = self.attrs._w
         wr = self.attrs._wr
         b = self.attrs._b
-        
+
         u = self.attrs._u
         s = tanh(self.attrs._state)
 
@@ -122,7 +120,7 @@ class lstm(Node):
         e = dy
 
         do = e * s * gd[:, 2 * m:]
-        dou = e * gated[:, 2 * m:] * activation_diff(s) + (pfg * dou if dt else 0)
+        dou = e * gated[:, 2 * m:] * activation_diff(s) + (pfg * dou if temporal else 0)
 
         df = dou * gd[:, :m] * ps if ps is not None else np.zeros_like(dou)
         di = dou * gd[:, m:2 * m] * u
@@ -140,21 +138,20 @@ class lstm(Node):
         if isinstance(w, Node):
             w._update_diff(context, np.dot(self.attrs._x.T, dr))
 
-        if isinstance(wr, Node):
+        if isinstance(wr, Node) and temporal:
             wr._update_diff(context, np.dot(self.T, drt))
 
         if isinstance(b, Node):
             b._update_diff(context, np.sum(dr, axis=0, keepdims=True))
 
         if isinstance(self.attrs._pz, Node):
-            self.attrs._pz._update_diff(context, np.dot(dr, wr.T), True)
+            self.attrs._pz._update_diff(context, np.dot(dr, wr.T), temporal=True)
 
-
-    def _backward_gpu(self, context, dy, dt=None):
+    def _backward_gpu(self, context, dy, temporal=False, **kwargs):
         w = self.attrs._w
         wr = self.attrs._wr
         b = self.attrs._b
-        
+
         u = self.attrs._u
         s = tanh(self.attrs._state)
         ps = self.attrs._pstate
@@ -166,7 +163,7 @@ class lstm(Node):
         e = get_gpu(dy)
 
         dr, dou_n = (get_gpu(a).empty_like_me() for a in (drt, dou))
-        cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n, dt)))
+        cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n)), temporal)
 
         dx = dot(dr, w.T)
 
@@ -179,14 +176,14 @@ class lstm(Node):
         if isinstance(w, Node):
             w._update_diff(context, dot(self.attrs._x.T, dr))
 
-        if isinstance(wr, Node):
+        if isinstance(wr, Node) and temporal:
             wr._update_diff(context, dot(self.T, drt))
 
         if isinstance(b, Node):
             b._update_diff(context, sum(dr, axis=0))
 
         if isinstance(self.attrs._pz, Node):
-            self.attrs._pz._update_diff(context, dot(dr, wr.T), True)
+            self.attrs._pz._update_diff(context, dot(dr, wr.T), temporal=True)
 
 
 class Lstm(Parametrized):

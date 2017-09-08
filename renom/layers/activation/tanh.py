@@ -17,13 +17,13 @@ class tanh(UnaryOp):
         cu.cutanh(get_gpu(arg), ret)
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            self.attrs._arg._update_diff(context, (1.0 - self**2) * dy)
+            self.attrs._arg._update_diff(context, (1.0 - self**2) * dy, **kwargs)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            self.attrs._arg._update_diff(context, (1.0 - self**2) * get_gpu(dy))
+            self.attrs._arg._update_diff(context, (1.0 - self**2) * get_gpu(dy), **kwargs)
 
 
 class Tanh:

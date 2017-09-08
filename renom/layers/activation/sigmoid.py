@@ -18,14 +18,14 @@ class sigmoid(UnaryOp):
         cu.cusigmoid(get_gpu(arg), ret)
         return ret
 
-    def _backward_cpu(self, context, dy):
+    def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            self.attrs._arg._update_diff(context, self * (1. - self) * dy)
+            self.attrs._arg._update_diff(context, self * (1. - self) * dy, **kwargs)
 
-    def _backward_gpu(self, context, dy):
+    def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             s = get_gpu(self)
-            self.attrs._arg._update_diff(context, s * (-s + 1.) * get_gpu(dy))
+            self.attrs._arg._update_diff(context, s * (-s + 1.) * get_gpu(dy), **kwargs)
 
 
 class Sigmoid:

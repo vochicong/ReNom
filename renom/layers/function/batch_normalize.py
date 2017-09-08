@@ -79,7 +79,7 @@ class batch_normalize(Node):
             ret.attrs._mov_v = mv_v
         return ret
 
-    def _backward_cpu(self, context, dy, dt=None):
+    def _backward_cpu(self, context, dy, **kwargs):
         a = self.attrs._axs
         sq_var = self.attrs._v
         meaned = self.attrs._x - self.attrs._m
@@ -90,16 +90,16 @@ class batch_normalize(Node):
             ds = np.sum(dxh * meaned * -np.power(sq_var, 3) / 2, axis=a, keepdims=True)
             du = np.sum(-dxh * sq_var, axis=a, keepdims=True)
             dx = dxh * sq_var + (ds * 2 * meaned + du) / N
-            self.attrs._x._update_diff(context, dx)
+            self.attrs._x._update_diff(context, dx, **kwargs)
 
         if isinstance(self.attrs._w, Node):
             xh = meaned * sq_var
-            self.attrs._w._update_diff(context, np.sum(xh * dy, axis=a, keepdims=True))
+            self.attrs._w._update_diff(context, np.sum(xh * dy, axis=a, keepdims=True), **kwargs)
 
         if isinstance(self.attrs._b, Node):
-            self.attrs._b._update_diff(context, np.sum(dy, axis=a, keepdims=True))
+            self.attrs._b._update_diff(context, np.sum(dy, axis=a, keepdims=True), **kwargs)
 
-    def _backward_gpu(self, context, dy, dt=None):
+    def _backward_gpu(self, context, dy, **kwargs):
         gw, gx, gdy, gm, gv = map(get_gpu, (self.attrs._w, self.attrs._x,
                                             dy, self.attrs._m, self.attrs._v))
         dx, dw, db = (g.ones_like_me() for g in (gx, gw, gw))
@@ -109,13 +109,13 @@ class batch_normalize(Node):
             cu.cuBatchNormalizatoinBackward(handle, gx, gw, gdy, gm, gv, dx, dw, db, mode=ax)
 
         if isinstance(self.attrs._x, Node):
-            self.attrs._x._update_diff(context, dx)
+            self.attrs._x._update_diff(context, dx, **kwargs)
 
         if isinstance(self.attrs._w, Node):
-            self.attrs._w._update_diff(context, dw)
+            self.attrs._w._update_diff(context, dw, **kwargs)
 
         if isinstance(self.attrs._b, Node):
-            self.attrs._b._update_diff(context, db)
+            self.attrs._b._update_diff(context, db, **kwargs)
 
 
 class BatchNormalize(Parametrized):
