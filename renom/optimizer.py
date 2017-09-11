@@ -47,9 +47,9 @@ class Sgd(Optimizer):
 
         node_id = id(node)
         pdy = self._params.get(node_id, 0)
-        ret = self._lr * (dy + self._momentum * pdy)
+        ret = self._lr * dy + self._momentum * pdy
         if self._momentum > 0:
-            self._params[node_id] = dy
+            self._params[node_id] = ret
         if isinstance(ret, Node):
             ret.detach_graph()
         return ret
