@@ -132,7 +132,7 @@ class GridSearcher(Searcher):
     """
 
     def suggest(self):
-        for p in product(*self._paramd_dict.values()[::-1]):
+        for p in product(*list(self._paramd_dict.values())[::-1]):
             ret = {k: self._raw_paramd_dict[k][v]
                    for k, v in zip(self._paramd_dict.keys(), p[::-1])}
             self._current_param = ret
@@ -154,7 +154,7 @@ class RandomSearcher(Searcher):
     def suggest(self, max_iter=10):
         for _ in range(min(max_iter, len(self))):
             item = None
-            iter = product(*self._paramd_dict.values()[::-1])
+            iter = product(*list(self._paramd_dict.values())[::-1])
             numbers = list(range(len(self)))
             for n in self._searched_index:
                 numbers.remove(n)
@@ -201,29 +201,28 @@ class BayesSearcher(Searcher):
             random_iter (int): Number of random search.
 
         """
-        candidates = np.array(list(product(*self._paramd_dict.values()[::-1])))
-        for _ in range(min(max_iter, len(self))):
-            if len(self._searched) < random_iter:
-                for p in self._rand_search.suggest(random_iter):
-                    self._current_param = self._rand_search._current_param
-                    yield p
-            else:
-                x = np.array(self._searched)
-                y = np.array(self._result)[:, None]
-                model = gp.models.GPRegression(x, y)
-                model.optimize()
-                mse, var = model._raw_predict(candidates)
-                while True:
-                    index = np.argmin(self.acquisition_UCB(mse, var))
-                    item = candidates[index]
-                    if self._to_index(item[::-1]) in self._searched_index:
-                        mse[index] = np.Inf
-                    else:
-                        break
-                ret = {k: self._raw_paramd_dict[k][v]
-                       for k, v in zip(self._paramd_dict.keys(), item[::-1])}
-                self._current_param = ret
-                yield ret
+        candidates = np.array(list(product(*list(self._paramd_dict.values())[::-1])))
+        for p in self._rand_search.suggest(random_iter):
+            self._current_param = self._rand_search._current_param
+            yield p
+
+        for _ in range(min(max_iter, len(self)) - random_iter):
+            x = np.array(self._searched)
+            y = np.array(self._result)[:, None]
+            model = gp.models.GPRegression(x, y)
+            model.optimize()
+            mse, var = model._raw_predict(candidates)
+            while True:
+                index = np.argmin(self.acquisition_UCB(mse, var))
+                item = candidates[index]
+                if self._to_index(item[::-1]) in self._searched_index:
+                    mse[index] = np.Inf
+                else:
+                    break
+            ret = {k: self._raw_paramd_dict[k][v]
+                   for k, v in zip(self._paramd_dict.keys(), item[::-1])}
+            self._current_param = ret
+            yield ret
 
     def acquisition_UCB(self, mse, var, k=1.0):
         return mse - k * var

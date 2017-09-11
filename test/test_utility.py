@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import pytest
+from itertools import product
 import renom.cuda as cuda
 from renom.utility.reinforcement.replaybuffer import ReplayBuffer
+from renom.utility.searcher import GridSearcher, RandomSearcher, BayesSearcher
 
 skipgpu = pytest.mark.skipif(not cuda.has_cuda(), reason="cuda is not installed")
 skipmultigpu = pytest.mark.skipif(
@@ -76,3 +78,39 @@ def test_replaybuffer(action_size, state_size, data_size):
         assert np.allclose(r[i], data[2][i])
         assert np.allclose(s[i], data[3][i])
         assert np.allclose(t[i], data[4][i])
+
+
+@pytest.mark.parametrize("param_space", [
+    {"a": [1, 2], "b":[3, 4]},
+    {"a": [1, 2], "b":[3, 4], "c":[4, 5, 3]},
+])
+def test_grid_searcher(param_space):
+    searcher = GridSearcher(param_space)
+    for params in searcher.suggest():
+        searcher.set_result(np.sum(list(params.values())))
+    assert searcher.best()[0][1] == \
+        np.min(list(map(lambda x: np.sum(x), product(*list(param_space.values())))))
+
+
+@pytest.mark.parametrize("param_space", [
+    {"a": [1, 2], "b":[3, 4]},
+    {"a": [1, 2], "b":[3, 4], "c":[4, 5, 3]},
+])
+def test_random_searcher(param_space):
+    searcher = RandomSearcher(param_space)
+    for params in searcher.suggest():
+        searcher.set_result(np.sum(list(params.values())))
+    assert searcher.best()[0][1] == \
+        np.min(list(map(lambda x: np.sum(x), product(*list(param_space.values())))))
+
+
+@pytest.mark.parametrize("param_space", [
+    {"a": [1, 2, 3], "b":[-1, 3, 4, 5]},
+    {"a": [1, 2], "b":[3, 4, -1], "c":[4, 5, 3]},
+])
+def test_bayes_searcher(param_space):
+    searcher = BayesSearcher(param_space)
+    for params in searcher.suggest(random_iter=5):
+        searcher.set_result(np.sum(list(params.values())))
+    assert searcher.best()[0][1] == \
+        np.min(list(map(lambda x: np.sum(x), product(*list(param_space.values())))))
