@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-precision = np.float32
+from renom.core import precision
 
 
 def out_size(size, k, s, p):
-    return (np.array(size) + np.array(p) * 2 - np.array(k)) // np.array(s) + 1
+    return ((np.array(size) + np.array(p) * 2 - np.array(k)) // np.array(s) + 1).astype(np.int)
 
 
 def transpose_out_size(size, k, s, p):
-    return np.array(s) * (np.array(size) - 1) + np.array(k) - 2 * np.array(p)
+    return (np.array(s) * (np.array(size) - 1) + np.array(k) - 2 * np.array(p)).astype(np.int)
 
 
 def im2col(img, size, kernel, stride, padding, padwith=0.):

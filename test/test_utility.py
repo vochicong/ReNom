@@ -103,7 +103,7 @@ def test_random_searcher(param_space):
     assert searcher.best()[0][1] == \
         np.min(list(map(lambda x: np.sum(x), product(*list(param_space.values())))))
 
-
+@pytest.mark.skip
 @pytest.mark.parametrize("param_space", [
     {"a": [1, 2, 3], "b":[-1, 3, 4, 5]},
     {"a": [1, 2], "b":[3, 4, -1], "c":[4, 5, 3]},

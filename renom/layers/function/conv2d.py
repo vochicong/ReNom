@@ -64,6 +64,7 @@ class conv2d(Node):
 
     def _backward_cpu(self, context, dy, **kwargs):
         dy = to_value(dy)
+
         if isinstance(self.attrs._x, Node):
             dx = np.tensordot(self.attrs._w, dy, (0, 1))
             dx = np.rollaxis(dx, 3)

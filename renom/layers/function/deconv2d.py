@@ -21,7 +21,6 @@ class deconv2d(Node):
 
     @classmethod
     def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding):
-
         z = np.tensordot(w, x, (0, 1))
         z = np.rollaxis(z, 3)
         z = col2im(z, out_shape[1:], stride, padding) + b
@@ -74,7 +73,6 @@ class deconv2d(Node):
     def _backward_gpu(self, context, dy, **kwargs):
         dw, db, dx = (get_gpu(g).empty_like_me()
                       for g in (self.attrs._w, self.attrs._b, self.attrs._x))
-
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionForward(handle, self.attrs._conv_desc,
                                     self.attrs._filter_desc, dy, self.attrs._w, dx)
