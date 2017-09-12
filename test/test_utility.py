@@ -98,7 +98,7 @@ def test_grid_searcher(param_space):
 ])
 def test_random_searcher(param_space):
     searcher = RandomSearcher(param_space)
-    for params in searcher.suggest():
+    for params in searcher.suggest(100):
         searcher.set_result(np.sum(list(params.values())))
     assert searcher.best()[0][1] == \
         np.min(list(map(lambda x: np.sum(x), product(*list(param_space.values())))))
