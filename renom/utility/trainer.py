@@ -199,7 +199,7 @@ class Trainer(object):
                 self.on_event('start')
 
                 datalen = len(data) // len(models)
-                self.data = [data[i:i + datalen] for i in range(0, datalen*len(models), datalen)]
+                self.data = [data[i:i + datalen] for i in range(0, datalen * len(models), datalen)]
                 if is_cuda_active():
                     self.data = [Node(d) for d in self.data]
                     for n, d in enumerate(self.data):
@@ -207,7 +207,8 @@ class Trainer(object):
                             d.to_gpu()
 
                 targetlen = len(target) // len(models)
-                self.targets = [target[i:i + targetlen] for i in range(0, targetlen*len(models), targetlen)]
+                self.targets = [target[i:i + targetlen]
+                                for i in range(0, targetlen * len(models), targetlen)]
                 if is_cuda_active():
                     self.targets = [Node(d) for d in self.targets]
                     for n, d in enumerate(self.targets):
