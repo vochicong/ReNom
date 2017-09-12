@@ -434,12 +434,11 @@ def test_conv2d(node, use_gpu):
     compare(func, layer.params["b"], node)
 
 
-@pytest.mark.skip()
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
     Variable(rand((2, 3, 4, 5))),
 ])
-def test_upconv2d(node, use_gpu):
+def test_deconv2d(node, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
@@ -467,7 +466,6 @@ def test_max_pool2d(node, use_gpu):
     compare(func, node, node)
 
 
-@pytest.mark.skip()
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
     Variable(rand((2, 3, 4, 5))),
