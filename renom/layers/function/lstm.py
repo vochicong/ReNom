@@ -253,7 +253,7 @@ class Lstm(Parametrized):
                    self.params.wr,
                    self.params.b)
         self._z = ret
-        self._state = getattr(ret, '_state', None)
+        self._state = getattr(ret.attrs, '_state', None)
         return ret
 
     def truncate(self):

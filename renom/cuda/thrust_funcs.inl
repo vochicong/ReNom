@@ -548,7 +548,101 @@ namespace renom{
 	{
 		cuda_backward_lstm <<<ceil((N*M/4)/256.0), 256>>> (N, M, u, du, s, ps, e, pfg, dou, next_dou, temporal);
 	}
-	
+
+    // Peephole Lstm forward
+    __global__ void cuda_forward_peephole_lstm_activate(int N, int M, VALUE_TYPE *u)
+    {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if(idx>= N*M) return;
+
+        if((idx%M)<M/4)
+            u[idx] = tanh(u[idx]);
+        else
+            u[idx] = 1.0/(1.0 + exp(-u[idx]));
+    }
+
+    void thrust_forward_peephole_lstm_activate(int N, int M, VALUE_TYPE *u)
+    {
+        cuda_forward_lstm_activate <<<ceil((N*M)/256.0), 256>>> (N, M, u);
+    }
+
+    __global__ void cuda_forward_peephole_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *s, VALUE_TYPE *ps, VALUE_TYPE *z)
+    {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int size = N*M/4;
+        int index = (idx/(M/4))*M + idx%(M/4);
+        if(idx < size)
+        {   
+            s[idx] = u[index+M/4*2]*u[index] + u[index+M/4]*ps[idx];
+            z[idx] = tanh(s[idx]) * u[index+M/4*3];
+        }
+        else
+        {   
+            return;
+        }
+    }
+
+    void thrust_forward_peephole_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *s, VALUE_TYPE *ps, VALUE_TYPE *z)
+    {
+        cuda_forward_lstm <<<ceil((N*M/4)/256.0), 256>>> (N, M, u, s, ps, z);
+    }
+
+    // Peephole Lstm backward
+    __device__ VALUE_TYPE sigmoid_diff(VALUE_TYPE z)
+    {
+        return z*(1-z);
+    }
+
+    __device__ VALUE_TYPE tanh_diff(VALUE_TYPE z)
+    {
+        return 1 - pow(z, 2);
+    }
+
+    __global__ void cuda_backward_peephole_lstm_activate(int N, int M, VALUE_TYPE *u)
+    {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if(idx>= N*M) return;
+
+        if((idx%M)<M/4)
+            u[idx] = tanh(u[idx]);
+        else
+            u[idx] = 1.0/(1.0 + exp(-u[idx]));
+    }
+
+    void thrust_backward_peephole_lstm_activate(int N, int M, VALUE_TYPE *u)
+    {
+        cuda_forward_lstm_activate <<<ceil((N*M)/256.0), 256>>> (N, M, u);
+    }
+
+    __global__ void cuda_backward_peephole_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps, \
+            VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou, bool temporal)
+    {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int size = N*M/4;
+        int index = (idx/(M/4))*M + idx%(M/4);
+
+        if(idx < size)
+        {
+            next_dou[idx] = e[idx]*u[index+M/4*3] * tanh_diff(s[idx]) + ((temporal)?pfg[index+M/4]*dou[idx]:0);
+            du[index+M/4] = next_dou[idx]*sigmoid_diff(u[index+M/4])*ps[idx];       // f
+            du[index+M/4*2] = next_dou[idx]*sigmoid_diff(u[index+M/4*2])*u[index];  // i
+            du[index+M/4*3] = e[idx]*s[idx]*sigmoid_diff(u[index+M/4*3]);           // o
+            du[index] = next_dou[idx]*tanh_diff(u[index])*u[index+M/4*2];           // c
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    void thrust_backward_peephole_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps,\
+            VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou, bool temporal)
+    {
+        cuda_backward_lstm <<<ceil((N*M/4)/256.0), 256>>> (N, M, u, du, s, ps, e, pfg, dou, next_dou, temporal);
+    }
+
     // Binalize
     __global__ void cuda_binalize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b){
 		int idx = blockIdx.x * blockDim.x + threadIdx.x;

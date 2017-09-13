@@ -15,7 +15,7 @@ from renom.utility.initializer import Gaussian
 from renom.utility.trainer import Trainer
 from renom.utility.distributor import NdarrayDistributor
 
-cuda.set_cuda_active(True)
+cuda.set_cuda_active(False)
 
 mnist = fetch_mldata('MNIST original', data_home="dataset")
 
@@ -32,7 +32,7 @@ class MNist(Model):
     def __init__(self):
         super(MNist, self).__init__()
         self.layer0 = Dense(output_size=50)
-        self.layer1 = Lstm(output_size=50)
+        self.layer1 = PeepholeLstm(output_size=50)
         self.layer2 = Dense(output_size=10)
 
     def forward(self, x):
