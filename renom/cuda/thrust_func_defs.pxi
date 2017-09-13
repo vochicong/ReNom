@@ -9,6 +9,9 @@ cdef extern from * namespace "renom":
     cdef void thrust_sigmoid(VALUE_TYPE *a, VALUE_TYPE *b, int size)
     cdef void thrust_tanh(VALUE_TYPE *a, VALUE_TYPE *b, int size)
     cdef void thrust_operation(Operation op, VALUE_TYPE value, int elem_size_a, VALUE_TYPE *a, int elem_size_b, VALUE_TYPE *b, VALUE_TYPE *c)
+    cdef void thrust_copy_memory_stride(VALUE_TYPE *dest, VALUE_TYPE *src, const size_t src_elems,
+                             const size_t size_stride, const size_t size_srcblock)
+
     cdef void thrust_fill(VALUE_TYPE value, VALUE_TYPE *a, int size)
     cdef void thrust_loge(VALUE_TYPE *a, VALUE_TYPE *b, int size)
     cdef void thrust_exp(VALUE_TYPE *a, VALUE_TYPE *b, int size)

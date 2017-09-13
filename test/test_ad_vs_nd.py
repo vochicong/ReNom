@@ -663,6 +663,8 @@ def test_concat(node, x, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
+    assert np.allclose(rm.concat(node, x), np.concatenate((node, x), 1))
+
     def func(node, x):
         return sum(rm.concat(node, x))
     compare(func, node, node, x)

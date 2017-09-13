@@ -125,6 +125,25 @@ namespace renom{
 		}
 	}
 
+
+        __global__ void cuda_copy_memory_stride(VALUE_TYPE *dest, VALUE_TYPE *src, const size_t src_elems,
+                             const size_t size_stride, const size_t size_srcblock) {
+            size_t pos = threadIdx.x + blockIdx.x * blockDim.x;
+            if (pos < src_elems) {
+                size_t n = pos / size_srcblock;
+                size_t m = pos % size_srcblock;
+                size_t d= n * size_stride + m;
+                dest[d] = src[pos];
+            }
+        }
+
+        // Copy memory block
+        void thrust_copy_memory_stride(VALUE_TYPE *dest, VALUE_TYPE *src, const size_t src_elems,
+                             const size_t size_stride, const size_t size_srcblock) {
+            cuda_copy_memory_stride <<<ceil(src_elems/256.0), 256>>> (dest, src, src_elems, size_stride, size_srcblock);
+        }
+
+
 	// Negate
 	void thrust_negate(VALUE_TYPE *first, VALUE_TYPE *last, VALUE_TYPE *output) {
 	    thrust::device_ptr<VALUE_TYPE> dev_first(first);
