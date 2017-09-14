@@ -5,10 +5,11 @@ from __future__ import division
 import numpy as np
 from renom.layers.activation.sigmoid import sigmoid
 from renom.layers.activation.tanh import tanh
-from renom.core import Node, Variable, to_value, get_gpu, precision
+from renom.core import Node, Variable, to_value, get_gpu, precision, GPUValue
 from renom.operation import dot, sum
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
+from renom.cuda import cuda as cu
 
 
 def gate(x):
@@ -40,14 +41,13 @@ class peephole_lstm(Node):
         m = u.shape[1] // 4
         u, gate_u = np.split(u, [m, ], axis=1)
         u = tanh(u)
-
         fg = sigmoid(s * wc[:, :m] + gate_u[:, :m])
         ig = sigmoid(s * wc[:, m:2 * m] + gate_u[:, m:2 * m])
         state = ig * u + fg * s
         og = sigmoid(state * wc[:, 2 * m:] + gate_u[:, 2 * m:])
+        z = tanh(state) * og
 
         gated = np.hstack((fg, ig, og))
-        z = tanh(state) * og
 
         ret = cls._create_node(z)
         ret.attrs._x = x
@@ -60,7 +60,6 @@ class peephole_lstm(Node):
         ret.attrs._pstate = ps
         ret.attrs._state = state
         ret.attrs._gated = gated
-
         if isinstance(pz, Node):
             pz.attrs._pfgate = gated[:, :m]
 
@@ -68,38 +67,32 @@ class peephole_lstm(Node):
 
     @classmethod
     def _oper_gpu(cls, x, pz, ps, w, wr, wc, b):
-        p = parameter
-        s = get_gpu(np.zeros((x.shape[0], p["w"].shape[1]), dtype=precision)) if ps is None else ps
-        z = get_gpu(s).zeros_like_me() if pz is None else pz
+        if ps is None:
+            s_p = GPUValue(shape=(x.shape[0], w.shape[1] // 4)).zeros_like_me()
+            z_p = s_p.zeros_like_me()
+        else:
+            s_p, z_p = map(get_gpu, (ps, pz))
 
-        u = dot(x, p["w"]) + dot(z, p["wr"]) + p["b"]
+        s = s_p.empty_like_me()
+        u = get_gpu(dot(x, w) + dot(z_p, wr) + b)
+        z = z_p.zeros_like_me()
+        cu.cupeepholelstm_forward(u, get_gpu(wc), s_p, s, z)
 
-        gate_f = sigmoid(dot(x, p["wf"]) +
-                         dot(z, p["wfr"]) + p["wfc"] * s + p["bf"])
-        gate_i = sigmoid(dot(x, p["wi"]) +
-                         dot(z, p["wir"]) + p["wic"] * s + p["bi"])
-
-        state = gate_i * tanh(u) + gate_f * s
-
-        gate_o = sigmoid(
-            dot(x, p["wo"]) + dot(z, p["wor"]) + p["bo"] + p["woc"] * state)
-
-        z = tanh(state) * gate_o
-
-        ret = cls._create_node(get_gpu(z))
+        ret = cls._create_node(z)
         ret.attrs._x = x
-        ret.attrs._p = parameter
+        ret.attrs._w = w
+        ret.attrs._wr = wr
+        ret.attrs._wc = wc
+        ret.attrs._b = b
         ret.attrs._u = u
-        ret.attrs._pgated_f = None
+        ret.attrs._pz = pz
         ret.attrs._pstate = ps
-        ret.attrs._state = state
-        ret.attrs._gated_o = gate_o
-        ret.attrs._gated_f = gate_f
-        ret.attrs._gated_i = gate_i
-        ret.attrs._dt_d = [p[k] for k in ["wr", "wi", "wf", "wo", "w"]]
-        ret._state = state
+        ret.attrs._state = s
 
+        if isinstance(pz, Node):
+            pz.attrs._pfgate = u
         return ret
+
 
     def _backward_cpu(self, context, dy, temporal=False, **kwargs):
         n, m = dy.shape
@@ -120,32 +113,25 @@ class peephole_lstm(Node):
 
         dot = context.restore(w, np.zeros((n, m), dtype=dy.dtype))
         drt = context.restore(wr, np.zeros((n, m * 4), dtype=dy.dtype))
-        dct = context.restore(wc, np.zeros((n, m * 2), dtype=dy.dtype))
 
-        do = dy * s * gd[:, 2 * m:]
-        dct = np.hstack((dct, do))
+        do = dy * s * gd[:, 2*m:]
 
-        dou = dy * gated[:, 2 * m:] * activation_diff(s) + dct[:, 2 * m:] * wc[:, 2 * m:]
+        dou = dy * gated[:, 2*m:] * activation_diff(s) + do * wc[:, 2*m:]
 
         if temporal:
-            dou += pfg * dot + dct[:, :m] * wc[:, :m] + dct[:, m:2 * m] * wc[:, m:2 * m]
-        else:
-            dct[:, :2 * m] = 0
+            dou += pfg * dot + drt[:, m:2*m] * wc[:, :m] + drt[:, 2*m:3*m] * wc[:, m:2 * m]
 
         df = dou * gd[:, :m] * ps if ps is not None else np.zeros_like(dou)
         di = dou * gd[:, m:2 * m] * u
         du = dou * activation_diff(u) * gated[:, m:2 * m]
 
         dr = np.hstack((du, df, di, do))
-        dc = np.hstack((df, di))
 
         context.store(wr, dr)
-        context.store(wc, dc)
         context.store(w, dou)
 
-        dx = np.dot(dr, w.T)
-
         if isinstance(self.attrs._x, Node):
+            dx = np.dot(dr, w.T)
             self.attrs._x._update_diff(context, dx)
 
         if isinstance(w, Node):
@@ -155,10 +141,12 @@ class peephole_lstm(Node):
             wr._update_diff(context, np.dot(self.T, drt))
 
         if isinstance(wc, Node):
-            wc._update_diff(context,
-                            np.sum(np.hstack([dct[:, m * i:m * (i + 1)] * self.attrs._state for i in range(3)]),
-                                   axis=0,
-                                   keepdims=True))
+            dwc = np.zeros(wc.shape, dtype=wc.dtype)
+            dwc[:, 2*m:] = np.sum(do*self.attrs._state, axis=0)
+            if temporal:
+                dwc[:, :m] = np.sum(drt[:, m:2*m]*self.attrs._state, axis=0)
+                dwc[:, m:2*m] = np.sum(drt[:, 2*m:3*m]*self.attrs._state, axis=0)
+            wc._update_diff(context, dwc)
 
         if isinstance(b, Node):
             b._update_diff(context, np.sum(dr, axis=0, keepdims=True))
@@ -166,63 +154,46 @@ class peephole_lstm(Node):
         if isinstance(self.attrs._pz, Node):
             self.attrs._pz._update_diff(context, np.dot(dr, wr.T), temporal=True)
 
-    def _backward_gpu(self, context, dy):
-        p = self.attrs._p
-        s = self.attrs._state
-        ps = self.attrs._pstate
+    def _backward_gpu(self, context, dy, temporal=False, **kwargs):
+        w = self.attrs._w
+        wr = self.attrs._wr
+        wc = self.attrs._wc
+        b = self.attrs._b
+
         u = self.attrs._u
+        s = tanh(self.attrs._state)
+        ps = get_gpu(s).zeros_like_me() if self.attrs._pstate is None else self.attrs._pstate
 
-        go = self.attrs._gated_o
-        gf = self.attrs._gated_f
-        gi = self.attrs._gated_i
-        pgf = get_gpu(gf).zeros_like_me() if self.attrs._pgated_f is None else self.attrs._pgated_f
+        drt = context.restore(wr, get_gpu(u).zeros_like_me())
+        dou = context.restore(w, get_gpu(dy).zeros_like_me())
+        pfg = getattr(self.attrs, "_pfgate", get_gpu(u).zeros_like_me())
 
-        drt, dit, dft, doot, dct = (context.restore(dt, get_gpu(dy).zeros_like_me())
-                                    for dt in self.attrs._dt_d)
+        dr = get_gpu(drt).empty_like_me()
+        dwc = get_gpu(wc).empty_like_me()
 
-        activated_s = tanh(s)
-        activated_u = tanh(u)
+        cu.cupeepholelstm_backward(*map(get_gpu, (u, ps, s, pfg, wc, dy, drt, dou, dr, dwc, temporal)))
 
-        e = dy + get_gpu(dot(drt, p["wr"].T)) \
-               + get_gpu(dot(dit, p["wir"].T)) + \
-               + get_gpu(dot(dft, p["wfr"].T)) + \
-               + get_gpu(dot(doot, p["wor"].T))
-
-        do = gate_diff(go) * activated_s * e
-        ds = go * activation_diff(activated_s) * e
-        dc = ds + pgf * dct + p["wfc"] * dft + p["wic"] * dit + p["woc"] * do
-
-        df = gate_diff(gf) * ps * dc if ps is not None else get_gpu(gf).zeros_like_me()
-        di = gate_diff(gi) * activated_u * dc
-
-        d = gi * activation_diff(activated_u) * dc
-
-        dx = dot(d, p["w"].T) \
-            + dot(di, p["wi"].T) \
-            + dot(do, p["wo"].T) \
-            + dot(df, p["wf"].T)
-
-        for dt_d, dt in zip(self.attrs._dt_d, (d, di, df, do, dc)):
-            context.store(dt_d, get_gpu(dt))
+        context.store(wr, drt)
+        context.store(w, dou)
 
         if isinstance(self.attrs._x, Node):
-            self.attrs._x._update_diff(context, get_gpu(dx))
+            dx = dot(dr, w.T)
+            self.attrs._x._update_diff(context, dx)
 
-        for k, diff in zip(("w", "wo", "wi", "wf"), (d, do, di, df)):
-            if isinstance(p[k], Node):
-                p[k]._update_diff(context, get_gpu(dot(self.attrs._x.T, diff)))
+        if isinstance(w, Node):
+            w._update_diff(context, dot(self.attrs._x.T, dr))
 
-        for k, diff in zip(("wr", "wor", "wir", "wfr"), (drt, doot, dit, dft)):
-            if isinstance(p[k], Node):
-                p[k]._update_diff(context, get_gpu(dot(self.T, diff)))
+        if isinstance(wr, Node) and temporal:
+            wr._update_diff(context, dot(self.T, drt))
 
-        for k, diff in zip(("wfc", "wic", "woc"), (dft, dit, do)):
-            if isinstance(p[k], Node):
-                p[k]._update_diff(context, sum(diff * get_gpu(s), axis=0))
+        if isinstance(wc, Node):
+            wc._update_diff(context, sum(dwc, axis=0))
 
-        for k, diff in zip(("b", "bf", "bi", "bo"), (d, df, di, do)):
-            if isinstance(p[k], Node):
-                p[k]._update_diff(context, sum(diff, axis=0))
+        if isinstance(b, Node):
+            b._update_diff(context, sum(dr, axis=0))
+
+        if isinstance(self.attrs._pz, Node):
+            self.attrs._pz._update_diff(context, dot(dr, wr.T), temporal=True)
 
 
 class PeepholeLstm(Parametrized):

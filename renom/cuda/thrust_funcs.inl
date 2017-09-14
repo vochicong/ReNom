@@ -519,7 +519,7 @@ namespace renom{
 	
 	void thrust_backward_lstm_activate(int N, int M, VALUE_TYPE *u)
 	{
-		cuda_forward_lstm_activate <<<ceil((N*M)/256.0), 256>>> (N, M, u);
+		cuda_backward_lstm_activate <<<ceil((N*M)/256.0), 256>>> (N, M, u);
 	}
 	
 	__global__ void cuda_backward_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps, \
@@ -550,97 +550,123 @@ namespace renom{
 	}
 
     // Peephole Lstm forward
-    __global__ void cuda_forward_peephole_lstm_activate(int N, int M, VALUE_TYPE *u)
+    __global__ void cuda_forward_peephole_lstm(\
+            int N,\
+            int M,\
+            VALUE_TYPE *u,\
+            VALUE_TYPE *wc,\
+            VALUE_TYPE *prestate,\
+            VALUE_TYPE *state,\
+            VALUE_TYPE *z)
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int size = M*N;
 
-        if(idx>= N*M) return;
+        int c3 = idx%M;
+        int c4 = (int)(idx/M)*M*4 + idx%M;
 
-        if((idx%M)<M/4)
-            u[idx] = tanh(u[idx]);
-        else
-            u[idx] = 1.0/(1.0 + exp(-u[idx]));
+        int u4 = c4;
+        int f4 = c4+M;
+        int i4 = c4+2*M;
+        int o4 = c4+3*M;
+
+        int f3 = c3;
+        int i3 = c3+M;
+        int o3 = c3+2*M;
+        
+        if(idx>= size) return;
+
+        u[u4] = tanh(u[u4]); // u
+        u[f4] = 1.0/(1.0 + exp(-(u[f4]+wc[f3]*prestate[idx]))); // f
+        u[i4] = 1.0/(1.0 + exp(-(u[i4]+wc[i3]*prestate[idx]))); // i
+        state[idx] = u[u4]*u[i4] + prestate[idx]*u[f4];
+        u[o4] = 1.0/(1.0 + exp(-(u[o4]+wc[o3]*state[idx]))); // o
+        z[idx] = tanh(state[idx])*u[o4]; // output
     }
 
-    void thrust_forward_peephole_lstm_activate(int N, int M, VALUE_TYPE *u)
+    void thrust_forward_peephole_lstm(\
+            int N,\
+            int M,\
+            VALUE_TYPE *wc,\
+            VALUE_TYPE *pstate,\
+            VALUE_TYPE *state,\
+            VALUE_TYPE *u,\
+            VALUE_TYPE *z)
     {
-        cuda_forward_lstm_activate <<<ceil((N*M)/256.0), 256>>> (N, M, u);
-    }
-
-    __global__ void cuda_forward_peephole_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *s, VALUE_TYPE *ps, VALUE_TYPE *z)
-    {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        int size = N*M/4;
-        int index = (idx/(M/4))*M + idx%(M/4);
-        if(idx < size)
-        {   
-            s[idx] = u[index+M/4*2]*u[index] + u[index+M/4]*ps[idx];
-            z[idx] = tanh(s[idx]) * u[index+M/4*3];
-        }
-        else
-        {   
-            return;
-        }
-    }
-
-    void thrust_forward_peephole_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *s, VALUE_TYPE *ps, VALUE_TYPE *z)
-    {
-        cuda_forward_lstm <<<ceil((N*M/4)/256.0), 256>>> (N, M, u, s, ps, z);
+        cuda_forward_peephole_lstm <<<ceil((N*M/4)/256.0), 256>>> (N, M/4, wc, pstate, state, u, z);
     }
 
     // Peephole Lstm backward
-    __device__ VALUE_TYPE sigmoid_diff(VALUE_TYPE z)
-    {
-        return z*(1-z);
-    }
-
-    __device__ VALUE_TYPE tanh_diff(VALUE_TYPE z)
-    {
-        return 1 - pow(z, 2);
-    }
-
-    __global__ void cuda_backward_peephole_lstm_activate(int N, int M, VALUE_TYPE *u)
-    {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-        if(idx>= N*M) return;
-
-        if((idx%M)<M/4)
-            u[idx] = tanh(u[idx]);
-        else
-            u[idx] = 1.0/(1.0 + exp(-u[idx]));
-    }
-
-    void thrust_backward_peephole_lstm_activate(int N, int M, VALUE_TYPE *u)
-    {
-        cuda_forward_lstm_activate <<<ceil((N*M)/256.0), 256>>> (N, M, u);
-    }
-
-    __global__ void cuda_backward_peephole_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps, \
-            VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou, bool temporal)
+    __global__ void cuda_backward_peephole_lstm( \
+            int N, \
+            int M, \
+            VALUE_TYPE *u,  \
+            VALUE_TYPE *prestate, \
+            VALUE_TYPE *state, \
+            VALUE_TYPE *prefg, \
+            VALUE_TYPE *wc, \
+            VALUE_TYPE *dy, \
+            VALUE_TYPE *drt, \
+            VALUE_TYPE *dou, \
+            VALUE_TYPE *dr, \
+            VALUE_TYPE *dwc, \
+            bool temporal)
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        int size = N*M/4;
-        int index = (idx/(M/4))*M + idx%(M/4);
+        int size = N*M;
 
-        if(idx < size)
-        {
-            next_dou[idx] = e[idx]*u[index+M/4*3] * tanh_diff(s[idx]) + ((temporal)?pfg[index+M/4]*dou[idx]:0);
-            du[index+M/4] = next_dou[idx]*sigmoid_diff(u[index+M/4])*ps[idx];       // f
-            du[index+M/4*2] = next_dou[idx]*sigmoid_diff(u[index+M/4*2])*u[index];  // i
-            du[index+M/4*3] = e[idx]*s[idx]*sigmoid_diff(u[index+M/4*3]);           // o
-            du[index] = next_dou[idx]*tanh_diff(u[index])*u[index+M/4*2];           // c
+        if(idx >= size)return;
+
+        int row3 = (int)(idx/M)*M*3;
+        int row4 = (int)(idx/M)*M*4;
+
+        int c3 = idx%M; // Row is not considered.
+        int c4 = row4 + idx%M;
+
+        int u4 = c4;
+        int f4 = c4+M;
+        int i4 = c4+2*M;
+        int o4 = c4+3*M;
+
+        int f3 = c3;
+        int i3 = c3+M;
+        int o3 = c3+2*M;
+
+        VALUE_TYPE dot = dou[idx];
+
+        dr[o4] = dy[idx] * state[idx] * sigmoid_diff(u[o4]);
+        dou[idx] = dy[idx]*u[o4]*tanh_diff(state[idx]) + dr[o4]*wc[o3];
+        if(temporal){
+            dou[idx] += prefg[idx]*dot;
+            dou[idx] += drt[f4]*wc[f3];
+            dou[idx] += drt[i4]*wc[i3];
+        }else{
+            dwc[f3+row3] = 0;
+            dwc[i3+row3] = 0;
         }
-        else
-        {
-            return;
-        }
+        dwc[o3+row3] = dr[o4];
+        dr[f4] = dou[idx] * sigmoid_diff(u[f4]) * prestate[idx];
+        dr[i4] = dou[idx] * sigmoid_diff(u[i4]) * u[u4];
+        dr[u4] = dou[idx] * tanh_diff(u[u4]) * u[i4];
     }
 
-    void thrust_backward_peephole_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps,\
-            VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou, bool temporal)
+    void thrust_backward_peephole_lstm( \
+            int N, \
+            int M, \
+            VALUE_TYPE *u,  \
+            VALUE_TYPE *prestate, \
+            VALUE_TYPE *state, \
+            VALUE_TYPE *prefg, \
+            VALUE_TYPE *wc, \
+            VALUE_TYPE *dy, \
+            VALUE_TYPE *drt, \
+            VALUE_TYPE *dou, \
+            VALUE_TYPE *dr, \
+            VALUE_TYPE *dwc, \
+            bool temporal)
     {
-        cuda_backward_lstm <<<ceil((N*M/4)/256.0), 256>>> (N, M, u, du, s, ps, e, pfg, dou, next_dou, temporal);
+        cuda_backward_peephole_lstm <<<ceil((N*M/4)/256.0), 256>>> \
+                (N, M/4, u, prestate, state, prefg, wc, dy, drt, dou, dr, dwc, temporal);
     }
 
     // Binalize

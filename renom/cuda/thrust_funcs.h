@@ -118,23 +118,22 @@ namespace renom{
 	void thrust_backward_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps, \
 			VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou, bool temporal);
 
-    // Peephole Lstm forward activation
-    __global__ void cuda_forward_peephole_lstm_activate(int N, int M, VALUE_TYPE *u);
-    void thrust_forward_lstm_activate(int N, int M, VALUE_TYPE *u);
+    // Peephole Lstm forward
+    __global__ void cuda_forward_peephole_lstm\
+        (int N, int M, VALUE_TYPE *u, VALUE_TYPE *wc, VALUE_TYPE *pstate, VALUE_TYPE *state, VALUE_TYPE *z);
+    void thrust_forward_peephole_lstm\
+        (int N, int M, VALUE_TYPE *u, VALUE_TYPE *wc, VALUE_TYPE *pstate, VALUE_TYPE *state, VALUE_TYPE *z);
 
-    // Peephole Lstm forward without
-    __global__ void cuda_forward_peephole_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *s, VALUE_TYPE *ps, VALUE_TYPE *z);
-    void thrust_forward_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *s, VALUE_TYPE *ps, VALUE_TYPE *z);
+    // Peephole Lstm backward
+    __global__ void cuda_backward_peephole_lstm\
+        (int N, int M, VALUE_TYPE *u, VALUE_TYPE *prestate, VALUE_TYPE *state, \
+            VALUE_TYPE *prefg, VALUE_TYPE *wc, VALUE_TYPE *dy, VALUE_TYPE *drt, \
+            VALUE_TYPE *dou, VALUE_TYPE *dr, VALUE_TYPE *dwc, bool temporal);
 
-    // Peephole Lstm backward activation
-    __global__ void cuda_backward_peephole_lstm_activate(int N, int M, VALUE_TYPE *u);
-    void thrust_backward_lstm_activate(int N, int M, VALUE_TYPE *u);
-
-    // Peephole Lstm backward without
-    __global__ void cuda_backward_peephole_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps, \
-            VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou, bool temporal);
-    void thrust_backward_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps, \
-            VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou, bool temporal);
+    void thrust_backward_peephole_lstm\
+        (int N, int M, VALUE_TYPE *u, VALUE_TYPE *prestate, VALUE_TYPE *state, \
+            VALUE_TYPE *prefg, VALUE_TYPE *wc, VALUE_TYPE *dy, VALUE_TYPE *drt, \
+            VALUE_TYPE *dou, VALUE_TYPE *dr, VALUE_TYPE *dwc, bool temporal);
 
     // Binarize
     void thrust_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b); 
@@ -148,4 +147,4 @@ namespace renom{
     __global__ void cuda_embedding_backward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *dy, VALUE_TYPE *dx);
     
 }
-#endif
+#endif

@@ -9,6 +9,7 @@ try:
     from renom.cuda.curand import *
     _has_cuda = True
 except ImportError as e:
+    print(e)
     curand_generator = None
     _has_cuda = False
 

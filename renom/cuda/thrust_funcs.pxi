@@ -301,6 +301,37 @@ def culstm_backward(u, du, s, ps, e, pgf, dou, dou_n, temporal):
     thrust_backward_lstm(N, M, ptr_u, ptr_du, ptr_s, ptr_ps,
                          ptr_e, ptr_pgf, ptr_dou, ptr_dou_n, temp)
 
+def cupeepholelstm_forward(u, wc, prestate, state, z):
+    cuda_base.check_heap_device(u, prestate, state, wc, z)
+
+    cdef int N = u.shape[0]
+    cdef int M = u.shape[1]
+    cdef VALUE_TYPE * ptr_u = < VALUE_TYPE * > < uintptr_t > u._ptr
+    cdef VALUE_TYPE * ptr_z = < VALUE_TYPE * > < uintptr_t > z._ptr
+    cdef VALUE_TYPE * ptr_ps = < VALUE_TYPE * > < uintptr_t > prestate._ptr
+    cdef VALUE_TYPE * ptr_s = < VALUE_TYPE * > < uintptr_t > state._ptr
+    cdef VALUE_TYPE * ptr_wc = < VALUE_TYPE * > < uintptr_t > wc._ptr
+    thrust_forward_peephole_lstm(N, M, ptr_u, ptr_wc, ptr_ps, ptr_s, ptr_z)
+
+
+def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dou, dr, dwc, temporal):
+    cuda_base.check_heap_device(u, prestate, state, prestate ,wc, dy, drt, dou, dwc, temporal)
+    cdef int N = u.shape[0]
+    cdef int M = u.shape[1]
+
+    cdef VALUE_TYPE * ptr_u = < VALUE_TYPE * > < uintptr_t > u._ptr
+    cdef VALUE_TYPE * ptr_ps = < VALUE_TYPE * > < uintptr_t > prestate._ptr
+    cdef VALUE_TYPE * ptr_s = < VALUE_TYPE * > < uintptr_t > state._ptr
+    cdef VALUE_TYPE * ptr_pfg = < VALUE_TYPE * > < uintptr_t > prefg._ptr
+    cdef VALUE_TYPE * ptr_wc = < VALUE_TYPE * > < uintptr_t > wc._ptr
+    cdef VALUE_TYPE * ptr_dy = < VALUE_TYPE * > < uintptr_t > dy._ptr
+    cdef VALUE_TYPE * ptr_drt = < VALUE_TYPE * > < uintptr_t > drt._ptr
+    cdef VALUE_TYPE * ptr_dou = < VALUE_TYPE * > < uintptr_t > dou._ptr
+    cdef VALUE_TYPE * ptr_dr = < VALUE_TYPE * > < uintptr_t > dr._ptr
+    cdef VALUE_TYPE * ptr_dwc = < VALUE_TYPE * > < uintptr_t > dwc._ptr
+    cdef bool temp = temporal
+    thrust_backward_peephole_lstm(N, M, ptr_u, ptr_ps, ptr_s, ptr_pfg, ptr_wc,
+                                    ptr_dy, ptr_drt, ptr_dou, ptr_dr, ptr_dwc, temp)
 
 def cubinarize(gpu_value1, th, gpu_value2):
     cdef int N = gpu_value1.size
