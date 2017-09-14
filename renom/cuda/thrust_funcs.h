@@ -44,6 +44,12 @@ namespace renom{
 	__global__ void cuda_rpow(VALUE_TYPE value, int a_step, VALUE_TYPE *a, int b_step, VALUE_TYPE *b, VALUE_TYPE *c, size_t size);
 	void thrust_operation(Operation op, VALUE_TYPE value, int elem_size_a, VALUE_TYPE *a, int elem_size_b, VALUE_TYPE *b, VALUE_TYPE *c);
 
+        __global__ void cuda_copy_memory_stride(VALUE_TYPE *dest, VALUE_TYPE *src, const size_t src_elems,
+                             const size_t size_stride, const size_t size_srcblock);
+
+        void thrust_copy_memory_stride(VALUE_TYPE *dest, VALUE_TYPE *src, const size_t src_elems,
+                             const size_t size_stride, const size_t size_srcblock);
+
 	// Fill
 	void thrust_fill(VALUE_TYPE value, VALUE_TYPE *a, int size);
 

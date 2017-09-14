@@ -10,7 +10,8 @@ import numpy as np
 from libc.stdint cimport uintptr_t
 from libcpp cimport bool
 import cuda_base
-
+import operator
+import functools
 
 def cunegate(input, result):
     cuda_base.check_heap_device(input, result)
@@ -366,3 +367,33 @@ def cuembedding_backward(gpu_index, gpu_dy, gpu_dx):
     cdef VALUE_TYPE * dx_ptr = <VALUE_TYPE * > < uintptr_t > gpu_dx._ptr
     cuda_base.check_heap_device(gpu_dy, gpu_index, gpu_dx)
     thrust_embedding_backward(N, K, M, index_ptr, dy_ptr, dx_ptr)
+
+
+def cuconcat(gpu_value1, gpu_value2, gpu_value3, axis):
+
+    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
+
+    cdef size_t size = gpu_value1.nbytes + gpu_value2.nbytes
+    if gpu_value3.nbytes < size:
+        raise ValueError("Insufficient destination buffer size")
+
+    if (not gpu_value1.shape) or (not gpu_value2.shape):
+        raise ValueError("zero-dimensional arrays cannot be concatenated")
+
+    s1 = gpu_value1.shape[:axis] + gpu_value1.shape[axis+1:]
+    s2 = gpu_value1.shape[:axis] + gpu_value1.shape[axis+1:]
+
+    if s1 != s2:
+        raise ValueError("all the input array dimensions except"
+                         " for the concatenation axis must match exactly")
+
+    cdef size_t size1 = functools.reduce(operator.__mul__, gpu_value1.shape[axis:], 1)
+    cdef size_t size2 = functools.reduce(operator.__mul__, gpu_value2.shape[axis:], 1)
+    cdef size_t rec_size = size1 + size2
+
+    cdef VALUE_TYPE *ptr1 = <VALUE_TYPE*><uintptr_t> gpu_value1._ptr
+    cdef VALUE_TYPE *ptr2 = <VALUE_TYPE*><uintptr_t> gpu_value2._ptr
+    cdef VALUE_TYPE *ptr3 = <VALUE_TYPE*><uintptr_t> gpu_value3._ptr
+
+    thrust_copy_memory_stride(ptr3, ptr1, gpu_value1.size, rec_size, size1)
+    thrust_copy_memory_stride(ptr3 + size1, ptr2, gpu_value2.size, rec_size, size2)
