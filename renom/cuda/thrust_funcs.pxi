@@ -45,7 +45,7 @@ def culeaky_leru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def culeaky_leru_backward(s, gpu_value1, gpu_value2):
@@ -54,7 +54,7 @@ def culeaky_leru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_forward(s, gpu_value1, gpu_value2):
@@ -63,7 +63,7 @@ def cueru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_backward(s, gpu_value1, gpu_value2):
@@ -72,7 +72,7 @@ def cueru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cusigmoid(gpu_value1, gpu_value2):
@@ -242,9 +242,9 @@ def cusum(gpu_value1, gpu_value2=None, axis=None):
             strides = np.prod(gpu_value1.shape[:axis])
 
         step = 1 if axis != 1 else gpu_value1.shape[1]
-        thrust_strided_reduce(< VALUE_TYPE*> < uintptr_t > gpu_value1._ptr,
-                               < VALUE_TYPE * > < uintptr_t > gpu_value2._ptr,
-                               strides, axis_size, step, size)
+        thrust_strided_reduce( < VALUE_TYPE*> < uintptr_t > gpu_value1._ptr,
+                              < VALUE_TYPE * > < uintptr_t > gpu_value2._ptr,
+                              strides, axis_size, step, size)
 
 
 def cumin(value, gpu_value1, gpu_value2=None):
@@ -301,6 +301,7 @@ def culstm_backward(u, du, s, ps, e, pgf, dou, dou_n, temporal):
     thrust_backward_lstm(N, M, ptr_u, ptr_du, ptr_s, ptr_ps,
                          ptr_e, ptr_pgf, ptr_dou, ptr_dou_n, temp)
 
+
 def cupeepholelstm_forward(u, wc, prestate, state, z):
     cuda_base.check_heap_device(u, prestate, state, wc, z)
 
@@ -314,8 +315,9 @@ def cupeepholelstm_forward(u, wc, prestate, state, z):
     thrust_forward_peephole_lstm(N, M, ptr_u, ptr_wc, ptr_ps, ptr_s, ptr_z)
 
 
-def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dou, dr, dwc, temporal):
-    cuda_base.check_heap_device(u, prestate, state, prestate ,wc, dy, drt, dou, dwc, temporal)
+def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dot, dr, dou, dwc, temporal):
+    cuda_base.check_heap_device(u, prestate, state, prestate, wc,
+                                dy, drt, dot, dou, dr, dwc, temporal)
     cdef int N = u.shape[0]
     cdef int M = u.shape[1]
 
@@ -326,12 +328,14 @@ def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dou, dr, dwc
     cdef VALUE_TYPE * ptr_wc = < VALUE_TYPE * > < uintptr_t > wc._ptr
     cdef VALUE_TYPE * ptr_dy = < VALUE_TYPE * > < uintptr_t > dy._ptr
     cdef VALUE_TYPE * ptr_drt = < VALUE_TYPE * > < uintptr_t > drt._ptr
-    cdef VALUE_TYPE * ptr_dou = < VALUE_TYPE * > < uintptr_t > dou._ptr
+    cdef VALUE_TYPE * ptr_dot = < VALUE_TYPE * > < uintptr_t > dot._ptr
     cdef VALUE_TYPE * ptr_dr = < VALUE_TYPE * > < uintptr_t > dr._ptr
+    cdef VALUE_TYPE * ptr_dou = < VALUE_TYPE * > < uintptr_t > dou._ptr
     cdef VALUE_TYPE * ptr_dwc = < VALUE_TYPE * > < uintptr_t > dwc._ptr
     cdef bool temp = temporal
     thrust_backward_peephole_lstm(N, M, ptr_u, ptr_ps, ptr_s, ptr_pfg, ptr_wc,
-                                    ptr_dy, ptr_drt, ptr_dou, ptr_dr, ptr_dwc, temp)
+                                  ptr_dy, ptr_drt, ptr_dot, ptr_dr, ptr_dou, ptr_dwc, temp)
+
 
 def cubinarize(gpu_value1, th, gpu_value2):
     cdef int N = gpu_value1.size

@@ -36,7 +36,7 @@ cdef extern from * namespace "renom":
 
     cdef void thrust_backward_peephole_lstm\
         (int N, int M, VALUE_TYPE *u, VALUE_TYPE *prestate, VALUE_TYPE *state, VALUE_TYPE *prefg, VALUE_TYPE *wc,\
-             VALUE_TYPE *dy, VALUE_TYPE *drt, VALUE_TYPE *dou, VALUE_TYPE *dr, VALUE_TYPE *dwc, bool temporal);
+             VALUE_TYPE *dy, VALUE_TYPE *drt, VALUE_TYPE *dot, VALUE_TYPE *dr, VALUE_TYPE *dou, VALUE_TYPE *dwc, bool temporal);
 
     cdef void thrust_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b);
     cdef void thrust_embedding_forward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *w, VALUE_TYPE *y);

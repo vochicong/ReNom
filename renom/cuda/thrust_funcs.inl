@@ -607,9 +607,10 @@ namespace renom{
             VALUE_TYPE *wc, \
             VALUE_TYPE *dy, \
             VALUE_TYPE *drt, \
-            VALUE_TYPE *dou, \
-            VALUE_TYPE *dr, \
-            VALUE_TYPE *dwc, \
+            VALUE_TYPE *dot, \
+            VALUE_TYPE *dr, \  // in place 
+            VALUE_TYPE *dou, \ // in place
+            VALUE_TYPE *dwc, \ // in place
             bool temporal)
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -632,19 +633,22 @@ namespace renom{
         int i3 = c3+M;
         int o3 = c3+2*M;
 
-        VALUE_TYPE dot = dou[idx];
+        VALUE_TYPE tanh_s = tanh(state[idx]);
 
-        dr[o4] = dy[idx] * state[idx] * sigmoid_diff(u[o4]);
-        dou[idx] = dy[idx]*u[o4]*tanh_diff(state[idx]) + dr[o4]*wc[o3];
+        dr[o4] = dy[idx] * tanh_s * sigmoid_diff(u[o4]);
+        dou[idx] = dy[idx]*u[o4]*tanh_diff(tanh_s) + dr[o4]*wc[o3];
         if(temporal){
-            dou[idx] += prefg[idx]*dot;
+            dou[idx] += prefg[f4]*dot[idx];
             dou[idx] += drt[f4]*wc[f3];
             dou[idx] += drt[i4]*wc[i3];
+
+            dwc[f3+row3] = drt[f4]*state[idx];
+            dwc[i3+row3] = drt[i4]*state[idx];
         }else{
             dwc[f3+row3] = 0;
             dwc[i3+row3] = 0;
         }
-        dwc[o3+row3] = dr[o4];
+        dwc[o3+row3] = dr[o4]*state[idx];
         dr[f4] = dou[idx] * sigmoid_diff(u[f4]) * prestate[idx];
         dr[i4] = dou[idx] * sigmoid_diff(u[i4]) * u[u4];
         dr[u4] = dou[idx] * tanh_diff(u[u4]) * u[i4];
@@ -660,13 +664,14 @@ namespace renom{
             VALUE_TYPE *wc, \
             VALUE_TYPE *dy, \
             VALUE_TYPE *drt, \
-            VALUE_TYPE *dou, \
+            VALUE_TYPE *dot, \
             VALUE_TYPE *dr, \
+            VALUE_TYPE *dou, \
             VALUE_TYPE *dwc, \
             bool temporal)
     {
         cuda_backward_peephole_lstm <<<ceil((N*M/4)/256.0), 256>>> \
-                (N, M/4, u, prestate, state, prefg, wc, dy, drt, dou, dr, dwc, temporal);
+                (N, M/4, u, prestate, state, prefg, wc, dy, drt, dot, dr, dou, dwc, temporal);
     }
 
     // Binalize
