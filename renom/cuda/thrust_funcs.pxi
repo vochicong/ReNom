@@ -13,6 +13,7 @@ import cuda_base
 import operator
 import functools
 
+
 def cunegate(input, result):
     cuda_base.check_heap_device(input, result)
 
@@ -380,8 +381,8 @@ def cuconcat(gpu_value1, gpu_value2, gpu_value3, axis):
     if (not gpu_value1.shape) or (not gpu_value2.shape):
         raise ValueError("zero-dimensional arrays cannot be concatenated")
 
-    s1 = gpu_value1.shape[:axis] + gpu_value1.shape[axis+1:]
-    s2 = gpu_value1.shape[:axis] + gpu_value1.shape[axis+1:]
+    s1 = gpu_value1.shape[:axis] + gpu_value1.shape[axis + 1:]
+    s2 = gpu_value1.shape[:axis] + gpu_value1.shape[axis + 1:]
 
     if s1 != s2:
         raise ValueError("all the input array dimensions except"
@@ -391,9 +392,9 @@ def cuconcat(gpu_value1, gpu_value2, gpu_value3, axis):
     cdef size_t size2 = functools.reduce(operator.__mul__, gpu_value2.shape[axis:], 1)
     cdef size_t rec_size = size1 + size2
 
-    cdef VALUE_TYPE *ptr1 = <VALUE_TYPE*><uintptr_t> gpu_value1._ptr
-    cdef VALUE_TYPE *ptr2 = <VALUE_TYPE*><uintptr_t> gpu_value2._ptr
-    cdef VALUE_TYPE *ptr3 = <VALUE_TYPE*><uintptr_t> gpu_value3._ptr
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+    cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > gpu_value3._ptr
 
     thrust_copy_memory_stride(ptr3, ptr1, gpu_value1.size, rec_size, size1)
     thrust_copy_memory_stride(ptr3 + size1, ptr2, gpu_value2.size, rec_size, size2)

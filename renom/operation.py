@@ -209,7 +209,7 @@ class concat(BinOp):
     @classmethod
     def _oper_gpu(cls, lhs, rhs):
         axis = 1
-        newshape = lhs.shape[:axis] + (lhs.shape[axis]+rhs.shape[axis],) + lhs.shape[axis+1:]
+        newshape = lhs.shape[:axis] + (lhs.shape[axis] + rhs.shape[axis],) + lhs.shape[axis + 1:]
 
         ret = GPUValue(shape=newshape)
         cuconcat(get_gpu(lhs), get_gpu(rhs), ret, axis)
