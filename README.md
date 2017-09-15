@@ -8,12 +8,12 @@ Documents are available on the ReNom.jp web site.
 ## ReNom version 2.1
 
 1. Modified GPU memory allocation
-* Modified GPU code of power operation
-* Modified GPU code of peephole lstm
-* Added soft max activation function
-* Added cross entropy loss function
-* Fixed lstm temporal backward 
-* Fixed momentum sgd
+2. Modified GPU code of power operation
+3. Modified GPU code of peephole lstm
+4. Added soft max activation function
+5. Added cross entropy loss function
+6. Fixed lstm temporal backward 
+7. Fixed momentum sgd
 
 
 ## Requirements
