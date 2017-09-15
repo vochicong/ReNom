@@ -35,7 +35,7 @@ class mean_squared_error(BinOp):
 
 class MeanSquaredError(object):
     """This function evaluates the loss between the target ``y``
-    and the output ``x`` using mean squared error.
+    and the input ``x`` using mean squared error.
 
     .. math::
         E(x) = \\frac{1}{2N}\sum_{n}^{N}\sum_{k}^{K}(x_{nk}-y_{nk})^2

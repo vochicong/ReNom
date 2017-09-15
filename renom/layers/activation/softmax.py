@@ -38,5 +38,24 @@ class softmax(UnaryOp):
 
 class Softmax:
 
+    '''Soft max activation function
+    is described by the following formula:
+
+        :math:`f(x_j)=\\frac{x_j}{\sum_{i}exp(x_i)}`
+
+    Args:
+        x (ndarray, Variable): Input numpy array or instance of Variable.
+
+    Example:
+        >>> import renom as rm
+        >>> import numpy as np
+        >>> x = np.random.rand(1, 3)
+        array([[ 0.11871966  0.48498547  0.7406374 ]])
+        >>> z = rm.softmax(x)
+        softmax([[ 0.23229694  0.33505085  0.43265226]])
+        >>> np.sum(z, axis=1)
+        array([ 1.])
+
+    '''
     def __call__(self, x):
         return softmax(x)

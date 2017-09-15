@@ -48,5 +48,35 @@ class cross_entropy(Node):
 
 class CrossEntropy:
 
+    """This function evaluates the cross entropy loss
+    between the target ``y`` and the input ``x``.
+
+    .. math::
+        E(x) = \sum_{n}^{N}\sum_{k}^{K}(-y*ln(x+\epsilon))
+
+    :math:`N` is batch size.
+    :math:`\epsilon` is small number for avoiding division by zero.
+
+    Args:
+        x (ndarray,Node): Input array.
+        y (ndarray,Node): Target array.
+
+    Raises:
+        AssertionError: An assertion error will be raised if the given tensor dimension is less than 2.
+
+    Example:
+        >>> import renom as rm
+        >>> import numpy as np
+        >>>
+        >>> x = np.array([[1.0, 0.5]])
+        >>> y = np.array([[0.0, 1.0]])
+        >>> print(x.shape, y.shape)
+        ((1, 2), (1, 2))
+        >>> loss = rm.cross_entropy(x, y)
+        >>> print(loss)
+        cross_entropy(0.6931471824645996)
+
+    """
+
     def __call__(self, lhs, rhs):
         return cross_entropy(lhs, rhs)
