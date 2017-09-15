@@ -4,6 +4,18 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
+
+## ReNom version 2.1
+
+1. Modified GPU memory allocation
+* Modified GPU code of power operation
+* Modified GPU code of peephole lstm
+* Added soft max activation function
+* Added cross entropy loss function
+* Fixed lstm temporal backward 
+* Fixed momentum sgd
+
+
 ## Requirements
 
 - python2.7, 3.4
