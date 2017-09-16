@@ -14,26 +14,18 @@ def layer_factory(channel=32, conv_layer_num=2):
     return rm.Sequential(layers)
 
 
-class VGG16(rm.Model):
+class VGG16(rm.Sequential):
 
     def __init__(self, classes=10):
-        self._block1 = layer_factory(channel=64, conv_layer_num=2)
-        self._block2 = layer_factory(channel=128, conv_layer_num=2)
-        self._block3 = layer_factory(channel=256, conv_layer_num=3)
-        self._block4 = layer_factory(channel=512, conv_layer_num=3)
-        self._block5 = layer_factory(channel=512, conv_layer_num=3)
-        self._dense1 = rm.Dense(4096)
-        self._dense2 = rm.Dense(4096)
-        self._dense3 = rm.Dense(classes)
+        super(VGG16, self).__init__([
+            layer_factory(channel=64, conv_layer_num=2),
+            layer_factory(channel=128, conv_layer_num=2),
+            layer_factory(channel=256, conv_layer_num=3),
+            layer_factory(channel=512, conv_layer_num=3),
+            layer_factory(channel=512, conv_layer_num=3),
+            rm.Flatten(),
+            rm.Dense(4096),
+            rm.Dense(4096),
+            rm.Dense(classes)
+        ])
 
-    def forward(self, x):
-        h = self._block1(x)
-        h = self._block2(h)
-        h = self._block3(h)
-        h = self._block4(h)
-        h = self._block5(h)
-        h = rm.flatten(h)
-        h = rm.relu(self._dense1(h))
-        h = rm.relu(self._dense2(h))
-        z = self._dense3(h)
-        return z
