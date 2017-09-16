@@ -57,5 +57,6 @@ class Softmax:
         array([ 1.])
 
     '''
+
     def __call__(self, x):
         return softmax(x)
