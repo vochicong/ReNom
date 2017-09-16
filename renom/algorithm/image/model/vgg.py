@@ -25,7 +25,26 @@ class VGG16(rm.Sequential):
             layer_factory(channel=512, conv_layer_num=3),
             rm.Flatten(),
             rm.Dense(4096),
+            rm.Dropout(0.5),
             rm.Dense(4096),
+            rm.Dropout(0.5),
             rm.Dense(classes)
         ])
 
+
+class VGG19(rm.Sequential):
+
+    def __init__(self, classes=10):
+        super(VGG19, self).__init__([
+            layer_factory(channel=64, conv_layer_num=2),
+            layer_factory(channel=128, conv_layer_num=2),
+            layer_factory(channel=256, conv_layer_num=4),
+            layer_factory(channel=512, conv_layer_num=4),
+            layer_factory(channel=512, conv_layer_num=4),
+            rm.Flatten(),
+            rm.Dense(4096),
+            rm.Dropout(0.5),
+            rm.Dense(4096),
+            rm.Dropout(0.5),
+            rm.Dense(classes)
+        ])
