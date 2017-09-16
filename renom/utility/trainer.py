@@ -196,8 +196,6 @@ class Trainer(object):
             self.avg_train_loss = 0
 
             for iteration, (data, target) in enumerate(self.train_distributor.batch(self.batch_size, self.shuffle)):
-                self.on_event('start')
-
                 datalen = len(data) // len(models)
                 self.data = [data[i:i + datalen] for i in range(0, datalen * len(models), datalen)]
                 if is_cuda_active():
