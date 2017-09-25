@@ -11,7 +11,6 @@ cdef extern from * namespace "renom":
     cdef void thrust_operation(Operation op, VALUE_TYPE value, int elem_size_a, VALUE_TYPE *a, int elem_size_b, VALUE_TYPE *b, VALUE_TYPE *c)
     cdef void thrust_copy_memory_stride(VALUE_TYPE *dest, VALUE_TYPE *src, const size_t src_elems,
                              const size_t size_stride, const size_t size_srcblock)
-
     cdef void thrust_fill(VALUE_TYPE value, VALUE_TYPE *a, int size)
     cdef void thrust_loge(VALUE_TYPE *a, VALUE_TYPE *b, int size)
     cdef void thrust_exp(VALUE_TYPE *a, VALUE_TYPE *b, int size)
@@ -25,6 +24,13 @@ cdef extern from * namespace "renom":
     cdef void thrust_create_mask(VALUE_TYPE *a, int size)
     cdef void thrust_min(VALUE_TYPE v, VALUE_TYPE *a, VALUE_TYPE *b, int size);
     cdef void thrust_max(VALUE_TYPE v, VALUE_TYPE *a, VALUE_TYPE *b, int size);
+    cdef void thrust_reduce_sum_axis(VALUE_TYPE *src, const size_t nsize, const size_t elemsize,
+                             const size_t childsize, const size_t axis_shape, VALUE_TYPE *output,
+                             const size_t result_len)
+    cdef void thrust_sum_blocks(const size_t g, VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len)
+    cdef void thrust_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len)
+    cdef void thrust_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len)
+
     cdef void thrust_leaky_relu_forward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);
     cdef void thrust_leaky_relu_backward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);
     cdef void thrust_elu_forward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);
@@ -43,4 +49,5 @@ cdef extern from * namespace "renom":
 
     cdef void thrust_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b);
     cdef void thrust_embedding_forward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *w, VALUE_TYPE *y);
+
     cdef void thrust_embedding_backward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *dy, VALUE_TYPE *dx);

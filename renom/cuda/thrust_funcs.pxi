@@ -12,7 +12,8 @@ from libcpp cimport bool
 import cuda_base
 import operator
 import functools
-
+import renom.core
+import renom.cuda
 
 def cunegate(input, result):
     cuda_base.check_heap_device(input, result)
@@ -398,3 +399,77 @@ def cuconcat(gpu_value1, gpu_value2, gpu_value3, axis):
 
     thrust_copy_memory_stride(ptr3, ptr1, gpu_value1.size, rec_size, size1)
     thrust_copy_memory_stride(ptr3 + size1, ptr2, gpu_value2.size, rec_size, size2)
+
+
+def cusum2(gpu_value1, axis=None):
+
+    result_shape = gpu_value1.shape[:axis] + gpu_value1.shape[axis+1:]
+    result_len = functools.reduce(operator.__mul__, result_shape, 1)
+    result = renom.core.GPUValue(shape=result_shape)
+
+    nsize = functools.reduce(operator.__mul__, gpu_value1.shape, 1)
+    elemsize = functools.reduce(operator.__mul__, gpu_value1.shape[axis:], 1)
+    childsize = functools.reduce(operator.__mul__, gpu_value1.shape[axis+1:], 1)
+    axis_shape = gpu_value1.shape[axis]
+
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE *><uintptr_t>gpu_value1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE *><uintptr_t>result._ptr
+    thrust_reduce_sum_axis(ptr1, nsize, elemsize, childsize, axis_shape, ptr2, result_len)
+    return result
+
+#    for i in range(result_len):
+#        n = (i // childsize) * elemsize + (i % childsize)
+#        for j in range(axis_shape):
+#            result[i] += src[n + j*childsize]
+#
+#    return result.reshape(result_shape)
+
+def cusum3(a, gpu_value1, axis=None):
+    import renom.cuda
+    import time
+    f = time.time()
+    nsize = functools.reduce(operator.__mul__, gpu_value1.shape, 1)
+    elemsize = functools.reduce(operator.__mul__, gpu_value1.shape[axis:], 1)
+    childsize = functools.reduce(operator.__mul__, gpu_value1.shape[axis+1:], 1)
+
+    src = gpu_value1.copy()
+#    src = renom.core.GPUValue(shape=gpu_value1.shape)
+    cdef VALUE_TYPE *ptr1 = <VALUE_TYPE *><uintptr_t>src._ptr
+
+    s = childsize
+    while s < elemsize:
+        thrust_sum_blocks(a, ptr1, nsize, elemsize, s)
+        s *= 2
+
+    result_shape = gpu_value1.shape[:axis] + gpu_value1.shape[axis+1:]
+    result = renom.core.GPUValue(shape=result_shape)
+    cdef VALUE_TYPE *ptr2 = <VALUE_TYPE *><uintptr_t>result._ptr
+
+    thrust_concat_blocks(ptr1, nsize, ptr2, elemsize, childsize)
+
+    return result
+
+def cusum4(gpu_value1, axis=None):
+    import renom.cuda
+    nsize = functools.reduce(operator.__mul__, gpu_value1.shape, 1)
+    elemsize = functools.reduce(operator.__mul__, gpu_value1.shape[axis:], 1)
+    childsize = functools.reduce(operator.__mul__, gpu_value1.shape[axis+1:], 1)
+
+    src = gpu_value1.copy()
+#    src = renom.core.GPUValue(shape=gpu_value1.shape)
+    cdef VALUE_TYPE *ptr1 = <VALUE_TYPE *><uintptr_t>src._ptr
+
+
+    import time
+    f = time.time()
+    thrust_sum_blocks2(ptr1, nsize, elemsize, childsize)
+    renom.cuda.cuDeviceSynchronize()
+    print(time.time()-f)
+    result_shape = gpu_value1.shape[:axis] + gpu_value1.shape[axis+1:]
+    result = renom.core.GPUValue(shape=result_shape)
+    cdef VALUE_TYPE *ptr2 = <VALUE_TYPE *><uintptr_t>result._ptr
+
+    thrust_concat_blocks(ptr1, nsize, ptr2, elemsize, childsize)
+
+    return result
+

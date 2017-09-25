@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <algorithm>
 #include "thrust_funcs.h"
 
 
@@ -141,6 +142,140 @@ namespace renom{
         void thrust_copy_memory_stride(VALUE_TYPE *dest, VALUE_TYPE *src, const size_t src_elems,
                              const size_t size_stride, const size_t size_srcblock) {
             cuda_copy_memory_stride <<<ceil(src_elems/256.0), 256>>> (dest, src, src_elems, size_stride, size_srcblock);
+        }
+
+
+
+        __global__ void cuda_reduce_sum_axis(VALUE_TYPE *src, const size_t nsize, const size_t elemsize,
+                             const size_t childsize, const size_t axis_shape, VALUE_TYPE *output,
+                             const size_t result_len) {
+
+
+            size_t pos = threadIdx.x + blockIdx.x * blockDim.x;
+            output[pos] = 0;
+            if (pos < result_len) {
+                size_t n = (pos / childsize) * elemsize + (pos % childsize);
+                for (size_t i=0; i < axis_shape; i++) {
+                    output[pos] += src[n + i*childsize];
+                }
+            }
+        }
+
+
+        // Reduce vector elems
+        void thrust_reduce_sum_axis(VALUE_TYPE *src, const size_t nsize, const size_t elemsize,
+                             const size_t childsize, const size_t axis_shape, VALUE_TYPE *output,
+                             const size_t result_len)
+        {
+            cuda_reduce_sum_axis <<<ceil(result_len/256.0), 256>>> (src, nsize, elemsize, childsize, axis_shape, output, result_len);
+        }
+
+
+        __global__ void cuda_sum_blocks(VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len) {
+            size_t i = threadIdx.x + blockIdx.x * blockDim.x;
+            if (i >= nsize) {
+                return;
+            }
+
+            size_t n_block = i / block_len;
+            size_t block_top = n_block * block_len;
+
+            size_t offset = i - block_top;
+            size_t n_seq = offset / part_len;
+
+            if (n_seq % 2) {
+                return;
+            }
+
+            if (i + part_len >= block_top + block_len) {
+                return;
+            }
+
+             
+            if (i+part_len >= nsize) {
+                return;
+            }
+            a[i] += a[i+part_len];
+        }
+
+        void thrust_sum_blocks(const size_t g, VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len) {
+            dim3 block(g);
+            dim3 grid((nsize + block.x - 1) / block.x, 1);
+            cuda_sum_blocks<<<grid, block>>> (a, nsize, block_len, part_len);
+        }
+
+
+        __global__ void cuda_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t elemsize, const size_t childsize) {
+//            printf("============= %d\n", childsize);
+
+            size_t num = (nsize-1) / blockDim.x + 1;
+            size_t begin = num * threadIdx.x;
+            size_t end = begin + num;
+            if (end >= nsize) {
+                end = nsize;
+            }
+
+//            printf("%\d\n", blockDim.x);
+
+            printf("@@@@@@@@ x:%lu begin:%lu end:%lu elem:%lu s:%lu\n", threadIdx.x, begin, end, elemsize, childsize);
+            size_t s = childsize;
+
+//            printf("begin: %lu end: %lu\n", begin, end);
+            while (s < elemsize) {
+                for (size_t i = begin; i < end; i++) {
+                    size_t n_block = i / elemsize;
+
+                    size_t block_top = n_block * elemsize;
+                    size_t offset = i - block_top;
+                    size_t n_seq = offset / s;
+
+//                    printf("==== begin: %lu s: %lu i:%lu block_top: %lu offset: %lu n_seq: %lu\n", begin, s, i, block_top, offset, n_seq);
+
+                    if (n_seq % 2) {
+                        continue;
+                    }
+
+//                    printf("11111 begin: %lu \n", begin);
+                    
+                    if (i + s >= block_top + elemsize) {
+                        continue;
+                    }
+             
+//                    printf("22222222222 begin: %lu \n", begin);
+                    if (i + s >= nsize) {
+                        continue;
+                    }
+//                    printf(">>> x:%lu i:%lu s:%lu\n", threadIdx.x, i, s);
+//                    if (i == 0) {
+//                        printf("begin:%lu end: %lu s:%lu\n", begin, end, s);
+//                    }
+                    a[i] += a[i + s];
+                }
+                __syncthreads();
+                s *= 2;
+            }
+        }
+
+
+        void thrust_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t elemsize, const size_t childsize) {
+            size_t x = (nsize > 1024)?1024:nsize;
+            cuda_sum_blocks2<<<1, x>>> (a, nsize, elemsize, childsize);
+        }
+
+        __global__ void cuda_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len) {
+            size_t i = threadIdx.x + blockIdx.x * blockDim.x;
+            size_t n_block = i / block_len;
+            size_t block_top = n_block * block_len;
+
+            size_t offset = i - block_top;
+            if (offset < copy_len) {
+                b[n_block*copy_len+offset] = a[i];
+            }
+        }
+
+
+        void thrust_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len) {
+            cuda_concat_blocks<<<ceil(nsize/256.0), 256>>> (a, nsize, b, block_len, copy_len);
         }
 
 
@@ -435,6 +570,7 @@ namespace renom{
 	{
 		cuda_strided_sum <<<ceil((size/axis_size)/256.0), 256>>> (a, b, stride, axis_size, step, int(size/axis_size));
 	}
+
 
 	// min
 	struct min_function

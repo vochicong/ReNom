@@ -92,6 +92,21 @@ namespace renom{
 	struct max_function;
 	void thrust_max(VALUE_TYPE v, VALUE_TYPE *a, VALUE_TYPE *b, int size);
 
+        // reduce sum
+        void thrust_reduce_sum_axis(VALUE_TYPE *src, const size_t nsize, const size_t elemsize,
+                             const size_t childsize, const size_t axis_shape, VALUE_TYPE *dest,
+                             const size_t resultsize);
+
+        __global__ void cuda_sum_blocks(VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len);
+        void thrust_sum_blocks(const size_t g, VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len);
+
+        __global__ void cuda_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t elemsize, const size_t childsize);
+        void thrust_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t elemsize, const size_t childsize);
+
+
+        __global__ void cuda_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);        
+        void thrust_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);
+
 	struct leaky_relu_forward_function;
 	void thrust_leaky_relu_forward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);
 

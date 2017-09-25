@@ -138,6 +138,12 @@ ext_modules = []
 cuda_sources = []
 
 
+cuda_depends=['renom/cuda/thrust_func_defs.pxi',
+         'renom/cuda/thrust_funcs.pxi', 
+         'renom/cuda/thrust_funcs.h'
+]
+
+
 def setup_cuda():
     cuda_home = os.environ.get("CUDA_HOME", "/usr/local/cuda")
     if not cuda_home or not os.path.exists(cuda_home):
@@ -155,8 +161,7 @@ def setup_cuda():
 
     ext_base = Extension('renom.cuda.cuda_base',
                          sources=['renom/cuda/cuda_base.pyx'],
-                         depends=['renom/cuda/thrust_func_defs.pxi',
-                                  'renom/cuda/thrust_funcs.pxi', ],
+                         depends=cuda_depends,
                          libraries=['cublas', 'cuda', 'cudart'],
                          library_dirs=libraries,
                          language='c++',
@@ -165,8 +170,7 @@ def setup_cuda():
 
     ext_utils = Extension('renom.cuda.cuda_utils',
                           sources=['renom/cuda/cuda_utils.pyx'],
-                          depends=['renom/cuda/thrust_func_defs.pxi',
-                                   'renom/cuda/thrust_funcs.pxi', ],
+                          depends=cuda_depends,
                           libraries=['cublas', 'cuda', 'cudart'],
                           library_dirs=libraries,
                           language='c++',
@@ -175,8 +179,7 @@ def setup_cuda():
 
     ext_cublas = Extension('renom.cuda.cublas',
                            sources=['renom/cuda/cublas.pyx'],
-                           depends=['renom/cuda/thrust_func_defs.pxi',
-                                    'renom/cuda/thrust_funcs.pxi', ],
+                           depends=cuda_depends,
                            libraries=['cublas', 'cuda', 'cudart'],
                            library_dirs=libraries,
                            language='c++',
@@ -185,8 +188,7 @@ def setup_cuda():
 
     ext_cudnn = Extension('renom.cuda.cudnn',
                           sources=['renom/cuda/cudnn.pyx'],
-                          depends=['renom/cuda/thrust_func_defs.pxi',
-                                   'renom/cuda/thrust_funcs.pxi', ],
+                          depends=cuda_depends,
                           libraries=['cublas', 'cuda', 'cudart', 'cudnn'],
                           library_dirs=libraries,
                           language='c++',
@@ -195,8 +197,7 @@ def setup_cuda():
 
     ext_curand = Extension('renom.cuda.curand',
                            sources=['renom/cuda/curand.pyx'],
-                           depends=['renom/cuda/thrust_func_defs.pxi',
-                                    'renom/cuda/thrust_funcs.pxi', ],
+                           depends=cuda_depends,
                            libraries=['curand', 'cuda', 'cudart'],
                            library_dirs=libraries,
                            language='c++',
@@ -205,8 +206,7 @@ def setup_cuda():
 
     ext_thrust_float = Extension('renom.cuda.thrust_float',
                                  sources=['renom/cuda/thrust_float.pyx'],
-                                 depends=['renom/cuda/thrust_func_defs.pxi',
-                                          'renom/cuda/thrust_funcs.pxi', ],
+                                 depends=cuda_depends,
                                  libraries=['cublas', 'cuda', 'cudart'],
                                  library_dirs=libraries,
                                  language='c++',
@@ -215,8 +215,7 @@ def setup_cuda():
 
     ext_thrust_double = Extension('renom.cuda.thrust_double',
                                   sources=['renom/cuda/thrust_double.pyx'],
-                                  depends=['renom/cuda/thrust_func_defs.pxi',
-                                           'renom/cuda/thrust_funcs.pxi', ],
+                                  depends=cuda_depends,
                                   libraries=['cublas', 'cuda', 'cudart'],
                                   library_dirs=libraries,
                                   language='c++',
