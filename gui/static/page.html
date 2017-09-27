@@ -249,146 +249,19 @@
 </script>
 
 <script>
-header_height = 50;
+function circle_active(c) {
+  c.attr("stroke","rgba(153,153,153,0.3)").attr("stroke-width",5);
+}
 
-Vue.component('loading-modal', {
-  template: '#loading_modal'
-})
+function circle_deactive(c) {
+  c.attr("stroke","rgba(204,204,204,0)");
+}
 
-Vue.component('node', {
-  template: '#node',
-  props: ["node", "index", "color", "size", "width", "height"],
-  data: function() {
-    return {
-      cx: 0,
-      cy: 0
-    }
-  },
-  mounted: function() {
-    this.cx = this.node[0]*this.width,
-    this.cy = this.node[1]*this.height
-  },
-  updated: function(){
-    this.cx = this.node[0]*this.width,
-    this.cy = this.node[1]*this.height
-  },
-  methods: {
-    clicknode: function() {
-      circle = d3.select("#circle_"+this.index);
-      circle.attr("stroke","rgba(153,153,153,0.3)").attr("stroke-width",5);
-      this.$emit('clicknode', this.index);
-    }
-  }
-})
-
-Vue.component('edge', {
-  template: '#edge',
-  props: ["n1", "n2", "color", "width", "height"],
-  data: function() {
-    return {
-      x1: 0,
-      y1: 0,
-      x2: 0,
-      y2: 0
-    }
-  },
-  mounted: function() {
-    this.x1 = this.n1[0]*this.width,
-    this.y1 = this.n1[1]*this.height,
-    this.x2 = this.n2[0]*this.width,
-    this.y2 = this.n2[1]*this.height
-  },
-  updated: function() {
-    this.x1 = this.n1[0]*this.width,
-    this.y1 = this.n1[1]*this.height,
-    this.x2 = this.n2[0]*this.width,
-    this.y2 = this.n2[1]*this.height
-  }
-})
-
-// graph component
-Vue.component('leftsidebar', {
-  template: '#left_sidebar',
-  props: ['parentlabels'],
-  data: function() {
-    return {
-      filename: "",
-      algorithm: 0,
-      algorithms: ["PCA", "TSNE", "Auto Encoder"],
-      resolution: 25,
-      overlap: 0.5,
-      selected: 0
-    }
-  },
-  mounted: function() {
-    window_height = window.innerHeight;
-    let e = document.getElementById("left-sidebar");
-    e.style.height = window_height - header_height;
-  },
-  methods: {
-    loadfile: function() {
-      this.$emit('loadfile', this.filename);
-    },
-    onrun: function() {
-      const data = [this.filename, this.algorithm, this.resolution, this.overlap, this.selected];
-      this.$emit('run', data);
-    },
-    onreset: function() {
-      this.$emit('reset');
-    }
-  }
-})
-
-// graph component
-Vue.component('rightsidebar', {
-  template: '#right_sidebar',
-  props: ['node_categorical_data', 'node_data', 'labels', 'colored_by'],
-  data: function() {
-    return {
-      search_value: ""
-    }
-  },
-  mounted: function() {
-    window_height = window.innerHeight;
-    let e = document.getElementById("right-sidebar");
-    e.style.height = window_height - header_height;
-  },
-  methods: {
-    onsearch: function(){
-      this.$emit('search', this.search_value);
-    }
-  }
-})
-
-// task component
-Vue.component('center', {
-  template: '#center',
-  props: ['nodes', 'edges', 'colors', 'node_sizes'],
-  data: function() {
-    return {
-      width: 0,
-      height: 0,
-      active_node: undefined
-    }
-  },
-  mounted: function() {
-    window_height = window.innerHeight;
-    const e = document.getElementById("graph-canvas");
-    e.style.height = window_height - header_height;
-    this.width = e.clientWidth;
-    this.height = e.clientHeight;
-  },
-  methods: {
-    clicknode: function(value) {
-      if (this.active_node) {
-        circle = d3.select("#circle_"+this.active_node);
-        circle.attr("stroke","rgba(204,204,204,0)");
-      }
-      this.active_node = value;
-      this.$emit('clicknode', value);
-    }
-  }
-})
+function set_height(e) {
+  header_height = 50;
+  window_height = window.innerHeight;
+  e.style.height = window_height - header_height;
+}
 
 function loadfile(self) {
   let fd = new FormData();
@@ -486,6 +359,142 @@ function reset(self){
   self.node_categorical_data = undefined;
   self.node_data = undefined;
 }
+
+Vue.component('loading-modal', {
+  template: '#loading_modal'
+})
+
+Vue.component('node', {
+  template: '#node',
+  props: ["node", "index", "color", "size", "width", "height"],
+  data: function() {
+    return {
+      cx: 0,
+      cy: 0
+    }
+  },
+  mounted: function() {
+    this.cx = this.node[0]*this.width,
+    this.cy = this.node[1]*this.height
+  },
+  updated: function(){
+    this.cx = this.node[0]*this.width,
+    this.cy = this.node[1]*this.height
+  },
+  methods: {
+    clicknode: function() {
+      circle = d3.select("#circle_"+this.index);
+      circle_active(circle);
+      this.$emit('clicknode', this.index);
+    }
+  }
+})
+
+Vue.component('edge', {
+  template: '#edge',
+  props: ["n1", "n2", "color", "width", "height"],
+  data: function() {
+    return {
+      x1: 0,
+      y1: 0,
+      x2: 0,
+      y2: 0
+    }
+  },
+  mounted: function() {
+    this.x1 = this.n1[0]*this.width,
+    this.y1 = this.n1[1]*this.height,
+    this.x2 = this.n2[0]*this.width,
+    this.y2 = this.n2[1]*this.height
+  },
+  updated: function() {
+    this.x1 = this.n1[0]*this.width,
+    this.y1 = this.n1[1]*this.height,
+    this.x2 = this.n2[0]*this.width,
+    this.y2 = this.n2[1]*this.height
+  }
+})
+
+// graph component
+Vue.component('leftsidebar', {
+  template: '#left_sidebar',
+  props: ['parentlabels'],
+  data: function() {
+    return {
+      filename: "",
+      algorithm: 0,
+      algorithms: ["PCA", "TSNE", "Auto Encoder"],
+      resolution: 25,
+      overlap: 0.5,
+      selected: 0
+    }
+  },
+  mounted: function() {
+    let e = document.getElementById("left-sidebar");
+    set_height(e);
+  },
+  methods: {
+    loadfile: function() {
+      this.$emit('loadfile', this.filename);
+    },
+    onrun: function() {
+      const data = [this.filename, this.algorithm, this.resolution, this.overlap, this.selected];
+      this.$emit('run', data);
+    },
+    onreset: function() {
+      this.$emit('reset');
+    }
+  }
+})
+
+// graph component
+Vue.component('rightsidebar', {
+  template: '#right_sidebar',
+  props: ['node_categorical_data', 'node_data', 'labels', 'colored_by'],
+  data: function() {
+    return {
+      search_value: ""
+    }
+  },
+  mounted: function() {
+    let e = document.getElementById("right-sidebar");
+    set_height(e);
+  },
+  methods: {
+    onsearch: function(){
+      this.$emit('search', this.search_value);
+    }
+  }
+})
+
+// task component
+Vue.component('center', {
+  template: '#center',
+  props: ['nodes', 'edges', 'colors', 'node_sizes'],
+  data: function() {
+    return {
+      width: 0,
+      height: 0,
+      active_node: undefined
+    }
+  },
+  mounted: function() {
+    const e = document.getElementById("graph-canvas");
+    set_height(e);
+    this.width = e.clientWidth;
+    this.height = e.clientHeight;
+  },
+  methods: {
+    clicknode: function(value) {
+      if (this.active_node) {
+        circle = d3.select("#circle_"+this.active_node);
+        circle_deactive(circle);
+      }
+      this.active_node = value;
+      this.$emit('clicknode', value);
+    }
+  }
+})
 
 let vm = new Vue({
   el: '#app',
