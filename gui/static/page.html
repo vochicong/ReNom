@@ -396,6 +396,11 @@ function loadfile(self) {
 
   return axios.post('/api/load', fd)
     .then(function(response){
+      error = response.data.error;
+      if (error){
+        alert("File not found. Please try again.");
+        return
+      }
       self.labels = response.data.labels;
     });
 }

@@ -80,15 +80,20 @@ def load():
     filename = request.params.filename
     filepath = os.path.join(DATA_DIR, filename)
 
-    # nanを含むデータは使わない
-    pdata = pd.read_csv(filepath).dropna()
+    try:
+        # nanを含むデータは使わない
+        pdata = pd.read_csv(filepath).dropna()
+        # 画面で選択できるカラム名を取得する
+        labels = pdata.columns[np.logical_or(pdata.dtypes == "float", pdata.dtypes == "int")]
 
-    # 画面で選択できるカラム名を取得する
-    labels = pdata.columns[np.logical_or(pdata.dtypes == "float", pdata.dtypes == "int")]
+        body = json.dumps({"labels": labels.tolist()})
+        r = set_json_body(body)
+        return r
 
-    body = json.dumps({"labels": labels.tolist()})
-    r = set_json_body(body)
-    return r
+    except IOError:
+        body = json.dumps({"error": True})
+        r = set_json_body(body)
+        return r
 
 
 # ノードをクリックした時に呼び出す関数
