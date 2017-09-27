@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 import numpy as np
-import itertools
 
 from renom.utility.distributor.imageloader import ImageLoader
 from renom.utility.image.data_augmentation.resize import resize
@@ -94,7 +93,7 @@ class ImageDetectionDistributor(ImageDistributor):
 
         imgfiles = [[self._data_table[p] for p in b] for b in batches]
         imgs = ImageLoader(imgfiles, self._color)
-        for p, imgs in itertools.izip(batches, imgs.wait_images()):
+        for p, imgs in zip(batches, imgs.wait_images()):
             # Case: we are given both images and labels
             if self._data_y is not None:
                 data_y = self._data_y[p].copy()
@@ -182,7 +181,7 @@ class ImageClassificationDistributor(ImageDistributor):
 
         imgs = ImageLoader(imgfiles, self._color)
 
-        for lbls, imgs in itertools.izip(labels, imgs.wait_images()):
+        for lbls, imgs in zip(labels, imgs.wait_images()):
             for index, img in enumerate(imgs):
                 if self._color == "GRAY":
                     img = np.array(img, dtype=np.float32)[:, :, np.newaxis]
