@@ -417,7 +417,35 @@ function set_form_data(self, search_txt) {
   return fd;
 }
 
+function is_params_out_of_range(self) {
+  if (self.algorithm < 0 | self.algorithm > 2) {
+    alert("algorithm must be 0 to 2.");
+    return true;
+  }
+
+  if (self.resolution < 5 | self.resolution > 50) {
+    alert("resolution must be 5 to 50.");
+    return true;
+  }
+
+  if (self.overlap < 0 | self.overlap > 1) {
+    alert("overlap must be 0 to 1.");
+    return true;
+  }
+
+  if (self.colored_by < 0 | self.colored_by > self.labels.length) {
+    alert("colored_by must be 0 to %s.", self.labels.length);
+    return true;
+  }
+  return false;
+}
+
 function create(self) {
+  if (is_params_out_of_range(self)) {
+    self.loading = false;
+    return
+  }
+
   // 検索文字をbase64に変換
   let text_encoder = new TextEncoder();
   const search_txt = text_encoder.encode(self.search_value);
