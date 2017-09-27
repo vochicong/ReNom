@@ -221,7 +221,7 @@
 <!-- template for right side bar -->
 <script type="text/x-template" id="right_sidebar">
   <div id="right-sidebar" class="col-lg-2">
-    <input class="searchbox" placeholder="search" v-model="search_value" @keyup.enter="onsearch">
+    <input class="searchbox" placeholder="search" v-model="search_value" @keyup.enter="onsearch" @keyup.delete="deletetext">
     <div class="nodedata-area">
       <div v-for="(data,index) in node_categorical_data" class="nodedata">
         <div class="name">
@@ -463,6 +463,12 @@ Vue.component('rightsidebar', {
   methods: {
     onsearch: function(){
       this.$emit('search', this.search_value);
+    },
+    deletetext: function() {
+      console.log(this.search_value);
+      if (this.search_value == "") {
+        this.onsearch();
+      }
     }
   }
 })
