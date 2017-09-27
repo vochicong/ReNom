@@ -97,7 +97,7 @@ class Resize(Image):
                         :, :, np.newaxis] * 255.
                 else:
                     resized_images[index] = (
-                        rs(image, (self.size[0], self.size[1], batch_x.shape[3])) * 255).astype(batch_x.dtype)
+                        rs(image, (self.size[0], self.size[1], batch_x.shape[3]), mode="reflect") * 255).astype(batch_x.dtype)
         # RGB images
         else:
             for index, image in enumerate(batch_x.copy() / 255.):
@@ -105,7 +105,7 @@ class Resize(Image):
                     resized_images[index] = cv2.resize(image, (self.size[1], self.size[0])) * 255.
                 else:
                     resized_images[index] = rs(
-                        image, (self.size[0], self.size[1], batch_x.shape[3])) * 255.
+                        image, (self.size[0], self.size[1], batch_x.shape[3]),mode="reflect") * 255.
 
         if isinstance(labels, np.ndarray):
             return resized_images, self._labels_transform(labels, num_class, batch_x.shape[1:3])
