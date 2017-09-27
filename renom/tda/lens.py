@@ -148,6 +148,7 @@ class AutoEncoderNetwork(rm.Model):
     Params:
         unit_size: unit_size is the size of input data.
     """
+
     def __init__(self, unit_size):
         self._layer1 = rm.Dense(10)
         self._encodedlayer = rm.Dense(2)
@@ -180,6 +181,7 @@ class AutoEncoder(object):
 
         verbose: print message or not.
     """
+
     def __init__(self, epoch, batch_size, opt=Sgd(), verbose=0):
         self.epoch = epoch
         self.batch_size = batch_size

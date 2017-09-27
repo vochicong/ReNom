@@ -125,7 +125,9 @@ def create():
 
     # filename, algorithmが変わっていたらデータの再読み込み&次元削減
     if params.is_file_changed(filename, algorithm):
-        algorithms = [PCA(components=[0, 1]), TSNE(components=[0, 1]), AutoEncoder(epoch=500, batch_size=100, opt=Adam())]
+        algorithms = [PCA(components=[0, 1]),
+                      TSNE(components=[0, 1]),
+                      AutoEncoder(epoch=500, batch_size=100, opt=Adam())]
         filepath = os.path.join(DATA_DIR, filename)
         pdata = pd.read_csv(filepath).dropna()
 
@@ -134,18 +136,21 @@ def create():
         topology.regist_categorical_data(categorical_data)
 
         # 数値データを抽出
-        numerical_data = np.array(pdata.loc[:, np.logical_or(pdata.dtypes == "float", pdata.dtypes == "int")])
+        numerical_data = np.array(pdata.loc[:, np.logical_or(
+            pdata.dtypes == "float", pdata.dtypes == "int")])
         params.avg = np.average(numerical_data, axis=0)
         params.std = np.std(numerical_data, axis=0)
         numerical_data = (numerical_data - params.avg) / params.std
 
         # 表示が切れるので、0~1ではなく0.01~0.99に正規化
         scaler = preprocessing.MinMaxScaler(feature_range=(0.01, 0.99))
-        topology.fit_transform(numerical_data, metric=None, lens=[algorithms[algorithm]], scaler=scaler)
+        topology.fit_transform(numerical_data, metric=None, lens=[
+                               algorithms[algorithm]], scaler=scaler)
 
     # filename, algorithm, resolution, overlapが変わっていたらトポロジーの再計算
     if params.is_file_changed(filename, algorithm) | params.is_params_changed(resolution, overlap):
-        topology.map(resolution=resolution, overlap=overlap, clusterer=cluster.DBSCAN(eps=25, min_samples=1))
+        topology.map(resolution=resolution, overlap=overlap,
+                     clusterer=cluster.DBSCAN(eps=25, min_samples=1))
 
     # paramsの更新
     if params.is_file_changed(filename, algorithm):
@@ -172,7 +177,10 @@ def create():
     scaler = preprocessing.MinMaxScaler(feature_range=(0.3, max_scale))
     topology.node_sizes = scaler.fit_transform(topology.node_sizes)
 
-    body = json.dumps({"nodes": topology.nodes.tolist(), "edges": topology.edges.tolist(), "colors": topology.colorlist, "node_sizes": topology.node_sizes.tolist()})
+    body = json.dumps({"nodes": topology.nodes.tolist(),
+                       "edges": topology.edges.tolist(),
+                       "colors": topology.colorlist,
+                       "node_sizes": topology.node_sizes.tolist()})
     r = set_json_body(body)
     return r
 

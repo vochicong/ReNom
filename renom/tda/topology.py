@@ -105,7 +105,8 @@ class Topology(object):
         # metricをもとに距離行列を作る。
         if (metric is not None) and ("fit_transform" in dir(metric)):
             if self.verbose == 1:
-                print("calculated distance matrix by %s class using %s distance." % (self.metric.__class__.__name__, self.metric.metric))
+                print("calculated distance matrix by %s class using %s distance." %
+                      (self.metric.__class__.__name__, self.metric.metric))
             dist_matrix = metric.fit_transform(data)
         else:
             # metricがNoneならdataをそのまま使う
@@ -308,14 +309,14 @@ class Topology(object):
         ret_target[index_q3_max] = target_q3_max
         return np.array(ret_target)
 
-
     def color(self, target, dtype="numerical", ctype="rgb", feature_range=(0, 1), normalized=False):
         """Function of coloring topology.
 
         Parameters:
             target：Array of coloring data.
 
-            dtype：The type of data. If dtype is "numerical", node is colored by mean value. If dtype is "categorical", node is colored by mode value.
+            dtype：The type of data. If dtype is "numerical", node is colored by mean value.
+                   If dtype is "categorical", node is colored by mode value.
 
             ctype：The type of node color. RGB or Grayscale.
 
@@ -383,7 +384,8 @@ class Topology(object):
 
             edge_width：The width of edges.
 
-            mode：Visualization mode. None or "spring". If this is "spring", node coordination is calculated by spring model.
+            mode：Visualization mode. None or "spring".
+                  If this is "spring", node coordination is calculated by spring model.
 
             strength：The strength of spring in spring model.
         """
@@ -417,12 +419,16 @@ class Topology(object):
             graph.add_nodes_from(range(len(self.nodes)))
             graph.add_edges_from(self.edges)
             pos = nx.spring_layout(graph, pos=pos, k=strength)
-            nx.draw_networkx(graph, pos=pos, node_size=sizes, node_color=self.colorlist, width=edge_width, edge_color=[self.colorlist[e[0]] for e in self.edges], with_labels=False)
+            nx.draw_networkx(graph, pos=pos, node_size=sizes, node_color=self.colorlist,
+                             width=edge_width, edge_color=[self.colorlist[e[0]] for e in self.edges],
+                             with_labels=False)
         else:
             fig = plt.figure(figsize=fig_size)
             ax = fig.add_subplot(111)
             for e in self.edges:
-                ax.plot([self.nodes[e[0], 0], self.nodes[e[1], 0]], [self.nodes[e[0], 1], self.nodes[e[1], 1]], c=self.colorlist[e[0]])
+                ax.plot([self.nodes[e[0], 0], self.nodes[e[1], 0]],
+                        [self.nodes[e[0], 1], self.nodes[e[1], 1]],
+                        c=self.colorlist[e[0]])
             ax.scatter(self.nodes[:, 0], self.nodes[:, 1], c=self.colorlist, s=sizes)
         plt.axis("off")
         plt.show()
@@ -463,7 +469,11 @@ class SearchableTopology(Topology):
         (150, 1)
         >>> topology.color(target, dtype="categorical", ctype="rgb")
         >>> topology.search("setosa")
-        setosa is in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49] data.
+        setosa is in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+                      11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+                      21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
+                      31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+                      41, 42, 43, 44, 45, 46, 47, 48, 49] data.
         setosa is in [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14] node.
         >>> topology.show(fig_size=(5,5), node_size=5, edge_width=1)
 
@@ -471,7 +481,7 @@ class SearchableTopology(Topology):
     """
 
     def __init__(self, verbose=1):
-        super().__init__(verbose)
+        super(SearchableTopology, self).__init__(verbose)
         self.categorical_data = None
 
     def regist_categorical_data(self, data):
