@@ -189,9 +189,18 @@ def load():
 
             algorithms = [PCA(components=[0, 1]),
                           TSNE(components=[0, 1]),
-                          AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder2Layer(numerical_data.shape[1]), opt=Adam()),
-                          AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder3Layer(numerical_data.shape[1]), opt=Adam()),
-                          AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder4Layer(numerical_data.shape[1]), opt=Adam())]
+                          AutoEncoder(epoch=500,
+                                      batch_size=100,
+                                      network=AutoEncoder2Layer(numerical_data.shape[1]), 
+                                      opt=Adam()),
+                          AutoEncoder(epoch=500,
+                                      batch_size=100,
+                                      network=AutoEncoder3Layer(numerical_data.shape[1]),
+                                      opt=Adam()),
+                          AutoEncoder(epoch=500,
+                                      batch_size=100,
+                                      network=AutoEncoder4Layer(numerical_data.shape[1]),
+                                      opt=Adam())]
 
             # 表示が切れるので、0~1ではなく0.01~0.99に正規化
             scaler = preprocessing.MinMaxScaler(feature_range=(0.01, 0.99))
