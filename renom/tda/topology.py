@@ -420,7 +420,8 @@ class Topology(object):
             graph.add_edges_from(self.edges)
             pos = nx.spring_layout(graph, pos=pos, k=strength)
             nx.draw_networkx(graph, pos=pos, node_size=sizes, node_color=self.colorlist,
-                             width=edge_width, edge_color=[self.colorlist[e[0]] for e in self.edges],
+                             width=edge_width, edge_color=[
+                                 self.colorlist[e[0]] for e in self.edges],
                              with_labels=False)
         else:
             fig = plt.figure(figsize=fig_size)

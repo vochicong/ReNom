@@ -191,7 +191,7 @@ def load():
                           TSNE(components=[0, 1]),
                           AutoEncoder(epoch=500,
                                       batch_size=100,
-                                      network=AutoEncoder2Layer(numerical_data.shape[1]), 
+                                      network=AutoEncoder2Layer(numerical_data.shape[1]),
                                       opt=Adam()),
                           AutoEncoder(epoch=500,
                                       batch_size=100,
