@@ -142,33 +142,6 @@ class TSNE(object):
         return projected_data[:, self.components]
 
 
-class AutoEncoderNetwork(rm.Model):
-    """Class of Auto Encoder Network.
-
-    Params:
-        unit_size: unit_size is the size of input data.
-    """
-
-    def __init__(self, unit_size):
-        self._layer1 = rm.Dense(10)
-        self._encodedlayer = rm.Dense(2)
-        self._layer2 = rm.Dense(10)
-        self._outlayer = rm.Dense(unit_size)
-
-    def forward(self, x):
-        """Forwarding.
-
-        Params:
-            x: training data.
-        """
-        l1_out = rm.sigmoid(self._layer1(x))
-        l = rm.sigmoid(self._encodedlayer(l1_out))
-        l2_out = rm.sigmoid(self._layer2(l))
-        g = self._outlayer(l2_out)
-        loss = rm.mse(g, x)
-        return loss
-
-
 class AutoEncoder(object):
     """Class of Auto Encoder dimention reduction lens.
 
@@ -179,12 +152,15 @@ class AutoEncoder(object):
 
         opt: training optimizer.
 
+        network: auto encoder network class.
+
         verbose: print message or not.
     """
 
-    def __init__(self, epoch, batch_size, opt=Sgd(), verbose=0):
+    def __init__(self, epoch, batch_size, network, opt=Sgd(), verbose=0):
         self.epoch = epoch
         self.batch_size = batch_size
+        self.network = network
         self.opt = opt
         self.verbose = verbose
 
@@ -197,10 +173,6 @@ class AutoEncoder(object):
         n = data.shape[0]
 
         train_data, test_data = train_test_split(data, test_size=0.1, random_state=10)
-
-        # TODO
-        # ネットワークを引数で入れられるように変更する。
-        self.network = AutoEncoderNetwork(data.shape[1])
 
         for i in range(self.epoch):
             total_loss = 0
@@ -216,5 +188,5 @@ class AutoEncoder(object):
             if self.verbose == 1:
                 print("epoch:{} loss:{}".format(i, total_loss / (n / self.batch_size)))
 
-        projected_data = self.network._encodedlayer(rm.sigmoid(self.network._layer1(data)))
+        projected_data = self.network.encode(data)
         return projected_data

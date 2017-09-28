@@ -291,7 +291,7 @@ function set_form_data(self, search_txt) {
 }
 
 function is_params_out_of_range(self) {
-  if (self.algorithm < 0 | self.algorithm > 2) {
+  if (self.algorithm < 0 | self.algorithm > 4) {
     alert("algorithm must be 0 to 2.");
     return true;
   }
@@ -423,7 +423,7 @@ Vue.component('leftsidebar', {
     return {
       filename: "",
       algorithm: 0,
-      algorithms: ["PCA", "TSNE", "Auto Encoder"],
+      algorithms: ["PCA", "TSNE", "Auto Encoder 2Layer", "Auto Encoder 3Layer", "Auto Encoder 4Layer"],
       resolution: 25,
       overlap: 0.5,
       selected: 0

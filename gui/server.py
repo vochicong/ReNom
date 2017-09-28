@@ -14,6 +14,7 @@ import pkg_resources
 
 from sklearn import cluster, preprocessing
 
+import renom as rm
 from renom.optimizer import Adam
 from renom.tda.lens import PCA, TSNE, AutoEncoder
 from renom.tda.topology import SearchableTopology
@@ -49,6 +50,84 @@ class Params(object):
         if (self.resolution == resolution) & (self.overlap == overlap):
             return False
         return True
+
+
+class AutoEncoder2Layer(rm.Model):
+    def __init__(self, unit_size):
+        self._encodelayer = rm.Dense(10)
+        self._encodedlayer = rm.Dense(2)
+        self._decodelayer = rm.Dense(10)
+        self._decodedlayer = rm.Dense(unit_size)
+
+    def forward(self, x):
+        el_out = rm.sigmoid(self._encodelayer(x))
+        l = rm.sigmoid(self._encodedlayer(el_out))
+        dl_out = rm.sigmoid(self._decodelayer(l))
+        g = self._decodedlayer(dl_out)
+        loss = rm.mse(g, x)
+        return loss
+
+    def encode(self, x):
+        el_out = rm.sigmoid(self._encodelayer(x))
+        l = self._encodedlayer(el_out)
+        return l
+
+
+class AutoEncoder3Layer(rm.Model):
+    def __init__(self, unit_size):
+        self._encodelayer1 = rm.Dense(25)
+        self._encodelayer2 = rm.Dense(10)
+        self._encodedlayer = rm.Dense(2)
+        self._decodelayer1 = rm.Dense(10)
+        self._decodelayer2 = rm.Dense(25)
+        self._decodedlayer = rm.Dense(unit_size)
+
+    def forward(self, x):
+        el1_out = rm.sigmoid(self._encodelayer1(x))
+        el2_out = rm.sigmoid(self._encodelayer2(el1_out))
+        l = rm.sigmoid(self._encodedlayer(el2_out))
+        dl1_out = rm.sigmoid(self._decodelayer1(l))
+        dl2_out = rm.sigmoid(self._decodelayer2(dl1_out))
+        g = self._decodedlayer(dl2_out)
+        loss = rm.mse(g, x)
+        return loss
+
+    def encode(self, x):
+        el1_out = rm.sigmoid(self._encodelayer1(x))
+        el2_out = rm.sigmoid(self._encodelayer2(el1_out))
+        l = self._encodedlayer(el2_out)
+        return l
+
+
+class AutoEncoder4Layer(rm.Model):
+    def __init__(self, unit_size):
+        self._encodelayer1 = rm.Dense(50)
+        self._encodelayer2 = rm.Dense(25)
+        self._encodelayer3 = rm.Dense(10)
+        self._encodedlayer = rm.Dense(2)
+        self._decodelayer1 = rm.Dense(10)
+        self._decodelayer2 = rm.Dense(25)
+        self._decodelayer3 = rm.Dense(50)
+        self._decodedlayer = rm.Dense(unit_size)
+
+    def forward(self, x):
+        el1_out = rm.sigmoid(self._encodelayer1(x))
+        el2_out = rm.sigmoid(self._encodelayer2(el1_out))
+        el3_out = rm.sigmoid(self._encodelayer3(el2_out))
+        l = rm.sigmoid(self._encodedlayer(el3_out))
+        dl1_out = rm.sigmoid(self._decodelayer1(l))
+        dl2_out = rm.sigmoid(self._decodelayer2(dl1_out))
+        dl3_out = rm.sigmoid(self._decodelayer3(dl2_out))
+        g = self._decodedlayer(dl3_out)
+        loss = rm.mse(g, x)
+        return loss
+
+    def encode(self, x):
+        el1_out = rm.sigmoid(self._encodelayer1(x))
+        el2_out = rm.sigmoid(self._encodelayer2(el1_out))
+        el3_out = rm.sigmoid(self._encodelayer3(el2_out))
+        l = self._encodedlayer(el3_out)
+        return l
 
 
 def set_json_body(body):
@@ -125,9 +204,6 @@ def create():
 
     # filename, algorithmが変わっていたらデータの再読み込み&次元削減
     if params.is_file_changed(filename, algorithm):
-        algorithms = [PCA(components=[0, 1]),
-                      TSNE(components=[0, 1]),
-                      AutoEncoder(epoch=500, batch_size=100, opt=Adam())]
         filepath = os.path.join(DATA_DIR, filename)
         pdata = pd.read_csv(filepath).dropna()
 
@@ -141,6 +217,12 @@ def create():
         params.avg = np.average(numerical_data, axis=0)
         params.std = np.std(numerical_data, axis=0)
         numerical_data = (numerical_data - params.avg) / params.std
+
+        algorithms = [PCA(components=[0, 1]),
+                      TSNE(components=[0, 1]),
+                      AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder2Layer(numerical_data.shape[1]), opt=Adam()),
+                      AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder3Layer(numerical_data.shape[1]), opt=Adam()),
+                      AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder4Layer(numerical_data.shape[1]), opt=Adam())]
 
         # 表示が切れるので、0~1ではなく0.01~0.99に正規化
         scaler = preprocessing.MinMaxScaler(feature_range=(0.01, 0.99))
