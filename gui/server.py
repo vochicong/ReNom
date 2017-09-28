@@ -4,7 +4,7 @@ import json
 
 import os
 
-from bottle import HTTPResponse, request, route, run
+from bottle import HTTPResponse, request, route, run, static_file
 
 import numpy as np
 
@@ -138,7 +138,12 @@ def set_json_body(body):
 
 @route("/")
 def index():
-    return pkg_resources.resource_string(__name__, "static/page.html")
+    return pkg_resources.resource_string(__name__, "index.html")
+
+
+@route("/css/<file_name>")
+def css(file_name):
+    return static_file("css/" + file_name, root='./')
 
 
 @route("/static/<file_name>")
@@ -158,12 +163,40 @@ def fonts(file_name):
 def load():
     filename = request.params.filename
     filepath = os.path.join(DATA_DIR, filename)
+    algorithm = int(request.params.algorithm)
 
     try:
         # nanを含むデータは使わない
         pdata = pd.read_csv(filepath).dropna()
         # 画面で選択できるカラム名を取得する
         labels = pdata.columns[np.logical_or(pdata.dtypes == "float", pdata.dtypes == "int")]
+
+        # filename, algorithmが変わっていたらデータの再読み込み&次元削減
+        if params.is_file_changed(filename, algorithm):
+            filepath = os.path.join(DATA_DIR, filename)
+            pdata = pd.read_csv(filepath).dropna()
+
+            # カテゴリデータを抽出
+            categorical_data = np.array(pdata.loc[:, pdata.dtypes == "object"])
+            topology.regist_categorical_data(categorical_data)
+
+            # 数値データを抽出
+            numerical_data = np.array(pdata.loc[:, np.logical_or(
+                pdata.dtypes == "float", pdata.dtypes == "int")])
+            params.avg = np.average(numerical_data, axis=0)
+            params.std = np.std(numerical_data, axis=0)
+            numerical_data = (numerical_data - params.avg) / params.std
+
+            algorithms = [PCA(components=[0, 1]),
+                          TSNE(components=[0, 1]),
+                          AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder2Layer(numerical_data.shape[1]), opt=Adam()),
+                          AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder3Layer(numerical_data.shape[1]), opt=Adam()),
+                          AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder4Layer(numerical_data.shape[1]), opt=Adam())]
+
+            # 表示が切れるので、0~1ではなく0.01~0.99に正規化
+            scaler = preprocessing.MinMaxScaler(feature_range=(0.01, 0.99))
+            topology.fit_transform(numerical_data, metric=None, lens=[
+                                   algorithms[algorithm]], scaler=scaler)
 
         body = json.dumps({"labels": labels.tolist()})
         r = set_json_body(body)
@@ -201,33 +234,6 @@ def create():
     resolution = int(request.params.resolution)
     overlap = float(request.params.overlap)
     colored_by = int(request.params.colored_by)
-
-    # filename, algorithmが変わっていたらデータの再読み込み&次元削減
-    if params.is_file_changed(filename, algorithm):
-        filepath = os.path.join(DATA_DIR, filename)
-        pdata = pd.read_csv(filepath).dropna()
-
-        # カテゴリデータを抽出
-        categorical_data = np.array(pdata.loc[:, pdata.dtypes == "object"])
-        topology.regist_categorical_data(categorical_data)
-
-        # 数値データを抽出
-        numerical_data = np.array(pdata.loc[:, np.logical_or(
-            pdata.dtypes == "float", pdata.dtypes == "int")])
-        params.avg = np.average(numerical_data, axis=0)
-        params.std = np.std(numerical_data, axis=0)
-        numerical_data = (numerical_data - params.avg) / params.std
-
-        algorithms = [PCA(components=[0, 1]),
-                      TSNE(components=[0, 1]),
-                      AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder2Layer(numerical_data.shape[1]), opt=Adam()),
-                      AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder3Layer(numerical_data.shape[1]), opt=Adam()),
-                      AutoEncoder(epoch=500, batch_size=100, network=AutoEncoder4Layer(numerical_data.shape[1]), opt=Adam())]
-
-        # 表示が切れるので、0~1ではなく0.01~0.99に正規化
-        scaler = preprocessing.MinMaxScaler(feature_range=(0.01, 0.99))
-        topology.fit_transform(numerical_data, metric=None, lens=[
-                               algorithms[algorithm]], scaler=scaler)
 
     # filename, algorithm, resolution, overlapが変わっていたらトポロジーの再計算
     if params.is_file_changed(filename, algorithm) | params.is_params_changed(resolution, overlap):
