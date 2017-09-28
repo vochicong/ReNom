@@ -185,7 +185,7 @@ def load():
                 pdata.dtypes == "float", pdata.dtypes == "int")])
             params.avg = np.average(numerical_data, axis=0)
             params.std = np.std(numerical_data, axis=0)
-            numerical_data = (numerical_data - params.avg) / params.std
+            numerical_data = (numerical_data - params.avg) / (params.std + 1e-6)
 
             algorithms = [PCA(components=[0, 1]),
                           TSNE(components=[0, 1]),
