@@ -23,6 +23,14 @@ export default {
         'edge': Edge
     },
     computed: {
+        width() {
+            let e = document.getElementById("center");
+            return e.clientWidth;
+        },
+        height() {
+            let e = document.getElementById("center");
+            return e.clientHeight;
+        },
         nodes(){
             return this.$store.state.topology.nodes
         },
@@ -35,6 +43,7 @@ export default {
 
 <style lang="scss">
 #center {
+    height: 100%;
     margin: 0;
     padding: 0;
 }
