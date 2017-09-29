@@ -143,7 +143,7 @@ def index():
 
 @route("/css/<file_name>")
 def css(file_name):
-    return static_file("css/" + file_name, root='./')
+    return static_file("css/" + file_name, root=BASE_DIR + '/css')
 
 
 @route("/static/<file_name>")
