@@ -9,7 +9,7 @@ try:
     from renom.cuda.curand import *
     _has_cuda = True
 except ImportError as e:
-    warnings.warn("Couldn't find cuda modules. %s"%e)
+    warnings.warn("Couldn't find cuda modules. %s" % e)
     curand_generator = None
     _has_cuda = False
 
