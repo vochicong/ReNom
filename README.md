@@ -4,6 +4,11 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
+
+## ReNom version 2.2
+
+Added TDA modules.
+
 ## Requirements
 
 - python2.7, 3.4
