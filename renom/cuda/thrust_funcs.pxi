@@ -473,3 +473,22 @@ def cusum4(gpu_value1, axis=None):
 
     return result
 
+
+def cusum5(gpu_value1, axis=None):
+    import renom.cuda
+    nsize = functools.reduce(operator.__mul__, gpu_value1.shape, 1)
+    axis_size = gpu_value1.shape[axis]
+    elem_size = functools.reduce(operator.__mul__, gpu_value1.shape[axis:], 1)
+    child_size = functools.reduce(operator.__mul__, gpu_value1.shape[axis+1:], 1)
+    result_shape = gpu_value1.shape[:axis] + gpu_value1.shape[axis+1:]
+    result_size = np.product(result_shape, dtype=int)
+
+    result = renom.core.GPUValue(shape=result_shape)
+
+    cdef VALUE_TYPE *ptr1 = <VALUE_TYPE *><uintptr_t>gpu_value1._ptr
+    cdef VALUE_TYPE *ptr2 = <VALUE_TYPE *><uintptr_t>result._ptr
+
+    thrust_sum_blocks3(ptr1, nsize, axis_size, elem_size, child_size, ptr2, result_size)
+
+    return result
+

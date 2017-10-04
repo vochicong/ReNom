@@ -29,6 +29,12 @@ cdef extern from * namespace "renom":
                              const size_t result_len)
     cdef void thrust_sum_blocks(const size_t g, VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len)
     cdef void thrust_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len)
+
+    cdef void thrust_sum_blocks3(VALUE_TYPE *a, const size_t nsize,
+                                 const size_t axis_size, const size_t elem_size,
+                                 const size_t child_size, VALUE_TYPE *b,
+                                 const size_t result_size)
+
     cdef void thrust_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len)
 
     cdef void thrust_leaky_relu_forward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);

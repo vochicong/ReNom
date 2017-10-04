@@ -90,8 +90,8 @@ cdef class ConvolutionDescriptor:
 
     def __init__(self, padding, stride, dtype):
         cdef int pad_h, pad_w, u, v, upscalex, upscaley
-        cdef cudnnConvolutionMode_t mode
-
+        cdef cudnnConvolutionMode_t mode;
+        mode = CUDNN_CONVOLUTION;
         pad_h, pad_w = padding
         u, v = stride
         upscalex, upscaley = 1, 1
