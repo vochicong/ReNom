@@ -271,54 +271,66 @@ namespace renom{
 
             __shared__ VALUE_TYPE sharemem[1024];
 
-            size_t threads_per_result = axis_size;
-            if (threads_per_result > blockDim.x) {
-                threads_per_result = blockDim.x;
-            }
-            size_t result_per_grid = blockDim.x / threads_per_result;
-            size_t grid_result_from = blockIdx.x * result_per_grid;
-            size_t grid_result_to = (blockIdx.x + 1) * result_per_grid;
-            if (grid_result_to > result_size) {
-                grid_result_to = result_size;
+            size_t num_block_results = ((result_size - 1) / gridDim.x + 1);
+
+            size_t block_result_from = blockIdx.x * num_block_results;
+            size_t block_result_to = (blockIdx.x + 1) * num_block_results;
+            if (block_result_to > result_size) {
+                block_result_to = result_size;
             }
 
-            size_t grid_result_step = blockDim.x / threads_per_result;
+            size_t threads_per_result = 1024 / num_block_results;
+            if (threads_per_result == 0) {
+                threads_per_result = 1;
+            }
+
+            size_t block_result_step = blockDim.x / threads_per_result;
 
             size_t src_per_thread = (axis_size - 1) / threads_per_result + 1;
             size_t nth_thread = threadIdx.x % threads_per_result;
 
-            for (size_t idx_result_start=grid_result_from;
-                 idx_result_start < grid_result_to;
-                 idx_result_start += grid_result_step) {
+// printf("result_size: %lu blockDim.x: %d num_block_results: %lu block_result_from: %lu block_result_to: %lu threads_per_result: %lu block_result_step: %lu src_per_thread: %u \n", result_size, blockDim.x, num_block_results, block_result_from, block_result_to, threads_per_result, block_result_step, src_per_thread, nth_thread);
+
+            for (size_t idx_result_start=block_result_from;
+                 idx_result_start < block_result_to;
+                 idx_result_start += block_result_step) {
 
                 size_t idx_result = idx_result_start + threadIdx.x / threads_per_result;
 
-                if (idx_result < grid_result_to) {
+                sharemem[threadIdx.x] = 0;
 
-                    size_t idx_src_from = (idx_result / child_size) * elem_size + idx_result % child_size;
-                    idx_src_from += nth_thread * src_per_thread * child_size;
+                if (nth_thread * src_per_thread < axis_size) {
+                    if (idx_result < block_result_to) {
 
-                    size_t idx_src_to = idx_src_from + src_per_thread * child_size;
-                    VALUE_TYPE s = 0;
+                        size_t idx_src_from = (idx_result / child_size) * elem_size + idx_result % child_size;
+                        idx_src_from += nth_thread * src_per_thread * child_size;
 
-                    for (size_t idx_src = idx_src_from; idx_src < idx_src_to; idx_src +=child_size) {
-                        if (idx_src < nsize) {
-                            s += a[idx_src];
+                        size_t idx_src_to = idx_src_from + src_per_thread * child_size;
+                        if (idx_src_to > nsize) {
+                            idx_src_to = nsize;
                         }
-                    }
 
-                    sharemem[threadIdx.x] = s;
-                    __syncthreads();
+                        VALUE_TYPE s = 0;
 
-
-                    if (nth_thread == 0) {
-
-                        VALUE_TYPE ret = 0;
-                        for (size_t i = 0; i < threads_per_result; i++) {
-                            size_t n = threadIdx.x + i;
-                            ret += sharemem[n];
+                        for (size_t idx_src = idx_src_from; idx_src < idx_src_to; idx_src +=child_size) {
+                            if (idx_src < nsize) {
+                                s += a[idx_src];
+                            }
                         }
-                        b[idx_result] = ret;
+
+                        sharemem[threadIdx.x] = s;
+                        __syncthreads();
+
+                        if (nth_thread == 0) {
+                            VALUE_TYPE ret = 0;
+                            for (size_t i = 0; i < threads_per_result; i++) {
+                                size_t n = threadIdx.x + i;
+                                if (n < 1024) {
+                                    ret += sharemem[n];
+                                }
+                            }
+                            b[idx_result] = ret;
+                        }
                     }
                 }
             }
@@ -331,17 +343,17 @@ namespace renom{
                                  const size_t result_size) {
 
             size_t num_threads = 1024;
-            size_t max_grids = 2147483648;
+            size_t num_blocks = 2147483648;
 
-            size_t threads_per_result = axis_size;
-            if (threads_per_result > num_threads) {
-                threads_per_result = num_threads;
+            size_t max_threads_per_result = axis_size;
+            if (max_threads_per_result > num_threads) {
+                max_threads_per_result = num_threads;
             }
-            size_t result_per_grid = num_threads / threads_per_result;
+            size_t result_per_block = num_threads / max_threads_per_result;
 
-            size_t num_grid = ((result_size - 1) / result_per_grid) + 1;
-            if (num_grid > max_grids) {
-                num_grid = max_grids;
+            size_t nblocks = ((result_size - 1) / result_per_block) + 1;
+            if (nblocks > num_blocks) {
+                nblocks = num_blocks;
             }
 
 /*
@@ -349,7 +361,7 @@ printf("result_size: %d threads_per_result: %d result_per_grid: %d num_grid: %d\
 
 printf("(result_size - 1): %d ((result_size - 1) / result_per_grid): %d max_grids: %d\n", (int)(result_size - 1), (int)((result_size - 1) / result_per_grid), max_grids);
 */
-            cuda_sum_blocks3<<<num_grid, num_threads>>> (a, nsize, axis_size, elem_size, child_size,
+            cuda_sum_blocks3<<<nblocks, num_threads>>> (a, nsize, axis_size, elem_size, child_size,
                                         b, result_size);
         }
 
