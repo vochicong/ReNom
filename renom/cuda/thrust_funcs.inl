@@ -268,7 +268,6 @@ namespace renom{
                                          const size_t elem_size, const size_t child_size,
                                          VALUE_TYPE *b, const size_t result_size) {
 
-
             __shared__ VALUE_TYPE sharemem[1024];
 
             size_t num_block_results = ((result_size - 1) / gridDim.x + 1);
@@ -279,7 +278,7 @@ namespace renom{
                 block_result_to = result_size;
             }
 
-            size_t threads_per_result = 1024 / num_block_results;
+            size_t threads_per_result = blockDim.x / num_block_results;
             if (threads_per_result == 0) {
                 threads_per_result = 1;
             }
@@ -289,7 +288,9 @@ namespace renom{
             size_t src_per_thread = (axis_size - 1) / threads_per_result + 1;
             size_t nth_thread = threadIdx.x % threads_per_result;
 
-// printf("result_size: %lu blockDim.x: %d num_block_results: %lu block_result_from: %lu block_result_to: %lu threads_per_result: %lu block_result_step: %lu src_per_thread: %u \n", result_size, blockDim.x, num_block_results, block_result_from, block_result_to, threads_per_result, block_result_step, src_per_thread, nth_thread);
+if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
+ printf("!!!!!!! result_size: %lu blockDim.x: %d num_block_results: %lu block_result_from: %lu block_result_to: %lu threads_per_result: %lu block_result_step: %lu src_per_thread: %u \n", result_size, blockDim.x, num_block_results, block_result_from, block_result_to, threads_per_result, block_result_step, src_per_thread, nth_thread);
+}
 
             for (size_t idx_result_start=block_result_from;
                  idx_result_start < block_result_to;
@@ -301,7 +302,6 @@ namespace renom{
 
                 if (nth_thread * src_per_thread < axis_size) {
                     if (idx_result < block_result_to) {
-
                         size_t idx_src_from = (idx_result / child_size) * elem_size + idx_result % child_size;
                         idx_src_from += nth_thread * src_per_thread * child_size;
 
@@ -312,12 +312,22 @@ namespace renom{
 
                         VALUE_TYPE s = 0;
 
-                        for (size_t idx_src = idx_src_from; idx_src < idx_src_to; idx_src +=child_size) {
+if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
+   printf("====== result_size: %lu blockDim.x: %d num_block_results: %lu block_result_from: %lu block_result_to: %lu threads_per_result: %lu block_result_step: %lu src_per_thread: %lu \n", result_size, blockDim.x, num_block_results, block_result_from, block_result_to, threads_per_result, block_result_step, src_per_thread, nth_thread);
+
+
+    printf("[[[[[[[[[ nsize: %lu, src_per_thread: %lu, idx_result_start: %lu idx_src_from: %lu idx_src_to: %lu \n", 
+        nsize, src_per_thread, idx_result_start, idx_src_from, idx_src_to);
+    
+    printf("[[[[[[[[[ nsize: %lu, src_per_thread: %lu, idx_result_start: %lu idx_src_from: %lu idx_src_to: %lu \n", 
+        nsize, src_per_thread, idx_result_start, idx_src_from, idx_src_to);
+}
+
+                        for (size_t idx_src = idx_src_from; idx_src < idx_src_to; idx_src += child_size) {
                             if (idx_src < nsize) {
                                 s += a[idx_src];
                             }
                         }
-
                         sharemem[threadIdx.x] = s;
                         __syncthreads();
 
@@ -342,8 +352,10 @@ namespace renom{
                                  const size_t child_size, VALUE_TYPE *b,
                                  const size_t result_size) {
 
-            size_t num_threads = 1024;
-            size_t num_blocks = 2147483648;
+//            size_t num_threads = 1024;
+            size_t num_threads = 256;
+//            size_t num_blocks = 2147483648;
+            size_t num_blocks = 60000;
 
             size_t max_threads_per_result = axis_size;
             if (max_threads_per_result > num_threads) {
@@ -356,11 +368,11 @@ namespace renom{
                 nblocks = num_blocks;
             }
 
-/*
-printf("result_size: %d threads_per_result: %d result_per_grid: %d num_grid: %d\n", (int)result_size, (int)threads_per_result, (int)result_per_grid, (int)num_grid);
 
-printf("(result_size - 1): %d ((result_size - 1) / result_per_grid): %d max_grids: %d\n", (int)(result_size - 1), (int)((result_size - 1) / result_per_grid), max_grids);
-*/
+//printf("result_size: %lu max_threads_per_result: %lu result_per_block: %d nblocks: %lu\n", result_size, max_threads_per_result, result_per_block, nblocks);
+
+//printf("(result_size - 1): %lu ((result_size - 1) / result_per_block): %lu \n", (result_size - 1), ((result_size - 1) / result_per_block));
+
             cuda_sum_blocks3<<<nblocks, num_threads>>> (a, nsize, axis_size, elem_size, child_size,
                                         b, result_size);
         }
