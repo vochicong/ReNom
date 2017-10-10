@@ -144,127 +144,29 @@ namespace renom{
             cuda_copy_memory_stride <<<ceil(src_elems/256.0), 256>>> (dest, src, src_elems, size_stride, size_srcblock);
         }
 
-
-
-        __global__ void cuda_reduce_sum_axis(VALUE_TYPE *src, const size_t nsize, const size_t elemsize,
-                             const size_t childsize, const size_t axis_shape, VALUE_TYPE *output,
-                             const size_t result_len) {
-
-
-            size_t pos = threadIdx.x + blockIdx.x * blockDim.x;
-            output[pos] = 0;
-            if (pos < result_len) {
-                size_t n = (pos / childsize) * elemsize + (pos % childsize);
-                for (size_t i=0; i < axis_shape; i++) {
-                    output[pos] += src[n + i*childsize];
-                }
+        class Reduce_Add {
+        public:
+            __device__ inline static VALUE_TYPE oper(const VALUE_TYPE &l, const VALUE_TYPE &r) {
+                return l + r;
             }
-        }
+        };
 
-
-        // Reduce vector elems
-        void thrust_reduce_sum_axis(VALUE_TYPE *src, const size_t nsize, const size_t elemsize,
-                             const size_t childsize, const size_t axis_shape, VALUE_TYPE *output,
-                             const size_t result_len)
-        {
-            cuda_reduce_sum_axis <<<ceil(result_len/256.0), 256>>> (src, nsize, elemsize, childsize, axis_shape, output, result_len);
-        }
-
-
-        __global__ void cuda_sum_blocks(VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len) {
-            size_t i = threadIdx.x + blockIdx.x * blockDim.x;
-            if (i >= nsize) {
-                return;
+        class Reduce_Min {
+        public:
+            __device__ inline static VALUE_TYPE oper(const VALUE_TYPE &l, const VALUE_TYPE &r) {
+                return (l < r)?l:r;
             }
+        };
 
-            size_t n_block = i / block_len;
-            size_t block_top = n_block * block_len;
-
-            size_t offset = i - block_top;
-            size_t n_seq = offset / part_len;
-
-            if (n_seq % 2) {
-                return;
+        class Reduce_Max{
+        public:
+            __device__ inline static VALUE_TYPE oper(const VALUE_TYPE &l, const VALUE_TYPE &r) {
+                return (l > r)?l:r;
             }
+        };
 
-            if (i + part_len >= block_top + block_len) {
-                return;
-            }
-
-             
-            if (i+part_len >= nsize) {
-                return;
-            }
-            a[i] += a[i+part_len];
-        }
-
-        void thrust_sum_blocks(const size_t g, VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len) {
-            dim3 block(g);
-            dim3 grid((nsize + block.x - 1) / block.x, 1);
-            cuda_sum_blocks<<<grid, block>>> (a, nsize, block_len, part_len);
-        }
-
-
-        __global__ void cuda_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t elemsize, const size_t childsize) {
-//            printf("============= %d\n", childsize);
-
-            size_t num = (nsize-1) / blockDim.x + 1;
-            size_t begin = num * threadIdx.x;
-            size_t end = begin + num;
-            if (end >= nsize) {
-                end = nsize;
-            }
-
-//            printf("%\d\n", blockDim.x);
-
-            printf("@@@@@@@@ x:%lu begin:%lu end:%lu elem:%lu s:%lu\n", threadIdx.x, begin, end, elemsize, childsize);
-            size_t s = childsize;
-
-//            printf("begin: %lu end: %lu\n", begin, end);
-            while (s < elemsize) {
-                for (size_t i = begin; i < end; i++) {
-                    size_t n_block = i / elemsize;
-
-                    size_t block_top = n_block * elemsize;
-                    size_t offset = i - block_top;
-                    size_t n_seq = offset / s;
-
-//                    printf("==== begin: %lu s: %lu i:%lu block_top: %lu offset: %lu n_seq: %lu\n", begin, s, i, block_top, offset, n_seq);
-
-                    if (n_seq % 2) {
-                        continue;
-                    }
-
-//                    printf("11111 begin: %lu \n", begin);
-                    
-                    if (i + s >= block_top + elemsize) {
-                        continue;
-                    }
-             
-//                    printf("22222222222 begin: %lu \n", begin);
-                    if (i + s >= nsize) {
-                        continue;
-                    }
-//                    printf(">>> x:%lu i:%lu s:%lu\n", threadIdx.x, i, s);
-//                    if (i == 0) {
-//                        printf("begin:%lu end: %lu s:%lu\n", begin, end, s);
-//                    }
-                    a[i] += a[i + s];
-                }
-                __syncthreads();
-                s *= 2;
-            }
-        }
-
-
-        void thrust_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t elemsize, const size_t childsize) {
-            size_t x = (nsize > 1024)?1024:nsize;
-            cuda_sum_blocks2<<<1, x>>> (a, nsize, elemsize, childsize);
-        }
-
-
-
-        __global__ void cuda_sum_blocks3(VALUE_TYPE *a, const size_t nsize, const size_t axis_size, 
+        template <typename T>
+        __global__ void cuda_reduce_array(VALUE_TYPE *a, const size_t nsize, const size_t axis_size, 
                                          const size_t elem_size, const size_t child_size,
                                          VALUE_TYPE *b, const size_t result_size) {
 
@@ -310,8 +212,6 @@ if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
                             idx_src_to = idx_src_from_base + elem_size;
                         }
 
-                        VALUE_TYPE s = 0;
-
 if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
    printf("====== result_size: %lu blockDim.x: %d num_block_results: %lu block_result_from: %lu block_result_to: %lu threads_per_result: %lu block_result_step: %lu src_per_thread: %lu \n", result_size, blockDim.x, num_block_results, block_result_from, block_result_to, threads_per_result, block_result_step, src_per_thread, nth_thread);
 
@@ -323,26 +223,32 @@ if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
         nsize, src_per_thread, idx_result_start, idx_src_from, idx_src_to);
 }
 
-                        for (size_t idx_src = idx_src_from; idx_src < idx_src_to; idx_src += child_size) {
-                            s += a[idx_src];
-if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
- printf("!!!!!!! idx_src: %lu a[idx_src]: %f s:%f\n", idx_src, a[idx_src], s);
-}
-                        }
-
+                        if (idx_src_from < idx_src_to) {
+                            size_t idx_src = idx_src_from;
+                            VALUE_TYPE s = 0;
+                            s = a[idx_src];
+                            idx_src += child_size;
+                            for (; idx_src < idx_src_to; idx_src += child_size) {
+                                s = T::oper(s, a[idx_src]);
+    if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
+     printf("!!!!!!! idx_src: %lu a[idx_src]: %f s:%f\n", idx_src, a[idx_src], s);
+    }
+                            }
 if (0 && blockIdx.x == 0) {
  printf("!!!!!!! threadIdx.x: %d s:%f idx_src_from: %ld idx_src_to: %ld nsize: %ld\n", threadIdx.x, s, idx_src_from, idx_src_to, nsize);
 }
 
-                        sharemem[threadIdx.x] = s;
+                            sharemem[threadIdx.x] = s;
+                        }
+
                         __syncthreads();
 
                         if (nth_thread == 0) {
                             VALUE_TYPE ret = 0;
                             for (size_t i = 0; i < threads_per_result; i++) {
                                 size_t n = threadIdx.x + i;
-                                if (n < 1024) {
-                                    ret += sharemem[n];
+                                if (n < blockDim.x) {
+                                    ret = T::oper(ret, sharemem[n]);
                                 }
                             }
                             b[idx_result] = ret;
@@ -353,10 +259,12 @@ if (0 && blockIdx.x == 0) {
         }
 
 
-        void thrust_sum_blocks3(VALUE_TYPE *a, const size_t nsize,
+        template <typename T>
+        void reduce_array(VALUE_TYPE *a, const size_t nsize,
                                  const size_t axis_size, const size_t elem_size,
                                  const size_t child_size, VALUE_TYPE *b,
                                  const size_t result_size) {
+
 
 //            size_t num_threads = 1024;
             size_t num_threads = 512;
@@ -379,7 +287,35 @@ if (0 && blockIdx.x == 0) {
 
 //printf("(result_size - 1): %lu ((result_size - 1) / result_per_block): %lu \n", (result_size - 1), ((result_size - 1) / result_per_block));
 
-            cuda_sum_blocks3<<<nblocks, num_threads>>> (a, nsize, axis_size, elem_size, child_size,
+            cuda_reduce_array<T><<<nblocks, num_threads>>> (a, nsize, axis_size, elem_size, child_size,
+                                        b, result_size);
+
+        }
+
+        void thrust_reduce_sum(VALUE_TYPE *a, const size_t nsize,
+                                 const size_t axis_size, const size_t elem_size,
+                                 const size_t child_size, VALUE_TYPE *b,
+                                 const size_t result_size) {
+
+            reduce_array<Reduce_Add>(a, nsize, axis_size, elem_size, child_size,
+                                        b, result_size);
+        }
+
+        void thrust_reduce_min(VALUE_TYPE *a, const size_t nsize,
+                                 const size_t axis_size, const size_t elem_size,
+                                 const size_t child_size, VALUE_TYPE *b,
+                                 const size_t result_size) {
+
+            reduce_array<Reduce_Min>(a, nsize, axis_size, elem_size, child_size,
+                                        b, result_size);
+        }
+
+        void thrust_reduce_max(VALUE_TYPE *a, const size_t nsize,
+                                 const size_t axis_size, const size_t elem_size,
+                                 const size_t child_size, VALUE_TYPE *b,
+                                 const size_t result_size) {
+
+            reduce_array<Reduce_Max>(a, nsize, axis_size, elem_size, child_size,
                                         b, result_size);
         }
 

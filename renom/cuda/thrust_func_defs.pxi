@@ -24,14 +24,16 @@ cdef extern from * namespace "renom":
     cdef void thrust_create_mask(VALUE_TYPE *a, int size)
     cdef void thrust_min(VALUE_TYPE v, VALUE_TYPE *a, VALUE_TYPE *b, int size);
     cdef void thrust_max(VALUE_TYPE v, VALUE_TYPE *a, VALUE_TYPE *b, int size);
-    cdef void thrust_reduce_sum_axis(VALUE_TYPE *src, const size_t nsize, const size_t elemsize,
-                             const size_t childsize, const size_t axis_shape, VALUE_TYPE *output,
-                             const size_t result_len)
-    cdef void thrust_sum_blocks(const size_t g, VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len)
-    cdef void thrust_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len)
+    cdef void thrust_reduce_sum(VALUE_TYPE *a, const size_t nsize,
+                                 const size_t axis_size, const size_t elem_size,
+                                 const size_t child_size, VALUE_TYPE *b,
+                                 const size_t result_size)
 
-
-    cdef void thrust_sum_blocks3(VALUE_TYPE *a, const size_t nsize,
+    cdef void thrust_reduce_min(VALUE_TYPE *a, const size_t nsize,
+                                 const size_t axis_size, const size_t elem_size,
+                                 const size_t child_size, VALUE_TYPE *b,
+                                 const size_t result_size)
+    cdef void thrust_reduce_max(VALUE_TYPE *a, const size_t nsize,
                                  const size_t axis_size, const size_t elem_size,
                                  const size_t child_size, VALUE_TYPE *b,
                                  const size_t result_size)
