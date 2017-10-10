@@ -85,17 +85,7 @@ class sum(Node):
 
     @classmethod
     def _oper_gpu(cls, arg, axis=None):
-        if axis is None:
-            return GPUValue(precision(cusum(get_gpu(arg))))
-        elif axis == 0:
-            new_shape = tuple([arg.shape[i] for i in range(len(arg.shape)) if not i == axis])
-            ret = GPUValue(np.zeros(shape=new_shape, dtype=arg.dtype))
-            cusum(get_gpu(arg), get_gpu(ret), axis=axis)
-            return ret
-        else:
-            a_cpu = get_gpu(arg).new_array()
-            ret = GPUValue(np.sum(a_cpu, axis=axis))
-            return ret
+        return cusum(get_gpu(arg), axis=axis)
 
     def __new__(cls, arg, axis=None):
         assert not hasattr(axis, "__getitem__"), "The argument axis only accepts integer."

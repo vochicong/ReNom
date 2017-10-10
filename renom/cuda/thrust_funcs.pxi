@@ -379,6 +379,7 @@ ctypedef void (*REDUCE_FUNC)(VALUE_TYPE *a, const size_t nsize,
                                  const size_t result_size)
 
 cdef _reduce_array(gpu_value1, axis, REDUCE_FUNC f):
+    cdef VALUE_TYPE xxx
     import renom.cuda
     nsize = functools.reduce(operator.__mul__, gpu_value1.shape, 1)
 
@@ -386,7 +387,7 @@ cdef _reduce_array(gpu_value1, axis, REDUCE_FUNC f):
         axis_size = nsize
         elem_size = nsize
         child_size = 1
-        result_shape = (1,)
+        result_shape = ()
         result_size = 1
     else:
         axis_size = gpu_value1.shape[axis]
@@ -401,12 +402,16 @@ cdef _reduce_array(gpu_value1, axis, REDUCE_FUNC f):
     cdef VALUE_TYPE *ptr2 = <VALUE_TYPE *><uintptr_t>result._ptr
 
     f(ptr1, nsize, axis_size, elem_size, child_size, ptr2, result_size)
+    return result
+
 
 def cusum(gpu_value1, axis=None):
     return _reduce_array(gpu_value1, axis, thrust_reduce_sum)
 
+
 def cu_reduce_min(gpu_value1, axis=None):
     return _reduce_array(gpu_value1, axis, thrust_reduce_min)
+
 
 def cu_reduce_max(gpu_value1, axis=None):
     return _reduce_array(gpu_value1, axis, thrust_reduce_min)
