@@ -4,6 +4,11 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
+
+## ReNom version 2.2
+
+Added TDA modules.
+
 ## Requirements
 
 - python2.7, 3.4
@@ -12,7 +17,12 @@ Documents are available on the ReNom.jp web site.
 - cython 0.24
 - cuda-toolkit 8.0
 - cudnn 5.1
-
+- bottle 0.12.13
+- matplotlib 2.0.2
+- networkx 1.11
+- pandas 0.20.3
+- scikit-learn 0.18.2
+- scipy 0.19.0
 
 ## Installation
 
