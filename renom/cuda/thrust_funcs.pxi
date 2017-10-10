@@ -222,34 +222,6 @@ def cuabs_backward(gpu_value1, gpu_value2):
     thrust_abs_backward(ptr1, ptr2, size)
 
 
-def cusum(gpu_value1, gpu_value2=None, axis=None):
-    cdef int size = gpu_value1.size
-    cdef VALUE_TYPE * ptr1
-    cdef VALUE_TYPE * ptr2
-
-    cuda_base.check_heap_device(gpu_value1, gpu_value2)
-    if axis is None:
-        ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
-        return thrust_all_reduce(ptr1, size)
-    else:
-        axis_size = gpu_value1.shape[axis]
-
-        if axis == 1:
-            strides = 1
-        elif axis == 0:
-            if len(gpu_value1.shape) == 1:
-                strides = 1
-            else:
-                strides = gpu_value1.shape[1]
-        else:
-            strides = np.prod(gpu_value1.shape[:axis])
-
-        step = 1 if axis != 1 else gpu_value1.shape[1]
-        thrust_strided_reduce( < VALUE_TYPE*> < uintptr_t > gpu_value1._ptr,
-                              < VALUE_TYPE * > < uintptr_t > gpu_value2._ptr,
-                              strides, axis_size, step, size)
-
-
 def cumin(value, gpu_value1, gpu_value2=None):
     cdef int size = gpu_value1.size
     cdef VALUE_TYPE * ptr1 = < VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
@@ -430,12 +402,7 @@ cdef _reduce_array(gpu_value1, axis, REDUCE_FUNC f):
 
     f(ptr1, nsize, axis_size, elem_size, child_size, ptr2, result_size)
 
-    if axis is None:
-        return result[0]
-    else:
-        return result
-
-def cu_reduce_sum(gpu_value1, axis=None):
+def cusum(gpu_value1, axis=None):
     return _reduce_array(gpu_value1, axis, thrust_reduce_sum)
 
 def cu_reduce_min(gpu_value1, axis=None):
