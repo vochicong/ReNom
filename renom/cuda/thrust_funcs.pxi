@@ -15,6 +15,7 @@ import functools
 import renom.core
 import renom.cuda
 
+
 def cunegate(input, result):
     cuda_base.check_heap_device(input, result)
 
@@ -373,10 +374,10 @@ def cuconcat(gpu_value1, gpu_value2, gpu_value3, axis):
     thrust_copy_memory_stride(ptr3 + size1, ptr2, gpu_value2.size, rec_size, size2)
 
 
-ctypedef void (*REDUCE_FUNC)(VALUE_TYPE *a, const size_t nsize,
-                                 const size_t axis_size, const size_t elem_size,
-                                 const size_t child_size, VALUE_TYPE *b,
-                                 const size_t result_size)
+ctypedef void(*REDUCE_FUNC)(VALUE_TYPE * a, const size_t nsize,
+                            const size_t axis_size, const size_t elem_size,
+                            const size_t child_size, VALUE_TYPE * b,
+                            const size_t result_size)
 
 cdef _reduce_array(gpu_value1, axis, REDUCE_FUNC f):
     cdef VALUE_TYPE xxx
@@ -392,14 +393,14 @@ cdef _reduce_array(gpu_value1, axis, REDUCE_FUNC f):
     else:
         axis_size = gpu_value1.shape[axis]
         elem_size = functools.reduce(operator.__mul__, gpu_value1.shape[axis:], 1)
-        child_size = functools.reduce(operator.__mul__, gpu_value1.shape[axis+1:], 1)
-        result_shape = gpu_value1.shape[:axis] + gpu_value1.shape[axis+1:]
+        child_size = functools.reduce(operator.__mul__, gpu_value1.shape[axis + 1:], 1)
+        result_shape = gpu_value1.shape[:axis] + gpu_value1.shape[axis + 1:]
         result_size = np.product(result_shape, dtype=int)
 
     result = renom.core.GPUValue(shape=result_shape)
 
-    cdef VALUE_TYPE *ptr1 = <VALUE_TYPE *><uintptr_t>gpu_value1._ptr
-    cdef VALUE_TYPE *ptr2 = <VALUE_TYPE *><uintptr_t>result._ptr
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > result._ptr
 
     f(ptr1, nsize, axis_size, elem_size, child_size, ptr2, result_size)
     return result
@@ -415,4 +416,3 @@ def cu_reduce_min(gpu_value1, axis=None):
 
 def cu_reduce_max(gpu_value1, axis=None):
     return _reduce_array(gpu_value1, axis, thrust_reduce_min)
-

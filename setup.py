@@ -138,10 +138,10 @@ ext_modules = []
 cuda_sources = []
 
 
-cuda_depends=['renom/cuda/thrust_func_defs.pxi',
-         'renom/cuda/thrust_funcs.pxi', 
-         'renom/cuda/thrust_funcs.h'
-]
+cuda_depends = ['renom/cuda/thrust_func_defs.pxi',
+                'renom/cuda/thrust_funcs.pxi',
+                'renom/cuda/thrust_funcs.h'
+                ]
 
 
 def setup_cuda():
