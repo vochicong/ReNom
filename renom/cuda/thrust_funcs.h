@@ -103,9 +103,15 @@ namespace renom{
         __global__ void cuda_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t elemsize, const size_t childsize);
         void thrust_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t elemsize, const size_t childsize);
 
-        __global__ void cuda_sum_blocks3(VALUE_TYPE *a, const size_t nsize, const size_t axis_size, 
-                                         const size_t elemsize, const size_t childsize,
-                                         VALUE_TYPE *b, const size_t result_size);
+
+        struct Reduce_Add {
+        };
+        
+
+//        __global__ void cuda_sum_blocks3(VALUE_TYPE *a, const size_t nsize, const size_t axis_size, 
+//                                         const size_t elemsize, const size_t childsize,
+//                                         VALUE_TYPE *b, const size_t result_size);
+
         void thrust_sum_blocks3(VALUE_TYPE *a, const size_t nsize,
                                  const size_t axis_size, const size_t elem_size,
                                  const size_t child_size, VALUE_TYPE *b,

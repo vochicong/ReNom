@@ -30,6 +30,7 @@ cdef extern from * namespace "renom":
     cdef void thrust_sum_blocks(const size_t g, VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len)
     cdef void thrust_sum_blocks2(VALUE_TYPE *a, const size_t nsize, const size_t block_len, const size_t part_len)
 
+
     cdef void thrust_sum_blocks3(VALUE_TYPE *a, const size_t nsize,
                                  const size_t axis_size, const size_t elem_size,
                                  const size_t child_size, VALUE_TYPE *b,

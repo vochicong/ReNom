@@ -289,7 +289,7 @@ namespace renom{
             size_t nth_thread = threadIdx.x % threads_per_result;
 
 if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
- printf("!!!!!!! result_size: %lu blockDim.x: %d num_block_results: %lu block_result_from: %lu block_result_to: %lu threads_per_result: %lu block_result_step: %lu src_per_thread: %u \n", result_size, blockDim.x, num_block_results, block_result_from, block_result_to, threads_per_result, block_result_step, src_per_thread, nth_thread);
+ printf("!!!!!!! result_size: %lu blockDim.x: %d elem_size: %lu child_size: %lu num_block_results: %lu block_result_from: %lu block_result_to: %lu threads_per_result: %lu block_result_step: %lu src_per_thread: %u \n", result_size, blockDim.x, elem_size, child_size, num_block_results, block_result_from, block_result_to, threads_per_result, block_result_step, src_per_thread, nth_thread);
 }
 
             for (size_t idx_result_start=block_result_from;
@@ -302,12 +302,12 @@ if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
 
                 if (nth_thread * src_per_thread < axis_size) {
                     if (idx_result < block_result_to) {
-                        size_t idx_src_from = (idx_result / child_size) * elem_size + idx_result % child_size;
-                        idx_src_from += nth_thread * src_per_thread * child_size;
+                        size_t idx_src_from_base = (idx_result / child_size) * elem_size + idx_result % child_size;
+                        size_t idx_src_from = idx_src_from_base + nth_thread * src_per_thread * child_size;
 
                         size_t idx_src_to = idx_src_from + src_per_thread * child_size;
-                        if (idx_src_to > nsize) {
-                            idx_src_to = nsize;
+                        if (idx_src_to > (idx_src_from_base + elem_size)) {
+                            idx_src_to = idx_src_from_base + elem_size;
                         }
 
                         VALUE_TYPE s = 0;
@@ -324,10 +324,16 @@ if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
 }
 
                         for (size_t idx_src = idx_src_from; idx_src < idx_src_to; idx_src += child_size) {
-                            if (idx_src < nsize) {
-                                s += a[idx_src];
-                            }
+                            s += a[idx_src];
+if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
+ printf("!!!!!!! idx_src: %lu a[idx_src]: %f s:%f\n", idx_src, a[idx_src], s);
+}
                         }
+
+if (0 && blockIdx.x == 0) {
+ printf("!!!!!!! threadIdx.x: %d s:%f idx_src_from: %ld idx_src_to: %ld nsize: %ld\n", threadIdx.x, s, idx_src_from, idx_src_to, nsize);
+}
+
                         sharemem[threadIdx.x] = s;
                         __syncthreads();
 
@@ -353,7 +359,7 @@ if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
                                  const size_t result_size) {
 
 //            size_t num_threads = 1024;
-            size_t num_threads = 256;
+            size_t num_threads = 512;
 //            size_t num_blocks = 2147483648;
             size_t num_blocks = 60000;
 
