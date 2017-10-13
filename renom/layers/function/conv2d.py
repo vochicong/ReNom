@@ -50,7 +50,7 @@ class conv2d(Node):
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y)
             if b is not None:
-                cu.cuadd(get_gpu(y), get_gpu(b), get_gpu(y))
+                cu.cu_add_bias(get_gpu(b), y)
 
         # assert type(x) is not np.ndarray
 

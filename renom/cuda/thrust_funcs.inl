@@ -126,6 +126,20 @@ namespace renom{
 		}
 	}
 
+    void thrust_add_bias(int size, int n, int wh, VALUE_TYPE *bias, VALUE_TYPE *a)
+    {
+        cuda_add_bias <<<ceil((size)/256.0), 256>>> (size, n, wh, bias, a); 
+    }
+
+    __global__ void cuda_add_bias(int size, int n, int wh, VALUE_TYPE *bias, VALUE_TYPE *a)
+    {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if(idx >= size)
+            return;
+        a[idx] += bias[(int)(idx%(size/n)/wh)];
+    }
+
+
 
         __global__ void cuda_copy_memory_stride(VALUE_TYPE *dest, VALUE_TYPE *src, const size_t src_elems,
                              const size_t size_stride, const size_t size_srcblock) {

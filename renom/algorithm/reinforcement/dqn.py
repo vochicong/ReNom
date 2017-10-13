@@ -17,7 +17,7 @@ class DQN(object):
         self._state_size = state_size if hasattr(state_size, "__getitem__") else [state_size, ]
         self._buffer_size = buffer_size
         self._ganma = ganma
-        self._buffer = ReplayBuffer([1,], self._state_size, buffer_size)
+        self._buffer = ReplayBuffer([1, ], self._state_size, buffer_size)
 
     def action(self, state):
         self._network.set_models(inference=True)
@@ -35,7 +35,7 @@ class DQN(object):
 
     def train(self, env, loss_func=rm.ClippedMeanSquaredError(), optimizer=rm.Rmsprop(lr=0.00025, g=0.95),
               episode=100, batch_size=32, random_step=1000, one_episode_step=20000, test_step=1000,
-              test_env=None, update_period=10000, greedy_step=1000000, min_greedy=0.0,
+              test_env=None, update_period=10000, greedy_step=1000000, min_greedy=0.0, train_frequency=4,
               max_greedy=0.9, test_greedy=0.95, callbacks=None):
 
         greedy = min_greedy
@@ -72,33 +72,40 @@ class DQN(object):
                     self._buffer.store(prestate, np.array(action),
                                        np.array(reward), state, np.array(terminal))
 
-                # Training
-                train_prestate, train_action, train_reward, train_state, train_terminal = \
-                    self._buffer.get_minibatch(batch_size)
+                if j % train_frequency == 0:
+                    # Training
+                    train_prestate, train_action, train_reward, train_state, train_terminal = \
+                        self._buffer.get_minibatch(batch_size)
 
-                target = np.zeros((batch_size, self._action_size), dtype=state.dtype)
-                for i in range(batch_size):
-                    target[i, train_action[i, 0].astype(np.integer)] = train_reward[i]
-                target += (self._target_network(train_state) *\
-                         self._ganma * (~train_terminal[:, None])).as_ndarray()
+                    target = np.zeros((batch_size, self._action_size), dtype=state.dtype)
+                    for i in range(batch_size):
+                        target[i, train_action[i, 0].astype(np.integer)] = train_reward[i]
+                    try:
+                        target += (self._target_network(train_state) *
+                                   self._ganma * (~train_terminal[:, None])).as_ndarray()
+                    except Exception as e:
+                        print(target.shape)
+                        print(train_state.shape)
+                        print(train_terminal.shape)
+                        raise e
 
-                self._network.set_models(inference=False)
-                with self._network.train():
-                    z = self._network(train_prestate)
-                    l = loss_func(z, target)
-                l.grad().update(optimizer)
-                loss += l.as_ndarray()
+                    self._network.set_models(inference=False)
+                    with self._network.train():
+                        z = self._network(train_prestate)
+                        l = loss_func(z, target)
+                    l.grad().update(optimizer)
+                    loss += l.as_ndarray()
 
-                if count % update_period == 0:
-                    self.update()
-                    count = 0
-                count += 1
+                    if count % update_period == 0:
+                        self.update()
+                        count = 0
+                    count += 1
 
                 tq.set_description("episode {:03d} loss:{:6.4f} sum reward:{:5.3f}".format(e,
-                    float(l.as_ndarray()), sum_reward))
+                                                                                           float(l.as_ndarray()), sum_reward))
                 tq.update(1)
             tq.set_description("episode {:03d} avg loss:{:6.4f} avg reward:{:5.3f}".format(e,
-                    float(loss) / (j + 1), sum_reward/one_episode_step))
+                                                                                           float(loss) / (j + 1), sum_reward / one_episode_step))
             tq.update(0)
             tq.refresh()
             tq.close()
@@ -125,5 +132,4 @@ class DQN(object):
                 if func:
                     func()
 
-            sleep(0.25) # This is for jupyter notebook representation.
-
+            sleep(0.25)  # This is for jupyter notebook representation.

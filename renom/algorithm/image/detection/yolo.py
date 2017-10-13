@@ -76,7 +76,7 @@ def apply_nms(x, cells, bbox, classes, thresh=0.2):
     Default threshold for detection is prob < 0.2.
     Default threshold for suppression is IOU > 0.4
     """
-    iou_thresh = 0.4
+    iou_thresh = 0.5
     probs = np.zeros((cells, cells, bbox, classes))
     boxes = np.zeros((cells, cells, bbox, 4))  # 4 is x y w h
     for b in range(bbox):

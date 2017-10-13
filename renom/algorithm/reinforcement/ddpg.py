@@ -37,12 +37,14 @@ class DDPG(object):
         for ac, target_ac in zip(self._actor.iter_models(), self._target_actor.iter_models()):
             if hasattr(ac, "params") and hasattr(target_ac, "params"):
                 for k in ac.params.keys():
-                    ac.params[k] = (1 - self._momentum)*ac.params[k]+self._momentum*target_ac.params[k]
+                    ac.params[k] = (1 - self._momentum) * ac.params[k] + \
+                        self._momentum * target_ac.params[k]
 
         for cr, target_cr in zip(self._critic.iter_models(), self._target_critic.iter_models()):
             if hasattr(cr, "params") and hasattr(target_cr, "params"):
                 for k in cr.params.keys():
-                    cr.params[k] = (1 - self._momentum)*cr.params[k]+self._momentum*target_cr.params[k]
+                    cr.params[k] = (1 - self._momentum) * cr.params[k] + \
+                        self._momentum * target_cr.params[k]
 
     def train(self, env, loss_func=rm.ClippedMeanSquaredError(), optimizer_critic=rm.Adam(lr=0.0001),
               optimizer_actor=rm.Adam(lr=0.0001),
@@ -71,7 +73,7 @@ class DDPG(object):
             tq = tqdm(range(one_episode_step))
             for j in range(one_episode_step):
                 action = np.atleast_2d(self.action(state[None, ...])) + \
-                    np.random.randn(batch_size, self._action_size)*(1 - greedy)*exploration_rate
+                    np.random.randn(batch_size, self._action_size) * (1 - greedy) * exploration_rate
                 prestate, action, reward, state, terminal = env(action)
                 greedy += g_step
                 greedy = np.clip(greedy, min_greedy, max_greedy)
@@ -89,9 +91,10 @@ class DDPG(object):
 
                 self._target_actor.set_models(inference=True)
                 self._target_critic.set_models(inference=True)
-                action_state_value = self._target_critic(train_state, self._target_actor(train_state))
-                target += (action_state_value *\
-                         self._ganma * (~train_terminal[:, None])).as_ndarray()
+                action_state_value = self._target_critic(
+                    train_state, self._target_actor(train_state))
+                target += (action_state_value *
+                           self._ganma * (~train_terminal[:, None])).as_ndarray()
 
                 self._actor.set_models(inference=True)
                 self._critic.set_models(inference=False)
@@ -128,8 +131,9 @@ class DDPG(object):
 
             for j in range(test_step):
                 if state is not None:
-                    action = self.action(state)+\
-                        np.random.randn(batch_size, self._action_size)*(1 - test_step)*exploration_rate
+                    action = self.action(state) +\
+                        np.random.randn(batch_size, self._action_size) * \
+                        (1 - test_step) * exploration_rate
                 prestate, action, reward, state, terminal = test_env(action)
                 sum_reward += float(reward)
 
@@ -144,4 +148,4 @@ class DDPG(object):
                 if func:
                     func()
 
-            sleep(0.25) # This is for jupyter notebook representation.
+            sleep(0.25)  # This is for jupyter notebook representation.

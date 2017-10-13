@@ -416,3 +416,12 @@ def cu_reduce_min(gpu_value1, axis=None):
 
 def cu_reduce_max(gpu_value1, axis=None):
     return _reduce_array(gpu_value1, axis, thrust_reduce_min)
+
+
+def cu_add_bias(bias, gpu_value):
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > bias._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value._ptr
+    cdef int size = <int > gpu_value.size
+    cdef int wh = <int > (gpu_value.shape[2] * gpu_value.shape[3])
+    cdef int n = <int > gpu_value.shape[0]
+    thrust_add_bias(size, n, wh, ptr1, ptr2)
