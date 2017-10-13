@@ -1,4 +1,5 @@
 
+from __future__ import division
 from time import sleep
 import copy
 from tqdm import tqdm
@@ -19,6 +20,7 @@ class DQN(object):
         self._buffer = ReplayBuffer([1,], self._state_size, buffer_size)
 
     def action(self, state):
+        self._network.set_models(inference=True)
         shape = [-1, ] + list(self._state_size)
         s = state.reshape(shape)
         return np.argmax(self._network(s).as_ndarray(), axis=1)
@@ -26,10 +28,14 @@ class DQN(object):
     def update(self):
         # Check GPU data
         self._target_network = copy.deepcopy(self._network)
+        for n, target_n in zip(self._network.iter_models(), self._target_network.iter_models()):
+            if hasattr(n, "params") and hasattr(target_n, "params"):
+                for k in n.params.keys():
+                    target_n.params[k] = rm.Variable(n.params[k])
 
     def train(self, env, loss_func=rm.ClippedMeanSquaredError(), optimizer=rm.Rmsprop(lr=0.00025, g=0.95),
-              episode=100, batch_size=32, random_step=1000, one_episode_step=5000, test_step=1000,
-              test_env=None, update_period=10000, greedy_step=1000000, min_greedy=0.1,
+              episode=100, batch_size=32, random_step=1000, one_episode_step=20000, test_step=1000,
+              test_env=None, update_period=10000, greedy_step=1000000, min_greedy=0.0,
               max_greedy=0.9, test_greedy=0.95, callbacks=None):
 
         greedy = min_greedy
@@ -51,6 +57,7 @@ class DQN(object):
         count = 0
         for e in range(episode):
             loss = 0
+            sum_reward = 0
             tq = tqdm(range(one_episode_step))
             for j in range(one_episode_step):
                 if greedy < np.random.rand() and state is not None:
@@ -60,6 +67,7 @@ class DQN(object):
                 prestate, action, reward, state, terminal = env(action)
                 greedy += g_step
                 greedy = np.clip(greedy, min_greedy, max_greedy)
+                sum_reward += reward
                 if prestate is not None:
                     self._buffer.store(prestate, np.array(action),
                                        np.array(reward), state, np.array(terminal))
@@ -74,18 +82,23 @@ class DQN(object):
                 target += (self._target_network(train_state) *\
                          self._ganma * (~train_terminal[:, None])).as_ndarray()
 
+                self._network.set_models(inference=False)
                 with self._network.train():
                     z = self._network(train_prestate)
                     l = loss_func(z, target)
                 l.grad().update(optimizer)
                 loss += l.as_ndarray()
+
                 if count % update_period == 0:
                     self.update()
                     count = 0
                 count += 1
-                tq.set_description("episode {:03d} loss:{:6.4f}".format(e, float(l.as_ndarray())))
+
+                tq.set_description("episode {:03d} loss:{:6.4f} sum reward:{:5.3f}".format(e,
+                    float(l.as_ndarray()), sum_reward))
                 tq.update(1)
-            tq.set_description("episode {:03d} avg loss:{:6.4f}".format(e, float(loss) / (j + 1)))
+            tq.set_description("episode {:03d} avg loss:{:6.4f} avg reward:{:5.3f}".format(e,
+                    float(loss) / (j + 1), sum_reward/one_episode_step))
             tq.update(0)
             tq.refresh()
             tq.close()
