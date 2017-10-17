@@ -97,12 +97,13 @@ class DQN(object):
                         self.update()
                         count = 0
                     count += 1
-
-                tq.set_description("episode {:03d} loss:{:6.4f} sum reward:{:5.3f}".format(e,
-                                                                                           float(l.as_ndarray()), sum_reward))
+                msg = "episode {:03d} loss:{:6.4f} sum reward:{:5.3f}".format(
+                    e, float(l.as_ndarray()), sum_reward)
+                tq.set_description(msg)
                 tq.update(1)
-            tq.set_description("episode {:03d} avg loss:{:6.4f} avg reward:{:5.3f}".format(e,
-                                                                                           float(loss) / (j + 1), sum_reward / one_episode_step))
+            msg = ("episode {:03d} avg loss:{:6.4f} avg reward:{:5.3f}".format(
+                e, float(loss) / (j + 1), sum_reward / one_episode_step))
+            tq.set_description(msg)
             tq.update(0)
             tq.refresh()
             tq.close()
