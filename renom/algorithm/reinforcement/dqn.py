@@ -60,7 +60,7 @@ class DQN(object):
             sum_reward = 0
             tq = tqdm(range(one_episode_step))
             for j in range(one_episode_step):
-                if greedy < np.random.rand() and state is not None:
+                if greedy > np.random.rand() and state is not None:
                     action = np.argmax(np.atleast_2d(self._network(state[None, ...])), axis=1)
                 else:
                     action = int(np.random.rand() * self._action_size)
@@ -81,12 +81,9 @@ class DQN(object):
                     for i in range(batch_size):
                         target[i, train_action[i, 0].astype(np.integer)] = train_reward[i]
                     try:
-                        target += (self._target_network(train_state) *
-                                   self._ganma * (~train_terminal[:, None])).as_ndarray()
+                        target += (self._target_network(train_state).as_ndarray() *
+                                   self._ganma * (~train_terminal[:, None]))
                     except Exception as e:
-                        print(target.shape)
-                        print(train_state.shape)
-                        print(train_terminal.shape)
                         raise e
 
                     self._network.set_models(inference=False)
@@ -114,7 +111,7 @@ class DQN(object):
             state = None
             sum_reward = 0
             for j in range(test_step):
-                if test_greedy < np.random.rand() and state is not None:
+                if test_greedy > np.random.rand() and state is not None:
                     action = self.action(state)
                 else:
                     action = int(np.random.rand() * self._action_size)
