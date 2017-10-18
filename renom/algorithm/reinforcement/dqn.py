@@ -38,6 +38,11 @@ class DQN(object):
               test_env=None, update_period=10000, greedy_step=1000000, min_greedy=0.0, train_frequency=4,
               max_greedy=0.9, test_greedy=0.95, callbacks=None):
 
+        # History of Learning
+        train_reward_list = []
+        test_reward_list = []
+        train_error_list = []
+
         greedy = min_greedy
         g_step = (max_greedy - min_greedy) / greedy_step
 
@@ -77,14 +82,17 @@ class DQN(object):
                     train_prestate, train_action, train_reward, train_state, train_terminal = \
                         self._buffer.get_minibatch(batch_size)
 
-                    target = np.zeros((batch_size, self._action_size), dtype=state.dtype)
+                    self._network.set_models(inference=False)
+                    self._target_network.set_models(inference=False)
+
+                    target = self._network(train_prestate).as_ndarray()
+                    target.setflags(write=True)
+                    value = (self._target_network(train_state).as_ndarray() *
+                             self._ganma * (~train_terminal[:, None]))
+
                     for i in range(batch_size):
-                        target[i, train_action[i, 0].astype(np.integer)] = train_reward[i]
-                    try:
-                        target += (self._target_network(train_state).as_ndarray() *
-                                   self._ganma * (~train_terminal[:, None]))
-                    except Exception as e:
-                        raise e
+                        a = train_action[i, 0].astype(np.integer)
+                        target[i, a] = train_reward[i] + value[i, 0]
 
                     self._network.set_models(inference=False)
                     with self._network.train():
@@ -101,6 +109,10 @@ class DQN(object):
                     e, float(l.as_ndarray()), sum_reward)
                 tq.set_description(msg)
                 tq.update(1)
+
+            train_reward_list.append(sum_reward)
+            train_error_list.append(float(loss) / (j + 1))
+
             msg = ("episode {:03d} avg loss:{:6.4f} avg reward:{:5.3f}".format(
                 e, float(loss) / (j + 1), sum_reward / one_episode_step))
             tq.set_description(msg)
@@ -118,6 +130,7 @@ class DQN(object):
                     action = int(np.random.rand() * self._action_size)
                 prestate, action, reward, state, terminal = test_env(action)
                 sum_reward += float(reward)
+            test_reward_list.append(sum_reward)
 
             tq.write("    /// Result")
             tq.write("    Average train error:{}".format(float(loss) / one_episode_step))
@@ -131,3 +144,7 @@ class DQN(object):
                     func()
 
             sleep(0.25)  # This is for jupyter notebook representation.
+
+        return {"train_reward": train_reward_list,
+                "train_reward": train_error_list,
+                "test_reward": test_reward}
