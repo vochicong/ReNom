@@ -55,7 +55,7 @@ class DQN(object):
     def train(self, env, loss_func=rm.ClippedMeanSquaredError(), optimizer=rm.Rmsprop(lr=0.00025, g=0.95),
               epoch=100, batch_size=32, random_step=1000, one_epoch_step=20000, test_step=1000,
               test_env=None, update_period=10000, greedy_step=1000000, min_greedy=0.0, max_greedy=0.9,
-              test_greedy=0.95, train_frequency=4, callbacks=None):
+              test_greedy=0.95, train_frequency=4):
         """This method executes training of a q-network.
         Training will be done with epsilon-greedy method.
 
@@ -75,7 +75,6 @@ class DQN(object):
             max_greedy (int): Maximum greedy value
             test_greedy (int): Greedy threshold 
             train_frequency (int): For the learning step, training is done at this cycle
-            callbacks (dict):
 
         Returns:
             (dict): A dictionary which includes reward list of training and loss list. 
@@ -260,11 +259,6 @@ class DQN(object):
             tq.write("    Test reward: {:5.3f}".format(sum_reward))
             tq.write("    Greedy: {:1.4f}".format(greedy))
             tq.write("    Buffer: {}".format(len(self._buffer)))
-
-            if isinstance(callbacks, dict):
-                func = callbacks.get("end_epoch", False)
-                if func:
-                    func()
 
             sleep(0.25)  # This is for jupyter notebook representation.
 
