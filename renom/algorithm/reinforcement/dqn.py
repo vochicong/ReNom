@@ -46,7 +46,6 @@ class DQN(object):
     def update(self):
         """This function updates target network."""
         # Check GPU data
-        self._target_network = copy.deepcopy(self._network)
         for n, target_n in zip(self._network.iter_models(), self._target_network.iter_models()):
             if hasattr(n, "params") and hasattr(target_n, "params"):
                 for k in n.params.keys():
@@ -166,6 +165,7 @@ class DQN(object):
             sum_reward = 0
             train_one_epoch_reward = []
             train_each_epoch_reward = []
+
             test_one_epoch_reward = []
             test_each_epoch_reward = []
 
@@ -194,13 +194,14 @@ class DQN(object):
                         self._buffer.get_minibatch(batch_size)
 
                     self._network.set_models(inference=False)
-                    self._target_network.set_models(inference=False)
+                    self._target_network.set_models(inference=True)
 
                     target = self._network(train_prestate).as_ndarray()
                     target.setflags(write=True)
+
                     train_state = train_state.reshape(batch_size, *self._state_size)
                     value = self._target_network(train_state).as_ndarray(
-                    ) * self._ganma * (~train_terminal[:, None])
+                        ) * self._ganma * (~train_terminal[:, None])
 
                     for i in range(batch_size):
                         a = train_action[i, 0].astype(np.integer)
