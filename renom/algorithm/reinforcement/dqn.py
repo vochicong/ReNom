@@ -17,7 +17,7 @@ class DQN(object):
         q_network (Model): Q-Network.
         state_size (tuple, list): The size of state.
         action_pattern (int): The number ob action pattern.
-                              ganma (float): Discount rate.
+        ganma (float): Discount rate.
         buffer_size (float, int): The size of replay buffer.
     """
 
@@ -50,7 +50,7 @@ class DQN(object):
         for n, target_n in zip(self._network.iter_models(), self._target_network.iter_models()):
             if hasattr(n, "params") and hasattr(target_n, "params"):
                 for k in n.params.keys():
-                    target_n.params[k] = rm.Variable(n.params[k])
+                    target_n.params[k] = rm.Variable(n.params[k].as_ndarray())
 
     def train(self, env, loss_func=rm.ClippedMeanSquaredError(), optimizer=rm.Rmsprop(lr=0.00025, g=0.95),
               epoch=100, batch_size=32, random_step=1000, one_epoch_step=20000, test_step=1000,
@@ -60,9 +60,10 @@ class DQN(object):
         Training will be done with epsilon-greedy method.
 
         Args:
-            env (function): A function which accepts action as an argument and returns prestate, state,  reward and terminal.
+            env (function): A function which accepts action as an argument
+                and returns prestate, state,  reward and terminal.
             loss_func (Model): Loss function for training q-network.
-            optimizer (Optimizer): Optimizer object for training q-network. 
+            optimizer (Optimizer): Optimizer object for training q-network.
             epoch (int): Number of epoch for training.
             batch_size (int): Batch size.
             random_step (int): Number of random step which will be executed before training.
@@ -73,11 +74,11 @@ class DQN(object):
             greedy_step (int): Number of step
             min_greedy (int): Minimum greedy value
             max_greedy (int): Maximum greedy value
-            test_greedy (int): Greedy threshold 
+            test_greedy (int): Greedy threshold
             train_frequency (int): For the learning step, training is done at this cycle
 
         Returns:
-            (dict): A dictionary which includes reward list of training and loss list. 
+            (dict): A dictionary which includes reward list of training and loss list.
 
         Example:
             >>> import renom as rm
@@ -118,8 +119,8 @@ class DQN(object):
             ...           loss_func=rm.ClippedMeanSquaredError(clip=(-1, 1)),
             ...           epoch=50,
             ...           random_step=5000,
-            ...           one_epoch_step=25000, 
-            ...           test_step=2500, 
+            ...           one_epoch_step=25000,
+            ...           test_step=2500,
             ...           test_env=environment,
             ...           optimizer=rm.Rmsprop(lr=0.00025, g=0.95))
             >>>
@@ -132,7 +133,7 @@ class DQN(object):
                 Test reward: 63.000
                 Greedy: 0.0225
                 Buffer: 29537
-                ... 
+                ...
             >>>
             >>> print(train_history["train_reward"])
 
@@ -197,8 +198,9 @@ class DQN(object):
 
                     target = self._network(train_prestate).as_ndarray()
                     target.setflags(write=True)
-                    value = (self._target_network(train_state.reshape(batch_size, *self._state_size)).as_ndarray() *
-                             self._ganma * (~train_terminal[:, None]))
+                    train_state = train_state.reshape(batch_size, *self._state_size)
+                    value = self._target_network(train_state).as_ndarray(
+                    ) * self._ganma * (~train_terminal[:, None])
 
                     for i in range(batch_size):
                         a = train_action[i, 0].astype(np.integer)
@@ -263,5 +265,5 @@ class DQN(object):
             sleep(0.25)  # This is for jupyter notebook representation.
 
         return {"train_reward": train_reward_list,
-                "train_reward": train_error_list,
-                "test_reward": test_reward}
+                "train_error": train_error_list,
+                "test_reward": test_reward_list}

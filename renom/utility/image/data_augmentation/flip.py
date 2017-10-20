@@ -117,7 +117,7 @@ class Flip(Image):
         """
         transformed_labels = labels.copy()
         block_len = 4 + num_class
-        num_block = labels[0].shape[0] / block_len
+        num_block = labels[0].shape[0] // block_len
         for index, label in zip(shuffle, transformed_labels[shuffle]):
             for block in range(num_block):
                 if label[block * (block_len):(block + 1) * (block_len)][2:4].all() == 0.:
