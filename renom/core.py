@@ -537,7 +537,6 @@ class Node(np.ndarray):
     def copy_from(self, other):
         assert self.shape == other.shape
         assert self.dtype == other.dtype
-
         if self._gpu:
             if other._gpu:
                 self._gpu.copy_from(other._gpu)
@@ -903,12 +902,12 @@ class Node(np.ndarray):
     def T(self):
         if is_cuda_active():
             if self._gpu is None:
-                ret = Variable(super(Variable, self).T)
+                ret = Variable(super(Variable, self).T, auto_update=self._auto_update)
                 ret.get_gpu()
             else:
-                ret = Variable(get_gpu(self).T)
+                ret = Variable(get_gpu(self).T, auto_update=self._auto_update)
         else:
-            ret = Variable(super(Node, self).T)
+            ret = Variable(super(Node, self).T, auto_update=self._auto_update)
         return ret
 
 

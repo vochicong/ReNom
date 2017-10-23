@@ -71,7 +71,7 @@ def make_box(box):
     return [x1, y1, x2, y2]
 
 
-def apply_nms(x, cells, bbox, classes, thresh=0.2):
+def apply_nms(x, cells, bbox, classes, image_size, thresh=0.2):
     u"""Apply to X predicted out of yolo_detector layer to get list of detected objects.
     Default threshold for detection is prob < 0.2.
     Default threshold for suppression is IOU > 0.4
@@ -84,6 +84,8 @@ def apply_nms(x, cells, bbox, classes, thresh=0.2):
         prob = x[:, :, b * 5] * x[:, :, bbox * 5:].transpose(2, 0, 1)
         probs[:, :, b, :] = prob.transpose(1, 2, 0)
         boxes[:, :, b, :] = x[:, :, b * 5 + 1:b * 5 + 5]
+        boxes[:, :, b, 2] = ((boxes[:, :, b, 2] * image_size[0])**2) / image_size[0]
+        boxes[:, :, b, 3] = ((boxes[:, :, b, 3] * image_size[1])**2) / image_size[1]
     offset = np.array([np.arange(cells)] * (cells * bbox)
                       ).reshape(bbox, cells, cells).transpose(1, 2, 0)
     # offset x and y values to be 0<xy<1 for the whole image, not a cell
@@ -143,11 +145,11 @@ class yolo(Node):
               |---1st bbox--||---2nd bbox--||-classes-|
     """
 
-    def __new__(cls, x, y, cells, bbox, classes):
-        return cls.calc_value(x, y, cells, bbox, classes)
+    def __new__(cls, x, y, cells, bbox, classes, image_size):
+        return cls.calc_value(x, y, cells, bbox, classes, image_size)
 
     @classmethod
-    def _oper_cpu(cls, x, y, cells, bbox, classes):
+    def _oper_cpu(cls, x, y, cells, bbox, classes, image_size):
         x.to_cpu()
         noobj_scale = 0.5
         obj_scale = 5
@@ -173,7 +175,10 @@ class yolo(Node):
             deltas[bg_ind, b * 5] = noobj_scale * x[bg_ind, b * 5]
             loss += noobj_scale * np.sum(np.square(x[bg_ind, b * 5]))
             # get ious for current box
-            predict_box = make_box(x[:, :, :, 5 * b + 1:5 * b + 5])
+            box = x[:, :, :, 5 * b + 1:5 * b + 5]
+            box[:, :, :, 2] = ((box[:, :, :, 2] * image_size[0])**2) / image_size[0]
+            box[:, :, :, 3] = ((box[:, :, :, 3] * image_size[1])**2) / image_size[1]
+            predict_box = make_box(box)
             ious[:, :, :, b] = box_iou(truth_box, predict_box)
         best_ind = np.argmax(ious, axis=3)
         for b in range(bbox):
@@ -194,8 +199,8 @@ class yolo(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, y, cells, bbox, classes):
-        return cls._oper_cpu(x, y, cells, bbox, classes)
+    def _oper_gpu(cls, x, y, cells, bbox, classes, image_size):
+        return cls._oper_cpu(x, y, cells, bbox, classes, image_size)
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
@@ -208,10 +213,11 @@ class yolo(Node):
 
 class Yolo(object):
 
-    def __init__(self, cells=7, bbox=2, classes=10):
+    def __init__(self, cells=7, bbox=2, classes=10, image_size=(448, 448)):
         self._cells = cells
         self._bbox = bbox
         self._classes = classes
+        self._image_size = image_size
 
     def __call__(self, x, y):
-        return yolo(x, y, self._cells, self._bbox, self._classes)
+        return yolo(x, y, self._cells, self._bbox, self._classesi, self._image_size)

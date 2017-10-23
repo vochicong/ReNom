@@ -213,7 +213,7 @@ def test_gpu_node_dot(a, b):
     g1 = Variable(a)
     g2 = Variable(b)
 
-    g3 = dot(g1, g2) 
+    g3 = dot(g1, g2)
     g4 = rm.sum(g3)
     g = g4.grad()
     g_g1 = g.get(g1)

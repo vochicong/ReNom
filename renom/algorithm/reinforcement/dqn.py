@@ -21,9 +21,9 @@ class DQN(object):
         buffer_size (float, int): The size of replay buffer.
     """
 
-    def __init__(self, q_network, state_size, action_pattern, ganma=0.99, buffer_size=1e5):
+    def __init__(self, q_network, target_q, state_size, action_pattern, ganma=0.99, buffer_size=1e5):
         self._network = q_network
-        self._target_network = copy.deepcopy(q_network)
+        self._target_network = target_q
         self._action_size = action_pattern
         self._state_size = state_size if hasattr(state_size, "__getitem__") else [state_size, ]
         self._buffer_size = buffer_size
@@ -46,10 +46,11 @@ class DQN(object):
     def update(self):
         """This function updates target network."""
         # Check GPU data
-        for n, target_n in zip(self._network.iter_models(), self._target_network.iter_models()):
-            if hasattr(n, "params") and hasattr(target_n, "params"):
-                for k in n.params.keys():
-                    target_n.params[k] = rm.Variable(n.params[k].as_ndarray())
+        # print("//")
+        # print(self._target_network[0].params["w"].as_ndarray()[0, 0, :2, 0], self._target_network[0].params["w"]._gpu._ptr)
+        self._target_network.copy_attr(self._network)
+        # print(self._target_network[0].params["w"].as_ndarray()[0, 0, :2, 0], self._target_network[0].params["w"]._gpu._ptr)
+        # print("////")
 
     def train(self, env, loss_func=rm.ClippedMeanSquaredError(), optimizer=rm.Rmsprop(lr=0.00025, g=0.95),
               epoch=100, batch_size=32, random_step=1000, one_epoch_step=20000, test_step=1000,
@@ -201,7 +202,7 @@ class DQN(object):
 
                     train_state = train_state.reshape(batch_size, *self._state_size)
                     value = self._target_network(train_state).as_ndarray(
-                        ) * self._ganma * (~train_terminal[:, None])
+                    ) * self._ganma * (~train_terminal[:, None])
 
                     for i in range(batch_size):
                         a = train_action[i, 0].astype(np.integer)
@@ -218,6 +219,9 @@ class DQN(object):
                         self.update()
                         count = 0
                     count += 1
+
+                    # print(self._target_network[0].params["w"].as_ndarray()[0, 0, :2, 0])
+
                 msg = "epoch {:03d} loss:{:6.4f} sum reward:{:5.3f}".format(
                     e, float(l.as_ndarray()), sum_reward)
                 tq.set_description(msg)

@@ -205,7 +205,8 @@ class GPUHeap(object):
 
         n = min(self.nbytes, other.nbytes)
         if self.device_id == other.device_id:
-            self.memcpyD2D(other, n)
+            # self.memcpyD2D(other, n)
+            other.memcpyD2D(self, n)
         else:
             runtime_check(cudaDeviceCanAccessPeer(&ret, self.device_id, other.device_id))
             if ret:
