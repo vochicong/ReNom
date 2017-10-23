@@ -84,8 +84,8 @@ def apply_nms(x, cells, bbox, classes, image_size, thresh=0.2):
         prob = x[:, :, b * 5] * x[:, :, bbox * 5:].transpose(2, 0, 1)
         probs[:, :, b, :] = prob.transpose(1, 2, 0)
         boxes[:, :, b, :] = x[:, :, b * 5 + 1:b * 5 + 5]
-        boxes[:, :, b, 2] = ((boxes[:, :, b, 2] * image_size[0])**2) / image_size[0]
-        boxes[:, :, b, 3] = ((boxes[:, :, b, 3] * image_size[1])**2) / image_size[1]
+        boxes[:, :, b, 2] = ((boxes[:, :, b, 2]*image_size[0])**2)/image_size[0]
+        boxes[:, :, b, 3] = ((boxes[:, :, b, 3]*image_size[1])**2)/image_size[1]
     offset = np.array([np.arange(cells)] * (cells * bbox)
                       ).reshape(bbox, cells, cells).transpose(1, 2, 0)
     # offset x and y values to be 0<xy<1 for the whole image, not a cell
@@ -176,8 +176,8 @@ class yolo(Node):
             loss += noobj_scale * np.sum(np.square(x[bg_ind, b * 5]))
             # get ious for current box
             box = x[:, :, :, 5 * b + 1:5 * b + 5]
-            box[:, :, :, 2] = ((box[:, :, :, 2] * image_size[0])**2) / image_size[0]
-            box[:, :, :, 3] = ((box[:, :, :, 3] * image_size[1])**2) / image_size[1]
+            box[:, :, :, 2] = ((box[:, :, :, 2]*image_size[0])**2)/image_size[0]
+            box[:, :, :, 3] = ((box[:, :, :, 3]*image_size[1])**2)/image_size[1]
             predict_box = make_box(box)
             ious[:, :, :, b] = box_iou(truth_box, predict_box)
         best_ind = np.argmax(ious, axis=3)
@@ -220,4 +220,4 @@ class Yolo(object):
         self._image_size = image_size
 
     def __call__(self, x, y):
-        return yolo(x, y, self._cells, self._bbox, self._classesi, self._image_size)
+        return yolo(x, y, self._cells, self._bbox, self._classes, self._image_size)
