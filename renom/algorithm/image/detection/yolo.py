@@ -170,27 +170,30 @@ class yolo(Node):
         # search for the best predicted bounding box
         truth_box = make_box(y[:, :, :, 1:5])
         ious = np.zeros((y.shape[0], y.shape[1], y.shape[2], bbox))
+
         for b in range(bbox):
             # add 4th part of the equation
             deltas[bg_ind, b * 5] = noobj_scale * x[bg_ind, b * 5]
             loss += noobj_scale * np.sum(np.square(x[bg_ind, b * 5]))
             # get ious for current box
             box = x[:, :, :, 5 * b + 1:5 * b + 5]
-            box[:, :, :, 2] = ((box[:, :, :, 2]*image_size[0])**2)/image_size[0]
-            box[:, :, :, 3] = ((box[:, :, :, 3]*image_size[1])**2)/image_size[1]
             predict_box = make_box(box)
             ious[:, :, :, b] = box_iou(truth_box, predict_box)
         best_ind = np.argmax(ious, axis=3)
+
         for b in range(bbox):
             update_ind = (b == best_ind) & obj_ind
             # add 3rd part of the equation
             loss += np.sum(np.square(x[update_ind, 5 * b] - 1))
             deltas[update_ind, 5 * b] = (x[update_ind, 5 * b] - 1)
+
             # add 1st-2nd part of the equation
-            loss += obj_scale * \
-                np.sum(np.square(x[update_ind, 5 * b + 1:5 * b + 5] - y[update_ind, 1:5]))
             deltas[update_ind, 5 * b + 1:5 * b + 5] = obj_scale * \
                 (x[update_ind, 5 * b + 1:5 * b + 5] - y[update_ind, 1:5])
+
+            loss += obj_scale * \
+                np.sum(np.square(deltas[update_ind, 5*b+1:5*b+5]))
+
         loss = loss / 2 / N
         deltas = deltas.reshape(-1, cells * cells * (5 * bbox + classes)) / N
         ret = cls._create_node(loss)

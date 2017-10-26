@@ -1,6 +1,8 @@
 import contextlib
 import numpy as np
 cimport cudnn as cd
+cimport cython
+from libc.stdlib cimport malloc, free
 from libc.stdint cimport uintptr_t
 from renom.core import get_gpu
 from renom.config import precision
@@ -52,11 +54,32 @@ cdef class TensorDesc(object):
 
     def __init__(self, shape, dtype=precision):
         cdef int n, c, h, w
-        n, c, h, w = list(shape) + [1] * (4 - len(shape))
+        cdef int ndims = len(shape)
+        cdef int *size
+        cdef int *strides
 
         check(cd.cudnnCreateTensorDescriptor(&(self.tensor_desc)))
-        check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,
+
+        if len(shape) < 5:
+            n, c, h, w = list(shape) + [1] * (4 - len(shape))
+            check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,
                                             data_type(dtype), n, c, h, w))
+        else:
+            size = <int *>malloc(ndims*cython.sizeof(int))
+            strides = <int *>malloc(ndims*cython.sizeof(int))
+            if strides is NULL or size is NULL:
+                raise MemoryError()
+            
+            for i in range(ndims):
+                size[i] = shape[i]
+                strides[i] = np.prod(shape[ndims-i:]) 
+            check(cd.cudnnSetTensorNdDescriptor(self.tensor_desc, data_type(dtype),
+                                                ndims,
+                                                size,
+                                                strides))
+            free(size)
+            free(strides)
+
 
     def __del__(self):
         if self.tensor_desc:

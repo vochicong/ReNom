@@ -46,11 +46,7 @@ class DQN(object):
     def update(self):
         """This function updates target network."""
         # Check GPU data
-        # print("//")
-        # print(self._target_network[0].params["w"].as_ndarray()[0, 0, :2, 0], self._target_network[0].params["w"]._gpu._ptr)
         self._target_network.copy_attr(self._network)
-        # print(self._target_network[0].params["w"].as_ndarray()[0, 0, :2, 0], self._target_network[0].params["w"]._gpu._ptr)
-        # print("////")
 
     def train(self, env, loss_func=rm.ClippedMeanSquaredError(), optimizer=rm.Rmsprop(lr=0.00025, g=0.95),
               epoch=100, batch_size=32, random_step=1000, one_epoch_step=20000, test_step=1000,
@@ -180,6 +176,7 @@ class DQN(object):
                 greedy += g_step
                 greedy = np.clip(greedy, min_greedy, max_greedy)
                 sum_reward += reward
+
                 if prestate is not None:
                     self._buffer.store(prestate, np.array(action),
                                        np.array(reward), state, np.array(terminal))
@@ -200,9 +197,9 @@ class DQN(object):
                     target = self._network(train_prestate).as_ndarray()
                     target.setflags(write=True)
 
-                    train_state = train_state.reshape(batch_size, *self._state_size)
+                    # train_state = train_state.reshape(batch_size, *self._state_size)
                     value = self._target_network(train_state).as_ndarray(
-                    ) * self._ganma * (~train_terminal[:, None])
+                        ) * self._ganma * (~train_terminal[:, None])
 
                     for i in range(batch_size):
                         a = train_action[i, 0].astype(np.integer)
@@ -219,8 +216,6 @@ class DQN(object):
                         self.update()
                         count = 0
                     count += 1
-
-                    # print(self._target_network[0].params["w"].as_ndarray()[0, 0, :2, 0])
 
                 msg = "epoch {:03d} loss:{:6.4f} sum reward:{:5.3f}".format(
                     e, float(l.as_ndarray()), sum_reward)
