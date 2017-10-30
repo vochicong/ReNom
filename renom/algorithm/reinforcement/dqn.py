@@ -191,7 +191,7 @@ class DQN(object):
                     train_prestate, train_action, train_reward, train_state, train_terminal = \
                         self._buffer.get_minibatch(batch_size)
 
-                    self._network.set_models(inference=False)
+                    self._network.set_models(inference=True)
                     self._target_network.set_models(inference=True)
 
                     target = self._network(train_prestate).as_ndarray()
@@ -203,7 +203,7 @@ class DQN(object):
 
                     for i in range(batch_size):
                         a = train_action[i, 0].astype(np.integer)
-                        target[i, a] = train_reward[i] + value[i, 0]
+                        target[i, a] = train_reward[i] + value[i, a]
 
                     self._network.set_models(inference=False)
                     with self._network.train():

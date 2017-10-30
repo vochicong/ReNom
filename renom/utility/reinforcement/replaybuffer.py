@@ -114,7 +114,17 @@ class ReplayBuffer:
         return self._unpack(buf)
 
     def get_minibatch(self, batch_size=32, shuffle=True):
-        perm = np.random.permutation(len(self))[:batch_size] if shuffle else np.arange(len(self))
+        if shuffle:
+            if len(self) > 1e3:
+                perm = []
+                while len(perm) < batch_size:
+                    perm = (np.random.rand(batch_size * 2) * len(self)).astype(np.int)
+                    perm = list(set(perm))[:batch_size]
+            else:
+                perm = np.random.permutation(len(self))[:batch_size]
+        else:
+            perm = np.arange(len(self))
+
         n = len(perm)
         state_shape = [n, ] + self._state_space_shape
         prestates = np.empty(state_shape, dtype=np.float32)
