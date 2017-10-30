@@ -5,9 +5,9 @@ Documents are available on the ReNom.jp web site.
 - http://renom.jp/index.html
 
 
-## ReNom version 2.2
+## ReNom version 2.3
 
-Added TDA modules.
+Added YOLO loss function.
 
 ## Requirements
 
@@ -23,6 +23,7 @@ Added TDA modules.
 - pandas 0.20.3
 - scikit-learn 0.18.2
 - scipy 0.19.0
+- tqdm 4.19.4
 
 ## Installation
 
