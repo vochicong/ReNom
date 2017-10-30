@@ -572,6 +572,7 @@ def test_peepholelstm(node, use_gpu):
     [Variable(rand((2, 2))), onehot((2, 2))],
     [Variable(rand((2, 3))), onehot((2, 3))],
     [Variable(rand((1, 2))), onehot((1, 2))],
+    [Variable(rand((1, 2, 2, 2, 2))), onehot((1, 2, 2, 2, 2))],
     [Variable(rand((2, 2, 3, 3))), onehot((2, 2, 3, 3))],
 ])
 def test_softmax_cross_entropy(node, x, use_gpu):

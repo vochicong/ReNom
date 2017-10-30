@@ -199,7 +199,7 @@ class DQN(object):
 
                     # train_state = train_state.reshape(batch_size, *self._state_size)
                     value = self._target_network(train_state).as_ndarray(
-                        ) * self._ganma * (~train_terminal[:, None])
+                    ) * self._ganma * (~train_terminal[:, None])
 
                     for i in range(batch_size):
                         a = train_action[i, 0].astype(np.integer)

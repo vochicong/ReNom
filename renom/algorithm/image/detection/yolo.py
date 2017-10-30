@@ -84,8 +84,8 @@ def apply_nms(x, cells, bbox, classes, image_size, thresh=0.2):
         prob = x[:, :, b * 5] * x[:, :, bbox * 5:].transpose(2, 0, 1)
         probs[:, :, b, :] = prob.transpose(1, 2, 0)
         boxes[:, :, b, :] = x[:, :, b * 5 + 1:b * 5 + 5]
-        boxes[:, :, b, 2] = ((boxes[:, :, b, 2]*image_size[0])**2)/image_size[0]
-        boxes[:, :, b, 3] = ((boxes[:, :, b, 3]*image_size[1])**2)/image_size[1]
+        boxes[:, :, b, 2] = boxes[:, :, b, 2]
+        boxes[:, :, b, 3] = boxes[:, :, b, 3]
     offset = np.array([np.arange(cells)] * (cells * bbox)
                       ).reshape(bbox, cells, cells).transpose(1, 2, 0)
     # offset x and y values to be 0<xy<1 for the whole image, not a cell
@@ -188,11 +188,11 @@ class yolo(Node):
             deltas[update_ind, 5 * b] = (x[update_ind, 5 * b] - 1)
 
             # add 1st-2nd part of the equation
+            loss += obj_scale * \
+                np.sum(np.square(x[update_ind, 5 * b + 1:5 * b + 5] - y[update_ind, 1:5]))
+
             deltas[update_ind, 5 * b + 1:5 * b + 5] = obj_scale * \
                 (x[update_ind, 5 * b + 1:5 * b + 5] - y[update_ind, 1:5])
-
-            loss += obj_scale * \
-                np.sum(np.square(deltas[update_ind, 5*b+1:5*b+5]))
 
         loss = loss / 2 / N
         deltas = deltas.reshape(-1, cells * cells * (5 * bbox + classes)) / N

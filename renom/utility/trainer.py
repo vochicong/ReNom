@@ -272,7 +272,7 @@ class Trainer(object):
         Returns:
             ndarray
         """
-        bs = self.batch_size//self.num_gpu
+        bs = self.batch_size // self.num_gpu
         N = len(data) - 1 + bs
         self.model.set_models(inference=True)
         ret = np.vstack([self.model(data[bs * i:bs * (i + 1)]).as_ndarray()
