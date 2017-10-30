@@ -31,6 +31,7 @@ from renom.layers.function.lstm import Lstm
 from renom.layers.function.batch_normalize import BatchNormalize,\
     BATCH_NORMALIZE_FEATUREMAP
 from renom.layers.function.lrn import Lrn
+from renom.layers.function.roi_pool2d import RoiPool2d, roi_pool2d
 from test_utility import auto_diff, numeric_diff
 
 from renom.cuda import is_cuda_active, set_cuda_active, curand_generator
@@ -464,6 +465,26 @@ def test_max_pool2d(node, use_gpu):
     def func(node):
         return sum(layer(node))
     compare(func, node, node)
+
+@pytest.mark.parametrize("node, rois", [
+    [Variable(rand((3, 3, 12, 8))), Variable(np.array([
+            [0, 1, 1, 6, 6],
+            [2, 6, 2, 7, 11],
+            [1, 3, 1, 5, 10],
+            [0, 3, 3, 3, 3]
+        ], dtype=np.float64))]
+])
+def test_roi_pool2d(node, rois,  use_gpu):
+    node = Variable(node)
+    rois = Variable(rois)
+    set_cuda_active(False)
+
+    layer = RoiPool2d(outh=7, outw=5, spatial_scale=0.6)
+
+    def func(node, rois):
+        return sum(layer(node, rois))
+    compare(func, node, node, rois)
+
 
 
 @pytest.mark.parametrize("node", [
