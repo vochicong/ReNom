@@ -32,10 +32,28 @@ class Grads:
               [ 2.,  2.,  2.]], dtype=float32)
     '''
 
-    def __init__(self):
+    def __init__(self, root=None):
         self.stroage = {}
         self.variables = {}
         self._auto_updates = []
+
+        if root is not None:
+            self._walk(root)
+
+    def _walk(self, root):
+        self._refcounts = collections.Counter()
+
+        g = root.walk()
+        n = next(g, None)
+        while n is not None:
+            nodeid = id(n)
+            seen = nodeid in self._refcounts
+            self._refcounts[nodeid] += 1
+            try:
+                n = g.send(seen) # don't walk same path again
+            except StopIteration:
+                break
+
 
     @contextlib.contextmanager
     def unlock_node(self, node):
@@ -70,6 +88,10 @@ class Grads:
             self.variables[selfid] = dy
             if node._auto_update:
                 self._auto_updates.append(node)
+
+        self._refcounts[selfid] -= 1
+        return self._refcounts[selfid] <= 0 # all backward diffs are added
+
 
     _omit = object()
 
@@ -570,6 +592,16 @@ class Node(np.ndarray):
             self._gpu.free()
             self._gpu = None
 
+    def walk(self):
+        seen = set
+        q = collections.deque([self])
+        while q:
+            t = q.pop()
+            ignore = yield t
+            if not ignore and isinstance(t, Node) and t.attrs:
+                 for c in t.attrs.get_attrs():
+                     q.append(c)
+
     def grad(self, initial=None, detach_graph=True, **kwargs):
         '''This method follows computational graph and returns the gradients of
         Variable object.
@@ -589,7 +621,7 @@ class Node(np.ndarray):
                 initial = Node(initial)
                 initial.to_gpu()
 
-        context = Grads()
+        context = Grads(self)
         self._update_diff(context, initial, **kwargs)
 
         if detach_graph:
@@ -597,8 +629,10 @@ class Node(np.ndarray):
         return context
 
     def _update_diff(self, context, dy, **kwargs):
-        context.add(self, dy)
-        self.backward(context, dy, **kwargs)
+        ready = context.add(self, dy)
+        if ready:
+            diff = context.get(self)
+            self.backward(context, diff, **kwargs)
 
     def _get_graph(self):
         if self.attrs:
