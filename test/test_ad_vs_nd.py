@@ -532,7 +532,6 @@ def test_lstm(node, use_gpu):
     set_cuda_active(use_gpu)
 
     layer1 = Lstm(output_size=4)
-
     def func(node):
         loss = 0
         for _ in range(3):

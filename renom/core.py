@@ -38,25 +38,25 @@ class Grads:
         self._auto_updates = []
 
         if root is not None:
-            self._walk(root)
+            self._build_refcounts(root)
 
-    def _walk(self, root):
+    def _build_refcounts(self, root):
         self._refcounts = collections.Counter()
+        self._backwards = collections.Counter()
 
-        g = root.walk()
-        n = next(g, None)
-        while n is not None:
-            skip = True
-            if not getattr(n, '_no_backward', False):
-                nodeid = id(n)
-                skip = nodeid in self._refcounts
-                self._refcounts[nodeid] += 1
+        q = collections.deque(root._args)
+        def walk():
+            while q:
+                t = q.pop()
+                if isinstance(t, Node):
+                    yield t
+                    if not getattr(t, '_no_backward', False):
+                        for c in t._args:
+                            q.append(c)
 
-            try:
-                n = g.send(skip) # don't walk same path again
-            except StopIteration:
-                break
-
+        for n in walk():
+            nodeid = id(n)
+            self._refcounts[nodeid] += 1
 
     @contextlib.contextmanager
     def unlock_node(self, node):
@@ -75,16 +75,16 @@ class Grads:
         selfid = id(node)
         return self.stroage.get(selfid, default)
 
-    def add(self, node, dy):
+    def add(self, node, dy, caller=None):
         selfid = id(node)
         if selfid in self.variables:
-            node = self.variables[selfid]
-            with self.unlock_node(node):
+            v = self.variables[selfid]
+            with self.unlock_node(v):
                 if isinstance(dy, GPUValue):
-                    diff = node.get_gpu() + dy
-                    node.set_gpu(diff)
+                    diff = v.get_gpu() + dy
+                    v.set_gpu(diff)
                 else:
-                    node[...] += dy
+                    v[...] += dy
         else:
             if isinstance(dy, GPUValue):
                 dy = Variable(dy)
@@ -92,8 +92,13 @@ class Grads:
             if node._auto_update:
                 self._auto_updates.append(node)
 
-        self._refcounts[selfid] -= 1
-        return self._refcounts[selfid] <= 0 # all backward diffs are added
+        if caller is not None:
+            caller_refs = self._refcounts[id(caller)] or 1
+        else:
+            caller_refs = 1
+        self._backwards[selfid] += caller_refs
+
+        return self._refcounts[selfid] <= self._backwards[selfid], GradsWithCaller(node, self)
 
 
     _omit = object()
@@ -154,6 +159,17 @@ class Grads:
                     if id(node) in self.variables:
                         self.update_node(node, opt)
 
+
+class GradsWithCaller(object):
+    def __init__(self, caller, grad):
+        self.grad__ = getattr(grad, 'grad__', grad)
+        self.caller = caller
+
+    def add(self, node, dy):
+        return self.grad__.add(node, dy, self.caller)
+
+    def __getattr__(self, name):
+        return getattr(self.grad__, name)
 
 # todo: move this method to Cython
 def calc_broadcast_shape(s1, s2):
@@ -455,6 +471,7 @@ class Node(np.ndarray):
     _model = None
     _auto_update = False
     _no_backward = False
+    _args = ()
 
     def __new__(cls, value):
         ret = cls._create_node(value)
@@ -493,6 +510,8 @@ class Node(np.ndarray):
 
     def __init__(self, *args, **kwargs):
         self.setflags(write=False)
+        self._args = [a for a in args if isinstance(a, Node)]
+        self._args.extend(a for a in kwargs.values() if isinstance(a, Node))
         self._reduce_graph()
         return
 
@@ -595,16 +614,6 @@ class Node(np.ndarray):
             self._gpu.free()
             self._gpu = None
 
-    def walk(self):
-        seen = set
-        q = collections.deque([self])
-        while q:
-            t = q.pop()
-            ignore = yield t
-            if not ignore and isinstance(t, Node) and t.attrs:
-                 for c in t.attrs.get_attrs():
-                     q.append(c)
-
     def grad(self, initial=None, detach_graph=True, **kwargs):
         '''This method follows computational graph and returns the gradients of
         Variable object.
@@ -632,7 +641,7 @@ class Node(np.ndarray):
         return context
 
     def _update_diff(self, context, dy, **kwargs):
-        ready = context.add(self, dy)
+        ready, context = context.add(self, dy)
         if ready:
             diff = context.get(self)
             self.backward(context, diff, **kwargs)

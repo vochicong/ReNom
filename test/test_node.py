@@ -23,33 +23,25 @@ def test_gpu_node_neg():
         assert np.allclose(g3, [-2, -4])
         assert not np.allclose(g3, [-3, -4])
 
-def test_walk():
-    g1 = Variable(np.array([1., 2.]))
-    g2 = Variable(np.array([1., 2.]))
-    g3 = Variable(np.array([1., 2.]))
-    g4 = g1 + g2
-    g5 = g3 + g4
-    g6 = g1+g2+g3+g4+g5
-    g7 = g6+g5
-
-    nodes = {id(g) for g in (g1, g2, g3, g4, g5, g6, g7)}
-    seen = set()
-    for c in g6.walk():
-        print(repr(c))
-        if id(c) in nodes:
-            nodes.remove(id(c))
-
-    assert nodes == {id(g7)}
-
-
 def test_grad():
-    g1 = Variable(np.array([1., 2.]))
-    g2 = Variable(np.array([1., 2.]))
-    g3 = Variable(np.array([1., 2.]))
+    class D(Variable):
+        def _update_diff(self, context, dy, **kwargs):
+            ready = context.add(self, dy)
+            print(id(self), ready)
+
+            if ready:
+                diff = context.get(self)
+                self.backward(context, diff, **kwargs)
+
+    g1 = D(np.array([1., 2.]))
+    g2 = D(np.array([1., 2.]))
+    g3 = D(np.array([1., 2.]))
     g4 = g1 + g2
     g5 = g3 + g4
     g6 = g1+g2+g3+g4+g5
     g7 = g6+g5
+
+    print([id(g) for g in (g1, g2, g3, g4, g5, g6, g7)])
 
     g = g6.grad(np.array([1., 2.]))
     print(g._refcounts )
