@@ -53,10 +53,12 @@ def test_grad():
 
     g = g6.grad(np.array([1., 2.]))
     print(g._refcounts )
-    assert g._refcounts[id(g1)] == 2
-    assert g._refcounts[id(g2)] == 2
-    assert g._refcounts[id(g3)] == 2
-    assert g._refcounts[id(g4)] == 2
-    assert g._refcounts[id(g5)] == 1
-    assert g._refcounts[id(g6)] == 1
+    assert len(g._refcounts) == 9
+
+    assert g._refcounts[id(g1)] == 0
+    assert g._refcounts[id(g2)] == 0
+    assert g._refcounts[id(g3)] == 0
+    assert g._refcounts[id(g4)] == 0
+    assert g._refcounts[id(g5)] == 0
+    assert g._refcounts[id(g6)] == 0
 

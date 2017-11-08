@@ -46,11 +46,14 @@ class Grads:
         g = root.walk()
         n = next(g, None)
         while n is not None:
-            nodeid = id(n)
-            seen = nodeid in self._refcounts
-            self._refcounts[nodeid] += 1
+            skip = True
+            if not getattr(n, '_no_backward', False):
+                nodeid = id(n)
+                skip = nodeid in self._refcounts
+                self._refcounts[nodeid] += 1
+
             try:
-                n = g.send(seen) # don't walk same path again
+                n = g.send(skip) # don't walk same path again
             except StopIteration:
                 break
 
