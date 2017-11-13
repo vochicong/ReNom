@@ -2,6 +2,7 @@ import numpy as np
 import itertools
 from scipy.interpolate import interp1d
 
+
 class _Interpolate:
     def __init__(self, x, axis=0, missing=(np.Inf, np.nan)):
         self.x = np.array(x)
@@ -31,7 +32,7 @@ class _Interpolate:
             x_1d = self.x_transpose[i]
             index = self._get_nomissing_index(x_1d, self.missing)
             assert len(index) != 0, "Can't interpolate a empty column."
-            assert 0 in index and len(x_1d)-1 in index, "Can't interpolate without the ends."
+            assert 0 in index and len(x_1d) - 1 in index, "Can't interpolate without the ends."
             f_interp = interp1d(index, x_1d[index])
             self.x_transpose[i] = f_interp(np.arange(0, self.x.shape[self.axis]))
         x_interp = np.transpose(self.x_transpose, self.transpose_list)
@@ -42,7 +43,7 @@ class _Interpolate:
             x_1d = self.x_transpose[i]
             index = self._get_nomissing_index(x_1d, self.missing)
             assert len(index) != 0, "Can't interpolate a empty column."
-            assert 0 in index and len(x_1d)-1 in index, "Can't interpolate without the ends."
+            assert 0 in index and len(x_1d) - 1 in index, "Can't interpolate without the ends."
             assert len(index) > 3, "Must have at least 4 entries."
             f_interp = interp1d(index, x_1d[index], kind="cubic")
             self.x_transpose[i] = f_interp(np.arange(0, self.x.shape[self.axis]))
@@ -53,7 +54,7 @@ class _Interpolate:
         for i in itertools.product(*self.args):
             x_1d = self.x_transpose[i]
             index = self._get_nomissing_index(x_1d, self.missing)
-            nindex = np.delete(np.arange(0, self.x.shape[self.axis]),index)
+            nindex = np.delete(np.arange(0, self.x.shape[self.axis]), index)
             if len(nindex) > 0:
                 x_1d[nindex] = constant
             self.x_transpose[i] = x_1d
@@ -64,19 +65,20 @@ class _Interpolate:
         for i in itertools.product(*self.args):
             x_1d = self.x_transpose[i]
             index = self._get_nomissing_index(x_1d, self.missing)
-            nindex = np.delete(np.arange(0, self.x.shape[self.axis]),index)
+            nindex = np.delete(np.arange(0, self.x.shape[self.axis]), index)
             if len(nindex) > 0:
                 for j in nindex:
-                    x_1d[j] = x_1d[index[np.abs(np.array(index) -j).argmin()]]
+                    x_1d[j] = x_1d[index[np.abs(np.array(index) - j).argmin()]]
             self.x_transpose[i] = x_1d
         x_interp = np.transpose(self.x_transpose, self.transpose_list)
         return x_interp
 
+
 def interpolate(x, mode, axis=0, missing=(np.nan, np.Inf), constant=None):
-    assert mode in ["linear", "spline","constant","nearest_index"],\
-       "specified mode does not exists in interpolate"
+    assert mode in ["linear", "spline", "constant", "nearest_index"],\
+        "specified mode does not exists in interpolate"
     if mode == "constant":
-        assert constant!=None, "constant is not specified."
+        assert constant != None, "constant is not specified."
 
     if isinstance(x, list):
         x = np.array(x)
@@ -98,4 +100,3 @@ def interpolate(x, mode, axis=0, missing=(np.nan, np.Inf), constant=None):
         return _Interpolate(x, axis, missing)._constant_interpolate(constant)
     if mode == "nearest_index":
         return _Interpolate(x, axis, missing)._nearest_index_interpolate()
-
