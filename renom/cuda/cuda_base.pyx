@@ -276,3 +276,15 @@ class allocator(object):
 
 
 gpu_allocator = allocator()
+
+
+def _cuSetLimit(limit, value):
+    cdef size_t c_value=999;
+
+    cuInit(0)
+
+    ret = cuCtxGetLimit(&c_value, limit)
+    print(ret, c_value)
+
+    cuCtxSetLimit(limit, value)
+    print(value)
