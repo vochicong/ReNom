@@ -13,4 +13,3 @@ class _Completion:
 def completion(x, mode, impute_type="col", missing=(np.nan, np.Inf)):
     if mode == "mice":
         return _Completion(x, missing)._mice_completion(impute_type)
-

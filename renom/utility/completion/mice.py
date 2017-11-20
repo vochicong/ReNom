@@ -9,15 +9,21 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# We(GRID Inc.) added *_categorical function to deal with categorical variable,
+# and complete function to ensemble the results.
 
 from __future__ import absolute_import, print_function, division
 
 from time import time
 
 from six.moves import range
+from sklearn.preprocessing import LabelBinarizer
+from collections import Counter
 import numpy as np
+import pandas as pd
 
 from .bayesian_ridge_regression import BayesianRidgeRegression
+from .logistic_regression import LogisticRegression, MulticlassLogisticRegression
 from .solver import Solver
 
 
@@ -76,7 +82,9 @@ class MICE(Solver):
     def __init__(
             self,
             visit_sequence='monotone',  # order in which we visit the columns
-            n_imputations=100,
+            #n_imputations=100,
+            #n_burn_in=10,  # this many replicates will be thrown away
+            n_imputations=50,
             n_burn_in=10,  # this many replicates will be thrown away
             n_pmm_neighbors=5,  # number of nearest neighbors in PMM
             impute_type='col',  # also can be pmm
@@ -139,6 +147,98 @@ class MICE(Solver):
         self.model = model
         self.n_nearest_columns = n_nearest_columns
         self.verbose = verbose
+        self.bool_missing = None
+
+    def transform_binary(self, y, lb):
+        y_convert = []
+        classes = list(lb.classes_)
+        for i,elem in enumerate(y):
+            tmp = [0,0]
+            elem = str(elem)
+            idx = classes.index(elem)
+            tmp[idx] = 1
+            y_convert += [tmp, ]
+        return np.array(y_convert)
+
+    def perform_imputation_round_categorical(
+            self,
+            X_filled,
+            categorical_index,
+            numerical_index,
+            missing_index_list):
+        N, D = len(X_filled), len(X_filled[0])
+        for col_idx in numerical_index:
+            n_missing = missing_index_list[col_idx]
+            merged = []
+            if n_missing > 0:
+                merged = X_filled[:,[index for index in numerical_index if index!=col_idx]]
+                #if len(categorical_index) > 0:
+                #    for cat_idx in categorical_index:
+                #        lb = LabelBinarizer().fit(X_filled[:,cat_idx])
+                #        if len(lb.classes_)==2:
+                #            onehot = self.transform_binary(X_filled[:,cat_idx], lb)
+                #        else:
+                #            onehot = lb.transform(X_filled[:,cat_idx])
+                #        if len(merged)==0:
+                #            merged = onehot
+                #        else:
+                #            merged = np.concatenate((merged, onehot), axis=1)
+                missing_row_mask_for_this_col = self.bool_missing[:, col_idx]
+                observed = np.array(merged[~missing_row_mask_for_this_col, :], dtype="float")
+                predict = np.array(X_filled[~missing_row_mask_for_this_col, col_idx], dtype="float")
+                brr = self.model
+                brr.fit(
+                    observed,
+                    predict,
+                    inverse_covariance=None)
+                if self.impute_type=="col":
+                    X_other_cols_missing = np.array(merged[missing_row_mask_for_this_col, :], dtype="float")
+                    mus, sigmas_squared = brr.predict_dist(X_other_cols_missing)
+                    sigmas = sigmas_squared
+                    np.sqrt(sigmas_squared, out=sigmas)
+                    imputed_values = np.random.normal(mus, sigmas)
+                imputed_values = self.clip(imputed_values)
+                X_filled[missing_row_mask_for_this_col, col_idx] = imputed_values
+
+        for col_idx in categorical_index:
+            n_missing = missing_index_list[col_idx]
+            if n_missing > 0:
+                merged = []
+                if len(numerical_index) > 0:
+                    numerical_index = list(numerical_index)
+                    merged = X_filled[:, numerical_index]
+                categorical_rest = [index for index in categorical_index if index!=col_idx]
+                if len(categorical_rest):
+                    for cat_idx in categorical_index:
+                        lb = LabelBinarizer().fit(X_filled[:, cat_idx])
+                        if len(lb.classes_)==2:
+                            onehot = self.transform_binary(X_filled[:, cat_idx], lb)
+                        else:
+                            onehot = lb.transform(X_filled[:, cat_idx])
+                        if len(merged)==0:
+                            merged = onehot
+                        else:
+                            merged = np.concatenate((merged, onehot), axis=1)
+                missing_row_mask_for_this_col = self.bool_missing[:, col_idx]
+                observed = np.array(merged[~missing_row_mask_for_this_col, :], dtype="float")
+                predict = np.array(X_filled[~missing_row_mask_for_this_col, col_idx])
+                if len(list(set(X_filled[:, col_idx])))==2:
+                    model = LogisticRegression(observed, predict)
+                    model.fit(
+                    observed,
+                    predict)
+                    missing_x = np.array(merged[missing_row_mask_for_this_col, :], dtype="float")
+                    imputed_val = model.predict(missing_x)
+                    X_filled[missing_row_mask_for_this_col, col_idx] = imputed_val
+                if len(list(set(X_filled[:, col_idx])))>2:
+                    model = MulticlassLogisticRegression(observed, predict)
+                    model.fit(
+                    observed,
+                    predict)
+                    missing_x = np.array(merged[missing_row_mask_for_this_col, :], dtype="float")
+                    imputed_val = model.predict(missing_x)
+                    X_filled[missing_row_mask_for_this_col, col_idx] = imputed_val
+        return X_filled
 
     def perform_imputation_round(
             self,
@@ -237,6 +337,28 @@ class MICE(Solver):
                 X_filled[missing_row_mask_for_this_col, col_idx] = imputed_values
         return X_filled
 
+    def initialize_categorical(self, X, categorical_index, numerical_index, missing_index_list):
+        X_filled = X.copy(order="F")
+        self.bool_missing = pd.DataFrame(X_filled).isnull().values
+        for col_idx in numerical_index:
+            n_missing = pd.DataFrame(X_filled[:, col_idx]).isnull().sum(axis=0).sum()
+            if n_missing > 0:
+                column = X_filled[:, col_idx]
+                missing_this_column = self.bool_missing[:, col_idx]
+                fill_val = np.mean(column[~missing_this_column])
+                column[missing_this_column] = fill_val
+                X_filled[:, col_idx] = column
+        for col_idx in categorical_index:
+            n_missing = pd.DataFrame(X_filled[:, col_idx]).isnull().sum(axis=0).sum()
+            if n_missing > 0:
+                missing_this_column_arg = []
+                column = X_filled[:, col_idx]
+                missing_this_column = self.bool_missing[:, col_idx]
+                fill_val = np.random.choice(list(set(column[~missing_this_column])), n_missing, replace=True)
+                column[missing_this_column] = fill_val
+                X_filled[:, col_idx] = column
+        return X_filled
+
     def initialize(self, X, missing_mask, observed_mask, visit_indices):
         """
         Initialize the missing values by simple sampling from the same column.
@@ -280,6 +402,34 @@ class MICE(Solver):
             return np.argsort(missing_mask.sum(0))
         else:
             raise ValueError("Invalid choice for visit order: %s" % self.visit_sequence)
+
+    def multiple_imputations_categorical(self, X, categorical_index, numerical_index):
+        start_t = time()
+        X = np.asarray(X)
+        df = pd.DataFrame(X, columns=None)
+        missing_index_list = list(df.isnull().sum(axis=0))
+        X_filled = self.initialize_categorical(
+           X,
+           categorical_index=categorical_index,
+           numerical_index=numerical_index,
+           missing_index_list=missing_index_list)
+
+        results_list = []
+        total_rounds = self.n_burn_in + self.n_imputations
+        for m in range(total_rounds):
+            if self.verbose and (m+1)%10==0:
+                print("[MICE] Starting imputation round %d/%d, elapsed time %0.3f" % (
+                   m+1,
+                   total_rounds,
+                   time() - start_t))
+            X_filled = self.perform_imputation_round_categorical(
+            X_filled,
+            categorical_index=categorical_index,
+            numerical_index=numerical_index,
+            missing_index_list=missing_index_list)
+            if m >= self.n_burn_in:
+                results_list.append(X_filled)
+        return np.array(results_list), missing_index_list
 
     def multiple_imputations(self, X):
         """
@@ -327,12 +477,40 @@ class MICE(Solver):
                 results_list.append(X_filled[missing_mask])
         return np.array(results_list), missing_mask
 
+    def get_data_type(self, X):
+        from collections import defaultdict
+        type_index = defaultdict(list)
+        N, D = len(X), len(X[0])
+        for d in range(D):
+            categorical_flag = False
+            for data in X[:, d]:
+                try:
+                    data = float(data)
+                except:
+                    categorical_flag = True
+            if categorical_flag:
+                type_index["categorical"] += [d, ]
+            else:
+                type_index["numerical"] += [d, ]
+        return np.array(type_index["categorical"]), np.array(type_index["numerical"])
+
     def complete(self, X):
         if self.verbose:
             print("[MICE] Completing matrix with shape %s" % (X.shape,))
         X_completed = X.copy()
-        imputed_arrays, missing_mask = self.multiple_imputations(X)
+        categorical_index, numerical_index = self.get_data_type(X)
+        imputed_arrays, missing_index_list = self.multiple_imputations_categorical(X, categorical_index, numerical_index)
         # average the imputed values for each feature
-        average_imputated_values = imputed_arrays.mean(axis=0)
-        X_completed[missing_mask] = average_imputated_values
+        for i,n_missing in enumerate(missing_index_list):
+            if i in categorical_index and n_missing > 0:
+                missing_mask = self.bool_missing[:, i]
+                counter_list = [Counter(imputed_arrays[:, missing_mask, i][:, j]) 
+                               for j 
+                               in range(imputed_arrays[:, missing_mask, i].shape[1])]
+                checked = [c.most_common(1) for c in counter_list]
+                imputed = np.array([c.most_common(1)[0][0] for c in counter_list])
+                X_completed[missing_mask, i] = imputed
+            elif i in numerical_index and n_missing > 0:
+                missing_mask = self.bool_missing[:, i]
+                X_completed[missing_mask, i] = imputed_arrays[:, missing_mask, i].mean(axis=0)
         return X_completed
