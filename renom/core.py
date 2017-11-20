@@ -679,6 +679,8 @@ class Node(np.ndarray):
         if self.attrs:
             self.attrs.clear()
 
+        self._args = []
+
     def backward(self, context, dy, **kwargs):
         if self._no_backward:
             return
