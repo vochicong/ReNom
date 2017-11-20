@@ -212,7 +212,7 @@ class Trainer(object):
                             d.to_gpu()
 
                 for gpu in range(1, self.num_gpu):
-                    models[gpu].copy_attr(models[0])
+                    models[gpu].copy_params(models[0])
 
                 for gpu in range(0, self.num_gpu):
                     models[gpu].set_models(inference=False)

@@ -46,7 +46,7 @@ class DQN(object):
     def update(self):
         """This function updates target network."""
         # Check GPU data
-        self._target_network.copy_attr(self._network)
+        self._target_network.copy_params(self._network)
 
     def train(self, env, loss_func=rm.ClippedMeanSquaredError(), optimizer=rm.Rmsprop(lr=0.00025, g=0.95),
               epoch=100, batch_size=32, random_step=1000, one_epoch_step=20000, test_step=1000,

@@ -153,6 +153,8 @@ class BatchNormalize(Parametrized):
 
     """
 
+    SERIALIZED = ('_mov_mean', '_mov_std', '_epsilon', '_mode')
+
     def __init__(self, input_size=None, momentum=0.99, mode="activation", epsilon=1e-5, initializer=GlorotNormal()):
         self._mov_mean = 0
         self._mov_std = 0
