@@ -955,7 +955,7 @@ class Transpose(UnaryOp):
 
     @classmethod
     def _oper_gpu(cls, arg):
-        return cls._oper_cpu(to_value(arg))
+        return get_gpu(arg).T
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
@@ -963,7 +963,7 @@ class Transpose(UnaryOp):
 
     def _backward_gpu(self, context, dy, *kwargs):
         if isinstance(self.attrs._arg, Node):
-            self.attrs._arg._update_diff(context. to_value(dy).T, **kwargs)
+            self.attrs._arg._update_diff(context. get_gpu(dy).T, **kwargs)
 
 
 class Pos(UnaryOp):
