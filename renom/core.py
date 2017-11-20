@@ -901,14 +901,7 @@ class Node(np.ndarray):
 
     @property
     def T(self):
-        if is_cuda_active():
-            if self._gpu is None:
-                ret = Variable(super(Variable, self).T)
-                ret.get_gpu()
-            else:
-                ret = Variable(get_gpu(self).T)
-        else:
-            ret = Variable(super(Node, self).T)
+        ret = Transpose(self)
         return ret
 
 
@@ -1586,6 +1579,23 @@ class GetSlice(Node):
     def _backward_gpu(self, context, dy, **kwargs):
         self._backward_cpu(context, dy, **kwargs)
 
+class Transpose(UnaryOp):
+    @classmethod
+    def _oper_cpu(cls, arg):
+        assert(len(arg.shape) < 3)
+        return arg.T
+
+    @classmethod
+    def _oper_gpu(cls, arg):
+        return get_gpu(arg).T
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            self.attrs._arg._update_diff(context, dy.T, **kwargs)
+
+    def _backward_gpu(self, context, dy, *kwargs):
+        if isinstance(self.attrs._arg, Node):
+            self.attrs._arg._update_diff(context. get_gpu(dy).T, **kwargs)
 
 def _plot_graph(objs):
     g = Digraph('G', filename='graphviz_output')
