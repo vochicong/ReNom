@@ -1,0 +1,7 @@
+[W 17:36:45.817 NotebookApp] WARNING: The notebook server is listening on all IP addresses and not using encryption. This is not recommended.
+[I 17:36:45.817 NotebookApp] The port 9999 is already in use, trying another port.
+[I 17:36:45.822 NotebookApp] Serving notebooks from local directory: /home/jun/projects/ReNom/renom/layers/activation
+[I 17:36:45.822 NotebookApp] 0 active kernels
+[I 17:36:45.822 NotebookApp] The Jupyter Notebook is running at:
+[I 17:36:45.822 NotebookApp] http://[all ip addresses on your system]:10000/
+[I 17:36:45.822 NotebookApp] Use Control-C to stop this server and shut down all kernels (twice to skip confirmation).

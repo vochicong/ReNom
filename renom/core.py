@@ -901,14 +901,15 @@ class Node(np.ndarray):
 
     @property
     def T(self):
-        if is_cuda_active():
-            if self._gpu is None:
-                ret = Variable(super(Variable, self).T)
-                ret.get_gpu()
-            else:
-                ret = Variable(get_gpu(self).T)
-        else:
-            ret = Variable(super(Node, self).T)
+        ret = Transpose(self)
+        #if is_cuda_active():
+        #    if self._gpu is None:
+        #        ret = Variable(super(Variable, self).T)
+        #        ret.get_gpu()
+        #    else:
+        #        ret = Variable(get_gpu(self).T)
+       # else:
+       #     ret = Variable(super(Node, self).T)
         return ret
 
 
@@ -945,6 +946,24 @@ class UnaryOp(Node):
         ret = super(UnaryOp, cls).__new__(cls, value)
         ret.attrs._arg = arg
         return ret
+
+class Transpose(UnaryOp):
+    @classmethod
+    def _oper_cpu(cls, arg):
+        assert(len(arg.shape) < 3)
+        return arg.T
+
+    @classmethod
+    def _oper_gpu(cls, arg):
+        return cls._oper_cpu(to_value(arg))
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            self.attrs._arg._update_diff(context, dy.T, **kwargs)
+
+    def _backward_gpu(self, context, dy, *kwargs):
+        if isinstance(self.attrs._arg, Node):
+            self.attrs._arg._update_diff(context. to_value(dy).T, **kwargs)
 
 
 class Pos(UnaryOp):
@@ -1560,6 +1579,81 @@ class GetItem(BinOp):
             zero[self.attrs._rhs] = dy
             self.attrs._lhs._update_diff(context, zero, **kwargs)
 
+class GetFgAry(Node):
+    @classmethod
+    def _oper_cpu(cls, arg):
+        return arg[:, :, 1, :, :]
+
+    @classmethod
+    def _oper_gpu(cls, arg):
+        shape = arg.shape
+        fg_ary = GPUValue(shape=(shape[0], shape[1], 1, shape[3], shape[4]))
+        arg = get_gpu(arg)
+        cu_get_fg_ary_forward(arg, fg_ary)
+        return fg_ary
+    
+    def __new__(cls, arg):
+        value = cls.calc_value(arg)
+        ret = super(GetFgAry, cls).__new__(cls, value)
+        ret.attrs._arg = arg
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            zero = np.zeros_like(np.array(self.attrs._arg))
+            zero[:, :, 1, :, :] = np.array(dy)
+            self.attrs._arg._update_diff(context, zero, **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._lhs, Node):
+            zero = get_gpu(self.attrs._lhs).zeros_like_me()
+            cu_get_fg_ary_backward(dy, zero)
+            self.attrs._arg._update_diff(context, zero, **kwargs)
+
+class GetIthAry(Node):
+    @classmethod
+    def _oper_cpu(cls, arg, i):
+        return arg[i]
+
+    @classmethod
+    def _oper_gpu(cls, arg, i):
+        shape = arg.shape
+        ith_ary = GPUValue(shape=(shape[1:]))
+        arg = get_gpu(arg)
+        cu_get_ith_ary_forward(arg, ith_ary, i)
+        return ith_ary
+    
+    def __new__(cls, arg, i):
+        value = cls.calc_value(arg, i)
+        ret = super(GetIthAry, cls).__new__(cls, value)
+        ret.attrs._arg = arg
+        ret._index = i
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            zero = np.zeros_like(np.array(self.attrs._arg))
+            zero[self.attrs._index] = np.array(dy)
+            self.attrs._arg._update_diff(context, zero, **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._lhs, Node):
+            zero = get_gpu(self.attrs._lhs).zeros_like_me()
+            cu_get_ith_ary_backward(dy, zero, self.attrs._index)
+            self.attrs._arg._update_diff(context, zero, **kwargs)
+
+class GetNthAry(Node):
+    def __new__(cls, arg, i, j):
+        value = cls.calc_value(arg, i, j)
+        ret = super(GetNthAry, cls).__new__(cls, value)
+        return ret
+
+    @classmethod
+    def _oper_gpu(cls, arg, i, j):
+        ary = GPUValue(shape=(arg.shape[0], ((arg.shape[1]-(i+1))//j)+1))
+        arg = get_gpu(arg)
+        cu_get_every_nth_ary(arg, ary, i, j)
+        return ary
 
 class GetSlice(Node):
     @classmethod
@@ -1586,6 +1680,48 @@ class GetSlice(Node):
     def _backward_gpu(self, context, dy, **kwargs):
         self._backward_cpu(context, dy, **kwargs)
 
+class AssignPredBox(Node):
+    def __new__(cls, arg, x, y, h, w):
+        ary = GPUValue(shape=arg.shape)
+        x = get_gpu(x)
+        y = get_gpu(y)
+        h = get_gpu(h)
+        w = get_gpu(w)
+        value = cls.calc_value(ary, x, y, h, w)
+        ret = super(AssignPredBox, cls).__new__(cls, value)
+        return ret
+    
+    @classmethod
+    def _oper_gpu(cls, ary, x, y, h, w):
+        cu_assign_pred_box(x, y, h, w, ary)
+        return ary
+class PredCtr(Node):
+    def __new__(cls, arg, length, ctr):
+        ary = GPUValue(shape=arg.shape)
+        arg = get_gpu(arg)
+        length = get_gpu(length)
+        ctr = get_gpu(ctr)
+        value = cls.calc_value(arg, length, ctr, ary)
+        ret = super(PredCtr, cls).__new__(cls, value)
+        return ret
+
+    @classmethod
+    def _oper_gpu(cls, arg, length, ctr, ary):
+        cu_pred_ctr(arg, length, ctr, ary)
+        return ary
+
+class GetIthBbox(Node):
+    def __new__(cls, arg, i):
+        arg = get_gpu(arg)
+        ary = GPUValue(shape=(arg.shape[0], 1))
+        value = cls.calc_value(arg, i, ary)
+        ret = super(GetIthBbox, cls).__new__(cls, value)
+        return ret
+
+    @classmethod
+    def _oper_gpu(cls, arg, i, ary):
+        cu_get_ith_bbox(arg, i, ary)
+        return ary
 
 def _plot_graph(objs):
     g = Digraph('G', filename='graphviz_output')

@@ -2,8 +2,9 @@
 # encoding: utf-8
 
 import numpy as np
-from renom.core import Node, GPUValue, to_value
+from renom.core import Node, GPUValue, to_value, get_gpu
 from renom.layers.function.utils import roi_pooling_slice, region_cordinates, roi_pooling_slice_decode
+import renom.cuda as cu
 
 class roi_pool2d(Node):
     def __new__(cls, x, rois, outh=7, outw=7, spatial_scale=1/16.):
@@ -29,7 +30,7 @@ class roi_pool2d(Node):
                     continue
                 for idx_w in range(outw):
                     slicew, lenw = roi_pooling_slice(idx_w, stridew, w, xmin)
-                    if sliceh.stop <= sliceh.start:
+                    if slicew.stop <= slicew.start:
                         continue
                     roi_data = x[int(idx), :, sliceh, slicew].reshape(ch, -1)
                     z[i_roi, :, idx_h, idx_w] = np.max(roi_data, axis=1)
@@ -46,6 +47,24 @@ class roi_pool2d(Node):
         ret.attrs._outh = outh
         ret.attrs._spatial_scale = spatial_scale
         return ret
+
+    @classmethod
+    def _oper_gpu(cls, x, rois, ch, h, w, n_rois, outh, outw, spatial_scale):
+        z = GPUValue(shape=(n_rois, ch, outh, outw))
+        argmax_data = z.empty_like_me()
+        rois = get_gpu(rois)
+        cu.curoi_pool2d_forward(rois, get_gpu(x), spatial_scale, ch, h, w, outh, outw, z, argmax_data)
+        ret = cls._create_node(z)
+        ret.attrs._index = argmax_data
+        ret.attrs._x = x
+        ret.attrs._rois = rois
+        ret.attrs._outh = outh
+        ret.attrs._outw = outw
+        ret.attrs._spatial_scale = spatial_scale
+        return ret
+
+
+
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
@@ -73,6 +92,14 @@ class roi_pool2d(Node):
                                     if max_idx_tmp[c] == (idx_h * w + idx_w):
                                         dx[idx, c, idx_h, idx_w] += dy[i_roi, c, ph, pw]
         self.attrs._x._update_diff(context, dx, **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._x, Node):
+            ch, h, w = self.attrs._x.shape[1:]
+            dx = GPUValue(shape=(self.attrs._x.shape))
+            cu.curoi_pool2d_backward(dy, self.attrs._index, self.attrs._rois, self.attrs._spatial_scale, ch, h, w, self.attrs._outh, self.attrs._outw, dx)
+        self.attrs._x._update_diff(context, dx, **kwargs)
+
 
 
 class RoiPoolBase(object):

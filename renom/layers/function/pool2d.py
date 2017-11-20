@@ -6,8 +6,6 @@ import numpy as np
 from renom.core import Node, GPUValue, get_gpu
 from renom.layers.function.utils import im2col, col2im, out_size, tuplize
 from renom.cuda import cuda as cu
-
-
 class pool_base(Node):
 
     def __new__(cls, x, filter=3, stride=1, padding=0):

@@ -477,8 +477,6 @@ def test_max_pool2d(node, use_gpu):
 def test_roi_pool2d(node, rois,  use_gpu):
     node = Variable(node)
     rois = Variable(rois)
-    set_cuda_active(False)
-
     layer = RoiPool2d(outh=7, outw=5, spatial_scale=0.6)
 
     def func(node, rois):
@@ -751,3 +749,19 @@ def test_exp(node, use_gpu):
     def func(node):
         return sum(rm.exp(node))
     compare(func, node, node)
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 2, 1, 1))),
+    Variable(rand((1, 2))),
+    Variable(rand((2, 0))),
+    Variable(rand((1,))),
+])
+def test_sign(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.sign(node))
+    compare(func, node, node)
+
