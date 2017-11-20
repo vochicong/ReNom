@@ -31,7 +31,6 @@ from renom.layers.function.lstm import Lstm
 from renom.layers.function.batch_normalize import BatchNormalize,\
     BATCH_NORMALIZE_FEATUREMAP
 from renom.layers.function.lrn import Lrn
-from renom.layers.function.roi_pool2d import RoiPool2d, roi_pool2d
 from test_utility import auto_diff, numeric_diff
 
 from renom.cuda import is_cuda_active, set_cuda_active, curand_generator
