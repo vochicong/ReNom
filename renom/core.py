@@ -229,7 +229,6 @@ class GPUValue(object):
     def reshape(self, *shape):
         clone = self.copy()
         a = np.empty(self.shape, dtype=np.bool).reshape(*shape)
-        print(a.shape)
         clone.shape = a.shape
         return clone
 
