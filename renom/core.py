@@ -228,7 +228,8 @@ class GPUValue(object):
 
     def reshape(self, *shape):
         clone = self.copy()
-        a = np.empty(self.shape).reshape(*shape)
+        a = np.empty(self.shape, dtype=np.bool).reshape(*shape)
+        print(a.shape)
         clone.shape = a.shape
         return clone
 
@@ -959,7 +960,7 @@ class Node(np.ndarray):
 
     def reshape(self, *shape):
         if isinstance(shape[0], (list, tuple)):
-            shape = shape[0]
+            shape = tuple(shape[0])
         return Reshape(self, shape)
 
 
@@ -1642,7 +1643,7 @@ class Reshape(Node):
 
     @classmethod
     def _oper_cpu(cls, array, shape):
-        return to_value(array).reshape(shape)
+        return np.reshape(array, shape).copy()
 
     @classmethod
     def _oper_gpu(cls, array, shape):

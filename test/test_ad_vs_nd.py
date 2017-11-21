@@ -790,7 +790,7 @@ def test_reshape(node, shape, use_gpu):
     set_cuda_active(use_gpu)
 
     def func(node):
-        return sum(rm.reshape(node, shape)) + sum(node.reshape(shape))
+        return sum(rm.reshape(node, shape)) + sum(node.reshape(shape)) + sum(node.reshape(*shape))
     compare(func, node, node)
 
 
