@@ -171,7 +171,7 @@ class Model(with_metaclass(ABCMeta, object)):
                 values[1][k] = v
 
         serialized = getattr(self, "SERIALIZED", ())
-        for name in serialized :
+        for name in serialized:
             if hasattr(self, name):
                 values[2][name] = getattr(self, name)
 
@@ -247,7 +247,7 @@ class Model(with_metaclass(ABCMeta, object)):
         Others is a list of tuple of (model, grads) to be merged.
         Models listed in the others should have same structure with self."""
 
-        values = {name:params for name, params, attrs in self.flatten_values()}
+        values = {name: params for name, params, attrs in self.flatten_values()}
         for model, _grads in others:
             o = model._get_grads(_grads)
 
@@ -301,7 +301,6 @@ class Model(with_metaclass(ABCMeta, object)):
 
                 for propname, propvalue in attrs.items():
                     g['__dict__.' + propname] = propvalue
-
 
     def load(self, filename):
         """Load saved weights to model.

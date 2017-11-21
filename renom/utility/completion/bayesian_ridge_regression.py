@@ -22,6 +22,7 @@ class BayesianRidgeRegression(object):
     """
     Bayesian Ridge Regression
     """
+
     def __init__(self, lambda_reg=0.001, add_ones=False, normalize_lambda=True):
         """
         Parameters

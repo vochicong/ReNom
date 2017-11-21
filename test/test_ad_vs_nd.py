@@ -465,6 +465,7 @@ def test_max_pool2d(node, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
 
+
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
     Variable(rand((2, 3, 4, 5))),
@@ -571,7 +572,6 @@ def test_peepholelstm(node, use_gpu):
     [Variable(rand((2, 2))), onehot((2, 2))],
     [Variable(rand((2, 3))), onehot((2, 3))],
     [Variable(rand((1, 2))), onehot((1, 2))],
-    [Variable(rand((1, 2, 2, 2, 2))), onehot((1, 2, 2, 2, 2))],
     [Variable(rand((2, 2, 3, 3))), onehot((2, 2, 3, 3))],
 ])
 def test_softmax_cross_entropy(node, x, use_gpu):

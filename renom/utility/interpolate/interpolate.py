@@ -78,7 +78,7 @@ def interpolate(x, mode, axis=0, missing=(np.nan, np.Inf), constant=None):
     assert mode in ["linear", "spline", "constant", "nearest_index"],\
         "specified mode does not exists in interpolate"
     if mode == "constant":
-        assert constant != None, "constant is not specified."
+        assert constant is not None, "constant is not specified."
 
     if isinstance(x, list):
         x = np.array(x)

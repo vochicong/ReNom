@@ -1172,7 +1172,7 @@ def test_cu_reduce_min(a, axis):
     [rand((1, 2, 3)), 1],
     [rand((1, 2, 3)), 2],
 ])
-def test_cu_reducearg_min(a, axis):
+def test_cu_reduce_arg_min(a, axis):
     with use_cuda():
         g = renom.core.GPUValue(a)
 
@@ -1209,7 +1209,7 @@ def test_cu_reduce_max(a, axis):
     [rand((1, 2, 3)), 1],
     [rand((1, 2, 3)), 2],
 ])
-def test_cu_reduce_max(a, axis):
+def test_cu_reduce_arg_max(a, axis):
     with use_cuda():
         g = renom.core.GPUValue(a)
 

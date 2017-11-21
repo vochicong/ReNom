@@ -1583,11 +1583,12 @@ class GetSlice(Node):
     def _backward_gpu(self, context, dy, **kwargs):
         self._backward_cpu(context, dy, **kwargs)
 
+
 class Transpose(UnaryOp):
     @classmethod
     def _oper_cpu(cls, arg):
         assert(len(arg.shape) < 3)
-        return arg.T
+        return to_value(arg).T
 
     @classmethod
     def _oper_gpu(cls, arg):
@@ -1595,11 +1596,12 @@ class Transpose(UnaryOp):
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            self.attrs._arg._update_diff(context, dy.T, **kwargs)
+            self.attrs._arg._update_diff(context, to_value(dy).T, **kwargs)
 
     def _backward_gpu(self, context, dy, *kwargs):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context. get_gpu(dy).T, **kwargs)
+
 
 def _plot_graph(objs):
     g = Digraph('G', filename='graphviz_output')

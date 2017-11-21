@@ -108,6 +108,7 @@ def test_save(tmpdir_factory):
 
     class NN3(rm.Model):
         SERIALIZED = ('AAA', 'BBB')
+
         def __init__(self):
             super(NN3, self).__init__()
             self.layer1 = NN2()
@@ -149,6 +150,7 @@ def test_save(tmpdir_factory):
     assert nn2.layer1.layer1.params.w._auto_update
     assert not nn2.layer1.layer1.params.b._auto_update
     assert nn2.AAA == 9999
+
 
 def test_update():
     nn = rm.Dense(2)
