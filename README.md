@@ -8,7 +8,8 @@ Documents are available on the ReNom.jp web site.
 ## ReNom version 2.3.1d
 
 - Fix save and load functions of model to save moving average of batch normalization.
-- Add auto-differentiation of transpose.
+- Add auto-differentiation to transpose.
+- Add auto-differentiation to node object's reshape function.
 - Optimized back-propagation path.
 
 ## Requirements
