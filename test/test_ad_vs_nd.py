@@ -776,3 +776,34 @@ def test_exp(node, use_gpu):
     def func(node):
         return sum(rm.exp(node))
     compare(func, node, node)
+
+
+@pytest.mark.parametrize("node, shape", [
+    [Variable(rand((2, 2))), (1, 4)],
+    [Variable(rand((2, 2, 1, 1))), (4, 1)],
+    [Variable(rand((1, 2))), (2, 1)],
+    [Variable(rand((2, 1))), (1, 2)],
+    [Variable(rand((1,))), (1,)],
+])
+def test_reshape(node, shape, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.reshape(node, shape)) + sum(node.reshape(shape))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((1, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1,))),
+])
+def test_T(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(node.T)
+    compare(func, node, node)

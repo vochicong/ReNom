@@ -955,8 +955,12 @@ class Node(np.ndarray):
 
     @property
     def T(self):
-        ret = Transpose(self)
-        return ret
+        return Transpose(self)
+
+    def reshape(self, *shape):
+        if isinstance(shape[0], (list, tuple)):
+            shape = shape[0]
+        return Reshape(self, shape)
 
 
 class Variable(Node):
@@ -1634,6 +1638,34 @@ class GetSlice(Node):
         self._backward_cpu(context, dy, **kwargs)
 
 
+class Reshape(Node):
+
+    @classmethod
+    def _oper_cpu(cls, array, shape):
+        return to_value(array).reshape(shape)
+
+    @classmethod
+    def _oper_gpu(cls, array, shape):
+        return get_gpu(array).reshape(shape)
+
+    def __new__(cls, array, shape):
+        value = cls.calc_value(array, shape)
+        ret = super(Reshape, cls).__new__(cls, value)
+        ret.attrs._array = array
+        ret.attrs._shape = array.shape
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._array, Node):
+            self.attrs._array._update_diff(context, to_value(
+                dy).reshape(self.attrs._shape), **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._array, Node):
+            self.attrs._array._update_diff(context, get_gpu(
+                dy).reshape(self.attrs._shape), **kwargs)
+
+
 class Transpose(UnaryOp):
     @classmethod
     def _oper_cpu(cls, arg):
@@ -1648,9 +1680,9 @@ class Transpose(UnaryOp):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, to_value(dy).T, **kwargs)
 
-    def _backward_gpu(self, context, dy, *kwargs):
+    def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            self.attrs._arg._update_diff(context. get_gpu(dy).T, **kwargs)
+            self.attrs._arg._update_diff(context, get_gpu(dy).T, **kwargs)
 
 
 def _plot_graph(objs):
