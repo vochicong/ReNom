@@ -31,7 +31,7 @@ class LogisticRegression(object):
                 loss.grad().update(self.optimizer)
 
     def predict(self, x):
-        output_network = list(map(int, rm.sigmoid(self.network(x)).as_ndarray()))
+        output_network = list(map(int, rm.sigmoid(self.network(x)).as_ndarray() > 0.5))
         result_array = [self.lb.classes_[output] for output in output_network]
         return np.array(result_array)
 
