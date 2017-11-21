@@ -98,7 +98,7 @@ class lstm(Node):
 
         return ret
 
-    def _backward_cpu(self, context, dy, temporal=False, **kwargs):
+    def _backward_cpu(self, context, dy, **kwargs):
         n, m = dy.shape
 
         w = self.attrs._w
@@ -120,7 +120,7 @@ class lstm(Node):
         e = dy
 
         do = e * s * gd[:, 2 * m:]
-        dou = e * gated[:, 2 * m:] * activation_diff(s) + (pfg * dou if temporal else 0)
+        dou = e * gated[:, 2 * m:] * activation_diff(s) + pfg * dou
 
         df = dou * gd[:, :m] * ps if ps is not None else np.zeros_like(dou)
         di = dou * gd[:, m:2 * m] * u
@@ -138,16 +138,16 @@ class lstm(Node):
         if isinstance(w, Node):
             w._update_diff(context, np.dot(self.attrs._x.T, dr))
 
-        if isinstance(wr, Node) and temporal:
+        if isinstance(wr, Node):
             wr._update_diff(context, np.dot(self.T, drt))
 
         if isinstance(b, Node):
             b._update_diff(context, np.sum(dr, axis=0, keepdims=True))
 
         if isinstance(self.attrs._pz, Node):
-            self.attrs._pz._update_diff(context, np.dot(dr, wr.T), temporal=True)
+            self.attrs._pz._update_diff(context, np.dot(dr, wr.T))
 
-    def _backward_gpu(self, context, dy, temporal=False, **kwargs):
+    def _backward_gpu(self, context, dy, **kwargs):
         w = self.attrs._w
         wr = self.attrs._wr
         b = self.attrs._b
@@ -163,7 +163,7 @@ class lstm(Node):
         e = get_gpu(dy)
 
         dr, dou_n = (get_gpu(a).empty_like_me() for a in (drt, dou))
-        cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n, temporal)))
+        cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n)))
 
         dx = dot(dr, w.T)
 
@@ -176,14 +176,14 @@ class lstm(Node):
         if isinstance(w, Node):
             w._update_diff(context, dot(self.attrs._x.T, dr))
 
-        if isinstance(wr, Node) and temporal:
+        if isinstance(wr, Node):
             wr._update_diff(context, dot(self.T, drt))
 
         if isinstance(b, Node):
             b._update_diff(context, sum(dr, axis=0))
 
         if isinstance(self.attrs._pz, Node):
-            self.attrs._pz._update_diff(context, dot(dr, wr.T), temporal=True)
+            self.attrs._pz._update_diff(context, dot(dr, wr.T))
 
 
 class Lstm(Parametrized):

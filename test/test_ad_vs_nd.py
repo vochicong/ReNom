@@ -550,6 +550,29 @@ def test_lstm(node, use_gpu):
     Variable(rand((2, 1))),
     Variable(rand((1, 2))),
 ])
+def test_lstm_temporal_connection(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer1 = Lstm(output_size=4)
+
+    def func(node):
+        loss = 0
+        for _ in range(3):
+            loss = sum(layer1(node))
+        layer1.truncate()
+        return loss
+
+    compare(func, node, node)
+    for k in layer1.params.keys():
+        compare(func, layer1.params[k], node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1, 2))),
+])
 def test_peepholelstm(node, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
@@ -560,6 +583,29 @@ def test_peepholelstm(node, use_gpu):
         loss = 0
         for _ in range(3):
             loss += sum(layer1(node))
+        layer1.truncate()
+        return loss
+
+    compare(func, node, node)
+    for k in layer1.params.keys():
+        compare(func, layer1.params[k], node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1, 2))),
+])
+def test_peepholelstm_temporal_connection(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer1 = rm.PeepholeLstm(output_size=4)
+
+    def func(node):
+        loss = 0
+        for _ in range(3):
+            loss = sum(layer1(node))
         layer1.truncate()
         return loss
 

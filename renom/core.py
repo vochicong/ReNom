@@ -32,10 +32,32 @@ class Grads:
               [ 2.,  2.,  2.]], dtype=float32)
     '''
 
-    def __init__(self):
+    def __init__(self, root=None):
         self.stroage = {}
         self.variables = {}
         self._auto_updates = []
+
+        if root is not None:
+            self._build_refcounts(root)
+
+    def _build_refcounts(self, root):
+        self._refcounts = collections.Counter()
+        self._backwards = collections.Counter()
+
+        q = collections.deque(root._args)
+
+        def walk():
+            while q:
+                t = q.pop()
+                if isinstance(t, Node):
+                    yield t
+                    if not getattr(t, '_no_backward', False):
+                        for c in t._args:
+                            q.append(c)
+
+        for n in walk():
+            nodeid = id(n)
+            self._refcounts[nodeid] += 1
 
     @contextlib.contextmanager
     def unlock_node(self, node):
@@ -54,22 +76,30 @@ class Grads:
         selfid = id(node)
         return self.stroage.get(selfid, default)
 
-    def add(self, node, dy):
+    def add(self, node, dy, caller=None):
         selfid = id(node)
         if selfid in self.variables:
-            node = self.variables[selfid]
-            with self.unlock_node(node):
+            v = self.variables[selfid]
+            with self.unlock_node(v):
                 if isinstance(dy, GPUValue):
-                    diff = node.get_gpu() + dy
-                    node.set_gpu(diff)
+                    diff = v.get_gpu() + dy
+                    v.set_gpu(diff)
                 else:
-                    node[...] += dy
+                    v[...] += dy
         else:
             if isinstance(dy, GPUValue):
                 dy = Variable(dy)
             self.variables[selfid] = dy
             if node._auto_update:
                 self._auto_updates.append(node)
+
+        if caller is not None:
+            caller_refs = self._refcounts[id(caller)] or 1
+        else:
+            caller_refs = 1
+        self._backwards[selfid] += caller_refs
+
+        return self._refcounts[selfid] <= self._backwards[selfid], GradsWithCaller(node, self)
 
     _omit = object()
 
@@ -130,7 +160,20 @@ class Grads:
                         self.update_node(node, opt)
 
 
+class GradsWithCaller(object):
+    def __init__(self, caller, grad):
+        self.grad__ = getattr(grad, 'grad__', grad)
+        self.caller = caller
+
+    def add(self, node, dy):
+        return self.grad__.add(node, dy, self.caller)
+
+    def __getattr__(self, name):
+        return getattr(self.grad__, name)
+
 # todo: move this method to Cython
+
+
 def calc_broadcast_shape(s1, s2):
     # silly, but works
     if all([isinstance(s, (np.ndarray, Number, GPUValue)) for s in (s1, s2)]):
@@ -435,6 +478,7 @@ class Node(np.ndarray):
     _model = None
     _auto_update = False
     _no_backward = False
+    _args = ()
 
     def __new__(cls, value):
         ret = cls._create_node(value)
@@ -473,6 +517,8 @@ class Node(np.ndarray):
 
     def __init__(self, *args, **kwargs):
         self.setflags(write=False)
+        self._args = [a for a in args if isinstance(a, Node)]
+        self._args.extend(a for a in kwargs.values() if isinstance(a, Node))
         self._reduce_graph()
         return
 
@@ -594,7 +640,7 @@ class Node(np.ndarray):
                 initial = Node(initial)
                 initial.to_gpu()
 
-        context = Grads()
+        context = Grads(self)
         self._update_diff(context, initial, **kwargs)
 
         if detach_graph:
@@ -602,8 +648,10 @@ class Node(np.ndarray):
         return context
 
     def _update_diff(self, context, dy, **kwargs):
-        context.add(self, dy)
-        self.backward(context, dy, **kwargs)
+        ready, context = context.add(self, dy)
+        if ready:
+            diff = context.get(self)
+            self.backward(context, diff, **kwargs)
 
     def _get_graph(self):
         if self.attrs:
@@ -637,6 +685,8 @@ class Node(np.ndarray):
                 v.detach_graph()
         if self.attrs:
             self.attrs.clear()
+
+        self._args = []
 
     def backward(self, context, dy, **kwargs):
         if self._no_backward:

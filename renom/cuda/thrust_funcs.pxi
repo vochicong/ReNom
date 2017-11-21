@@ -262,7 +262,7 @@ def culstm_forward(u, s, ps, z):
     thrust_forward_lstm(N, M, ptr_u, ptr_s, ptr_ps, ptr_z)
 
 
-def culstm_backward(u, du, s, ps, e, pgf, dou, dou_n, temporal):
+def culstm_backward(u, du, s, ps, e, pgf, dou, dou_n):
     cdef int N = u.shape[0]
     cdef int M = u.shape[1]
     cdef VALUE_TYPE * ptr_u = < VALUE_TYPE * > < uintptr_t > u._ptr
@@ -273,9 +273,8 @@ def culstm_backward(u, du, s, ps, e, pgf, dou, dou_n, temporal):
     cdef VALUE_TYPE * ptr_pgf = < VALUE_TYPE * > < uintptr_t > pgf._ptr
     cdef VALUE_TYPE * ptr_dou = < VALUE_TYPE * > < uintptr_t > dou._ptr
     cdef VALUE_TYPE * ptr_dou_n = < VALUE_TYPE * > < uintptr_t > dou_n._ptr
-    cdef bool temp = temporal
     thrust_backward_lstm(N, M, ptr_u, ptr_du, ptr_s, ptr_ps,
-                         ptr_e, ptr_pgf, ptr_dou, ptr_dou_n, temp)
+                         ptr_e, ptr_pgf, ptr_dou, ptr_dou_n)
 
 
 def cupeepholelstm_forward(u, wc, prestate, state, z):
@@ -291,9 +290,9 @@ def cupeepholelstm_forward(u, wc, prestate, state, z):
     thrust_forward_peephole_lstm(N, M, ptr_u, ptr_wc, ptr_ps, ptr_s, ptr_z)
 
 
-def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dot, dr, dou, dwc, temporal):
+def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dot, dr, dou, dwc):
     cuda_base.check_heap_device(u, prestate, state, prestate, wc,
-                                dy, drt, dot, dou, dr, dwc, temporal)
+                                dy, drt, dot, dou, dr, dwc)
     cdef int N = u.shape[0]
     cdef int M = u.shape[1]
 
@@ -308,9 +307,8 @@ def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dot, dr, dou
     cdef VALUE_TYPE * ptr_dr = < VALUE_TYPE * > < uintptr_t > dr._ptr
     cdef VALUE_TYPE * ptr_dou = < VALUE_TYPE * > < uintptr_t > dou._ptr
     cdef VALUE_TYPE * ptr_dwc = < VALUE_TYPE * > < uintptr_t > dwc._ptr
-    cdef bool temp = temporal
     thrust_backward_peephole_lstm(N, M, ptr_u, ptr_ps, ptr_s, ptr_pfg, ptr_wc,
-                                  ptr_dy, ptr_drt, ptr_dot, ptr_dr, ptr_dou, ptr_dwc, temp)
+                                  ptr_dy, ptr_drt, ptr_dot, ptr_dr, ptr_dou, ptr_dwc)
 
 
 def cubinarize(gpu_value1, th, gpu_value2):

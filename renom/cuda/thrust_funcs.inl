@@ -951,7 +951,7 @@ namespace renom{
 	}
 	
 	__global__ void cuda_backward_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps, \
-			VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou, bool temporal)
+			VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou)
 	{
 		int idx = blockIdx.x * blockDim.x + threadIdx.x;
 		int size = N*M/4;
@@ -959,7 +959,7 @@ namespace renom{
 		
 		if(idx < size)
 		{
-			next_dou[idx] = e[idx]*u[index+M/4*3] * tanh_diff(s[idx]) + ((temporal)?pfg[index+M/4]*dou[idx]:0);
+			next_dou[idx] = e[idx]*u[index+M/4*3] * tanh_diff(s[idx]) + pfg[index+M/4]*dou[idx];
 			du[index+M/4] = next_dou[idx]*sigmoid_diff(u[index+M/4])*ps[idx];		// f
 			du[index+M/4*2] = next_dou[idx]*sigmoid_diff(u[index+M/4*2])*u[index];	// i
 			du[index+M/4*3] = e[idx]*s[idx]*sigmoid_diff(u[index+M/4*3]);			// o
@@ -972,9 +972,9 @@ namespace renom{
 	}
 	
 	void thrust_backward_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps,\
-			VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou, bool temporal)
+			VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou)
 	{
-		cuda_backward_lstm <<<ceil((N*M/4)/256.0), 256>>> (N, M, u, du, s, ps, e, pfg, dou, next_dou, temporal);
+		cuda_backward_lstm <<<ceil((N*M/4)/256.0), 256>>> (N, M, u, du, s, ps, e, pfg, dou, next_dou);
 	}
 
     // Peephole Lstm forward
@@ -1038,8 +1038,8 @@ namespace renom{
             VALUE_TYPE *dot, \
             VALUE_TYPE *dr, \  // in place 
             VALUE_TYPE *dou, \ // in place
-            VALUE_TYPE *dwc, \ // in place
-            bool temporal)
+            VALUE_TYPE *dwc // in place
+        )
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
         int size = N*M;
@@ -1065,18 +1065,14 @@ namespace renom{
 
         dr[o4] = dy[idx] * tanh_s * sigmoid_diff(u[o4]);
         dou[idx] = dy[idx]*u[o4]*tanh_diff(tanh_s) + dr[o4]*wc[o3];
-        if(temporal){
-            dou[idx] += prefg[f4]*dot[idx];
-            dou[idx] += drt[f4]*wc[f3];
-            dou[idx] += drt[i4]*wc[i3];
+        dou[idx] += prefg[f4]*dot[idx];
+        dou[idx] += drt[f4]*wc[f3];
+        dou[idx] += drt[i4]*wc[i3];
 
-            dwc[f3+row3] = drt[f4]*state[idx];
-            dwc[i3+row3] = drt[i4]*state[idx];
-        }else{
-            dwc[f3+row3] = 0;
-            dwc[i3+row3] = 0;
-        }
+        dwc[f3+row3] = drt[f4]*state[idx];
+        dwc[i3+row3] = drt[i4]*state[idx];
         dwc[o3+row3] = dr[o4]*state[idx];
+
         dr[f4] = dou[idx] * sigmoid_diff(u[f4]) * prestate[idx];
         dr[i4] = dou[idx] * sigmoid_diff(u[i4]) * u[u4];
         dr[u4] = dou[idx] * tanh_diff(u[u4]) * u[i4];
@@ -1095,11 +1091,11 @@ namespace renom{
             VALUE_TYPE *dot, \
             VALUE_TYPE *dr, \
             VALUE_TYPE *dou, \
-            VALUE_TYPE *dwc, \
-            bool temporal)
+            VALUE_TYPE *dwc
+        )
     {
         cuda_backward_peephole_lstm <<<ceil((N*M/4)/256.0), 256>>> \
-                (N, M/4, u, prestate, state, prefg, wc, dy, drt, dot, dr, dou, dwc, temporal);
+                (N, M/4, u, prestate, state, prefg, wc, dy, drt, dot, dr, dou, dwc);
     }
 
     // Binalize
