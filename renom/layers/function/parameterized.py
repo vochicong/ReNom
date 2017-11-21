@@ -300,7 +300,11 @@ class Model(with_metaclass(ABCMeta, object)):
                         t[propname] = 'renom.Node'
 
                 for propname, propvalue in attrs.items():
-                    g['__dict__.' + propname] = propvalue
+                    if isinstance(propvalue, GPUValue):
+                        g['__dict__.' + propname] = propvalue.new_array()
+                    else:
+                        g['__dict__.' + propname] = propvalue
+
 
     def load(self, filename):
         """Load saved weights to model.
