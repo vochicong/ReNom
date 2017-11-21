@@ -465,7 +465,6 @@ def test_max_pool2d(node, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
 
-
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
     Variable(rand((2, 3, 4, 5))),
