@@ -24,19 +24,63 @@ cdef extern from * namespace "renom":
     cdef void thrust_create_mask(VALUE_TYPE *a, int size)
     cdef void thrust_min(VALUE_TYPE v, VALUE_TYPE *a, VALUE_TYPE *b, int size);
     cdef void thrust_max(VALUE_TYPE v, VALUE_TYPE *a, VALUE_TYPE *b, int size);
-    cdef void thrust_reduce_sum(VALUE_TYPE *a, const size_t nsize,
-                                 const size_t axis_size, const size_t elem_size,
-                                 const size_t child_size, VALUE_TYPE *b,
-                                 const size_t result_size)
 
-    cdef void thrust_reduce_min(VALUE_TYPE *a, const size_t nsize,
-                                 const size_t axis_size, const size_t elem_size,
-                                 const size_t child_size, VALUE_TYPE *b,
-                                 const size_t result_size)
-    cdef void thrust_reduce_max(VALUE_TYPE *a, const size_t nsize,
-                                 const size_t axis_size, const size_t elem_size,
-                                 const size_t child_size, VALUE_TYPE *b,
-                                 const size_t result_size)
+    cdef struct reduce_shape_infos:
+        size_t out_size[16]
+        size_t in_size[16]
+        size_t group_size[16]
+
+    cdef void thrust_reduce_sum(
+        size_t num_blocks, size_t num_threads,
+        VALUE_TYPE *src, size_t src_size,
+        VALUE_TYPE *result, size_t result_size,
+        size_t src_per_result,
+        size_t sequence_stride,
+        size_t num_axis,
+        reduce_shape_infos *reduction_infos,
+        reduce_shape_infos *seq_infos)
+
+    cdef void thrust_reduce_min(
+        size_t num_blocks, size_t num_threads,
+        VALUE_TYPE *src, size_t src_size,
+        VALUE_TYPE *result, size_t result_size,
+        size_t src_per_result,
+        size_t sequence_stride,
+        size_t num_axis,
+        reduce_shape_infos *reduction_infos,
+        reduce_shape_infos *seq_infos)
+
+    cdef void thrust_reduce_argmin(
+        size_t num_blocks, size_t num_threads,
+        VALUE_TYPE *src, size_t src_size,
+        size_t *result, size_t result_size,
+        size_t src_per_result,
+        size_t sequence_stride,
+        size_t num_axis,
+        reduce_shape_infos *reduction_infos,
+        reduce_shape_infos *seq_infos,
+        size_t mod, size_t div)
+
+    cdef void thrust_reduce_max(
+        size_t num_blocks, size_t num_threads,
+        VALUE_TYPE *src, const size_t src_size,
+        VALUE_TYPE *result, const size_t result_size,
+        size_t src_per_result,
+        size_t sequence_stride,
+        size_t num_axis,
+        reduce_shape_infos *reduction_infos,
+        reduce_shape_infos *seq_infos)
+
+    cdef void thrust_reduce_argmax(
+        size_t num_blocks, size_t num_threads,
+        VALUE_TYPE *src, const size_t src_size,
+        size_t *result, const size_t result_size,
+        size_t src_per_result,
+        size_t sequence_stride,
+        size_t num_axis,
+        reduce_shape_infos *reduction_infos,
+        reduce_shape_infos *seq_infos,
+        size_t mod, size_t div);
 
     cdef void thrust_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len)
 
@@ -61,3 +105,4 @@ cdef extern from * namespace "renom":
 
     cdef void thrust_embedding_backward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *dy, VALUE_TYPE *dx);
     cdef void thrust_add_bias(int size, int n, int wh, VALUE_TYPE *bias, VALUE_TYPE *a);
+

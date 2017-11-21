@@ -143,16 +143,21 @@ def calc_broadcast_shape(s1, s2):
 class GPUValue(object):
     ACTIVE_GPU = None
 
-    def __init__(self, array=None, shape=None, ptr=None):
+    def __init__(self, array=None, shape=None, ptr=None, dtype=None):
         if shape is not None:
-            self.shape = shape
+            self.shape = tuple(shape)
         else:
             self.shape = getattr(array, "shape", None) or ()
 
-        self.dtype = precision
+        if not dtype:
+            self.dtype = precision
+        else:
+            self.dtype = np.dtype(dtype)
+
         self.itemsize = np.dtype(self.dtype).itemsize
-        self.size = np.prod(self.shape) if self.shape else 1
+        self.size = (np.prod(self.shape) if self.shape else 1) or 1
         self.nbytes = self.size * self.itemsize
+
         self._ptr = ptr
         if array is not None:
             self.to_gpu(array)
