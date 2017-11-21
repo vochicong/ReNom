@@ -23,6 +23,7 @@ def test_gpu_node_neg():
         assert np.allclose(g3, [-2, -4])
         assert not np.allclose(g3, [-3, -4])
 
+
 def test_grad():
     class D(Variable):
         def _update_diff(self, context, dy, **kwargs):
@@ -38,13 +39,13 @@ def test_grad():
     g3 = D(np.array([1., 2.]))
     g4 = g1 + g2
     g5 = g3 + g4
-    g6 = g1+g2+g3+g4+g5
-    g7 = g6+g5
+    g6 = g1 + g2 + g3 + g4 + g5
+    g7 = g6 + g5
 
     print([id(g) for g in (g1, g2, g3, g4, g5, g6, g7)])
 
     g = g6.grad(np.array([1., 2.]))
-    print(g._refcounts )
+    print(g._refcounts)
     print(g._backwards)
     assert len(g._refcounts) == 8
 
@@ -53,5 +54,3 @@ def test_grad():
     assert g._refcounts[id(g3)] == g._backwards[id(g3)]
     assert g._refcounts[id(g4)] == g._backwards[id(g4)]
     assert g._refcounts[id(g5)] == g._backwards[id(g5)]
-
-

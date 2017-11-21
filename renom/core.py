@@ -45,6 +45,7 @@ class Grads:
         self._backwards = collections.Counter()
 
         q = collections.deque(root._args)
+
         def walk():
             while q:
                 t = q.pop()
@@ -99,7 +100,6 @@ class Grads:
         self._backwards[selfid] += caller_refs
 
         return self._refcounts[selfid] <= self._backwards[selfid], GradsWithCaller(node, self)
-
 
     _omit = object()
 
@@ -172,6 +172,8 @@ class GradsWithCaller(object):
         return getattr(self.grad__, name)
 
 # todo: move this method to Cython
+
+
 def calc_broadcast_shape(s1, s2):
     # silly, but works
     if all([isinstance(s, (np.ndarray, Number, GPUValue)) for s in (s1, s2)]):
@@ -186,7 +188,7 @@ class GPUValue(object):
 
     def __init__(self, array=None, shape=None, ptr=None):
         if shape is not None:
-            self.shape = shape
+            self.shape = tuple(shape)
         else:
             self.shape = getattr(array, "shape", None) or ()
 

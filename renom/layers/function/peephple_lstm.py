@@ -95,7 +95,7 @@ class peephole_lstm(Node):
             pz.attrs._pfgate = u
         return ret
 
-    def _backward_cpu(self, context, dy, temporal=False, **kwargs):
+    def _backward_cpu(self, context, dy, **kwargs):
         n, m = dy.shape
 
         w = self.attrs._w
@@ -118,8 +118,7 @@ class peephole_lstm(Node):
         do = dy * s * gd[:, 2 * m:]
         dou = dy * gated[:, 2 * m:] * activation_diff(s) + do * wc[:, 2 * m:]
 
-        if temporal:
-            dou += pfg * dot + drt[:, m:2 * m] * wc[:, :m] + drt[:, 2 * m:3 * m] * wc[:, m:2 * m]
+        dou += pfg * dot + drt[:, m:2 * m] * wc[:, :m] + drt[:, 2 * m:3 * m] * wc[:, m:2 * m]
 
         df = dou * gd[:, :m] * ps if ps is not None else np.zeros_like(dou)
         di = dou * gd[:, m:2 * m] * u
@@ -137,24 +136,23 @@ class peephole_lstm(Node):
         if isinstance(w, Node):
             w._update_diff(context, np.dot(self.attrs._x.T, dr))
 
-        if isinstance(wr, Node) and temporal:
+        if isinstance(wr, Node):
             wr._update_diff(context, np.dot(self.T, drt))
 
         if isinstance(wc, Node):
             dwc = np.zeros(wc.shape, dtype=wc.dtype)
             dwc[:, 2 * m:] = np.sum(do * self.attrs._state, axis=0)
-            if temporal:
-                dwc[:, :m] = np.sum(drt[:, m:2 * m] * self.attrs._state, axis=0)
-                dwc[:, m:2 * m] = np.sum(drt[:, 2 * m:3 * m] * self.attrs._state, axis=0)
+            dwc[:, :m] = np.sum(drt[:, m:2 * m] * self.attrs._state, axis=0)
+            dwc[:, m:2 * m] = np.sum(drt[:, 2 * m:3 * m] * self.attrs._state, axis=0)
             wc._update_diff(context, dwc)
 
         if isinstance(b, Node):
-            b._update_diff(context, np.sum(dr, axis=0, keepdims=True))
+            b._update_diff(context, np.sum(dr, axis=0))
 
         if isinstance(self.attrs._pz, Node):
-            self.attrs._pz._update_diff(context, np.dot(dr, wr.T), temporal=True)
+            self.attrs._pz._update_diff(context, np.dot(dr, wr.T))
 
-    def _backward_gpu(self, context, dy, temporal=False, **kwargs):
+    def _backward_gpu(self, context, dy, **kwargs):
         n, m = dy.shape
 
         w = self.attrs._w
@@ -175,7 +173,7 @@ class peephole_lstm(Node):
         dou = get_gpu(dot).empty_like_me()
 
         cu.cupeepholelstm_backward(
-            *map(get_gpu, (u, ps, s, pfg, wc, dy, drt, dot, dr, dou, dwc, temporal)))
+            *map(get_gpu, (u, ps, s, pfg, wc, dy, drt, dot, dr, dou, dwc)))
 
         context.store(wr, dr)
         context.store(w, dou)
@@ -187,7 +185,7 @@ class peephole_lstm(Node):
         if isinstance(w, Node):
             w._update_diff(context, op.dot(self.attrs._x.T, dr))
 
-        if isinstance(wr, Node) and temporal:
+        if isinstance(wr, Node):
             wr._update_diff(context, op.dot(self.T, drt))
 
         if isinstance(wc, Node):
@@ -197,7 +195,7 @@ class peephole_lstm(Node):
             b._update_diff(context, op.sum(dr, axis=0))
 
         if isinstance(self.attrs._pz, Node):
-            self.attrs._pz._update_diff(context, op.dot(dr, wr.T), temporal=True)
+            self.attrs._pz._update_diff(context, op.dot(dr, wr.T))
 
 
 class PeepholeLstm(Parametrized):
