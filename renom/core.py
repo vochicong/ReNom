@@ -675,7 +675,7 @@ class Node(np.ndarray):
             if not self._has_autoupdate():
                 self._no_backward = True
                 self.attrs.clear()
-
+                self._args = []
         return False
 
     def detach_graph(self):
