@@ -102,15 +102,19 @@ def test_save(tmpdir_factory):
             super(NN2, self).__init__()
             self.layer1 = rm.Dense(output_size=2)
             self.layer2 = rm.Dense(output_size=2)
+            self.bn = rm.BatchNormalize()
 
         def forward(self, x):
-            return self.layer2(rm.relu(self.layer1(x)))
+            return self.layer2(self.bn(rm.relu(self.layer1(x))))
 
     class NN3(rm.Model):
+        SERIALIZED = ('AAA', 'BBB')
+
         def __init__(self):
             super(NN3, self).__init__()
             self.layer1 = NN2()
             self.layer2 = NN2()
+            self.AAA = 0
 
         def forward(self, x):
             return self.layer2(rm.relu(self.layer1(x)))
@@ -128,6 +132,7 @@ def test_save(tmpdir_factory):
 
     d = tmpdir_factory.mktemp('h5')
     fname = os.path.join(str(d), 'aaa')
+    nn.AAA = 9999
     nn.save(fname)
 
     nn2 = NN3()
@@ -145,6 +150,7 @@ def test_save(tmpdir_factory):
 
     assert nn2.layer1.layer1.params.w._auto_update
     assert not nn2.layer1.layer1.params.b._auto_update
+    assert nn2.AAA == 9999
 
 
 def test_update():
@@ -189,7 +195,7 @@ def test_multi_gpu():
     nn2.set_gpu(cuGetDeviceCount() - 1)
 
     for i in range(2):
-        nn2.copy_attr(nn)
+        nn2.copy_params(nn)
         x = np.random.rand(100, 2)
         with nn.train():
             ret1 = nn(x[:50])

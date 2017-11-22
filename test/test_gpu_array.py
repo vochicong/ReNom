@@ -4,6 +4,8 @@
 from __future__ import division, print_function
 import numpy as np
 import pytest
+import renom.cuda
+import renom.core
 from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device
 from renom.core import to_value, Variable, get_gpu
 from renom.operation import dot, sum, sqrt
@@ -31,6 +33,11 @@ def arange(shape):
 
 def close(a, b):
     assert np.allclose(to_value(a), to_value(b), atol=1e-4, rtol=1e-3)
+
+
+def close_shape(a, b):
+    assert a.shape == b.shape
+    return close(a, b)
 
 
 @test_utility.skipgpu
@@ -1114,3 +1121,98 @@ def test_copy_from_another_gpu():
     close(src, dest)
 
     close(src._gpu.new_array(), dest._gpu.new_array())
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a, axis", [
+    [rand((1, 2, 3)), None],
+    [rand((1, 2, 3)), 0],
+    [rand((1, 2, 3)), 1],
+    [rand((1, 2, 3)), 2],
+    [rand((1, 2, 3)), (0, 1)],
+    [rand((1, 2, 3)), (0, 2)],
+    [rand((1, 2, 3)), (0, 1, 2)],
+])
+def test_cusum(a, axis):
+    with use_cuda():
+        g = renom.core.GPUValue(a)
+
+        ret = renom.cuda.cusum(g, axis, keepdims=False)
+        close(ret.new_array(), np.sum(a, axis, keepdims=False))
+
+        ret = renom.cuda.cusum(g, axis, keepdims=True)
+        close(ret.new_array(), np.sum(a, axis, keepdims=True))
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a, axis", [
+    [rand((1, 2, 3)), None],
+    [rand((1, 2, 3)), 0],
+    [rand((1, 2, 3)), 1],
+    [rand((1, 2, 3)), 2],
+    [rand((1, 2, 3)), (0, 1)],
+    [rand((1, 2, 3)), (0, 2)],
+    [rand((1, 2, 3)), (0, 1, 2)],
+])
+def test_cu_reduce_min(a, axis):
+    with use_cuda():
+        g = renom.core.GPUValue(a)
+
+        ret = renom.cuda.cu_reduce_min(g, axis, keepdims=False)
+        close_shape(ret.new_array(), np.min(a, axis, keepdims=False))
+
+        ret = renom.cuda.cu_reduce_min(g, axis, keepdims=True)
+        close_shape(ret.new_array(), np.min(a, axis, keepdims=True))
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a, axis", [
+    [rand((1, 2, 3)), None],
+    [rand((1, 2, 3)), 0],
+    [rand((1, 2, 3)), 1],
+    [rand((1, 2, 3)), 2],
+])
+def test_cu_reduce_arg_min(a, axis):
+    with use_cuda():
+        g = renom.core.GPUValue(a)
+
+        ret = renom.cuda.cu_reduce_argmin(g, axis)
+        close_shape(ret.new_array(), np.argmin(a, axis))
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a, axis", [
+    [rand((1, 2, 3)), None],
+    [rand((1, 2, 3)), 0],
+    [rand((1, 2, 3)), 1],
+    [rand((1, 2, 3)), 2],
+    [rand((1, 2, 3)), (0, 1)],
+    [rand((1, 2, 3)), (0, 2)],
+    [rand((1, 2, 3)), (0, 1, 2)],
+])
+def test_cu_reduce_max(a, axis):
+    with use_cuda():
+        g = renom.core.GPUValue(a)
+
+        ret = renom.cuda.cu_reduce_max(g, axis, keepdims=False)
+        renom.cuda.cuDeviceSynchronize()
+        close_shape(ret.new_array(), np.max(a, axis, keepdims=False))
+
+        ret = renom.cuda.cu_reduce_max(g, axis, keepdims=True)
+        close_shape(ret.new_array(), np.max(a, axis, keepdims=True))
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a, axis", [
+    [rand((1, 2, 3)), None],
+    [rand((1, 2, 3)), 0],
+    [rand((1, 2, 3)), 1],
+    [rand((1, 2, 3)), 2],
+])
+def test_cu_reduce_arg_max(a, axis):
+    with use_cuda():
+        g = renom.core.GPUValue(a)
+
+        ret = renom.cuda.cu_reduce_argmax(g, axis)
+        renom.cuda.cuDeviceSynchronize()
+        close_shape(ret.new_array(), np.argmax(a, axis))

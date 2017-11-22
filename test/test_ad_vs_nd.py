@@ -550,6 +550,29 @@ def test_lstm(node, use_gpu):
     Variable(rand((2, 1))),
     Variable(rand((1, 2))),
 ])
+def test_lstm_temporal_connection(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer1 = Lstm(output_size=4)
+
+    def func(node):
+        loss = 0
+        for _ in range(3):
+            loss = sum(layer1(node))
+        layer1.truncate()
+        return loss
+
+    compare(func, node, node)
+    for k in layer1.params.keys():
+        compare(func, layer1.params[k], node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1, 2))),
+])
 def test_peepholelstm(node, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
@@ -568,11 +591,33 @@ def test_peepholelstm(node, use_gpu):
         compare(func, layer1.params[k], node)
 
 
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1, 2))),
+])
+def test_peepholelstm_temporal_connection(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer1 = rm.PeepholeLstm(output_size=4)
+
+    def func(node):
+        loss = 0
+        for _ in range(3):
+            loss = sum(layer1(node))
+        layer1.truncate()
+        return loss
+
+    compare(func, node, node)
+    for k in layer1.params.keys():
+        compare(func, layer1.params[k], node)
+
+
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((2, 2))), onehot((2, 2))],
     [Variable(rand((2, 3))), onehot((2, 3))],
     [Variable(rand((1, 2))), onehot((1, 2))],
-    [Variable(rand((1, 2, 2, 2, 2))), onehot((1, 2, 2, 2, 2))],
     [Variable(rand((2, 2, 3, 3))), onehot((2, 2, 3, 3))],
 ])
 def test_softmax_cross_entropy(node, x, use_gpu):
@@ -730,4 +775,35 @@ def test_exp(node, use_gpu):
 
     def func(node):
         return sum(rm.exp(node))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node, shape", [
+    [Variable(rand((2, 2))), (1, 4)],
+    [Variable(rand((2, 2, 1, 1))), (4, 1)],
+    [Variable(rand((1, 2))), (2, 1)],
+    [Variable(rand((2, 1))), (1, 2)],
+    [Variable(rand((1,))), (1,)],
+])
+def test_reshape(node, shape, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.reshape(node, shape)) + sum(node.reshape(shape)) + sum(node.reshape(*shape))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((1, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1,))),
+])
+def test_T(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(node.T)
     compare(func, node, node)

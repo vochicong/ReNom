@@ -46,7 +46,7 @@ class DQN(object):
     def update(self):
         """This function updates target network."""
         # Check GPU data
-        self._target_network.copy_attr(self._network)
+        self._target_network.copy_params(self._network)
 
     def train(self, env, loss_func=rm.ClippedMeanSquaredError(), optimizer=rm.Rmsprop(lr=0.00025, g=0.95),
               epoch=100, batch_size=32, random_step=1000, one_epoch_step=20000, test_step=1000,
@@ -191,7 +191,7 @@ class DQN(object):
                     train_prestate, train_action, train_reward, train_state, train_terminal = \
                         self._buffer.get_minibatch(batch_size)
 
-                    self._network.set_models(inference=False)
+                    self._network.set_models(inference=True)
                     self._target_network.set_models(inference=True)
 
                     target = self._network(train_prestate).as_ndarray()
@@ -203,7 +203,7 @@ class DQN(object):
 
                     for i in range(batch_size):
                         a = train_action[i, 0].astype(np.integer)
-                        target[i, a] = train_reward[i] + value[i, 0]
+                        target[i, a] = train_reward[i] + value[i, a]
 
                     self._network.set_models(inference=False)
                     with self._network.train():

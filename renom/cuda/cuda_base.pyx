@@ -181,14 +181,14 @@ class GPUHeap(object):
 
     def memcpyD2H(self, cpu_ptr, nbytes):
         shape = cpu_ptr.shape
-        cpu_ptr = cpu_ptr.reshape(-1)
+        cpu_ptr = pnp.reshape(cpu_ptr, -1)
 
         cdef _VoidPtr ptr = _VoidPtr(cpu_ptr)
 
         with renom.cuda.use_device(self.device_id):
             cuMemcpyD2H(self.ptr, ptr.ptr, nbytes)
 
-        cpu_ptr.reshape(shape)
+        pnp.reshape(cpu_ptr, shape)
 
     def memcpyD2D(self, gpu_ptr, nbytes):
         assert self.device_id == gpu_ptr.device_id
@@ -276,3 +276,15 @@ class allocator(object):
 
 
 gpu_allocator = allocator()
+
+
+def _cuSetLimit(limit, value):
+    cdef size_t c_value=999;
+
+    cuInit(0)
+
+    ret = cuCtxGetLimit(&c_value, limit)
+    print(ret, c_value)
+
+    cuCtxSetLimit(limit, value)
+    print(value)

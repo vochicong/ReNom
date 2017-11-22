@@ -54,12 +54,14 @@ class build_nvcc(build_clib):
         arch = self.distribution.cuda_gpu_arch
         arch_arg = ["-arch=%s" % arch] if arch else []
 
-        args = ["nvcc", "--device-c", "--ptxas-options=-v", "-c",
+#        args = ["nvcc", "--device-c", "--ptxas-options=-v", "-c",
+        args = ["nvcc", "--device-c", "-c",
                 "--compiler-options", ','.join(self.compiler.compiler_so[1:])] + arch_arg
 
         self.compiler.set_executables(compiler_so=args)
 
-        args = ["nvcc", "--device-c", "--ptxas-options=-v", "-c",
+#        args = ["nvcc", "--device-c", "--ptxas-options=-v", "-c", "-Xptxas",  "-v"
+        args = ["nvcc", "--device-c", "-c", "-Xptxas", "-v",
                 "--compiler-options", ','.join(self.compiler.compiler_so[1:])] + arch_arg
 
         self.compiler.set_executables(compiler_cxx=args)
@@ -257,4 +259,4 @@ setup(
     name='renom',
     packages=find_packages(),
     include_dirs=[numpy.get_include()],
-    version='2.3.0')
+    version='2.3.1')

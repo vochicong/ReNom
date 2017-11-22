@@ -71,12 +71,11 @@ def make_box(box):
     return [x1, y1, x2, y2]
 
 
-def apply_nms(x, cells, bbox, classes, image_size, thresh=0.2):
+def apply_nms(x, cells, bbox, classes, image_size, thresh=0.2, iou_thresh=0.3):
     u"""Apply to X predicted out of yolo_detector layer to get list of detected objects.
     Default threshold for detection is prob < 0.2.
     Default threshold for suppression is IOU > 0.4
     """
-    iou_thresh = 0.5
     probs = np.zeros((cells, cells, bbox, classes))
     boxes = np.zeros((cells, cells, bbox, 4))  # 4 is x y w h
     for b in range(bbox):

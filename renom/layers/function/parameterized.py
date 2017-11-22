@@ -49,6 +49,7 @@ class Model(with_metaclass(ABCMeta, object)):
     _prevent_update = False
     _parameters = None
     _device_id = 0
+    SERIALIZED = ()
 
     @property
     def params(self):
@@ -76,10 +77,10 @@ class Model(with_metaclass(ABCMeta, object)):
     def forward(self):
         pass
 
-    def copy_attr(self, model):
+    def copy_params(self, model):
         value_list = model.flatten_values()
         with use_device(self._device_id):
-            for names, values in value_list:
+            for names, values, attrs in value_list:
                 layer = self
                 for name in names[1:]:
                     layer = getattr(layer, name)
@@ -169,9 +170,14 @@ class Model(with_metaclass(ABCMeta, object)):
             for k, v in self.params.items():
                 values[1][k] = v
 
+        serialized = getattr(self, "SERIALIZED", ())
+        for name in serialized:
+            if hasattr(self, name):
+                values[2][name] = getattr(self, name)
+
         for k, v in self.__dict__.items():
             if isinstance(v, Model):
-                childvalues = ({}, {})
+                childvalues = ({}, {}, {})
                 v._get_values(childvalues)
                 values[0][k] = childvalues
 
@@ -207,7 +213,7 @@ class Model(with_metaclass(ABCMeta, object)):
                     {}
                 )
         """
-        ret = ({}, {})
+        ret = ({}, {}, {})
         self._get_values(ret)
         return ret
 
@@ -216,7 +222,7 @@ class Model(with_metaclass(ABCMeta, object)):
         value_list = []
 
         def flatten(names, values):
-            value_list.append((names, values[1]))
+            value_list.append((names, values[1], values[2]))
 
             for name, child_values in values[0].items():
                 flatten(names + (name,), child_values)
@@ -229,7 +235,7 @@ class Model(with_metaclass(ABCMeta, object)):
         value_list = self.flatten_values()
 
         d = {}
-        for name, values in value_list:
+        for name, values, attrs in value_list:
             for k, v in values.items():
                 diff = grads.get(v, None)
                 if diff is not None:
@@ -241,7 +247,7 @@ class Model(with_metaclass(ABCMeta, object)):
         Others is a list of tuple of (model, grads) to be merged.
         Models listed in the others should have same structure with self."""
 
-        values = dict(self.flatten_values())
+        values = {name: params for name, params, attrs in self.flatten_values()}
         for model, _grads in others:
             o = model._get_grads(_grads)
 
@@ -277,20 +283,27 @@ class Model(with_metaclass(ABCMeta, object)):
             values_grp = f.create_group('values')
             types_grp = f.create_group('types')
 
-            for names, values in value_list:
+            for names, params, attrs in value_list:
                 g = values_grp.create_group('.'.join(names))
                 t = types_grp.create_group('.'.join(names))
 
-                for propname, propvalue in values.items():
+                for propname, propvalue in params.items():
                     propvalue.to_cpu()
                     g[propname] = propvalue
 
                     if isinstance(propvalue, Variable):
+                        # todo: move to Node/Variable
                         t[propname] = 'renom.Variable'
                         t[propname + '._auto_update'] = propvalue._auto_update
 
                     elif isinstance(propvalue, Node):
                         t[propname] = 'renom.Node'
+
+                for propname, propvalue in attrs.items():
+                    if isinstance(propvalue, GPUValue):
+                        g['__dict__.' + propname] = propvalue.new_array()
+                    else:
+                        g['__dict__.' + propname] = propvalue
 
     def load(self, filename):
         """Load saved weights to model.
@@ -334,7 +347,14 @@ class Model(with_metaclass(ABCMeta, object)):
                         else:
                             v = Node(v)
 
-                setattr(target.params, k, v)
+                if k.startswith('__dict__.'):
+                    obj = target
+                    name = k.split(".", 1)[1]
+                else:
+                    obj = target.params
+                    name = k
+
+                setattr(obj, name, v)
 
     def detach_graph(self):
         for c in self.iter_models():
