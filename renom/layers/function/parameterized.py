@@ -305,7 +305,6 @@ class Model(with_metaclass(ABCMeta, object)):
                     else:
                         g['__dict__.' + propname] = propvalue
 
-
     def load(self, filename):
         """Load saved weights to model.
 

@@ -59,8 +59,8 @@ class batch_normalize(Node):
             axs = 0
 
         y, mean, sq_var = (get_gpu(g).empty_like_me() for g in (x, w, w))
-        mv_m = mov_m or get_gpu(w).zeros_like_me()
-        mv_v = mov_s or get_gpu(w).zeros_like_me()
+        mv_m = mov_m if mov_m is not None else get_gpu(w).zeros_like_me()
+        mv_v = mov_s if mov_s is not None else get_gpu(w).zeros_like_me()
 
         with cu.cudnn_handler() as handle:
             cu.cuBatchNormalizatoinForward(handle, x, mv_m, mv_v, w, b,
