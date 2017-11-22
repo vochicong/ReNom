@@ -1684,7 +1684,6 @@ class Transpose(UnaryOp):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, get_gpu(dy).T, **kwargs)
 
-
 def _plot_graph(objs):
     g = Digraph('G', filename='graphviz_output')
 
@@ -1700,14 +1699,13 @@ def _plot_graph(objs):
             nodeid = str(id(node))
             if not node.attrs:
                 return
-            for name in node.attrs.get_names():
-                val = getattr(node.attrs, name)
+            for val in node._args:
                 valid = str(id(val))
-
+                name = ''
                 g.node(valid, label=str(type(val)))
                 g.edge(valid, nodeid, label=name)
 
-            for o in node.attrs.get_attrs():
+            for o in node._args:
                 if id(o) not in s:
                     add_edge(o)
                     s.add(id(o))
@@ -1747,7 +1745,7 @@ def DEBUG_GET_ROOTS():
 
     forwards = collections.defaultdict(set)
     for o in Node.ACTIVE_NODE.values():
-        for ref in o.attrs.get_attrs():
+        for ref in o._args:
             forwards[id(ref)].add(id(o))
     rootids = set(Node.ACTIVE_NODE.keys()) - set(forwards.keys())
     roots = [Node.ACTIVE_NODE[o] for o in rootids]
