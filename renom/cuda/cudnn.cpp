@@ -486,8 +486,9 @@ static CYTHON_INLINE float __PYX_NAN() {
 #include "cuda_runtime.h"
 #include "cuda.h"
 #include "cudnn.h"
-#include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include "pythread.h"
 #ifdef _OPENMP
@@ -690,8 +691,8 @@ static const char *__pyx_filename;
 
 
 static const char *__pyx_f[] = {
-  "stringsource",
   "renom/cuda/cudnn.pyx",
+  "stringsource",
   "type.pxd",
   "bool.pxd",
   "complex.pxd",
@@ -722,7 +723,7 @@ struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr {
 };
 
 
-/* "renom/cuda/cudnn.pyx":49
+/* "renom/cuda/cudnn.pyx":51
  * 
  * 
  * cdef class TensorDesc(object):             # <<<<<<<<<<<<<<
@@ -735,7 +736,7 @@ struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc {
 };
 
 
-/* "renom/cuda/cudnn.pyx":88
+/* "renom/cuda/cudnn.pyx":111
  * 
  * 
  * cdef class ConvolutionDescriptor:             # <<<<<<<<<<<<<<
@@ -748,7 +749,7 @@ struct __pyx_obj_5renom_4cuda_5cudnn_ConvolutionDescriptor {
 };
 
 
-/* "renom/cuda/cudnn.pyx":112
+/* "renom/cuda/cudnn.pyx":135
  * 
  * 
  * cdef class PoolingDescriptor:             # <<<<<<<<<<<<<<
@@ -761,7 +762,7 @@ struct __pyx_obj_5renom_4cuda_5cudnn_PoolingDescriptor {
 };
 
 
-/* "renom/cuda/cudnn.pyx":138
+/* "renom/cuda/cudnn.pyx":161
  * 
  * 
  * cdef class LRNDescriptor:             # <<<<<<<<<<<<<<
@@ -774,7 +775,7 @@ struct __pyx_obj_5renom_4cuda_5cudnn_LRNDescriptor {
 };
 
 
-/* "renom/cuda/cudnn.pyx":206
+/* "renom/cuda/cudnn.pyx":229
  * 
  * 
  * cdef class FilterDescriptor:             # <<<<<<<<<<<<<<
@@ -787,7 +788,7 @@ struct __pyx_obj_5renom_4cuda_5cudnn_FilterDescriptor {
 };
 
 
-/* "renom/cuda/cudnn.pyx":24
+/* "renom/cuda/cudnn.pyx":26
  * 
  * @contextlib.contextmanager
  * def cudnn_handler():             # <<<<<<<<<<<<<<
@@ -1005,6 +1006,12 @@ static CYTHON_INLINE void __Pyx_RaiseTooManyValuesError(Py_ssize_t expected);
 /* RaiseNeedMoreValuesToUnpack.proto */
 static CYTHON_INLINE void __Pyx_RaiseNeedMoreValuesError(Py_ssize_t index);
 
+/* SliceObject.proto */
+static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(
+        PyObject* obj, Py_ssize_t cstart, Py_ssize_t cstop,
+        PyObject** py_start, PyObject** py_stop, PyObject** py_slice,
+        int has_cstart, int has_cstop, int wraparound);
+
 /* IterFinish.proto */
 static CYTHON_INLINE int __Pyx_IterFinish(void);
 
@@ -1162,6 +1169,12 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'renom.cuda.cuda_base' */
 
+/* Module declarations from 'cython' */
+
+/* Module declarations from 'libc.string' */
+
+/* Module declarations from 'libc.stdlib' */
+
 /* Module declarations from 'libc.stdint' */
 
 /* Module declarations from 'cpython.version' */
@@ -1170,8 +1183,6 @@ static int __Pyx_InitStrings(__Pyx_StringTabEntry *t);
 
 /* Module declarations from 'cpython.type' */
 static PyTypeObject *__pyx_ptype_7cpython_4type_type = 0;
-
-/* Module declarations from 'libc.string' */
 
 /* Module declarations from 'libc.stdio' */
 
@@ -1263,6 +1274,8 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *); /*proto*/
 int __pyx_module_is_main_renom__cuda__cudnn = 0;
 
 /* Implementation of 'renom.cuda.cudnn' */
+static PyObject *__pyx_builtin_MemoryError;
+static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_TypeError;
 static PyObject *__pyx_builtin_map;
 static const char __pyx_k_a[] = "a";
@@ -1294,6 +1307,7 @@ static const char __pyx_k_main[] = "__main__";
 static const char __pyx_k_mean[] = "mean";
 static const char __pyx_k_mode[] = "mode";
 static const char __pyx_k_pref[] = "pref";
+static const char __pyx_k_prod[] = "prod";
 static const char __pyx_k_send[] = "send";
 static const char __pyx_k_test[] = "__test__";
 static const char __pyx_k_array[] = "array";
@@ -1302,6 +1316,7 @@ static const char __pyx_k_close[] = "close";
 static const char __pyx_k_dtype[] = "dtype";
 static const char __pyx_k_error[] = "error";
 static const char __pyx_k_numpy[] = "numpy";
+static const char __pyx_k_range[] = "range";
 static const char __pyx_k_shape[] = "shape";
 static const char __pyx_k_throw[] = "throw";
 static const char __pyx_k_wDesc[] = "wDesc";
@@ -1342,6 +1357,7 @@ static const char __pyx_k_workSpace[] = "workSpace";
 static const char __pyx_k_contextlib[] = "contextlib";
 static const char __pyx_k_renom_core[] = "renom.core";
 static const char __pyx_k_saved_mean[] = "saved_mean";
+static const char __pyx_k_MemoryError[] = "MemoryError";
 static const char __pyx_k_algo_filter[] = "algo_filter";
 static const char __pyx_k_cuGetDevice[] = "cuGetDevice";
 static const char __pyx_k_filter_desc[] = "filter_desc";
@@ -1376,6 +1392,7 @@ static const char __pyx_k_self_filter_desc_cannot_be_conve[] = "self.filter_desc
 static const char __pyx_k_self_lrn_desc_cannot_be_converte[] = "self.lrn_desc cannot be converted to a Python object for pickling";
 static const char __pyx_k_self_pool_desc_cannot_be_convert[] = "self.pool_desc cannot be converted to a Python object for pickling";
 static const char __pyx_k_self_tensor_desc_cannot_be_conve[] = "self.tensor_desc cannot be converted to a Python object for pickling";
+static PyObject *__pyx_n_s_MemoryError;
 static PyObject *__pyx_n_s_TypeError;
 static PyObject *__pyx_n_s_a;
 static PyObject *__pyx_n_s_alf;
@@ -1456,7 +1473,9 @@ static PyObject *__pyx_n_s_pool_desc;
 static PyObject *__pyx_n_s_pool_mode;
 static PyObject *__pyx_n_s_precision;
 static PyObject *__pyx_n_s_pref;
+static PyObject *__pyx_n_s_prod;
 static PyObject *__pyx_n_s_ptr;
+static PyObject *__pyx_n_s_range;
 static PyObject *__pyx_n_s_reduce_cython;
 static PyObject *__pyx_n_s_renom_config;
 static PyObject *__pyx_n_s_renom_core;
@@ -1583,7 +1602,7 @@ static PyObject *__pyx_codeobj__39;
 static PyObject *__pyx_codeobj__41;
 static PyObject *__pyx_codeobj__43;
 
-/* "renom/cuda/cudnn.pyx":13
+/* "renom/cuda/cudnn.pyx":15
  * 
  * 
  * def check(cd.cudnnStatus_t status):             # <<<<<<<<<<<<<<
@@ -1600,7 +1619,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_1check(PyObject *__pyx_self, PyObj
   __Pyx_RefNannyDeclarations
   __Pyx_RefNannySetupContext("check (wrapper)", 0);
   assert(__pyx_arg_status); {
-    __pyx_v_status = ((cudnnStatus_t)__Pyx_PyInt_As_cudnnStatus_t(__pyx_arg_status)); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 13, __pyx_L3_error)
+    __pyx_v_status = ((cudnnStatus_t)__Pyx_PyInt_As_cudnnStatus_t(__pyx_arg_status)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 15, __pyx_L3_error)
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L3_error:;
@@ -1624,7 +1643,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_check(CYTHON_UNUSED PyObject *__py
   PyObject *__pyx_t_3 = NULL;
   __Pyx_RefNannySetupContext("check", 0);
 
-  /* "renom/cuda/cudnn.pyx":14
+  /* "renom/cuda/cudnn.pyx":16
  * 
  * def check(cd.cudnnStatus_t status):
  *     if status == cd.cudnnStatus_t.CUDNN_STATUS_SUCCESS:             # <<<<<<<<<<<<<<
@@ -1634,7 +1653,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_check(CYTHON_UNUSED PyObject *__py
   __pyx_t_1 = ((__pyx_v_status == CUDNN_STATUS_SUCCESS) != 0);
   if (__pyx_t_1) {
 
-    /* "renom/cuda/cudnn.pyx":15
+    /* "renom/cuda/cudnn.pyx":17
  * def check(cd.cudnnStatus_t status):
  *     if status == cd.cudnnStatus_t.CUDNN_STATUS_SUCCESS:
  *         return             # <<<<<<<<<<<<<<
@@ -1645,7 +1664,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_check(CYTHON_UNUSED PyObject *__py
     __pyx_r = Py_None; __Pyx_INCREF(Py_None);
     goto __pyx_L0;
 
-    /* "renom/cuda/cudnn.pyx":14
+    /* "renom/cuda/cudnn.pyx":16
  * 
  * def check(cd.cudnnStatus_t status):
  *     if status == cd.cudnnStatus_t.CUDNN_STATUS_SUCCESS:             # <<<<<<<<<<<<<<
@@ -1654,7 +1673,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_check(CYTHON_UNUSED PyObject *__py
  */
   }
 
-  /* "renom/cuda/cudnn.pyx":17
+  /* "renom/cuda/cudnn.pyx":19
  *         return
  *     else:
  *         error = cd.cudnnGetErrorString(status)             # <<<<<<<<<<<<<<
@@ -1664,29 +1683,29 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_check(CYTHON_UNUSED PyObject *__py
   /*else*/ {
     __pyx_v_error = cudnnGetErrorString(__pyx_v_status);
 
-    /* "renom/cuda/cudnn.pyx":18
+    /* "renom/cuda/cudnn.pyx":20
  *     else:
  *         error = cd.cudnnGetErrorString(status)
  *         raise Exception(error)             # <<<<<<<<<<<<<<
  * 
  * 
  */
-    __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_error); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 18, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyBytes_FromString(__pyx_v_error); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 20, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 18, __pyx_L1_error)
+    __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 20, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_GIVEREF(__pyx_t_2);
     PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
     __pyx_t_2 = 0;
-    __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 18, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])), __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 20, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_Raise(__pyx_t_2, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __PYX_ERR(1, 18, __pyx_L1_error)
+    __PYX_ERR(0, 20, __pyx_L1_error)
   }
 
-  /* "renom/cuda/cudnn.pyx":13
+  /* "renom/cuda/cudnn.pyx":15
  * 
  * 
  * def check(cd.cudnnStatus_t status):             # <<<<<<<<<<<<<<
@@ -1707,7 +1726,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_check(CYTHON_UNUSED PyObject *__py
 }
 static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *__pyx_generator, PyObject *__pyx_sent_value); /* proto */
 
-/* "renom/cuda/cudnn.pyx":24
+/* "renom/cuda/cudnn.pyx":26
  * 
  * @contextlib.contextmanager
  * def cudnn_handler():             # <<<<<<<<<<<<<<
@@ -1738,12 +1757,12 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_2cudnn_handler(CYTHON_UNUSED PyObj
   if (unlikely(!__pyx_cur_scope)) {
     __pyx_cur_scope = ((struct __pyx_obj_5renom_4cuda_5cudnn___pyx_scope_struct__cudnn_handler *)Py_None);
     __Pyx_INCREF(Py_None);
-    __PYX_ERR(1, 24, __pyx_L1_error)
+    __PYX_ERR(0, 26, __pyx_L1_error)
   } else {
     __Pyx_GOTREF(__pyx_cur_scope);
   }
   {
-    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_5renom_4cuda_5cudnn_4generator, (PyObject *) __pyx_cur_scope, __pyx_n_s_cudnn_handler, __pyx_n_s_cudnn_handler, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!gen)) __PYX_ERR(1, 24, __pyx_L1_error)
+    __pyx_CoroutineObject *gen = __Pyx_Generator_New((__pyx_coroutine_body_t) __pyx_gb_5renom_4cuda_5cudnn_4generator, (PyObject *) __pyx_cur_scope, __pyx_n_s_cudnn_handler, __pyx_n_s_cudnn_handler, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!gen)) __PYX_ERR(0, 26, __pyx_L1_error)
     __Pyx_DECREF(__pyx_cur_scope);
     __Pyx_RefNannyFinishContext();
     return (PyObject *) gen;
@@ -1789,18 +1808,18 @@ static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *
     return NULL;
   }
   __pyx_L3_first_run:;
-  if (unlikely(!__pyx_sent_value)) __PYX_ERR(1, 24, __pyx_L1_error)
+  if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 26, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":27
+  /* "renom/cuda/cudnn.pyx":29
  *     cdef cudnnHandle_t handle
  * 
  *     device_id = cuda_base.cuGetDevice()             # <<<<<<<<<<<<<<
  *     if device_id not in _cudnn_handlers:
  *         check(cudnnCreate(&handle))
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 27, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_cuGetDevice); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 27, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_cuGetDevice); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 29, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_t_2 = NULL;
@@ -1814,10 +1833,10 @@ static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *
     }
   }
   if (__pyx_t_2) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 27, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 29, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
-    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 27, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallNoArg(__pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 29, __pyx_L1_error)
   }
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -1825,30 +1844,30 @@ static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *
   __pyx_cur_scope->__pyx_v_device_id = __pyx_t_1;
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":28
+  /* "renom/cuda/cudnn.pyx":30
  * 
  *     device_id = cuda_base.cuGetDevice()
  *     if device_id not in _cudnn_handlers:             # <<<<<<<<<<<<<<
  *         check(cudnnCreate(&handle))
  *         _cudnn_handlers[device_id] =  <uintptr_t> handle
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cudnn_handlers); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 28, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cudnn_handlers); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_cur_scope->__pyx_v_device_id, __pyx_t_1, Py_NE)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(1, 28, __pyx_L1_error)
+  __pyx_t_4 = (__Pyx_PySequence_ContainsTF(__pyx_cur_scope->__pyx_v_device_id, __pyx_t_1, Py_NE)); if (unlikely(__pyx_t_4 < 0)) __PYX_ERR(0, 30, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_5 = (__pyx_t_4 != 0);
   if (__pyx_t_5) {
 
-    /* "renom/cuda/cudnn.pyx":29
+    /* "renom/cuda/cudnn.pyx":31
  *     device_id = cuda_base.cuGetDevice()
  *     if device_id not in _cudnn_handlers:
  *         check(cudnnCreate(&handle))             # <<<<<<<<<<<<<<
  *         _cudnn_handlers[device_id] =  <uintptr_t> handle
  * 
  */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 29, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 31, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreate((&__pyx_cur_scope->__pyx_v_handle))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 29, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreate((&__pyx_cur_scope->__pyx_v_handle))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 31, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_6 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -1861,14 +1880,14 @@ static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *
       }
     }
     if (!__pyx_t_6) {
-      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 29, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 31, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_6, __pyx_t_2};
-        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 29, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 31, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -1877,20 +1896,20 @@ static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_6, __pyx_t_2};
-        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 29, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 31, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_6); __pyx_t_6 = 0;
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       } else
       #endif
       {
-        __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 29, __pyx_L1_error)
+        __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 31, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_GIVEREF(__pyx_t_6); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_6); __pyx_t_6 = NULL;
         __Pyx_GIVEREF(__pyx_t_2);
         PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_2);
         __pyx_t_2 = 0;
-        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 29, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 31, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
@@ -1898,22 +1917,22 @@ static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "renom/cuda/cudnn.pyx":30
+    /* "renom/cuda/cudnn.pyx":32
  *     if device_id not in _cudnn_handlers:
  *         check(cudnnCreate(&handle))
  *         _cudnn_handlers[device_id] =  <uintptr_t> handle             # <<<<<<<<<<<<<<
  * 
  *     try:
  */
-    __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_cur_scope->__pyx_v_handle)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 30, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_cur_scope->__pyx_v_handle)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_cudnn_handlers); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 30, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_cudnn_handlers); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    if (unlikely(PyObject_SetItem(__pyx_t_3, __pyx_cur_scope->__pyx_v_device_id, __pyx_t_1) < 0)) __PYX_ERR(1, 30, __pyx_L1_error)
+    if (unlikely(PyObject_SetItem(__pyx_t_3, __pyx_cur_scope->__pyx_v_device_id, __pyx_t_1) < 0)) __PYX_ERR(0, 32, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "renom/cuda/cudnn.pyx":28
+    /* "renom/cuda/cudnn.pyx":30
  * 
  *     device_id = cuda_base.cuGetDevice()
  *     if device_id not in _cudnn_handlers:             # <<<<<<<<<<<<<<
@@ -1922,7 +1941,7 @@ static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *
  */
   }
 
-  /* "renom/cuda/cudnn.pyx":32
+  /* "renom/cuda/cudnn.pyx":34
  *         _cudnn_handlers[device_id] =  <uintptr_t> handle
  * 
  *     try:             # <<<<<<<<<<<<<<
@@ -1931,16 +1950,16 @@ static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *
  */
   /*try:*/ {
 
-    /* "renom/cuda/cudnn.pyx":33
+    /* "renom/cuda/cudnn.pyx":35
  * 
  *     try:
  *         yield _cudnn_handlers[device_id]             # <<<<<<<<<<<<<<
  *     finally:
  *         pass
  */
-    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cudnn_handlers); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 33, __pyx_L6_error)
+    __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cudnn_handlers); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 35, __pyx_L6_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_3 = PyObject_GetItem(__pyx_t_1, __pyx_cur_scope->__pyx_v_device_id); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 33, __pyx_L6_error)
+    __pyx_t_3 = PyObject_GetItem(__pyx_t_1, __pyx_cur_scope->__pyx_v_device_id); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 35, __pyx_L6_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __pyx_r = __pyx_t_3;
@@ -1951,10 +1970,10 @@ static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *
     __pyx_generator->resume_label = 1;
     return __pyx_r;
     __pyx_L8_resume_from_yield:;
-    if (unlikely(!__pyx_sent_value)) __PYX_ERR(1, 33, __pyx_L6_error)
+    if (unlikely(!__pyx_sent_value)) __PYX_ERR(0, 35, __pyx_L6_error)
   }
 
-  /* "renom/cuda/cudnn.pyx":35
+  /* "renom/cuda/cudnn.pyx":37
  *         yield _cudnn_handlers[device_id]
  *     finally:
  *         pass             # <<<<<<<<<<<<<<
@@ -2005,7 +2024,7 @@ static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *
   }
   CYTHON_MAYBE_UNUSED_VAR(__pyx_cur_scope);
 
-  /* "renom/cuda/cudnn.pyx":24
+  /* "renom/cuda/cudnn.pyx":26
  * 
  * @contextlib.contextmanager
  * def cudnn_handler():             # <<<<<<<<<<<<<<
@@ -2031,7 +2050,7 @@ static PyObject *__pyx_gb_5renom_4cuda_5cudnn_4generator(__pyx_CoroutineObject *
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":38
+/* "renom/cuda/cudnn.pyx":40
  * 
  * 
  * cdef data_type(dtype):             # <<<<<<<<<<<<<<
@@ -2049,25 +2068,25 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *__pyx_v_dtype) 
   PyObject *__pyx_t_5 = NULL;
   __Pyx_RefNannySetupContext("data_type", 0);
 
-  /* "renom/cuda/cudnn.pyx":39
+  /* "renom/cuda/cudnn.pyx":41
  * 
  * cdef data_type(dtype):
  *     if dtype == np.float32:             # <<<<<<<<<<<<<<
  *         return cd.cudnnDataType_t.CUDNN_DATA_FLOAT
  *     elif dtype == np.float64:
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 39, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float32); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 39, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float32); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyObject_RichCompare(__pyx_v_dtype, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 39, __pyx_L1_error)
+  __pyx_t_1 = PyObject_RichCompare(__pyx_v_dtype, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(1, 39, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 41, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_3) {
 
-    /* "renom/cuda/cudnn.pyx":40
+    /* "renom/cuda/cudnn.pyx":42
  * cdef data_type(dtype):
  *     if dtype == np.float32:
  *         return cd.cudnnDataType_t.CUDNN_DATA_FLOAT             # <<<<<<<<<<<<<<
@@ -2075,13 +2094,13 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *__pyx_v_dtype) 
  *         return cd.cudnnDataType_t.CUDNN_DATA_DOUBLE
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __Pyx_PyInt_From_cudnnDataType_t(CUDNN_DATA_FLOAT); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 40, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_cudnnDataType_t(CUDNN_DATA_FLOAT); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 42, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "renom/cuda/cudnn.pyx":39
+    /* "renom/cuda/cudnn.pyx":41
  * 
  * cdef data_type(dtype):
  *     if dtype == np.float32:             # <<<<<<<<<<<<<<
@@ -2090,25 +2109,25 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *__pyx_v_dtype) 
  */
   }
 
-  /* "renom/cuda/cudnn.pyx":41
+  /* "renom/cuda/cudnn.pyx":43
  *     if dtype == np.float32:
  *         return cd.cudnnDataType_t.CUDNN_DATA_FLOAT
  *     elif dtype == np.float64:             # <<<<<<<<<<<<<<
  *         return cd.cudnnDataType_t.CUDNN_DATA_DOUBLE
  *     elif dtype == np.float16:
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 41, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float64); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 41, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float64); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 43, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyObject_RichCompare(__pyx_v_dtype, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 41, __pyx_L1_error)
+  __pyx_t_1 = PyObject_RichCompare(__pyx_v_dtype, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 43, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(1, 41, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 43, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_3) {
 
-    /* "renom/cuda/cudnn.pyx":42
+    /* "renom/cuda/cudnn.pyx":44
  *         return cd.cudnnDataType_t.CUDNN_DATA_FLOAT
  *     elif dtype == np.float64:
  *         return cd.cudnnDataType_t.CUDNN_DATA_DOUBLE             # <<<<<<<<<<<<<<
@@ -2116,13 +2135,13 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *__pyx_v_dtype) 
  *         return cd.cudnnDataType_t.CUDNN_DATA_HALF
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __Pyx_PyInt_From_cudnnDataType_t(CUDNN_DATA_DOUBLE); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 42, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_cudnnDataType_t(CUDNN_DATA_DOUBLE); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 44, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "renom/cuda/cudnn.pyx":41
+    /* "renom/cuda/cudnn.pyx":43
  *     if dtype == np.float32:
  *         return cd.cudnnDataType_t.CUDNN_DATA_FLOAT
  *     elif dtype == np.float64:             # <<<<<<<<<<<<<<
@@ -2131,25 +2150,25 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *__pyx_v_dtype) 
  */
   }
 
-  /* "renom/cuda/cudnn.pyx":43
+  /* "renom/cuda/cudnn.pyx":45
  *     elif dtype == np.float64:
  *         return cd.cudnnDataType_t.CUDNN_DATA_DOUBLE
  *     elif dtype == np.float16:             # <<<<<<<<<<<<<<
  *         return cd.cudnnDataType_t.CUDNN_DATA_HALF
  *     else:
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 43, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float16); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 43, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_float16); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyObject_RichCompare(__pyx_v_dtype, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 43, __pyx_L1_error)
+  __pyx_t_1 = PyObject_RichCompare(__pyx_v_dtype, __pyx_t_2, Py_EQ); __Pyx_XGOTREF(__pyx_t_1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(1, 43, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 45, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_3) {
 
-    /* "renom/cuda/cudnn.pyx":44
+    /* "renom/cuda/cudnn.pyx":46
  *         return cd.cudnnDataType_t.CUDNN_DATA_DOUBLE
  *     elif dtype == np.float16:
  *         return cd.cudnnDataType_t.CUDNN_DATA_HALF             # <<<<<<<<<<<<<<
@@ -2157,13 +2176,13 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *__pyx_v_dtype) 
  *         raise Exception("{} is not supported type.".format(dtype))
  */
     __Pyx_XDECREF(__pyx_r);
-    __pyx_t_1 = __Pyx_PyInt_From_cudnnDataType_t(CUDNN_DATA_HALF); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 44, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyInt_From_cudnnDataType_t(CUDNN_DATA_HALF); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 46, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __pyx_r = __pyx_t_1;
     __pyx_t_1 = 0;
     goto __pyx_L0;
 
-    /* "renom/cuda/cudnn.pyx":43
+    /* "renom/cuda/cudnn.pyx":45
  *     elif dtype == np.float64:
  *         return cd.cudnnDataType_t.CUDNN_DATA_DOUBLE
  *     elif dtype == np.float16:             # <<<<<<<<<<<<<<
@@ -2172,7 +2191,7 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *__pyx_v_dtype) 
  */
   }
 
-  /* "renom/cuda/cudnn.pyx":46
+  /* "renom/cuda/cudnn.pyx":48
  *         return cd.cudnnDataType_t.CUDNN_DATA_HALF
  *     else:
  *         raise Exception("{} is not supported type.".format(dtype))             # <<<<<<<<<<<<<<
@@ -2180,7 +2199,7 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *__pyx_v_dtype) 
  * 
  */
   /*else*/ {
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_is_not_supported_type, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 46, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_kp_s_is_not_supported_type, __pyx_n_s_format); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_4 = NULL;
     if (CYTHON_UNPACK_METHODS && likely(PyMethod_Check(__pyx_t_2))) {
@@ -2193,13 +2212,13 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *__pyx_v_dtype) 
       }
     }
     if (!__pyx_t_4) {
-      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 46, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_v_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_2)) {
         PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_v_dtype};
-        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 46, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_GOTREF(__pyx_t_1);
       } else
@@ -2207,38 +2226,38 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *__pyx_v_dtype) 
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
         PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_v_dtype};
-        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 46, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
         __Pyx_GOTREF(__pyx_t_1);
       } else
       #endif
       {
-        __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 46, __pyx_L1_error)
+        __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 48, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_5);
         __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
         __Pyx_INCREF(__pyx_v_dtype);
         __Pyx_GIVEREF(__pyx_v_dtype);
         PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_v_dtype);
-        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 46, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
       }
     }
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 46, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 48, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_GIVEREF(__pyx_t_1);
     PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
     __pyx_t_1 = 0;
-    __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 46, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)(&((PyTypeObject*)PyExc_Exception)[0])), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 48, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_Raise(__pyx_t_1, 0, 0, 0);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-    __PYX_ERR(1, 46, __pyx_L1_error)
+    __PYX_ERR(0, 48, __pyx_L1_error)
   }
 
-  /* "renom/cuda/cudnn.pyx":38
+  /* "renom/cuda/cudnn.pyx":40
  * 
  * 
  * cdef data_type(dtype):             # <<<<<<<<<<<<<<
@@ -2260,12 +2279,12 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_data_type(PyObject *__pyx_v_dtype) 
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":53
+/* "renom/cuda/cudnn.pyx":55
  *     cdef cudnnTensorDescriptor_t tensor_desc
  * 
  *     def __init__(self, shape, dtype=precision):             # <<<<<<<<<<<<<<
  *         cdef int n, c, h, w
- *         n, c, h, w = list(shape) + [1] * (4 - len(shape))
+ *         cdef int ndims = len(shape)
  */
 
 /* Python wrapper */
@@ -2304,7 +2323,7 @@ static int __pyx_pw_5renom_4cuda_5cudnn_10TensorDesc_1__init__(PyObject *__pyx_v
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 53, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 55, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -2320,7 +2339,7 @@ static int __pyx_pw_5renom_4cuda_5cudnn_10TensorDesc_1__init__(PyObject *__pyx_v
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 53, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 0, 1, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 55, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.TensorDesc.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -2338,10 +2357,14 @@ static int __pyx_pf_5renom_4cuda_5cudnn_10TensorDesc___init__(struct __pyx_obj_5
   int __pyx_v_c;
   int __pyx_v_h;
   int __pyx_v_w;
+  int __pyx_v_ndims;
+  int *__pyx_v_size;
+  int *__pyx_v_strides;
+  PyObject *__pyx_v_i = NULL;
   int __pyx_r;
   __Pyx_RefNannyDeclarations
-  PyObject *__pyx_t_1 = NULL;
-  Py_ssize_t __pyx_t_2;
+  Py_ssize_t __pyx_t_1;
+  PyObject *__pyx_t_2 = NULL;
   PyObject *__pyx_t_3 = NULL;
   PyObject *__pyx_t_4 = NULL;
   PyObject *__pyx_t_5 = NULL;
@@ -2350,243 +2373,582 @@ static int __pyx_pf_5renom_4cuda_5cudnn_10TensorDesc___init__(struct __pyx_obj_5
   int __pyx_t_8;
   int __pyx_t_9;
   int __pyx_t_10;
-  cudnnDataType_t __pyx_t_11;
+  int __pyx_t_11;
+  cudnnDataType_t __pyx_t_12;
+  int __pyx_t_13;
+  PyObject *(*__pyx_t_14)(PyObject *);
+  Py_ssize_t __pyx_t_15;
+  PyObject *__pyx_t_16 = NULL;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "renom/cuda/cudnn.pyx":55
+  /* "renom/cuda/cudnn.pyx":57
  *     def __init__(self, shape, dtype=precision):
  *         cdef int n, c, h, w
- *         n, c, h, w = list(shape) + [1] * (4 - len(shape))             # <<<<<<<<<<<<<<
- * 
- *         check(cd.cudnnCreateTensorDescriptor(&(self.tensor_desc)))
+ *         cdef int ndims = len(shape)             # <<<<<<<<<<<<<<
+ *         cdef int *size
+ *         cdef int *strides
  */
-  __pyx_t_1 = PySequence_List(__pyx_v_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 55, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_Length(__pyx_v_shape); if (unlikely(__pyx_t_2 == -1)) __PYX_ERR(1, 55, __pyx_L1_error)
-  __pyx_t_3 = PyList_New(1 * (((4 - __pyx_t_2)<0) ? 0:(4 - __pyx_t_2))); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 55, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
-  { Py_ssize_t __pyx_temp;
-    for (__pyx_temp=0; __pyx_temp < (4 - __pyx_t_2); __pyx_temp++) {
-      __Pyx_INCREF(__pyx_int_1);
-      __Pyx_GIVEREF(__pyx_int_1);
-      PyList_SET_ITEM(__pyx_t_3, __pyx_temp, __pyx_int_1);
-    }
-  }
-  __pyx_t_4 = PyNumber_Add(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 55, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_4);
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (1) {
-    PyObject* sequence = __pyx_t_4;
-    #if !CYTHON_COMPILING_IN_PYPY
-    Py_ssize_t size = Py_SIZE(sequence);
-    #else
-    Py_ssize_t size = PySequence_Size(sequence);
-    #endif
-    if (unlikely(size != 4)) {
-      if (size > 4) __Pyx_RaiseTooManyValuesError(4);
-      else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 55, __pyx_L1_error)
-    }
-    #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
-    __pyx_t_3 = PyList_GET_ITEM(sequence, 0); 
-    __pyx_t_1 = PyList_GET_ITEM(sequence, 1); 
-    __pyx_t_5 = PyList_GET_ITEM(sequence, 2); 
-    __pyx_t_6 = PyList_GET_ITEM(sequence, 3); 
-    __Pyx_INCREF(__pyx_t_3);
-    __Pyx_INCREF(__pyx_t_1);
-    __Pyx_INCREF(__pyx_t_5);
-    __Pyx_INCREF(__pyx_t_6);
-    #else
-    {
-      Py_ssize_t i;
-      PyObject** temps[4] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_5,&__pyx_t_6};
-      for (i=0; i < 4; i++) {
-        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(1, 55, __pyx_L1_error)
-        __Pyx_GOTREF(item);
-        *(temps[i]) = item;
-      }
-    }
-    #endif
-    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  }
-  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 55, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 55, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_9 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_9 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 55, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_10 = __Pyx_PyInt_As_int(__pyx_t_6); if (unlikely((__pyx_t_10 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 55, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_v_n = __pyx_t_7;
-  __pyx_v_c = __pyx_t_8;
-  __pyx_v_h = __pyx_t_9;
-  __pyx_v_w = __pyx_t_10;
+  __pyx_t_1 = PyObject_Length(__pyx_v_shape); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(0, 57, __pyx_L1_error)
+  __pyx_v_ndims = __pyx_t_1;
 
-  /* "renom/cuda/cudnn.pyx":57
- *         n, c, h, w = list(shape) + [1] * (4 - len(shape))
+  /* "renom/cuda/cudnn.pyx":61
+ *         cdef int *strides
  * 
  *         check(cd.cudnnCreateTensorDescriptor(&(self.tensor_desc)))             # <<<<<<<<<<<<<<
- *         check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,
- *                                             data_type(dtype), n, c, h, w))
- */
-  __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 57, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_5 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreateTensorDescriptor((&__pyx_v_self->tensor_desc))); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 57, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = NULL;
-  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-    __pyx_t_1 = PyMethod_GET_SELF(__pyx_t_6);
-    if (likely(__pyx_t_1)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
-      __Pyx_INCREF(__pyx_t_1);
-      __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_6, function);
-    }
-  }
-  if (!__pyx_t_1) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 57, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    __Pyx_GOTREF(__pyx_t_4);
-  } else {
-    #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(__pyx_t_6)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_5};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 57, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    } else
-    #endif
-    #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_5};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 57, __pyx_L1_error)
-      __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-    } else
-    #endif
-    {
-      __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 57, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_3);
-      __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1); __pyx_t_1 = NULL;
-      __Pyx_GIVEREF(__pyx_t_5);
-      PyTuple_SET_ITEM(__pyx_t_3, 0+1, __pyx_t_5);
-      __pyx_t_5 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 57, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    }
-  }
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-
-  /* "renom/cuda/cudnn.pyx":58
  * 
- *         check(cd.cudnnCreateTensorDescriptor(&(self.tensor_desc)))
- *         check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,             # <<<<<<<<<<<<<<
- *                                             data_type(dtype), n, c, h, w))
- * 
+ *         if len(shape) < 5:
  */
-  __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 58, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_6);
-
-  /* "renom/cuda/cudnn.pyx":59
- *         check(cd.cudnnCreateTensorDescriptor(&(self.tensor_desc)))
- *         check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,
- *                                             data_type(dtype), n, c, h, w))             # <<<<<<<<<<<<<<
- * 
- *     def __del__(self):
- */
-  __pyx_t_3 = __pyx_f_5renom_4cuda_5cudnn_data_type(__pyx_v_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 59, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 61, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_11 = ((cudnnDataType_t)__Pyx_PyInt_As_cudnnDataType_t(__pyx_t_3)); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 59, __pyx_L1_error)
-  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-
-  /* "renom/cuda/cudnn.pyx":58
- * 
- *         check(cd.cudnnCreateTensorDescriptor(&(self.tensor_desc)))
- *         check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,             # <<<<<<<<<<<<<<
- *                                             data_type(dtype), n, c, h, w))
- * 
- */
-  __pyx_t_3 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSetTensor4dDescriptor(__pyx_v_self->tensor_desc, __pyx_v_5renom_4cuda_5cudnn_tensor_format, __pyx_t_11, __pyx_v_n, __pyx_v_c, __pyx_v_h, __pyx_v_w)); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 58, __pyx_L1_error)
-  __Pyx_GOTREF(__pyx_t_3);
+  __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreateTensorDescriptor((&__pyx_v_self->tensor_desc))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 61, __pyx_L1_error)
+  __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_5 = NULL;
-  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
-    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_6);
+  if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
+    __pyx_t_5 = PyMethod_GET_SELF(__pyx_t_3);
     if (likely(__pyx_t_5)) {
-      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+      PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_3);
       __Pyx_INCREF(__pyx_t_5);
       __Pyx_INCREF(function);
-      __Pyx_DECREF_SET(__pyx_t_6, function);
+      __Pyx_DECREF_SET(__pyx_t_3, function);
     }
   }
   if (!__pyx_t_5) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 58, __pyx_L1_error)
-    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 61, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __Pyx_GOTREF(__pyx_t_2);
   } else {
     #if CYTHON_FAST_PYCALL
-    if (PyFunction_Check(__pyx_t_6)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_3};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 58, __pyx_L1_error)
+    if (PyFunction_Check(__pyx_t_3)) {
+      PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
+      __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 61, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else
     #endif
     #if CYTHON_FAST_PYCCALL
-    if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
-      PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_3};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 58, __pyx_L1_error)
+    if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
+      PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
+      __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 61, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else
     #endif
     {
-      __pyx_t_1 = PyTuple_New(1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 58, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_1);
-      __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_5); __pyx_t_5 = NULL;
-      __Pyx_GIVEREF(__pyx_t_3);
-      PyTuple_SET_ITEM(__pyx_t_1, 0+1, __pyx_t_3);
-      __pyx_t_3 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_1, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 58, __pyx_L1_error)
-      __Pyx_GOTREF(__pyx_t_4);
-      __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
+      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 61, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_6);
+      __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5); __pyx_t_5 = NULL;
+      __Pyx_GIVEREF(__pyx_t_4);
+      PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_4);
+      __pyx_t_4 = 0;
+      __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 61, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     }
   }
-  __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+  __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+  __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":53
+  /* "renom/cuda/cudnn.pyx":63
+ *         check(cd.cudnnCreateTensorDescriptor(&(self.tensor_desc)))
+ * 
+ *         if len(shape) < 5:             # <<<<<<<<<<<<<<
+ *             n, c, h, w = list(shape) + [1] * (4 - len(shape))
+ *             check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,
+ */
+  __pyx_t_1 = PyObject_Length(__pyx_v_shape); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(0, 63, __pyx_L1_error)
+  __pyx_t_7 = ((__pyx_t_1 < 5) != 0);
+  if (__pyx_t_7) {
+
+    /* "renom/cuda/cudnn.pyx":64
+ * 
+ *         if len(shape) < 5:
+ *             n, c, h, w = list(shape) + [1] * (4 - len(shape))             # <<<<<<<<<<<<<<
+ *             check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,
+ *                                             data_type(dtype), n, c, h, w))
+ */
+    __pyx_t_2 = PySequence_List(__pyx_v_shape); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 64, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_2);
+    __pyx_t_1 = PyObject_Length(__pyx_v_shape); if (unlikely(__pyx_t_1 == -1)) __PYX_ERR(0, 64, __pyx_L1_error)
+    __pyx_t_3 = PyList_New(1 * (((4 - __pyx_t_1)<0) ? 0:(4 - __pyx_t_1))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 64, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_3);
+    { Py_ssize_t __pyx_temp;
+      for (__pyx_temp=0; __pyx_temp < (4 - __pyx_t_1); __pyx_temp++) {
+        __Pyx_INCREF(__pyx_int_1);
+        __Pyx_GIVEREF(__pyx_int_1);
+        PyList_SET_ITEM(__pyx_t_3, __pyx_temp, __pyx_int_1);
+      }
+    }
+    __pyx_t_6 = PyNumber_Add(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 64, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    if (1) {
+      PyObject* sequence = __pyx_t_6;
+      #if !CYTHON_COMPILING_IN_PYPY
+      Py_ssize_t size = Py_SIZE(sequence);
+      #else
+      Py_ssize_t size = PySequence_Size(sequence);
+      #endif
+      if (unlikely(size != 4)) {
+        if (size > 4) __Pyx_RaiseTooManyValuesError(4);
+        else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
+        __PYX_ERR(0, 64, __pyx_L1_error)
+      }
+      #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+      __pyx_t_3 = PyList_GET_ITEM(sequence, 0); 
+      __pyx_t_2 = PyList_GET_ITEM(sequence, 1); 
+      __pyx_t_4 = PyList_GET_ITEM(sequence, 2); 
+      __pyx_t_5 = PyList_GET_ITEM(sequence, 3); 
+      __Pyx_INCREF(__pyx_t_3);
+      __Pyx_INCREF(__pyx_t_2);
+      __Pyx_INCREF(__pyx_t_4);
+      __Pyx_INCREF(__pyx_t_5);
+      #else
+      {
+        Py_ssize_t i;
+        PyObject** temps[4] = {&__pyx_t_3,&__pyx_t_2,&__pyx_t_4,&__pyx_t_5};
+        for (i=0; i < 4; i++) {
+          PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(0, 64, __pyx_L1_error)
+          __Pyx_GOTREF(item);
+          *(temps[i]) = item;
+        }
+      }
+      #endif
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    }
+    __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 64, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+    __pyx_t_9 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_9 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 64, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+    __pyx_t_10 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_10 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 64, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+    __pyx_t_11 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_11 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 64, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __pyx_v_n = __pyx_t_8;
+    __pyx_v_c = __pyx_t_9;
+    __pyx_v_h = __pyx_t_10;
+    __pyx_v_w = __pyx_t_11;
+
+    /* "renom/cuda/cudnn.pyx":65
+ *         if len(shape) < 5:
+ *             n, c, h, w = list(shape) + [1] * (4 - len(shape))
+ *             check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,             # <<<<<<<<<<<<<<
+ *                                             data_type(dtype), n, c, h, w))
+ *         else:
+ */
+    __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 65, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+
+    /* "renom/cuda/cudnn.pyx":66
+ *             n, c, h, w = list(shape) + [1] * (4 - len(shape))
+ *             check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,
+ *                                             data_type(dtype), n, c, h, w))             # <<<<<<<<<<<<<<
+ *         else:
+ *             size = <int *>malloc(ndims*cython.sizeof(int))
+ */
+    __pyx_t_4 = __pyx_f_5renom_4cuda_5cudnn_data_type(__pyx_v_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 66, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_12 = ((cudnnDataType_t)__Pyx_PyInt_As_cudnnDataType_t(__pyx_t_4)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 66, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+
+    /* "renom/cuda/cudnn.pyx":65
+ *         if len(shape) < 5:
+ *             n, c, h, w = list(shape) + [1] * (4 - len(shape))
+ *             check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,             # <<<<<<<<<<<<<<
+ *                                             data_type(dtype), n, c, h, w))
+ *         else:
+ */
+    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSetTensor4dDescriptor(__pyx_v_self->tensor_desc, __pyx_v_5renom_4cuda_5cudnn_tensor_format, __pyx_t_12, __pyx_v_n, __pyx_v_c, __pyx_v_h, __pyx_v_w)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 65, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_2 = NULL;
+    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_5))) {
+      __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_5);
+      if (likely(__pyx_t_2)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_5);
+        __Pyx_INCREF(__pyx_t_2);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_5, function);
+      }
+    }
+    if (!__pyx_t_2) {
+      __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 65, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __Pyx_GOTREF(__pyx_t_6);
+    } else {
+      #if CYTHON_FAST_PYCALL
+      if (PyFunction_Check(__pyx_t_5)) {
+        PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_4};
+        __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 65, __pyx_L1_error)
+        __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+        __Pyx_GOTREF(__pyx_t_6);
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      } else
+      #endif
+      #if CYTHON_FAST_PYCCALL
+      if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
+        PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_4};
+        __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 65, __pyx_L1_error)
+        __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+        __Pyx_GOTREF(__pyx_t_6);
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      } else
+      #endif
+      {
+        __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 65, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2); __pyx_t_2 = NULL;
+        __Pyx_GIVEREF(__pyx_t_4);
+        PyTuple_SET_ITEM(__pyx_t_3, 0+1, __pyx_t_4);
+        __pyx_t_4 = 0;
+        __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_3, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 65, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_6);
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      }
+    }
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+
+    /* "renom/cuda/cudnn.pyx":63
+ *         check(cd.cudnnCreateTensorDescriptor(&(self.tensor_desc)))
+ * 
+ *         if len(shape) < 5:             # <<<<<<<<<<<<<<
+ *             n, c, h, w = list(shape) + [1] * (4 - len(shape))
+ *             check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,
+ */
+    goto __pyx_L3;
+  }
+
+  /* "renom/cuda/cudnn.pyx":68
+ *                                             data_type(dtype), n, c, h, w))
+ *         else:
+ *             size = <int *>malloc(ndims*cython.sizeof(int))             # <<<<<<<<<<<<<<
+ *             strides = <int *>malloc(ndims*cython.sizeof(int))
+ *             if strides is NULL or size is NULL:
+ */
+  /*else*/ {
+    __pyx_v_size = ((int *)malloc((__pyx_v_ndims * (sizeof(int)))));
+
+    /* "renom/cuda/cudnn.pyx":69
+ *         else:
+ *             size = <int *>malloc(ndims*cython.sizeof(int))
+ *             strides = <int *>malloc(ndims*cython.sizeof(int))             # <<<<<<<<<<<<<<
+ *             if strides is NULL or size is NULL:
+ *                 raise MemoryError()
+ */
+    __pyx_v_strides = ((int *)malloc((__pyx_v_ndims * (sizeof(int)))));
+
+    /* "renom/cuda/cudnn.pyx":70
+ *             size = <int *>malloc(ndims*cython.sizeof(int))
+ *             strides = <int *>malloc(ndims*cython.sizeof(int))
+ *             if strides is NULL or size is NULL:             # <<<<<<<<<<<<<<
+ *                 raise MemoryError()
+ * 
+ */
+    __pyx_t_13 = ((__pyx_v_strides == NULL) != 0);
+    if (!__pyx_t_13) {
+    } else {
+      __pyx_t_7 = __pyx_t_13;
+      goto __pyx_L5_bool_binop_done;
+    }
+    __pyx_t_13 = ((__pyx_v_size == NULL) != 0);
+    __pyx_t_7 = __pyx_t_13;
+    __pyx_L5_bool_binop_done:;
+    if (__pyx_t_7) {
+
+      /* "renom/cuda/cudnn.pyx":71
+ *             strides = <int *>malloc(ndims*cython.sizeof(int))
+ *             if strides is NULL or size is NULL:
+ *                 raise MemoryError()             # <<<<<<<<<<<<<<
+ * 
+ *             for i in range(ndims):
+ */
+      PyErr_NoMemory(); __PYX_ERR(0, 71, __pyx_L1_error)
+
+      /* "renom/cuda/cudnn.pyx":70
+ *             size = <int *>malloc(ndims*cython.sizeof(int))
+ *             strides = <int *>malloc(ndims*cython.sizeof(int))
+ *             if strides is NULL or size is NULL:             # <<<<<<<<<<<<<<
+ *                 raise MemoryError()
+ * 
+ */
+    }
+
+    /* "renom/cuda/cudnn.pyx":73
+ *                 raise MemoryError()
+ * 
+ *             for i in range(ndims):             # <<<<<<<<<<<<<<
+ *                 size[i] = shape[i]
+ *                 strides[i] = np.prod(shape[ndims-i:])
+ */
+    __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_ndims); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 73, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_5);
+    __Pyx_GIVEREF(__pyx_t_6);
+    PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_6);
+    __pyx_t_6 = 0;
+    __pyx_t_6 = __Pyx_PyObject_Call(__pyx_builtin_range, __pyx_t_5, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 73, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+    if (likely(PyList_CheckExact(__pyx_t_6)) || PyTuple_CheckExact(__pyx_t_6)) {
+      __pyx_t_5 = __pyx_t_6; __Pyx_INCREF(__pyx_t_5); __pyx_t_1 = 0;
+      __pyx_t_14 = NULL;
+    } else {
+      __pyx_t_1 = -1; __pyx_t_5 = PyObject_GetIter(__pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 73, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_5);
+      __pyx_t_14 = Py_TYPE(__pyx_t_5)->tp_iternext; if (unlikely(!__pyx_t_14)) __PYX_ERR(0, 73, __pyx_L1_error)
+    }
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    for (;;) {
+      if (likely(!__pyx_t_14)) {
+        if (likely(PyList_CheckExact(__pyx_t_5))) {
+          if (__pyx_t_1 >= PyList_GET_SIZE(__pyx_t_5)) break;
+          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+          __pyx_t_6 = PyList_GET_ITEM(__pyx_t_5, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 73, __pyx_L1_error)
+          #else
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_5, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 73, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          #endif
+        } else {
+          if (__pyx_t_1 >= PyTuple_GET_SIZE(__pyx_t_5)) break;
+          #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
+          __pyx_t_6 = PyTuple_GET_ITEM(__pyx_t_5, __pyx_t_1); __Pyx_INCREF(__pyx_t_6); __pyx_t_1++; if (unlikely(0 < 0)) __PYX_ERR(0, 73, __pyx_L1_error)
+          #else
+          __pyx_t_6 = PySequence_ITEM(__pyx_t_5, __pyx_t_1); __pyx_t_1++; if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 73, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          #endif
+        }
+      } else {
+        __pyx_t_6 = __pyx_t_14(__pyx_t_5);
+        if (unlikely(!__pyx_t_6)) {
+          PyObject* exc_type = PyErr_Occurred();
+          if (exc_type) {
+            if (likely(exc_type == PyExc_StopIteration || PyErr_GivenExceptionMatches(exc_type, PyExc_StopIteration))) PyErr_Clear();
+            else __PYX_ERR(0, 73, __pyx_L1_error)
+          }
+          break;
+        }
+        __Pyx_GOTREF(__pyx_t_6);
+      }
+      __Pyx_XDECREF_SET(__pyx_v_i, __pyx_t_6);
+      __pyx_t_6 = 0;
+
+      /* "renom/cuda/cudnn.pyx":74
+ * 
+ *             for i in range(ndims):
+ *                 size[i] = shape[i]             # <<<<<<<<<<<<<<
+ *                 strides[i] = np.prod(shape[ndims-i:])
+ *             check(cd.cudnnSetTensorNdDescriptor(self.tensor_desc, data_type(dtype),
+ */
+      __pyx_t_6 = PyObject_GetItem(__pyx_v_shape, __pyx_v_i); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 74, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_6);
+      __pyx_t_11 = __Pyx_PyInt_As_int(__pyx_t_6); if (unlikely((__pyx_t_11 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 74, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      __pyx_t_15 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_15 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 74, __pyx_L1_error)
+      (__pyx_v_size[__pyx_t_15]) = __pyx_t_11;
+
+      /* "renom/cuda/cudnn.pyx":75
+ *             for i in range(ndims):
+ *                 size[i] = shape[i]
+ *                 strides[i] = np.prod(shape[ndims-i:])             # <<<<<<<<<<<<<<
+ *             check(cd.cudnnSetTensorNdDescriptor(self.tensor_desc, data_type(dtype),
+ *                                                 ndims,
+ */
+      __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_prod); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_4);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_ndims); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __pyx_t_2 = PyNumber_Subtract(__pyx_t_3, __pyx_v_i); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_2);
+      __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      __pyx_t_3 = __Pyx_PyObject_GetSlice(__pyx_v_shape, 0, 0, &__pyx_t_2, NULL, NULL, 0, 0, 1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_GOTREF(__pyx_t_3);
+      __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
+      __pyx_t_2 = NULL;
+      if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
+        __pyx_t_2 = PyMethod_GET_SELF(__pyx_t_4);
+        if (likely(__pyx_t_2)) {
+          PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_4);
+          __Pyx_INCREF(__pyx_t_2);
+          __Pyx_INCREF(function);
+          __Pyx_DECREF_SET(__pyx_t_4, function);
+        }
+      }
+      if (!__pyx_t_2) {
+        __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_3); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 75, __pyx_L1_error)
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        __Pyx_GOTREF(__pyx_t_6);
+      } else {
+        #if CYTHON_FAST_PYCALL
+        if (PyFunction_Check(__pyx_t_4)) {
+          PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_3};
+          __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 75, __pyx_L1_error)
+          __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+          __Pyx_GOTREF(__pyx_t_6);
+          __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        } else
+        #endif
+        #if CYTHON_FAST_PYCCALL
+        if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
+          PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_3};
+          __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 75, __pyx_L1_error)
+          __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
+          __Pyx_GOTREF(__pyx_t_6);
+          __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+        } else
+        #endif
+        {
+          __pyx_t_16 = PyTuple_New(1+1); if (unlikely(!__pyx_t_16)) __PYX_ERR(0, 75, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_16);
+          __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_16, 0, __pyx_t_2); __pyx_t_2 = NULL;
+          __Pyx_GIVEREF(__pyx_t_3);
+          PyTuple_SET_ITEM(__pyx_t_16, 0+1, __pyx_t_3);
+          __pyx_t_3 = 0;
+          __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_16, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 75, __pyx_L1_error)
+          __Pyx_GOTREF(__pyx_t_6);
+          __Pyx_DECREF(__pyx_t_16); __pyx_t_16 = 0;
+        }
+      }
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __pyx_t_11 = __Pyx_PyInt_As_int(__pyx_t_6); if (unlikely((__pyx_t_11 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 75, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+      __pyx_t_15 = __Pyx_PyIndex_AsSsize_t(__pyx_v_i); if (unlikely((__pyx_t_15 == (Py_ssize_t)-1) && PyErr_Occurred())) __PYX_ERR(0, 75, __pyx_L1_error)
+      (__pyx_v_strides[__pyx_t_15]) = __pyx_t_11;
+
+      /* "renom/cuda/cudnn.pyx":73
+ *                 raise MemoryError()
+ * 
+ *             for i in range(ndims):             # <<<<<<<<<<<<<<
+ *                 size[i] = shape[i]
+ *                 strides[i] = np.prod(shape[ndims-i:])
+ */
+    }
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+
+    /* "renom/cuda/cudnn.pyx":76
+ *                 size[i] = shape[i]
+ *                 strides[i] = np.prod(shape[ndims-i:])
+ *             check(cd.cudnnSetTensorNdDescriptor(self.tensor_desc, data_type(dtype),             # <<<<<<<<<<<<<<
+ *                                                 ndims,
+ *                                                 size,
+ */
+    __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 76, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_6);
+    __pyx_t_4 = __pyx_f_5renom_4cuda_5cudnn_data_type(__pyx_v_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 76, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_12 = ((cudnnDataType_t)__Pyx_PyInt_As_cudnnDataType_t(__pyx_t_4)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 76, __pyx_L1_error)
+    __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+
+    /* "renom/cuda/cudnn.pyx":79
+ *                                                 ndims,
+ *                                                 size,
+ *                                                 strides))             # <<<<<<<<<<<<<<
+ *             free(size)
+ *             free(strides)
+ */
+    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSetTensorNdDescriptor(__pyx_v_self->tensor_desc, __pyx_t_12, __pyx_v_ndims, __pyx_v_size, __pyx_v_strides)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 76, __pyx_L1_error)
+    __Pyx_GOTREF(__pyx_t_4);
+    __pyx_t_16 = NULL;
+    if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
+      __pyx_t_16 = PyMethod_GET_SELF(__pyx_t_6);
+      if (likely(__pyx_t_16)) {
+        PyObject* function = PyMethod_GET_FUNCTION(__pyx_t_6);
+        __Pyx_INCREF(__pyx_t_16);
+        __Pyx_INCREF(function);
+        __Pyx_DECREF_SET(__pyx_t_6, function);
+      }
+    }
+    if (!__pyx_t_16) {
+      __pyx_t_5 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
+      __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      __Pyx_GOTREF(__pyx_t_5);
+    } else {
+      #if CYTHON_FAST_PYCALL
+      if (PyFunction_Check(__pyx_t_6)) {
+        PyObject *__pyx_temp[2] = {__pyx_t_16, __pyx_t_4};
+        __pyx_t_5 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
+        __Pyx_XDECREF(__pyx_t_16); __pyx_t_16 = 0;
+        __Pyx_GOTREF(__pyx_t_5);
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      } else
+      #endif
+      #if CYTHON_FAST_PYCCALL
+      if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
+        PyObject *__pyx_temp[2] = {__pyx_t_16, __pyx_t_4};
+        __pyx_t_5 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
+        __Pyx_XDECREF(__pyx_t_16); __pyx_t_16 = 0;
+        __Pyx_GOTREF(__pyx_t_5);
+        __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
+      } else
+      #endif
+      {
+        __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 76, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_3);
+        __Pyx_GIVEREF(__pyx_t_16); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_16); __pyx_t_16 = NULL;
+        __Pyx_GIVEREF(__pyx_t_4);
+        PyTuple_SET_ITEM(__pyx_t_3, 0+1, __pyx_t_4);
+        __pyx_t_4 = 0;
+        __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_3, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 76, __pyx_L1_error)
+        __Pyx_GOTREF(__pyx_t_5);
+        __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
+      }
+    }
+    __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
+    __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
+
+    /* "renom/cuda/cudnn.pyx":80
+ *                                                 size,
+ *                                                 strides))
+ *             free(size)             # <<<<<<<<<<<<<<
+ *             free(strides)
+ * 
+ */
+    free(__pyx_v_size);
+
+    /* "renom/cuda/cudnn.pyx":81
+ *                                                 strides))
+ *             free(size)
+ *             free(strides)             # <<<<<<<<<<<<<<
+ * 
+ * 
+ */
+    free(__pyx_v_strides);
+  }
+  __pyx_L3:;
+
+  /* "renom/cuda/cudnn.pyx":55
  *     cdef cudnnTensorDescriptor_t tensor_desc
  * 
  *     def __init__(self, shape, dtype=precision):             # <<<<<<<<<<<<<<
  *         cdef int n, c, h, w
- *         n, c, h, w = list(shape) + [1] * (4 - len(shape))
+ *         cdef int ndims = len(shape)
  */
 
   /* function exit code */
   __pyx_r = 0;
   goto __pyx_L0;
   __pyx_L1_error:;
-  __Pyx_XDECREF(__pyx_t_1);
+  __Pyx_XDECREF(__pyx_t_2);
   __Pyx_XDECREF(__pyx_t_3);
   __Pyx_XDECREF(__pyx_t_4);
   __Pyx_XDECREF(__pyx_t_5);
   __Pyx_XDECREF(__pyx_t_6);
+  __Pyx_XDECREF(__pyx_t_16);
   __Pyx_AddTraceback("renom.cuda.cudnn.TensorDesc.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = -1;
   __pyx_L0:;
+  __Pyx_XDECREF(__pyx_v_i);
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":61
- *                                             data_type(dtype), n, c, h, w))
+/* "renom/cuda/cudnn.pyx":84
+ * 
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<
  *         if self.tensor_desc:
@@ -2617,7 +2979,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_2__del__(struct __pyx
   PyObject *__pyx_t_6 = NULL;
   __Pyx_RefNannySetupContext("__del__", 0);
 
-  /* "renom/cuda/cudnn.pyx":62
+  /* "renom/cuda/cudnn.pyx":85
  * 
  *     def __del__(self):
  *         if self.tensor_desc:             # <<<<<<<<<<<<<<
@@ -2627,16 +2989,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_2__del__(struct __pyx
   __pyx_t_1 = (__pyx_v_self->tensor_desc != 0);
   if (__pyx_t_1) {
 
-    /* "renom/cuda/cudnn.pyx":63
+    /* "renom/cuda/cudnn.pyx":86
  *     def __del__(self):
  *         if self.tensor_desc:
  *             check(cd.cudnnDestroyTensorDescriptor(self.tensor_desc))             # <<<<<<<<<<<<<<
  *             self.tensor_desc = NULL
  * 
  */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 63, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 86, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnDestroyTensorDescriptor(__pyx_v_self->tensor_desc)); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 63, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnDestroyTensorDescriptor(__pyx_v_self->tensor_desc)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 86, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -2649,14 +3011,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_2__del__(struct __pyx
       }
     }
     if (!__pyx_t_5) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 63, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_2);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 63, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -2665,20 +3027,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_2__del__(struct __pyx
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 63, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       } else
       #endif
       {
-        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 63, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 86, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5); __pyx_t_5 = NULL;
         __Pyx_GIVEREF(__pyx_t_4);
         PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_4);
         __pyx_t_4 = 0;
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 63, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 86, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       }
@@ -2686,7 +3048,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_2__del__(struct __pyx
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "renom/cuda/cudnn.pyx":64
+    /* "renom/cuda/cudnn.pyx":87
  *         if self.tensor_desc:
  *             check(cd.cudnnDestroyTensorDescriptor(self.tensor_desc))
  *             self.tensor_desc = NULL             # <<<<<<<<<<<<<<
@@ -2695,7 +3057,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_2__del__(struct __pyx
  */
     __pyx_v_self->tensor_desc = NULL;
 
-    /* "renom/cuda/cudnn.pyx":62
+    /* "renom/cuda/cudnn.pyx":85
  * 
  *     def __del__(self):
  *         if self.tensor_desc:             # <<<<<<<<<<<<<<
@@ -2704,8 +3066,8 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_2__del__(struct __pyx
  */
   }
 
-  /* "renom/cuda/cudnn.pyx":61
- *                                             data_type(dtype), n, c, h, w))
+  /* "renom/cuda/cudnn.pyx":84
+ * 
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<
  *         if self.tensor_desc:
@@ -2729,7 +3091,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_2__del__(struct __pyx
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":66
+/* "renom/cuda/cudnn.pyx":89
  *             self.tensor_desc = NULL
  * 
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -2756,7 +3118,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_4__int__(struct __pyx
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__int__", 0);
 
-  /* "renom/cuda/cudnn.pyx":67
+  /* "renom/cuda/cudnn.pyx":90
  * 
  *     def __int__(self):
  *         return <uintptr_t>self.tensor_desc             # <<<<<<<<<<<<<<
@@ -2764,13 +3126,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_4__int__(struct __pyx
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_self->tensor_desc)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 67, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_self->tensor_desc)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 90, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "renom/cuda/cudnn.pyx":66
+  /* "renom/cuda/cudnn.pyx":89
  *             self.tensor_desc = NULL
  * 
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -2820,11 +3182,11 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_6__reduce_cython__(CY
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.tensor_desc cannot be converted to a Python object for pickling")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(0, 2, __pyx_L1_error)
+  __PYX_ERR(1, 2, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -2873,11 +3235,11 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_8__setstate_cython__(
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.tensor_desc cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(0, 4, __pyx_L1_error)
+  __PYX_ERR(1, 4, __pyx_L1_error)
 
   /* "(tree fragment)":3
  * def __reduce_cython__(self):
@@ -2896,7 +3258,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_10TensorDesc_8__setstate_cython__(
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":70
+/* "renom/cuda/cudnn.pyx":93
  * 
  * 
  * cdef getTensorDescriptor(desc):             # <<<<<<<<<<<<<<
@@ -2930,17 +3292,17 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_getTensorDescriptor(PyObject *__pyx
   PyObject *__pyx_t_11 = NULL;
   __Pyx_RefNannySetupContext("getTensorDescriptor", 0);
 
-  /* "renom/cuda/cudnn.pyx":73
+  /* "renom/cuda/cudnn.pyx":96
  *     cdef int n, c, h, w, ns, cs, hs, ws
  *     cdef cudnnDataType_t dtype
  *     cdef cudnnTensorDescriptor_t c_desc = <cudnnTensorDescriptor_t> <uintptr_t> desc             # <<<<<<<<<<<<<<
  *     cudnnGetTensor4dDescriptor(
  *         c_desc,
  */
-  __pyx_t_1 = __Pyx_PyInt_As_size_t(__pyx_v_desc); if (unlikely((__pyx_t_1 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 73, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_As_size_t(__pyx_v_desc); if (unlikely((__pyx_t_1 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 96, __pyx_L1_error)
   __pyx_v_c_desc = ((cudnnTensorDescriptor_t)((uintptr_t)__pyx_t_1));
 
-  /* "renom/cuda/cudnn.pyx":74
+  /* "renom/cuda/cudnn.pyx":97
  *     cdef cudnnDataType_t dtype
  *     cdef cudnnTensorDescriptor_t c_desc = <cudnnTensorDescriptor_t> <uintptr_t> desc
  *     cudnnGetTensor4dDescriptor(             # <<<<<<<<<<<<<<
@@ -2949,7 +3311,7 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_getTensorDescriptor(PyObject *__pyx
  */
   cudnnGetTensor4dDescriptor(__pyx_v_c_desc, (&__pyx_v_dtype), (&__pyx_v_n), (&__pyx_v_c), (&__pyx_v_h), (&__pyx_v_w), (&__pyx_v_ns), (&__pyx_v_cs), (&__pyx_v_hs), (&__pyx_v_ws));
 
-  /* "renom/cuda/cudnn.pyx":85
+  /* "renom/cuda/cudnn.pyx":108
  *         & hs,
  *         & ws)
  *     return n, c, h, w, ns, cs, hs, ws, <int> dtype             # <<<<<<<<<<<<<<
@@ -2957,25 +3319,25 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_getTensorDescriptor(PyObject *__pyx
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_n); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 85, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_int(__pyx_v_n); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_c); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 85, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_int(__pyx_v_c); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_h); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 85, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_int(__pyx_v_h); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_w); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 85, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_int(__pyx_v_w); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_ns); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 85, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_From_int(__pyx_v_ns); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_cs); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 85, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_From_int(__pyx_v_cs); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_hs); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 85, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_From_int(__pyx_v_hs); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_ws); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 85, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_From_int(__pyx_v_ws); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_10 = __Pyx_PyInt_From_int(((int)__pyx_v_dtype)); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 85, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyInt_From_int(((int)__pyx_v_dtype)); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
-  __pyx_t_11 = PyTuple_New(9); if (unlikely(!__pyx_t_11)) __PYX_ERR(1, 85, __pyx_L1_error)
+  __pyx_t_11 = PyTuple_New(9); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 108, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_11);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_2);
@@ -3008,7 +3370,7 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_getTensorDescriptor(PyObject *__pyx
   __pyx_t_11 = 0;
   goto __pyx_L0;
 
-  /* "renom/cuda/cudnn.pyx":70
+  /* "renom/cuda/cudnn.pyx":93
  * 
  * 
  * cdef getTensorDescriptor(desc):             # <<<<<<<<<<<<<<
@@ -3036,7 +3398,7 @@ static PyObject *__pyx_f_5renom_4cuda_5cudnn_getTensorDescriptor(PyObject *__pyx
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":91
+/* "renom/cuda/cudnn.pyx":114
  *     cdef cudnnConvolutionDescriptor_t conv_desc
  * 
  *     def __init__(self, padding, stride, dtype):             # <<<<<<<<<<<<<<
@@ -3078,17 +3440,17 @@ static int __pyx_pw_5renom_4cuda_5cudnn_21ConvolutionDescriptor_1__init__(PyObje
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_stride)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, 1); __PYX_ERR(1, 91, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, 1); __PYX_ERR(0, 114, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dtype)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, 2); __PYX_ERR(1, 91, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, 2); __PYX_ERR(0, 114, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 91, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 114, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -3103,7 +3465,7 @@ static int __pyx_pw_5renom_4cuda_5cudnn_21ConvolutionDescriptor_1__init__(PyObje
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 91, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 114, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.ConvolutionDescriptor.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3137,7 +3499,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
   cudnnDataType_t __pyx_t_9;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "renom/cuda/cudnn.pyx":94
+  /* "renom/cuda/cudnn.pyx":117
  *         cdef int pad_h, pad_w, u, v, upscalex, upscaley
  *         cdef cudnnConvolutionMode_t mode;
  *         mode = CUDNN_CONVOLUTION;             # <<<<<<<<<<<<<<
@@ -3146,7 +3508,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
  */
   __pyx_v_mode = CUDNN_CONVOLUTION;
 
-  /* "renom/cuda/cudnn.pyx":95
+  /* "renom/cuda/cudnn.pyx":118
  *         cdef cudnnConvolutionMode_t mode;
  *         mode = CUDNN_CONVOLUTION;
  *         pad_h, pad_w = padding             # <<<<<<<<<<<<<<
@@ -3163,7 +3525,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 95, __pyx_L1_error)
+      __PYX_ERR(0, 118, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -3176,21 +3538,21 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
     __Pyx_INCREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_t_2);
     #else
-    __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 95, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 118, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_2 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 95, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 118, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     #endif
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_3 = PyObject_GetIter(__pyx_v_padding); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 95, __pyx_L1_error)
+    __pyx_t_3 = PyObject_GetIter(__pyx_v_padding); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 118, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_4 = Py_TYPE(__pyx_t_3)->tp_iternext;
     index = 0; __pyx_t_1 = __pyx_t_4(__pyx_t_3); if (unlikely(!__pyx_t_1)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_1);
     index = 1; __pyx_t_2 = __pyx_t_4(__pyx_t_3); if (unlikely(!__pyx_t_2)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_2);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_4(__pyx_t_3), 2) < 0) __PYX_ERR(1, 95, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_4(__pyx_t_3), 2) < 0) __PYX_ERR(0, 118, __pyx_L1_error)
     __pyx_t_4 = NULL;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     goto __pyx_L4_unpacking_done;
@@ -3198,17 +3560,17 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_4 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 95, __pyx_L1_error)
+    __PYX_ERR(0, 118, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
-  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 95, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 95, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 118, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_pad_h = __pyx_t_5;
   __pyx_v_pad_w = __pyx_t_6;
 
-  /* "renom/cuda/cudnn.pyx":96
+  /* "renom/cuda/cudnn.pyx":119
  *         mode = CUDNN_CONVOLUTION;
  *         pad_h, pad_w = padding
  *         u, v = stride             # <<<<<<<<<<<<<<
@@ -3225,7 +3587,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 96, __pyx_L1_error)
+      __PYX_ERR(0, 119, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -3238,21 +3600,21 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
     __Pyx_INCREF(__pyx_t_2);
     __Pyx_INCREF(__pyx_t_1);
     #else
-    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 96, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 119, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 96, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 119, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     #endif
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_3 = PyObject_GetIter(__pyx_v_stride); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 96, __pyx_L1_error)
+    __pyx_t_3 = PyObject_GetIter(__pyx_v_stride); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 119, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __pyx_t_4 = Py_TYPE(__pyx_t_3)->tp_iternext;
     index = 0; __pyx_t_2 = __pyx_t_4(__pyx_t_3); if (unlikely(!__pyx_t_2)) goto __pyx_L5_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_2);
     index = 1; __pyx_t_1 = __pyx_t_4(__pyx_t_3); if (unlikely(!__pyx_t_1)) goto __pyx_L5_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_1);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_4(__pyx_t_3), 2) < 0) __PYX_ERR(1, 96, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_4(__pyx_t_3), 2) < 0) __PYX_ERR(0, 119, __pyx_L1_error)
     __pyx_t_4 = NULL;
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     goto __pyx_L6_unpacking_done;
@@ -3260,17 +3622,17 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __pyx_t_4 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 96, __pyx_L1_error)
+    __PYX_ERR(0, 119, __pyx_L1_error)
     __pyx_L6_unpacking_done:;
   }
-  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 96, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_6 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 119, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 96, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_5 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 119, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_u = __pyx_t_6;
   __pyx_v_v = __pyx_t_5;
 
-  /* "renom/cuda/cudnn.pyx":97
+  /* "renom/cuda/cudnn.pyx":120
  *         pad_h, pad_w = padding
  *         u, v = stride
  *         upscalex, upscaley = 1, 1             # <<<<<<<<<<<<<<
@@ -3282,16 +3644,16 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
   __pyx_v_upscalex = __pyx_t_5;
   __pyx_v_upscaley = __pyx_t_6;
 
-  /* "renom/cuda/cudnn.pyx":99
+  /* "renom/cuda/cudnn.pyx":122
  *         upscalex, upscaley = 1, 1
  * 
  *         check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))             # <<<<<<<<<<<<<<
  *         check(cudnnSetConvolution2dDescriptor_v5(
  *             self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 99, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 122, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreateConvolutionDescriptor((&__pyx_v_self->conv_desc))); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 99, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreateConvolutionDescriptor((&__pyx_v_self->conv_desc))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 122, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_7 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -3304,14 +3666,14 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
     }
   }
   if (!__pyx_t_7) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 99, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 122, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_3};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 99, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 122, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -3320,20 +3682,20 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_3};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 99, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 122, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     } else
     #endif
     {
-      __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 99, __pyx_L1_error)
+      __pyx_t_8 = PyTuple_New(1+1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 122, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_8);
       __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_7); __pyx_t_7 = NULL;
       __Pyx_GIVEREF(__pyx_t_3);
       PyTuple_SET_ITEM(__pyx_t_8, 0+1, __pyx_t_3);
       __pyx_t_3 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 99, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 122, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     }
@@ -3341,36 +3703,36 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":100
+  /* "renom/cuda/cudnn.pyx":123
  * 
  *         check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))
  *         check(cudnnSetConvolution2dDescriptor_v5(             # <<<<<<<<<<<<<<
  *             self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 100, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
 
-  /* "renom/cuda/cudnn.pyx":101
+  /* "renom/cuda/cudnn.pyx":124
  *         check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))
  *         check(cudnnSetConvolution2dDescriptor_v5(
  *             self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))             # <<<<<<<<<<<<<<
  * 
  *     def __del__(self):
  */
-  __pyx_t_8 = __pyx_f_5renom_4cuda_5cudnn_data_type(__pyx_v_dtype); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 101, __pyx_L1_error)
+  __pyx_t_8 = __pyx_f_5renom_4cuda_5cudnn_data_type(__pyx_v_dtype); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 124, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_9 = ((cudnnDataType_t)__Pyx_PyInt_As_cudnnDataType_t(__pyx_t_8)); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 101, __pyx_L1_error)
+  __pyx_t_9 = ((cudnnDataType_t)__Pyx_PyInt_As_cudnnDataType_t(__pyx_t_8)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 124, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
 
-  /* "renom/cuda/cudnn.pyx":100
+  /* "renom/cuda/cudnn.pyx":123
  * 
  *         check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))
  *         check(cudnnSetConvolution2dDescriptor_v5(             # <<<<<<<<<<<<<<
  *             self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
  * 
  */
-  __pyx_t_8 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSetConvolution2dDescriptor_v5(__pyx_v_self->conv_desc, __pyx_v_pad_h, __pyx_v_pad_w, __pyx_v_u, __pyx_v_v, __pyx_v_upscalex, __pyx_v_upscaley, __pyx_v_mode, __pyx_t_9)); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 100, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSetConvolution2dDescriptor_v5(__pyx_v_self->conv_desc, __pyx_v_pad_h, __pyx_v_pad_w, __pyx_v_u, __pyx_v_v, __pyx_v_upscalex, __pyx_v_upscaley, __pyx_v_mode, __pyx_t_9)); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 123, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -3383,14 +3745,14 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
     }
   }
   if (!__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 100, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_8); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_8};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 100, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
@@ -3399,20 +3761,20 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_8};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 100, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     } else
     #endif
     {
-      __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 100, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_3); __pyx_t_3 = NULL;
       __Pyx_GIVEREF(__pyx_t_8);
       PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_8);
       __pyx_t_8 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 100, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 123, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     }
@@ -3420,7 +3782,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":91
+  /* "renom/cuda/cudnn.pyx":114
  *     cdef cudnnConvolutionDescriptor_t conv_desc
  * 
  *     def __init__(self, padding, stride, dtype):             # <<<<<<<<<<<<<<
@@ -3444,7 +3806,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor___init__(struct 
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":103
+/* "renom/cuda/cudnn.pyx":126
  *             self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<
@@ -3476,7 +3838,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_2__del__(s
   PyObject *__pyx_t_6 = NULL;
   __Pyx_RefNannySetupContext("__del__", 0);
 
-  /* "renom/cuda/cudnn.pyx":104
+  /* "renom/cuda/cudnn.pyx":127
  * 
  *     def __del__(self):
  *         if self.conv_desc:             # <<<<<<<<<<<<<<
@@ -3486,16 +3848,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_2__del__(s
   __pyx_t_1 = (__pyx_v_self->conv_desc != 0);
   if (__pyx_t_1) {
 
-    /* "renom/cuda/cudnn.pyx":105
+    /* "renom/cuda/cudnn.pyx":128
  *     def __del__(self):
  *         if self.conv_desc:
  *             check(cudnnDestroyConvolutionDescriptor(self.conv_desc))             # <<<<<<<<<<<<<<
  *             self.conv_desc = NULL
  * 
  */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 105, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 128, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnDestroyConvolutionDescriptor(__pyx_v_self->conv_desc)); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 105, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnDestroyConvolutionDescriptor(__pyx_v_self->conv_desc)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 128, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -3508,14 +3870,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_2__del__(s
       }
     }
     if (!__pyx_t_5) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 105, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_2);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 105, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -3524,20 +3886,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_2__del__(s
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 105, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       } else
       #endif
       {
-        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 105, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 128, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5); __pyx_t_5 = NULL;
         __Pyx_GIVEREF(__pyx_t_4);
         PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_4);
         __pyx_t_4 = 0;
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 105, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 128, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       }
@@ -3545,7 +3907,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_2__del__(s
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "renom/cuda/cudnn.pyx":106
+    /* "renom/cuda/cudnn.pyx":129
  *         if self.conv_desc:
  *             check(cudnnDestroyConvolutionDescriptor(self.conv_desc))
  *             self.conv_desc = NULL             # <<<<<<<<<<<<<<
@@ -3554,7 +3916,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_2__del__(s
  */
     __pyx_v_self->conv_desc = NULL;
 
-    /* "renom/cuda/cudnn.pyx":104
+    /* "renom/cuda/cudnn.pyx":127
  * 
  *     def __del__(self):
  *         if self.conv_desc:             # <<<<<<<<<<<<<<
@@ -3563,7 +3925,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_2__del__(s
  */
   }
 
-  /* "renom/cuda/cudnn.pyx":103
+  /* "renom/cuda/cudnn.pyx":126
  *             self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<
@@ -3588,7 +3950,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_2__del__(s
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":108
+/* "renom/cuda/cudnn.pyx":131
  *             self.conv_desc = NULL
  * 
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -3615,7 +3977,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_4__int__(s
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__int__", 0);
 
-  /* "renom/cuda/cudnn.pyx":109
+  /* "renom/cuda/cudnn.pyx":132
  * 
  *     def __int__(self):
  *         return <uintptr_t>self.conv_desc             # <<<<<<<<<<<<<<
@@ -3623,13 +3985,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_4__int__(s
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_self->conv_desc)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 109, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_self->conv_desc)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 132, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "renom/cuda/cudnn.pyx":108
+  /* "renom/cuda/cudnn.pyx":131
  *             self.conv_desc = NULL
  * 
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -3679,11 +4041,11 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_6__reduce_
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.conv_desc cannot be converted to a Python object for pickling")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(0, 2, __pyx_L1_error)
+  __PYX_ERR(1, 2, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -3732,11 +4094,11 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_8__setstat
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.conv_desc cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(0, 4, __pyx_L1_error)
+  __PYX_ERR(1, 4, __pyx_L1_error)
 
   /* "(tree fragment)":3
  * def __reduce_cython__(self):
@@ -3755,7 +4117,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21ConvolutionDescriptor_8__setstat
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":115
+/* "renom/cuda/cudnn.pyx":138
  *     cdef cudnnPoolingDescriptor_t pool_desc
  * 
  *     def __init__(self, filter, padding, stride, pool_mode):             # <<<<<<<<<<<<<<
@@ -3800,23 +4162,23 @@ static int __pyx_pw_5renom_4cuda_5cudnn_17PoolingDescriptor_1__init__(PyObject *
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_padding)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 1); __PYX_ERR(1, 115, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 1); __PYX_ERR(0, 138, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_stride)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 2); __PYX_ERR(1, 115, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 2); __PYX_ERR(0, 138, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pool_mode)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 3); __PYX_ERR(1, 115, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 3); __PYX_ERR(0, 138, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 115, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 138, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -3833,7 +4195,7 @@ static int __pyx_pw_5renom_4cuda_5cudnn_17PoolingDescriptor_1__init__(PyObject *
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 115, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 138, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.PoolingDescriptor.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -3869,22 +4231,22 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
   PyObject *__pyx_t_10 = NULL;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "renom/cuda/cudnn.pyx":117
+  /* "renom/cuda/cudnn.pyx":140
  *     def __init__(self, filter, padding, stride, pool_mode):
  *         cdef int pad_h, pad_w, u, v, upscalex, upscaley
  *         cdef cudnnPoolingMode_t mode = cudnnPoolingMode_t.CUDNN_POOLING_MAX if pool_mode == 0 else \             # <<<<<<<<<<<<<<
  *                                             cudnnPoolingMode_t.CUDNN_POOLING_AVERAGE_COUNT_INCLUDE_PADDING
  *         cdef cudnnNanPropagation_t nan_prop = cudnnNanPropagation_t.CUDNN_NOT_PROPAGATE_NAN
  */
-  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_v_pool_mode, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 117, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_EqObjC(__pyx_v_pool_mode, __pyx_int_0, 0, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(1, 117, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_IsTrue(__pyx_t_2); if (unlikely(__pyx_t_3 < 0)) __PYX_ERR(0, 140, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   if (__pyx_t_3) {
     __pyx_t_1 = CUDNN_POOLING_MAX;
   } else {
 
-    /* "renom/cuda/cudnn.pyx":118
+    /* "renom/cuda/cudnn.pyx":141
  *         cdef int pad_h, pad_w, u, v, upscalex, upscaley
  *         cdef cudnnPoolingMode_t mode = cudnnPoolingMode_t.CUDNN_POOLING_MAX if pool_mode == 0 else \
  *                                             cudnnPoolingMode_t.CUDNN_POOLING_AVERAGE_COUNT_INCLUDE_PADDING             # <<<<<<<<<<<<<<
@@ -3895,7 +4257,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
   }
   __pyx_v_mode = __pyx_t_1;
 
-  /* "renom/cuda/cudnn.pyx":119
+  /* "renom/cuda/cudnn.pyx":142
  *         cdef cudnnPoolingMode_t mode = cudnnPoolingMode_t.CUDNN_POOLING_MAX if pool_mode == 0 else \
  *                                             cudnnPoolingMode_t.CUDNN_POOLING_AVERAGE_COUNT_INCLUDE_PADDING
  *         cdef cudnnNanPropagation_t nan_prop = cudnnNanPropagation_t.CUDNN_NOT_PROPAGATE_NAN             # <<<<<<<<<<<<<<
@@ -3904,7 +4266,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
  */
   __pyx_v_nan_prop = CUDNN_NOT_PROPAGATE_NAN;
 
-  /* "renom/cuda/cudnn.pyx":121
+  /* "renom/cuda/cudnn.pyx":144
  *         cdef cudnnNanPropagation_t nan_prop = cudnnNanPropagation_t.CUDNN_NOT_PROPAGATE_NAN
  * 
  *         w, h = filter             # <<<<<<<<<<<<<<
@@ -3921,7 +4283,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 121, __pyx_L1_error)
+      __PYX_ERR(0, 144, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -3934,21 +4296,21 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     __Pyx_INCREF(__pyx_t_2);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 121, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 144, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 121, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 144, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_v_filter); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 121, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_v_filter); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 144, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_6 = Py_TYPE(__pyx_t_5)->tp_iternext;
     index = 0; __pyx_t_2 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_2)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_2);
     index = 1; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 2) < 0) __PYX_ERR(1, 121, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 2) < 0) __PYX_ERR(0, 144, __pyx_L1_error)
     __pyx_t_6 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L4_unpacking_done;
@@ -3956,7 +4318,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 121, __pyx_L1_error)
+    __PYX_ERR(0, 144, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __pyx_v_w = __pyx_t_2;
@@ -3964,7 +4326,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
   __pyx_v_h = __pyx_t_4;
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":122
+  /* "renom/cuda/cudnn.pyx":145
  * 
  *         w, h = filter
  *         pad_h, pad_w = padding             # <<<<<<<<<<<<<<
@@ -3981,7 +4343,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 122, __pyx_L1_error)
+      __PYX_ERR(0, 145, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -3994,21 +4356,21 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     __Pyx_INCREF(__pyx_t_4);
     __Pyx_INCREF(__pyx_t_2);
     #else
-    __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 122, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 145, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
-    __pyx_t_2 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 122, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 145, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     #endif
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_v_padding); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 122, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_v_padding); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 145, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_6 = Py_TYPE(__pyx_t_5)->tp_iternext;
     index = 0; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L5_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
     index = 1; __pyx_t_2 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_2)) goto __pyx_L5_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_2);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 2) < 0) __PYX_ERR(1, 122, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 2) < 0) __PYX_ERR(0, 145, __pyx_L1_error)
     __pyx_t_6 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L6_unpacking_done;
@@ -4016,17 +4378,17 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 122, __pyx_L1_error)
+    __PYX_ERR(0, 145, __pyx_L1_error)
     __pyx_L6_unpacking_done:;
   }
-  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 122, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 122, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 145, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_pad_h = __pyx_t_7;
   __pyx_v_pad_w = __pyx_t_8;
 
-  /* "renom/cuda/cudnn.pyx":123
+  /* "renom/cuda/cudnn.pyx":146
  *         w, h = filter
  *         pad_h, pad_w = padding
  *         u, v = stride             # <<<<<<<<<<<<<<
@@ -4043,7 +4405,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 123, __pyx_L1_error)
+      __PYX_ERR(0, 146, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -4056,21 +4418,21 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     __Pyx_INCREF(__pyx_t_2);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 123, __pyx_L1_error)
+    __pyx_t_2 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 146, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_4 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 123, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 146, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_v_stride); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 123, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_v_stride); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 146, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __pyx_t_6 = Py_TYPE(__pyx_t_5)->tp_iternext;
     index = 0; __pyx_t_2 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_2)) goto __pyx_L7_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_2);
     index = 1; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L7_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 2) < 0) __PYX_ERR(1, 123, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 2) < 0) __PYX_ERR(0, 146, __pyx_L1_error)
     __pyx_t_6 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L8_unpacking_done;
@@ -4078,26 +4440,26 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 123, __pyx_L1_error)
+    __PYX_ERR(0, 146, __pyx_L1_error)
     __pyx_L8_unpacking_done:;
   }
-  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 123, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_2); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 146, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 123, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_4); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 146, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_u = __pyx_t_8;
   __pyx_v_v = __pyx_t_7;
 
-  /* "renom/cuda/cudnn.pyx":125
+  /* "renom/cuda/cudnn.pyx":148
  *         u, v = stride
  * 
  *         check(cudnnCreatePoolingDescriptor(& self.pool_desc))             # <<<<<<<<<<<<<<
  *         check(cudnnSetPooling2dDescriptor(
  *             self.pool_desc, mode, nan_prop, w, h, pad_h, pad_w, u, v))
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 125, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreatePoolingDescriptor((&__pyx_v_self->pool_desc))); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 125, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreatePoolingDescriptor((&__pyx_v_self->pool_desc))); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 148, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_9 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -4110,14 +4472,14 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     }
   }
   if (!__pyx_t_9) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 125, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 148, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_5};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 125, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 148, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -4126,20 +4488,20 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_9, __pyx_t_5};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 125, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 148, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_9); __pyx_t_9 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else
     #endif
     {
-      __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 125, __pyx_L1_error)
+      __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 148, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_GIVEREF(__pyx_t_9); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_9); __pyx_t_9 = NULL;
       __Pyx_GIVEREF(__pyx_t_5);
       PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_10, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 125, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_10, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 148, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     }
@@ -4147,34 +4509,34 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":126
+  /* "renom/cuda/cudnn.pyx":149
  * 
  *         check(cudnnCreatePoolingDescriptor(& self.pool_desc))
  *         check(cudnnSetPooling2dDescriptor(             # <<<<<<<<<<<<<<
  *             self.pool_desc, mode, nan_prop, w, h, pad_h, pad_w, u, v))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 126, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 149, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
 
-  /* "renom/cuda/cudnn.pyx":127
+  /* "renom/cuda/cudnn.pyx":150
  *         check(cudnnCreatePoolingDescriptor(& self.pool_desc))
  *         check(cudnnSetPooling2dDescriptor(
  *             self.pool_desc, mode, nan_prop, w, h, pad_h, pad_w, u, v))             # <<<<<<<<<<<<<<
  * 
  *     def __del__(self):
  */
-  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_v_w); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 127, __pyx_L1_error)
-  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_v_h); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 127, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_v_w); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 150, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_v_h); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 150, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":126
+  /* "renom/cuda/cudnn.pyx":149
  * 
  *         check(cudnnCreatePoolingDescriptor(& self.pool_desc))
  *         check(cudnnSetPooling2dDescriptor(             # <<<<<<<<<<<<<<
  *             self.pool_desc, mode, nan_prop, w, h, pad_h, pad_w, u, v))
  * 
  */
-  __pyx_t_10 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSetPooling2dDescriptor(__pyx_v_self->pool_desc, __pyx_v_mode, __pyx_v_nan_prop, __pyx_t_7, __pyx_t_8, __pyx_v_pad_h, __pyx_v_pad_w, __pyx_v_u, __pyx_v_v)); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 126, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSetPooling2dDescriptor(__pyx_v_self->pool_desc, __pyx_v_mode, __pyx_v_nan_prop, __pyx_t_7, __pyx_t_8, __pyx_v_pad_h, __pyx_v_pad_w, __pyx_v_u, __pyx_v_v)); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 149, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_10);
   __pyx_t_5 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -4187,14 +4549,14 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     }
   }
   if (!__pyx_t_5) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_10); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 126, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_10); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 149, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_10};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 126, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 149, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
@@ -4203,20 +4565,20 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_10};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 126, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 149, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     } else
     #endif
     {
-      __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 126, __pyx_L1_error)
+      __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 149, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_5); __pyx_t_5 = NULL;
       __Pyx_GIVEREF(__pyx_t_10);
       PyTuple_SET_ITEM(__pyx_t_9, 0+1, __pyx_t_10);
       __pyx_t_10 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_9, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 126, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_9, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 149, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     }
@@ -4224,7 +4586,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":115
+  /* "renom/cuda/cudnn.pyx":138
  *     cdef cudnnPoolingDescriptor_t pool_desc
  * 
  *     def __init__(self, filter, padding, stride, pool_mode):             # <<<<<<<<<<<<<<
@@ -4250,7 +4612,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor___init__(struct __py
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":129
+/* "renom/cuda/cudnn.pyx":152
  *             self.pool_desc, mode, nan_prop, w, h, pad_h, pad_w, u, v))
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<
@@ -4282,29 +4644,29 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_2__del__(struc
   PyObject *__pyx_t_6 = NULL;
   __Pyx_RefNannySetupContext("__del__", 0);
 
-  /* "renom/cuda/cudnn.pyx":130
+  /* "renom/cuda/cudnn.pyx":153
  * 
  *     def __del__(self):
  *         if self.conv_desc:             # <<<<<<<<<<<<<<
  *             check(cudnnDestroyPoolingDescriptor(self.pool_desc))
  *             self.pool_desc= NULL
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_conv_desc); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 130, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(((PyObject *)__pyx_v_self), __pyx_n_s_conv_desc); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(1, 130, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_2 < 0)) __PYX_ERR(0, 153, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_2) {
 
-    /* "renom/cuda/cudnn.pyx":131
+    /* "renom/cuda/cudnn.pyx":154
  *     def __del__(self):
  *         if self.conv_desc:
  *             check(cudnnDestroyPoolingDescriptor(self.pool_desc))             # <<<<<<<<<<<<<<
  *             self.pool_desc= NULL
  * 
  */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 131, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 154, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnDestroyPoolingDescriptor(__pyx_v_self->pool_desc)); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 131, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnDestroyPoolingDescriptor(__pyx_v_self->pool_desc)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 154, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -4317,14 +4679,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_2__del__(struc
       }
     }
     if (!__pyx_t_5) {
-      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 131, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 154, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 131, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 154, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -4333,20 +4695,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_2__del__(struc
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 131, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 154, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       } else
       #endif
       {
-        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 131, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 154, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5); __pyx_t_5 = NULL;
         __Pyx_GIVEREF(__pyx_t_4);
         PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_4);
         __pyx_t_4 = 0;
-        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 131, __pyx_L1_error)
+        __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 154, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_1);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       }
@@ -4354,7 +4716,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_2__del__(struc
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-    /* "renom/cuda/cudnn.pyx":132
+    /* "renom/cuda/cudnn.pyx":155
  *         if self.conv_desc:
  *             check(cudnnDestroyPoolingDescriptor(self.pool_desc))
  *             self.pool_desc= NULL             # <<<<<<<<<<<<<<
@@ -4363,7 +4725,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_2__del__(struc
  */
     __pyx_v_self->pool_desc = NULL;
 
-    /* "renom/cuda/cudnn.pyx":130
+    /* "renom/cuda/cudnn.pyx":153
  * 
  *     def __del__(self):
  *         if self.conv_desc:             # <<<<<<<<<<<<<<
@@ -4372,7 +4734,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_2__del__(struc
  */
   }
 
-  /* "renom/cuda/cudnn.pyx":129
+  /* "renom/cuda/cudnn.pyx":152
  *             self.pool_desc, mode, nan_prop, w, h, pad_h, pad_w, u, v))
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<
@@ -4397,7 +4759,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_2__del__(struc
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":134
+/* "renom/cuda/cudnn.pyx":157
  *             self.pool_desc= NULL
  * 
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -4424,7 +4786,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_4__int__(struc
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__int__", 0);
 
-  /* "renom/cuda/cudnn.pyx":135
+  /* "renom/cuda/cudnn.pyx":158
  * 
  *     def __int__(self):
  *         return <uintptr_t>self.pool_desc             # <<<<<<<<<<<<<<
@@ -4432,13 +4794,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_4__int__(struc
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_self->pool_desc)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 135, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_self->pool_desc)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 158, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "renom/cuda/cudnn.pyx":134
+  /* "renom/cuda/cudnn.pyx":157
  *             self.pool_desc= NULL
  * 
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -4488,11 +4850,11 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_6__reduce_cyth
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.pool_desc cannot be converted to a Python object for pickling")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__6, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(0, 2, __pyx_L1_error)
+  __PYX_ERR(1, 2, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -4541,11 +4903,11 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_8__setstate_cy
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.pool_desc cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(0, 4, __pyx_L1_error)
+  __PYX_ERR(1, 4, __pyx_L1_error)
 
   /* "(tree fragment)":3
  * def __reduce_cython__(self):
@@ -4564,7 +4926,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17PoolingDescriptor_8__setstate_cy
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":141
+/* "renom/cuda/cudnn.pyx":164
  *     cdef cudnnLRNDescriptor_t lrn_desc
  * 
  *     def __init__(self, n, a, b, k):             # <<<<<<<<<<<<<<
@@ -4609,23 +4971,23 @@ static int __pyx_pw_5renom_4cuda_5cudnn_13LRNDescriptor_1__init__(PyObject *__py
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_a)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 1); __PYX_ERR(1, 141, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 1); __PYX_ERR(0, 164, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_b)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 2); __PYX_ERR(1, 141, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 2); __PYX_ERR(0, 164, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_k)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 3); __PYX_ERR(1, 141, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, 3); __PYX_ERR(0, 164, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 141, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 164, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -4642,7 +5004,7 @@ static int __pyx_pw_5renom_4cuda_5cudnn_13LRNDescriptor_1__init__(PyObject *__py
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 141, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 164, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.LRNDescriptor.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -4669,16 +5031,16 @@ static int __pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor___init__(struct __pyx_ob
   double __pyx_t_9;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "renom/cuda/cudnn.pyx":144
+  /* "renom/cuda/cudnn.pyx":167
  *         cdef cudnnConvolutionMode_t mode
  * 
  *         check(cudnnCreateLRNDescriptor(&self.lrn_desc))             # <<<<<<<<<<<<<<
  *         check(cudnnSetLRNDescriptor(
  *             self.lrn_desc, n, a, b, k))
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 144, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 167, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreateLRNDescriptor((&__pyx_v_self->lrn_desc))); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 144, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreateLRNDescriptor((&__pyx_v_self->lrn_desc))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 167, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -4691,14 +5053,14 @@ static int __pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor___init__(struct __pyx_ob
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 144, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_3};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 144, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -4707,20 +5069,20 @@ static int __pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor___init__(struct __pyx_ob
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_3};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 144, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     } else
     #endif
     {
-      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 144, __pyx_L1_error)
+      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 167, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_3);
       PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_t_3);
       __pyx_t_3 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 144, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 167, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
@@ -4728,36 +5090,36 @@ static int __pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor___init__(struct __pyx_ob
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":145
+  /* "renom/cuda/cudnn.pyx":168
  * 
  *         check(cudnnCreateLRNDescriptor(&self.lrn_desc))
  *         check(cudnnSetLRNDescriptor(             # <<<<<<<<<<<<<<
  *             self.lrn_desc, n, a, b, k))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 145, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 168, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
 
-  /* "renom/cuda/cudnn.pyx":146
+  /* "renom/cuda/cudnn.pyx":169
  *         check(cudnnCreateLRNDescriptor(&self.lrn_desc))
  *         check(cudnnSetLRNDescriptor(
  *             self.lrn_desc, n, a, b, k))             # <<<<<<<<<<<<<<
  * 
  *     def __del__(self):
  */
-  __pyx_t_6 = __Pyx_PyInt_As_unsigned_int(__pyx_v_n); if (unlikely((__pyx_t_6 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(1, 146, __pyx_L1_error)
-  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_v_a); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 146, __pyx_L1_error)
-  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_v_b); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 146, __pyx_L1_error)
-  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_k); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 146, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_unsigned_int(__pyx_v_n); if (unlikely((__pyx_t_6 == (unsigned int)-1) && PyErr_Occurred())) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_7 = __pyx_PyFloat_AsDouble(__pyx_v_a); if (unlikely((__pyx_t_7 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_8 = __pyx_PyFloat_AsDouble(__pyx_v_b); if (unlikely((__pyx_t_8 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 169, __pyx_L1_error)
+  __pyx_t_9 = __pyx_PyFloat_AsDouble(__pyx_v_k); if (unlikely((__pyx_t_9 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 169, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":145
+  /* "renom/cuda/cudnn.pyx":168
  * 
  *         check(cudnnCreateLRNDescriptor(&self.lrn_desc))
  *         check(cudnnSetLRNDescriptor(             # <<<<<<<<<<<<<<
  *             self.lrn_desc, n, a, b, k))
  * 
  */
-  __pyx_t_5 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSetLRNDescriptor(__pyx_v_self->lrn_desc, __pyx_t_6, __pyx_t_7, __pyx_t_8, __pyx_t_9)); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 145, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSetLRNDescriptor(__pyx_v_self->lrn_desc, __pyx_t_6, __pyx_t_7, __pyx_t_8, __pyx_t_9)); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 168, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -4770,14 +5132,14 @@ static int __pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor___init__(struct __pyx_ob
     }
   }
   if (!__pyx_t_3) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 145, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 168, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_5};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 145, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 168, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -4786,20 +5148,20 @@ static int __pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor___init__(struct __pyx_ob
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_5};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 145, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 168, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else
     #endif
     {
-      __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 145, __pyx_L1_error)
+      __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 168, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_3); __pyx_t_3 = NULL;
       __Pyx_GIVEREF(__pyx_t_5);
       PyTuple_SET_ITEM(__pyx_t_4, 0+1, __pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 145, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 168, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
@@ -4807,7 +5169,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor___init__(struct __pyx_ob
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":141
+  /* "renom/cuda/cudnn.pyx":164
  *     cdef cudnnLRNDescriptor_t lrn_desc
  * 
  *     def __init__(self, n, a, b, k):             # <<<<<<<<<<<<<<
@@ -4831,7 +5193,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor___init__(struct __pyx_ob
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":148
+/* "renom/cuda/cudnn.pyx":171
  *             self.lrn_desc, n, a, b, k))
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<
@@ -4863,7 +5225,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_2__del__(struct __
   PyObject *__pyx_t_6 = NULL;
   __Pyx_RefNannySetupContext("__del__", 0);
 
-  /* "renom/cuda/cudnn.pyx":149
+  /* "renom/cuda/cudnn.pyx":172
  * 
  *     def __del__(self):
  *         if self.lrn_desc:             # <<<<<<<<<<<<<<
@@ -4873,16 +5235,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_2__del__(struct __
   __pyx_t_1 = (__pyx_v_self->lrn_desc != 0);
   if (__pyx_t_1) {
 
-    /* "renom/cuda/cudnn.pyx":150
+    /* "renom/cuda/cudnn.pyx":173
  *     def __del__(self):
  *         if self.lrn_desc:
  *             check(cudnnDestroyLRNDescriptor(self.lrn_desc))             # <<<<<<<<<<<<<<
  *             self.lrn_desc= NULL
  * 
  */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 150, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 173, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnDestroyLRNDescriptor(__pyx_v_self->lrn_desc)); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 150, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnDestroyLRNDescriptor(__pyx_v_self->lrn_desc)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 173, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -4895,14 +5257,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_2__del__(struct __
       }
     }
     if (!__pyx_t_5) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 150, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_2);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 150, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -4911,20 +5273,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_2__del__(struct __
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 150, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       } else
       #endif
       {
-        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 150, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 173, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5); __pyx_t_5 = NULL;
         __Pyx_GIVEREF(__pyx_t_4);
         PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_4);
         __pyx_t_4 = 0;
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 150, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 173, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       }
@@ -4932,7 +5294,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_2__del__(struct __
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "renom/cuda/cudnn.pyx":151
+    /* "renom/cuda/cudnn.pyx":174
  *         if self.lrn_desc:
  *             check(cudnnDestroyLRNDescriptor(self.lrn_desc))
  *             self.lrn_desc= NULL             # <<<<<<<<<<<<<<
@@ -4941,7 +5303,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_2__del__(struct __
  */
     __pyx_v_self->lrn_desc = NULL;
 
-    /* "renom/cuda/cudnn.pyx":149
+    /* "renom/cuda/cudnn.pyx":172
  * 
  *     def __del__(self):
  *         if self.lrn_desc:             # <<<<<<<<<<<<<<
@@ -4950,7 +5312,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_2__del__(struct __
  */
   }
 
-  /* "renom/cuda/cudnn.pyx":148
+  /* "renom/cuda/cudnn.pyx":171
  *             self.lrn_desc, n, a, b, k))
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<
@@ -4975,7 +5337,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_2__del__(struct __
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":153
+/* "renom/cuda/cudnn.pyx":176
  *             self.lrn_desc= NULL
  * 
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -5002,7 +5364,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_4__int__(struct __
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__int__", 0);
 
-  /* "renom/cuda/cudnn.pyx":154
+  /* "renom/cuda/cudnn.pyx":177
  * 
  *     def __int__(self):
  *         return <uintptr_t>self.lrn_desc             # <<<<<<<<<<<<<<
@@ -5010,13 +5372,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_4__int__(struct __
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_self->lrn_desc)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 154, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_self->lrn_desc)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 177, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "renom/cuda/cudnn.pyx":153
+  /* "renom/cuda/cudnn.pyx":176
  *             self.lrn_desc= NULL
  * 
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -5066,11 +5428,11 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_6__reduce_cython__
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.lrn_desc cannot be converted to a Python object for pickling")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__8, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(0, 2, __pyx_L1_error)
+  __PYX_ERR(1, 2, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -5119,11 +5481,11 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_8__setstate_cython
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.lrn_desc cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__9, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(0, 4, __pyx_L1_error)
+  __PYX_ERR(1, 4, __pyx_L1_error)
 
   /* "(tree fragment)":3
  * def __reduce_cython__(self):
@@ -5142,7 +5504,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13LRNDescriptor_8__setstate_cython
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":157
+/* "renom/cuda/cudnn.pyx":180
  * 
  * 
  * def cuPoolingForward(handle, pool_desc, x, y):             # <<<<<<<<<<<<<<
@@ -5188,23 +5550,23 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_6cuPoolingForward(PyObject *__pyx_
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pool_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuPoolingForward", 1, 4, 4, 1); __PYX_ERR(1, 157, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuPoolingForward", 1, 4, 4, 1); __PYX_ERR(0, 180, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuPoolingForward", 1, 4, 4, 2); __PYX_ERR(1, 157, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuPoolingForward", 1, 4, 4, 2); __PYX_ERR(0, 180, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuPoolingForward", 1, 4, 4, 3); __PYX_ERR(1, 157, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuPoolingForward", 1, 4, 4, 3); __PYX_ERR(0, 180, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuPoolingForward") < 0)) __PYX_ERR(1, 157, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuPoolingForward") < 0)) __PYX_ERR(0, 180, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -5221,7 +5583,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_6cuPoolingForward(PyObject *__pyx_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuPoolingForward", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 157, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuPoolingForward", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 180, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuPoolingForward", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5256,16 +5618,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_INCREF(__pyx_v_y);
 
-  /* "renom/cuda/cudnn.pyx":158
+  /* "renom/cuda/cudnn.pyx":181
  * 
  * def cuPoolingForward(handle, pool_desc, x, y):
  *     x, y = map(get_gpu, [x, y])             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 158, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 181, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 158, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
@@ -5273,7 +5635,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
   __Pyx_INCREF(__pyx_v_y);
   __Pyx_GIVEREF(__pyx_v_y);
   PyList_SET_ITEM(__pyx_t_2, 1, __pyx_v_y);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 158, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 181, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -5281,7 +5643,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 158, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 181, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -5294,7 +5656,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 158, __pyx_L1_error)
+      __PYX_ERR(0, 181, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -5307,15 +5669,15 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
     __Pyx_INCREF(__pyx_t_3);
     __Pyx_INCREF(__pyx_t_1);
     #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 158, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 181, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 158, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 181, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     #endif
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 158, __pyx_L1_error)
+    __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 181, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_5 = Py_TYPE(__pyx_t_4)->tp_iternext;
@@ -5323,7 +5685,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
     __Pyx_GOTREF(__pyx_t_3);
     index = 1; __pyx_t_1 = __pyx_t_5(__pyx_t_4); if (unlikely(!__pyx_t_1)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_1);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(1, 158, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(0, 181, __pyx_L1_error)
     __pyx_t_5 = NULL;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     goto __pyx_L4_unpacking_done;
@@ -5331,7 +5693,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_5 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 158, __pyx_L1_error)
+    __PYX_ERR(0, 181, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_3);
@@ -5339,168 +5701,168 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
   __Pyx_DECREF_SET(__pyx_v_y, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":160
+  /* "renom/cuda/cudnn.pyx":183
  *     x, y = map(get_gpu, [x, y])
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  */
-  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 160, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 183, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_6));
 
-  /* "renom/cuda/cudnn.pyx":162
+  /* "renom/cuda/cudnn.pyx":185
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 162, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 185, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 162, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 185, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 162, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 185, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_float_1_0);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 162, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 185, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 162, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 185, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 162, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 185, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 162, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 185, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 162, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 185, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 162, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 185, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 162, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 185, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_alf = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":163
+  /* "renom/cuda/cudnn.pyx":186
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 163, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 163, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 163, __pyx_L1_error)
+  __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_4, 0, __pyx_float_0_0);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 163, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 163, __pyx_L1_error)
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 163, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 163, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 163, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 186, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_bt = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":165
+  /* "renom/cuda/cudnn.pyx":188
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 165, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 188, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 165, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 188, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 165, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 188, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 165, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 188, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 165, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 188, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 165, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 188, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_xDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":166
+  /* "renom/cuda/cudnn.pyx":189
  * 
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)             # <<<<<<<<<<<<<<
  * 
  *     cuda_base.check_heap_device(x, y)
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 166, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 166, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 166, __pyx_L1_error)
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 166, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 166, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 166, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 189, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_yDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":168
+  /* "renom/cuda/cudnn.pyx":191
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  * 
  *     cuda_base.check_heap_device(x, y)             # <<<<<<<<<<<<<<
  *     check(cudnnPoolingForward(
  *         handler,
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 168, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 191, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 168, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 191, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -5518,7 +5880,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_1)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_v_x, __pyx_v_y};
-    __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 168, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 191, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else
@@ -5526,13 +5888,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_1)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_v_x, __pyx_v_y};
-    __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 168, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 191, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else
   #endif
   {
-    __pyx_t_2 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 168, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 191, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     if (__pyx_t_3) {
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -5543,64 +5905,64 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
     __Pyx_INCREF(__pyx_v_y);
     __Pyx_GIVEREF(__pyx_v_y);
     PyTuple_SET_ITEM(__pyx_t_2, 1+__pyx_t_7, __pyx_v_y);
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 168, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 191, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":169
+  /* "renom/cuda/cudnn.pyx":192
  * 
  *     cuda_base.check_heap_device(x, y)
  *     check(cudnnPoolingForward(             # <<<<<<<<<<<<<<
  *         handler,
  *         <cudnnPoolingDescriptor_t> <uintptr_t> pool_desc,
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 169, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
 
-  /* "renom/cuda/cudnn.pyx":171
+  /* "renom/cuda/cudnn.pyx":194
  *     check(cudnnPoolingForward(
  *         handler,
  *         <cudnnPoolingDescriptor_t> <uintptr_t> pool_desc,             # <<<<<<<<<<<<<<
  *         alf.ptr,
  *         xDesc.tensor_desc,
  */
-  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_pool_desc); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 171, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_pool_desc); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 194, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":174
+  /* "renom/cuda/cudnn.pyx":197
  *         alf.ptr,
  *         xDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,             # <<<<<<<<<<<<<<
  *         bt.ptr,
  *         yDesc.tensor_desc,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 174, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 197, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 174, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 197, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":177
+  /* "renom/cuda/cudnn.pyx":200
  *         bt.ptr,
  *         yDesc.tensor_desc,
  *         <void *> <uintptr_t> y._ptr))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 177, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 200, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_9 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 177, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_9 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 200, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":169
+  /* "renom/cuda/cudnn.pyx":192
  * 
  *     cuda_base.check_heap_device(x, y)
  *     check(cudnnPoolingForward(             # <<<<<<<<<<<<<<
  *         handler,
  *         <cudnnPoolingDescriptor_t> <uintptr_t> pool_desc,
  */
-  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnPoolingForward(__pyx_v_handler, ((cudnnPoolingDescriptor_t)((uintptr_t)__pyx_t_6)), __pyx_v_alf->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_8)), __pyx_v_bt->ptr, __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_9)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 169, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnPoolingForward(__pyx_v_handler, ((cudnnPoolingDescriptor_t)((uintptr_t)__pyx_t_6)), __pyx_v_alf->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_8)), __pyx_v_bt->ptr, __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_9)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 192, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
@@ -5613,14 +5975,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
     }
   }
   if (!__pyx_t_3) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 169, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 192, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_1)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_2};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 169, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 192, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -5629,20 +5991,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_1)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_2};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 169, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 192, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 169, __pyx_L1_error)
+      __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 192, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_3); __pyx_t_3 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_10, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 169, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_10, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 192, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     }
@@ -5650,7 +6012,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":157
+  /* "renom/cuda/cudnn.pyx":180
  * 
  * 
  * def cuPoolingForward(handle, pool_desc, x, y):             # <<<<<<<<<<<<<<
@@ -5681,7 +6043,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_5cuPoolingForward(CYTHON_UNUSED Py
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":180
+/* "renom/cuda/cudnn.pyx":203
  * 
  * 
  * def cuPoolingBackward(handle, pool_desc, x, y, dy, dx):             # <<<<<<<<<<<<<<
@@ -5733,35 +6095,35 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_8cuPoolingBackward(PyObject *__pyx
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_pool_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, 1); __PYX_ERR(1, 180, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, 1); __PYX_ERR(0, 203, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, 2); __PYX_ERR(1, 180, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, 2); __PYX_ERR(0, 203, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, 3); __PYX_ERR(1, 180, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, 3); __PYX_ERR(0, 203, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dy)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, 4); __PYX_ERR(1, 180, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, 4); __PYX_ERR(0, 203, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dx)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, 5); __PYX_ERR(1, 180, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, 5); __PYX_ERR(0, 203, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuPoolingBackward") < 0)) __PYX_ERR(1, 180, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuPoolingBackward") < 0)) __PYX_ERR(0, 203, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
@@ -5782,7 +6144,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_8cuPoolingBackward(PyObject *__pyx
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 180, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuPoolingBackward", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 203, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuPoolingBackward", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -5822,16 +6184,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
   __Pyx_INCREF(__pyx_v_dy);
   __Pyx_INCREF(__pyx_v_dx);
 
-  /* "renom/cuda/cudnn.pyx":181
+  /* "renom/cuda/cudnn.pyx":204
  * 
  * def cuPoolingBackward(handle, pool_desc, x, y, dy, dx):
  *     x, y, dy, dx = map(get_gpu, [x, y, dy, dx])             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 181, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(4); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 181, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
@@ -5845,7 +6207,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
   __Pyx_INCREF(__pyx_v_dx);
   __Pyx_GIVEREF(__pyx_v_dx);
   PyList_SET_ITEM(__pyx_t_2, 3, __pyx_v_dx);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 181, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -5853,7 +6215,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 181, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 204, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -5866,7 +6228,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
     if (unlikely(size != 4)) {
       if (size > 4) __Pyx_RaiseTooManyValuesError(4);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 181, __pyx_L1_error)
+      __PYX_ERR(0, 204, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -5889,7 +6251,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
       Py_ssize_t i;
       PyObject** temps[4] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_4,&__pyx_t_5};
       for (i=0; i < 4; i++) {
-        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(1, 181, __pyx_L1_error)
+        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(0, 204, __pyx_L1_error)
         __Pyx_GOTREF(item);
         *(temps[i]) = item;
       }
@@ -5899,7 +6261,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
   } else {
     Py_ssize_t index = -1;
     PyObject** temps[4] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_4,&__pyx_t_5};
-    __pyx_t_6 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 181, __pyx_L1_error)
+    __pyx_t_6 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 204, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_7 = Py_TYPE(__pyx_t_6)->tp_iternext;
@@ -5908,7 +6270,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
       __Pyx_GOTREF(item);
       *(temps[index]) = item;
     }
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_7(__pyx_t_6), 4) < 0) __PYX_ERR(1, 181, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_7(__pyx_t_6), 4) < 0) __PYX_ERR(0, 204, __pyx_L1_error)
     __pyx_t_7 = NULL;
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     goto __pyx_L4_unpacking_done;
@@ -5916,7 +6278,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_t_7 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 181, __pyx_L1_error)
+    __PYX_ERR(0, 204, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_3);
@@ -5928,168 +6290,168 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
   __Pyx_DECREF_SET(__pyx_v_dx, __pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":183
+  /* "renom/cuda/cudnn.pyx":206
  *     x, y, dy, dx = map(get_gpu, [x, y, dy, dx])
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  */
-  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 183, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 206, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_8));
 
-  /* "renom/cuda/cudnn.pyx":185
+  /* "renom/cuda/cudnn.pyx":208
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 185, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 185, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 185, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_float_1_0);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 185, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 185, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 185, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 185, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 185, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 185, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 185, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 208, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_alf = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":186
+  /* "renom/cuda/cudnn.pyx":209
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 186, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 186, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 186, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_float_0_0);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 186, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 186, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 186, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(1, 186, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 186, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 186, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_5);
   __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_1, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 186, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_1, NULL); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 209, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_bt = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":187
+  /* "renom/cuda/cudnn.pyx":210
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  * 
  */
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 187, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 210, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 187, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 210, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_5);
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 187, __pyx_L1_error)
+  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 210, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 187, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 210, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 187, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 210, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 187, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_1, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 210, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_xDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":188
+  /* "renom/cuda/cudnn.pyx":211
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)             # <<<<<<<<<<<<<<
  * 
  *     cuda_base.check_heap_device(x, y, dy, dx)
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 188, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 188, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 188, __pyx_L1_error)
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 188, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 188, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 188, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_5, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 211, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_yDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":190
+  /* "renom/cuda/cudnn.pyx":213
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  * 
  *     cuda_base.check_heap_device(x, y, dy, dx)             # <<<<<<<<<<<<<<
  *     check(cudnnPoolingBackward(
  *         handler,
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 190, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 213, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 190, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 213, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = NULL;
@@ -6107,7 +6469,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_5)) {
     PyObject *__pyx_temp[5] = {__pyx_t_4, __pyx_v_x, __pyx_v_y, __pyx_v_dy, __pyx_v_dx};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 190, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 213, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
@@ -6115,13 +6477,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
     PyObject *__pyx_temp[5] = {__pyx_t_4, __pyx_v_x, __pyx_v_y, __pyx_v_dy, __pyx_v_dx};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 190, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 213, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
   #endif
   {
-    __pyx_t_2 = PyTuple_New(4+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 190, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(4+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 213, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     if (__pyx_t_4) {
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -6138,88 +6500,88 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
     __Pyx_INCREF(__pyx_v_dx);
     __Pyx_GIVEREF(__pyx_v_dx);
     PyTuple_SET_ITEM(__pyx_t_2, 3+__pyx_t_9, __pyx_v_dx);
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 190, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 213, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":191
+  /* "renom/cuda/cudnn.pyx":214
  * 
  *     cuda_base.check_heap_device(x, y, dy, dx)
  *     check(cudnnPoolingBackward(             # <<<<<<<<<<<<<<
  *         handler,
  *         <cudnnPoolingDescriptor_t> <uintptr_t> pool_desc,
  */
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 191, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 214, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
 
-  /* "renom/cuda/cudnn.pyx":193
+  /* "renom/cuda/cudnn.pyx":216
  *     check(cudnnPoolingBackward(
  *         handler,
  *         <cudnnPoolingDescriptor_t> <uintptr_t> pool_desc,             # <<<<<<<<<<<<<<
  *         alf.ptr,
  *         yDesc.tensor_desc,
  */
-  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_v_pool_desc); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 193, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_v_pool_desc); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 216, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":196
+  /* "renom/cuda/cudnn.pyx":219
  *         alf.ptr,
  *         yDesc.tensor_desc,
  *         <const void *> <uintptr_t> y._ptr,             # <<<<<<<<<<<<<<
  *         yDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 196, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 219, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 196, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 219, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":198
+  /* "renom/cuda/cudnn.pyx":221
  *         <const void *> <uintptr_t> y._ptr,
  *         yDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,             # <<<<<<<<<<<<<<
  *         xDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 198, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 221, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 198, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 221, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":200
+  /* "renom/cuda/cudnn.pyx":223
  *         <const void *> <uintptr_t> dy._ptr,
  *         xDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,             # <<<<<<<<<<<<<<
  *         bt.ptr,
  *         xDesc.tensor_desc,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 200, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 223, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 200, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 223, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":203
+  /* "renom/cuda/cudnn.pyx":226
  *         bt.ptr,
  *         xDesc.tensor_desc,
  *         <void *> <uintptr_t> dx._ptr))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 203, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 226, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_13 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_13 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 203, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_13 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 226, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":191
+  /* "renom/cuda/cudnn.pyx":214
  * 
  *     cuda_base.check_heap_device(x, y, dy, dx)
  *     check(cudnnPoolingBackward(             # <<<<<<<<<<<<<<
  *         handler,
  *         <cudnnPoolingDescriptor_t> <uintptr_t> pool_desc,
  */
-  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnPoolingBackward(__pyx_v_handler, ((cudnnPoolingDescriptor_t)((uintptr_t)__pyx_t_8)), __pyx_v_alf->ptr, __pyx_v_yDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_10)), __pyx_v_yDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_11)), __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_12)), __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_13)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 191, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnPoolingBackward(__pyx_v_handler, ((cudnnPoolingDescriptor_t)((uintptr_t)__pyx_t_8)), __pyx_v_alf->ptr, __pyx_v_yDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_10)), __pyx_v_yDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_11)), __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_12)), __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_13)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 214, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_5))) {
@@ -6232,14 +6594,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 191, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_5, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 214, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 191, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 214, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -6248,20 +6610,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_5)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 191, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_5, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 214, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 191, __pyx_L1_error)
+      __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 214, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_3, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 191, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_3, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 214, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     }
@@ -6269,7 +6631,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":180
+  /* "renom/cuda/cudnn.pyx":203
  * 
  * 
  * def cuPoolingBackward(handle, pool_desc, x, y, dy, dx):             # <<<<<<<<<<<<<<
@@ -6303,7 +6665,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_7cuPoolingBackward(CYTHON_UNUSED P
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":209
+/* "renom/cuda/cudnn.pyx":232
  *     cdef cudnnFilterDescriptor_t filter_desc
  * 
  *     def __init__(self, shape, dtype):             # <<<<<<<<<<<<<<
@@ -6342,11 +6704,11 @@ static int __pyx_pw_5renom_4cuda_5cudnn_16FilterDescriptor_1__init__(PyObject *_
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dtype)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(1, 209, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, 1); __PYX_ERR(0, 232, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(1, 209, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "__init__") < 0)) __PYX_ERR(0, 232, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 2) {
       goto __pyx_L5_argtuple_error;
@@ -6359,7 +6721,7 @@ static int __pyx_pw_5renom_4cuda_5cudnn_16FilterDescriptor_1__init__(PyObject *_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 209, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("__init__", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 232, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.FilterDescriptor.__init__", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -6392,17 +6754,17 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
   cudnnDataType_t __pyx_t_11;
   __Pyx_RefNannySetupContext("__init__", 0);
 
-  /* "renom/cuda/cudnn.pyx":212
+  /* "renom/cuda/cudnn.pyx":235
  *         cdef cudnnFilterDescriptor_t filter_desc
  *         cdef int k, c, h, w
  *         k, c, h, w = list(shape) + [1] * (4 - len(shape))             # <<<<<<<<<<<<<<
  *         check(cudnnCreateFilterDescriptor(&self.filter_desc))
  *         check(cudnnSetFilter4dDescriptor(self.filter_desc, data_type(
  */
-  __pyx_t_1 = PySequence_List(__pyx_v_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 212, __pyx_L1_error)
+  __pyx_t_1 = PySequence_List(__pyx_v_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyObject_Length(__pyx_v_shape); if (unlikely(__pyx_t_2 == -1)) __PYX_ERR(1, 212, __pyx_L1_error)
-  __pyx_t_3 = PyList_New(1 * (((4 - __pyx_t_2)<0) ? 0:(4 - __pyx_t_2))); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 212, __pyx_L1_error)
+  __pyx_t_2 = PyObject_Length(__pyx_v_shape); if (unlikely(__pyx_t_2 == -1)) __PYX_ERR(0, 235, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(1 * (((4 - __pyx_t_2)<0) ? 0:(4 - __pyx_t_2))); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   { Py_ssize_t __pyx_temp;
     for (__pyx_temp=0; __pyx_temp < (4 - __pyx_t_2); __pyx_temp++) {
@@ -6411,7 +6773,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
       PyList_SET_ITEM(__pyx_t_3, __pyx_temp, __pyx_int_1);
     }
   }
-  __pyx_t_4 = PyNumber_Add(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 212, __pyx_L1_error)
+  __pyx_t_4 = PyNumber_Add(__pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -6425,7 +6787,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
     if (unlikely(size != 4)) {
       if (size > 4) __Pyx_RaiseTooManyValuesError(4);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 212, __pyx_L1_error)
+      __PYX_ERR(0, 235, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     __pyx_t_3 = PyList_GET_ITEM(sequence, 0); 
@@ -6441,7 +6803,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
       Py_ssize_t i;
       PyObject** temps[4] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_5,&__pyx_t_6};
       for (i=0; i < 4; i++) {
-        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(1, 212, __pyx_L1_error)
+        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(0, 235, __pyx_L1_error)
         __Pyx_GOTREF(item);
         *(temps[i]) = item;
       }
@@ -6449,29 +6811,29 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
     #endif
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   }
-  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 212, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_int(__pyx_t_3); if (unlikely((__pyx_t_7 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 212, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_int(__pyx_t_1); if (unlikely((__pyx_t_8 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_9 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_9 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 212, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_As_int(__pyx_t_5); if (unlikely((__pyx_t_9 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_10 = __Pyx_PyInt_As_int(__pyx_t_6); if (unlikely((__pyx_t_10 == (int)-1) && PyErr_Occurred())) __PYX_ERR(1, 212, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyInt_As_int(__pyx_t_6); if (unlikely((__pyx_t_10 == (int)-1) && PyErr_Occurred())) __PYX_ERR(0, 235, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_v_k = __pyx_t_7;
   __pyx_v_c = __pyx_t_8;
   __pyx_v_h = __pyx_t_9;
   __pyx_v_w = __pyx_t_10;
 
-  /* "renom/cuda/cudnn.pyx":213
+  /* "renom/cuda/cudnn.pyx":236
  *         cdef int k, c, h, w
  *         k, c, h, w = list(shape) + [1] * (4 - len(shape))
  *         check(cudnnCreateFilterDescriptor(&self.filter_desc))             # <<<<<<<<<<<<<<
  *         check(cudnnSetFilter4dDescriptor(self.filter_desc, data_type(
  *             dtype), tensor_format, k, c, h, w))
  */
-  __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 213, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 236, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_5 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreateFilterDescriptor((&__pyx_v_self->filter_desc))); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 213, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_cudnnStatus_t(cudnnCreateFilterDescriptor((&__pyx_v_self->filter_desc))); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 236, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_1 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
@@ -6484,14 +6846,14 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
     }
   }
   if (!__pyx_t_1) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 213, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 236, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_5};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 213, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 236, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -6500,20 +6862,20 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_5};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 213, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 236, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else
     #endif
     {
-      __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 213, __pyx_L1_error)
+      __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 236, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1); __pyx_t_1 = NULL;
       __Pyx_GIVEREF(__pyx_t_5);
       PyTuple_SET_ITEM(__pyx_t_3, 0+1, __pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 213, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 236, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     }
@@ -6521,44 +6883,44 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":214
+  /* "renom/cuda/cudnn.pyx":237
  *         k, c, h, w = list(shape) + [1] * (4 - len(shape))
  *         check(cudnnCreateFilterDescriptor(&self.filter_desc))
  *         check(cudnnSetFilter4dDescriptor(self.filter_desc, data_type(             # <<<<<<<<<<<<<<
  *             dtype), tensor_format, k, c, h, w))
  * 
  */
-  __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 214, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
 
-  /* "renom/cuda/cudnn.pyx":215
+  /* "renom/cuda/cudnn.pyx":238
  *         check(cudnnCreateFilterDescriptor(&self.filter_desc))
  *         check(cudnnSetFilter4dDescriptor(self.filter_desc, data_type(
  *             dtype), tensor_format, k, c, h, w))             # <<<<<<<<<<<<<<
  * 
  *     def __del__(self):
  */
-  __pyx_t_3 = __pyx_f_5renom_4cuda_5cudnn_data_type(__pyx_v_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 214, __pyx_L1_error)
+  __pyx_t_3 = __pyx_f_5renom_4cuda_5cudnn_data_type(__pyx_v_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
 
-  /* "renom/cuda/cudnn.pyx":214
+  /* "renom/cuda/cudnn.pyx":237
  *         k, c, h, w = list(shape) + [1] * (4 - len(shape))
  *         check(cudnnCreateFilterDescriptor(&self.filter_desc))
  *         check(cudnnSetFilter4dDescriptor(self.filter_desc, data_type(             # <<<<<<<<<<<<<<
  *             dtype), tensor_format, k, c, h, w))
  * 
  */
-  __pyx_t_11 = ((cudnnDataType_t)__Pyx_PyInt_As_cudnnDataType_t(__pyx_t_3)); if (unlikely(PyErr_Occurred())) __PYX_ERR(1, 214, __pyx_L1_error)
+  __pyx_t_11 = ((cudnnDataType_t)__Pyx_PyInt_As_cudnnDataType_t(__pyx_t_3)); if (unlikely(PyErr_Occurred())) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":215
+  /* "renom/cuda/cudnn.pyx":238
  *         check(cudnnCreateFilterDescriptor(&self.filter_desc))
  *         check(cudnnSetFilter4dDescriptor(self.filter_desc, data_type(
  *             dtype), tensor_format, k, c, h, w))             # <<<<<<<<<<<<<<
  * 
  *     def __del__(self):
  */
-  __pyx_t_3 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSetFilter4dDescriptor(__pyx_v_self->filter_desc, __pyx_t_11, __pyx_v_5renom_4cuda_5cudnn_tensor_format, __pyx_v_k, __pyx_v_c, __pyx_v_h, __pyx_v_w)); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 214, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSetFilter4dDescriptor(__pyx_v_self->filter_desc, __pyx_t_11, __pyx_v_5renom_4cuda_5cudnn_tensor_format, __pyx_v_k, __pyx_v_c, __pyx_v_h, __pyx_v_w)); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 237, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __pyx_t_5 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_6))) {
@@ -6571,14 +6933,14 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
     }
   }
   if (!__pyx_t_5) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 214, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_6, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 237, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_3};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 214, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 237, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
@@ -6587,20 +6949,20 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
       PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_3};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 214, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 237, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     } else
     #endif
     {
-      __pyx_t_1 = PyTuple_New(1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 214, __pyx_L1_error)
+      __pyx_t_1 = PyTuple_New(1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 237, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_5); __pyx_t_5 = NULL;
       __Pyx_GIVEREF(__pyx_t_3);
       PyTuple_SET_ITEM(__pyx_t_1, 0+1, __pyx_t_3);
       __pyx_t_3 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_1, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 214, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_1, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 237, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     }
@@ -6608,7 +6970,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":209
+  /* "renom/cuda/cudnn.pyx":232
  *     cdef cudnnFilterDescriptor_t filter_desc
  * 
  *     def __init__(self, shape, dtype):             # <<<<<<<<<<<<<<
@@ -6632,7 +6994,7 @@ static int __pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor___init__(struct __pyx
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":217
+/* "renom/cuda/cudnn.pyx":240
  *             dtype), tensor_format, k, c, h, w))
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<
@@ -6664,7 +7026,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_2__del__(struct
   PyObject *__pyx_t_6 = NULL;
   __Pyx_RefNannySetupContext("__del__", 0);
 
-  /* "renom/cuda/cudnn.pyx":218
+  /* "renom/cuda/cudnn.pyx":241
  * 
  *     def __del__(self):
  *         if self.filter_desc:             # <<<<<<<<<<<<<<
@@ -6674,16 +7036,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_2__del__(struct
   __pyx_t_1 = (__pyx_v_self->filter_desc != 0);
   if (__pyx_t_1) {
 
-    /* "renom/cuda/cudnn.pyx":219
+    /* "renom/cuda/cudnn.pyx":242
  *     def __del__(self):
  *         if self.filter_desc:
  *             check(cudnnDestroyFilterDescriptor(self.filter_desc))             # <<<<<<<<<<<<<<
  *             self.filter_desc= NULL
  * 
  */
-    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 219, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 242, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnDestroyFilterDescriptor(__pyx_v_self->filter_desc)); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 219, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnDestroyFilterDescriptor(__pyx_v_self->filter_desc)); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 242, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __pyx_t_5 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -6696,14 +7058,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_2__del__(struct
       }
     }
     if (!__pyx_t_5) {
-      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 219, __pyx_L1_error)
+      __pyx_t_2 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 242, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_2);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 219, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 242, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -6712,20 +7074,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_2__del__(struct
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
         PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 219, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 242, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
       } else
       #endif
       {
-        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 219, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 242, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5); __pyx_t_5 = NULL;
         __Pyx_GIVEREF(__pyx_t_4);
         PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_4);
         __pyx_t_4 = 0;
-        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 219, __pyx_L1_error)
+        __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_6, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 242, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_2);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       }
@@ -6733,7 +7095,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_2__del__(struct
     __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "renom/cuda/cudnn.pyx":220
+    /* "renom/cuda/cudnn.pyx":243
  *         if self.filter_desc:
  *             check(cudnnDestroyFilterDescriptor(self.filter_desc))
  *             self.filter_desc= NULL             # <<<<<<<<<<<<<<
@@ -6742,7 +7104,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_2__del__(struct
  */
     __pyx_v_self->filter_desc = NULL;
 
-    /* "renom/cuda/cudnn.pyx":218
+    /* "renom/cuda/cudnn.pyx":241
  * 
  *     def __del__(self):
  *         if self.filter_desc:             # <<<<<<<<<<<<<<
@@ -6751,7 +7113,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_2__del__(struct
  */
   }
 
-  /* "renom/cuda/cudnn.pyx":217
+  /* "renom/cuda/cudnn.pyx":240
  *             dtype), tensor_format, k, c, h, w))
  * 
  *     def __del__(self):             # <<<<<<<<<<<<<<
@@ -6776,7 +7138,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_2__del__(struct
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":222
+/* "renom/cuda/cudnn.pyx":245
  *             self.filter_desc= NULL
  * 
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -6803,7 +7165,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_4__int__(struct
   PyObject *__pyx_t_1 = NULL;
   __Pyx_RefNannySetupContext("__int__", 0);
 
-  /* "renom/cuda/cudnn.pyx":223
+  /* "renom/cuda/cudnn.pyx":246
  * 
  *     def __int__(self):
  *         return <uintptr_t>self.filter_desc             # <<<<<<<<<<<<<<
@@ -6811,13 +7173,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_4__int__(struct
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_self->filter_desc)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 223, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_self->filter_desc)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 246, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "renom/cuda/cudnn.pyx":222
+  /* "renom/cuda/cudnn.pyx":245
  *             self.filter_desc= NULL
  * 
  *     def __int__(self):             # <<<<<<<<<<<<<<
@@ -6867,11 +7229,11 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_6__reduce_cytho
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.filter_desc cannot be converted to a Python object for pickling")
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__10, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(0, 2, __pyx_L1_error)
+  __PYX_ERR(1, 2, __pyx_L1_error)
 
   /* "(tree fragment)":1
  * def __reduce_cython__(self):             # <<<<<<<<<<<<<<
@@ -6920,11 +7282,11 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_8__setstate_cyt
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.filter_desc cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_builtin_TypeError, __pyx_tuple__11, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_Raise(__pyx_t_1, 0, 0, 0);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __PYX_ERR(0, 4, __pyx_L1_error)
+  __PYX_ERR(1, 4, __pyx_L1_error)
 
   /* "(tree fragment)":3
  * def __reduce_cython__(self):
@@ -6943,7 +7305,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_16FilterDescriptor_8__setstate_cyt
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":226
+/* "renom/cuda/cudnn.pyx":249
  * 
  * 
  * def cuBatchNormalizatoinForward(handle, x, mean, var, w, b, y, rm, rv, momentum=0.0, mode=None, inference=False, eps=1e-5):             # <<<<<<<<<<<<<<
@@ -7020,49 +7382,49 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_10cuBatchNormalizatoinForward(PyOb
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 1); __PYX_ERR(1, 226, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 1); __PYX_ERR(0, 249, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_mean)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 2); __PYX_ERR(1, 226, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 2); __PYX_ERR(0, 249, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_var)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 3); __PYX_ERR(1, 226, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 3); __PYX_ERR(0, 249, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_w)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 4); __PYX_ERR(1, 226, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 4); __PYX_ERR(0, 249, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_b)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 5); __PYX_ERR(1, 226, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 5); __PYX_ERR(0, 249, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
         if (likely((values[6] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 6); __PYX_ERR(1, 226, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 6); __PYX_ERR(0, 249, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  7:
         if (likely((values[7] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_rm)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 7); __PYX_ERR(1, 226, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 7); __PYX_ERR(0, 249, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  8:
         if (likely((values[8] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_rv)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 8); __PYX_ERR(1, 226, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, 8); __PYX_ERR(0, 249, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  9:
@@ -7090,7 +7452,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_10cuBatchNormalizatoinForward(PyOb
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuBatchNormalizatoinForward") < 0)) __PYX_ERR(1, 226, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuBatchNormalizatoinForward") < 0)) __PYX_ERR(0, 249, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -7131,7 +7493,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_10cuBatchNormalizatoinForward(PyOb
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 226, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinForward", 0, 9, 13, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 249, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuBatchNormalizatoinForward", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -7190,16 +7552,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
   __Pyx_INCREF(__pyx_v_rm);
   __Pyx_INCREF(__pyx_v_rv);
 
-  /* "renom/cuda/cudnn.pyx":227
+  /* "renom/cuda/cudnn.pyx":250
  * 
  * def cuBatchNormalizatoinForward(handle, x, mean, var, w, b, y, rm, rv, momentum=0.0, mode=None, inference=False, eps=1e-5):
  *     x, mean, var, w, b, y, rm, rv = map(get_gpu, [x, mean, var, w, b, y, rm, rv])             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 227, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 250, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(8); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 227, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 250, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
@@ -7225,7 +7587,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
   __Pyx_INCREF(__pyx_v_rv);
   __Pyx_GIVEREF(__pyx_v_rv);
   PyList_SET_ITEM(__pyx_t_2, 7, __pyx_v_rv);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 227, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 250, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -7233,7 +7595,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 227, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 250, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -7246,7 +7608,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
     if (unlikely(size != 8)) {
       if (size > 8) __Pyx_RaiseTooManyValuesError(8);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 227, __pyx_L1_error)
+      __PYX_ERR(0, 250, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -7281,7 +7643,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
       Py_ssize_t i;
       PyObject** temps[8] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_4,&__pyx_t_5,&__pyx_t_6,&__pyx_t_7,&__pyx_t_8,&__pyx_t_9};
       for (i=0; i < 8; i++) {
-        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(1, 227, __pyx_L1_error)
+        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(0, 250, __pyx_L1_error)
         __Pyx_GOTREF(item);
         *(temps[i]) = item;
       }
@@ -7291,7 +7653,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
   } else {
     Py_ssize_t index = -1;
     PyObject** temps[8] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_4,&__pyx_t_5,&__pyx_t_6,&__pyx_t_7,&__pyx_t_8,&__pyx_t_9};
-    __pyx_t_10 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 227, __pyx_L1_error)
+    __pyx_t_10 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 250, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_10);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_11 = Py_TYPE(__pyx_t_10)->tp_iternext;
@@ -7300,7 +7662,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
       __Pyx_GOTREF(item);
       *(temps[index]) = item;
     }
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 8) < 0) __PYX_ERR(1, 227, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 8) < 0) __PYX_ERR(0, 250, __pyx_L1_error)
     __pyx_t_11 = NULL;
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     goto __pyx_L4_unpacking_done;
@@ -7308,7 +7670,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     __pyx_t_11 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 227, __pyx_L1_error)
+    __PYX_ERR(0, 250, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_3);
@@ -7328,241 +7690,241 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
   __Pyx_DECREF_SET(__pyx_v_rv, __pyx_t_9);
   __pyx_t_9 = 0;
 
-  /* "renom/cuda/cudnn.pyx":229
+  /* "renom/cuda/cudnn.pyx":252
  *     x, mean, var, w, b, y, rm, rv = map(get_gpu, [x, mean, var, w, b, y, rm, rv])
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  */
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 229, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 252, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_12));
 
-  /* "renom/cuda/cudnn.pyx":231
+  /* "renom/cuda/cudnn.pyx":254
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 231, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 231, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 231, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_float_1_0);
-  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 231, __pyx_L1_error)
+  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 231, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 231, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(1, 231, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_8, __pyx_t_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 231, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_8, __pyx_t_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 231, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 231, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 254, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_alf = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "renom/cuda/cudnn.pyx":232
+  /* "renom/cuda/cudnn.pyx":255
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnBatchNormMode_t md
  */
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 232, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 232, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyList_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 232, __pyx_L1_error)
+  __pyx_t_7 = PyList_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_7, 0, __pyx_float_0_0);
-  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 232, __pyx_L1_error)
+  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 232, __pyx_L1_error)
+  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 232, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(1, 232, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 232, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 232, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_9);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_9);
   __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_7, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 232, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_7, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 255, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_v_bt = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_9);
   __pyx_t_9 = 0;
 
-  /* "renom/cuda/cudnn.pyx":235
+  /* "renom/cuda/cudnn.pyx":258
  * 
  *     cdef cudnnBatchNormMode_t md
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc wDesc = TensorDesc(w.shape, dtype=w.dtype)
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  */
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 235, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 258, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 235, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 258, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_9);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_9);
   __pyx_t_9 = 0;
-  __pyx_t_9 = PyDict_New(); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 235, __pyx_L1_error)
+  __pyx_t_9 = PyDict_New(); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 258, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 235, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 258, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_dtype, __pyx_t_8) < 0) __PYX_ERR(1, 235, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_dtype, __pyx_t_8) < 0) __PYX_ERR(0, 258, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __pyx_t_8 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_7, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 235, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_7, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 258, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __pyx_v_xDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_8);
   __pyx_t_8 = 0;
 
-  /* "renom/cuda/cudnn.pyx":236
+  /* "renom/cuda/cudnn.pyx":259
  *     cdef cudnnBatchNormMode_t md
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc wDesc = TensorDesc(w.shape, dtype=w.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  *     cdef void * mean_ptr = <void *> <uintptr_t> getattr(mean, "_ptr", 0)
  */
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_shape); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 236, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_shape); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 259, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_9 = PyTuple_New(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 236, __pyx_L1_error)
+  __pyx_t_9 = PyTuple_New(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 259, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_GIVEREF(__pyx_t_8);
   PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_8);
   __pyx_t_8 = 0;
-  __pyx_t_8 = PyDict_New(); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 236, __pyx_L1_error)
+  __pyx_t_8 = PyDict_New(); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 259, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 236, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 259, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(1, 236, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(0, 259, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_9, __pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 236, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_9, __pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 259, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __pyx_v_wDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "renom/cuda/cudnn.pyx":237
+  /* "renom/cuda/cudnn.pyx":260
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc wDesc = TensorDesc(w.shape, dtype=w.dtype)
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)             # <<<<<<<<<<<<<<
  *     cdef void * mean_ptr = <void *> <uintptr_t> getattr(mean, "_ptr", 0)
  *     cdef void * var_ptr = <void *> <uintptr_t> getattr(var, "_ptr", 0)
  */
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 237, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 260, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 237, __pyx_L1_error)
+  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 260, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 237, __pyx_L1_error)
+  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 260, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 237, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 260, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(1, 237, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(0, 260, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 237, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 260, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_v_yDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_9);
   __pyx_t_9 = 0;
 
-  /* "renom/cuda/cudnn.pyx":238
+  /* "renom/cuda/cudnn.pyx":261
  *     cdef TensorDesc wDesc = TensorDesc(w.shape, dtype=w.dtype)
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  *     cdef void * mean_ptr = <void *> <uintptr_t> getattr(mean, "_ptr", 0)             # <<<<<<<<<<<<<<
  *     cdef void * var_ptr = <void *> <uintptr_t> getattr(var, "_ptr", 0)
  * 
  */
-  __pyx_t_9 = __Pyx_GetAttr3(__pyx_v_mean, __pyx_n_s_ptr, __pyx_int_0); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 238, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_GetAttr3(__pyx_v_mean, __pyx_n_s_ptr, __pyx_int_0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 261, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_9); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 238, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_9); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 261, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __pyx_v_mean_ptr = ((void *)((uintptr_t)__pyx_t_12));
 
-  /* "renom/cuda/cudnn.pyx":239
+  /* "renom/cuda/cudnn.pyx":262
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  *     cdef void * mean_ptr = <void *> <uintptr_t> getattr(mean, "_ptr", 0)
  *     cdef void * var_ptr = <void *> <uintptr_t> getattr(var, "_ptr", 0)             # <<<<<<<<<<<<<<
  * 
  *     cdef double epsilon = eps
  */
-  __pyx_t_9 = __Pyx_GetAttr3(__pyx_v_var, __pyx_n_s_ptr, __pyx_int_0); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 239, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_GetAttr3(__pyx_v_var, __pyx_n_s_ptr, __pyx_int_0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 262, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_9); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 239, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_9); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 262, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __pyx_v_var_ptr = ((void *)((uintptr_t)__pyx_t_12));
 
-  /* "renom/cuda/cudnn.pyx":241
+  /* "renom/cuda/cudnn.pyx":264
  *     cdef void * var_ptr = <void *> <uintptr_t> getattr(var, "_ptr", 0)
  * 
  *     cdef double epsilon = eps             # <<<<<<<<<<<<<<
  *     cdef double exponentialAverageFactor = momentum
  * 
  */
-  __pyx_t_13 = __pyx_PyFloat_AsDouble(__pyx_v_eps); if (unlikely((__pyx_t_13 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 241, __pyx_L1_error)
+  __pyx_t_13 = __pyx_PyFloat_AsDouble(__pyx_v_eps); if (unlikely((__pyx_t_13 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 264, __pyx_L1_error)
   __pyx_v_epsilon = __pyx_t_13;
 
-  /* "renom/cuda/cudnn.pyx":242
+  /* "renom/cuda/cudnn.pyx":265
  * 
  *     cdef double epsilon = eps
  *     cdef double exponentialAverageFactor = momentum             # <<<<<<<<<<<<<<
  * 
  *     cuda_base.check_heap_device(x, mean, var, w, b, y, rm, rv)
  */
-  __pyx_t_13 = __pyx_PyFloat_AsDouble(__pyx_v_momentum); if (unlikely((__pyx_t_13 == (double)-1) && PyErr_Occurred())) __PYX_ERR(1, 242, __pyx_L1_error)
+  __pyx_t_13 = __pyx_PyFloat_AsDouble(__pyx_v_momentum); if (unlikely((__pyx_t_13 == (double)-1) && PyErr_Occurred())) __PYX_ERR(0, 265, __pyx_L1_error)
   __pyx_v_exponentialAverageFactor = __pyx_t_13;
 
-  /* "renom/cuda/cudnn.pyx":244
+  /* "renom/cuda/cudnn.pyx":267
  *     cdef double exponentialAverageFactor = momentum
  * 
  *     cuda_base.check_heap_device(x, mean, var, w, b, y, rm, rv)             # <<<<<<<<<<<<<<
  * 
  *     md = cudnnBatchNormMode_t.CUDNN_BATCHNORM_SPATIAL if mode == 1 else cudnnBatchNormMode_t.CUDNN_BATCHNORM_PER_ACTIVATION
  */
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 244, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 267, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 244, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 267, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_t_7 = NULL;
@@ -7580,7 +7942,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_8)) {
     PyObject *__pyx_temp[9] = {__pyx_t_7, __pyx_v_x, __pyx_v_mean, __pyx_v_var, __pyx_v_w, __pyx_v_b, __pyx_v_y, __pyx_v_rm, __pyx_v_rv};
-    __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_14, 8+__pyx_t_14); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 244, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_14, 8+__pyx_t_14); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 267, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_GOTREF(__pyx_t_9);
   } else
@@ -7588,13 +7950,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
     PyObject *__pyx_temp[9] = {__pyx_t_7, __pyx_v_x, __pyx_v_mean, __pyx_v_var, __pyx_v_w, __pyx_v_b, __pyx_v_y, __pyx_v_rm, __pyx_v_rv};
-    __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_14, 8+__pyx_t_14); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 244, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_14, 8+__pyx_t_14); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 267, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_GOTREF(__pyx_t_9);
   } else
   #endif
   {
-    __pyx_t_2 = PyTuple_New(8+__pyx_t_14); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 244, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(8+__pyx_t_14); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 267, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     if (__pyx_t_7) {
       __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_7); __pyx_t_7 = NULL;
@@ -7623,23 +7985,23 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
     __Pyx_INCREF(__pyx_v_rv);
     __Pyx_GIVEREF(__pyx_v_rv);
     PyTuple_SET_ITEM(__pyx_t_2, 7+__pyx_t_14, __pyx_v_rv);
-    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_2, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 244, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_2, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 267, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-  /* "renom/cuda/cudnn.pyx":246
+  /* "renom/cuda/cudnn.pyx":269
  *     cuda_base.check_heap_device(x, mean, var, w, b, y, rm, rv)
  * 
  *     md = cudnnBatchNormMode_t.CUDNN_BATCHNORM_SPATIAL if mode == 1 else cudnnBatchNormMode_t.CUDNN_BATCHNORM_PER_ACTIVATION             # <<<<<<<<<<<<<<
  * 
  *     if not inference:
  */
-  __pyx_t_9 = __Pyx_PyInt_EqObjC(__pyx_v_mode, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 246, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_EqObjC(__pyx_v_mode, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 269, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_9); if (unlikely(__pyx_t_16 < 0)) __PYX_ERR(1, 246, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_t_9); if (unlikely(__pyx_t_16 < 0)) __PYX_ERR(0, 269, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   if (__pyx_t_16) {
     __pyx_t_15 = CUDNN_BATCHNORM_SPATIAL;
@@ -7648,107 +8010,107 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
   }
   __pyx_v_md = __pyx_t_15;
 
-  /* "renom/cuda/cudnn.pyx":248
+  /* "renom/cuda/cudnn.pyx":271
  *     md = cudnnBatchNormMode_t.CUDNN_BATCHNORM_SPATIAL if mode == 1 else cudnnBatchNormMode_t.CUDNN_BATCHNORM_PER_ACTIVATION
  * 
  *     if not inference:             # <<<<<<<<<<<<<<
  *         check(cudnnBatchNormalizationForwardTraining(
  *             handler,
  */
-  __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_v_inference); if (unlikely(__pyx_t_16 < 0)) __PYX_ERR(1, 248, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyObject_IsTrue(__pyx_v_inference); if (unlikely(__pyx_t_16 < 0)) __PYX_ERR(0, 271, __pyx_L1_error)
   __pyx_t_17 = ((!__pyx_t_16) != 0);
   if (__pyx_t_17) {
 
-    /* "renom/cuda/cudnn.pyx":249
+    /* "renom/cuda/cudnn.pyx":272
  * 
  *     if not inference:
  *         check(cudnnBatchNormalizationForwardTraining(             # <<<<<<<<<<<<<<
  *             handler,
  *             md,
  */
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 249, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 272, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
 
-    /* "renom/cuda/cudnn.pyx":255
+    /* "renom/cuda/cudnn.pyx":278
  *             bt.ptr,
  *             xDesc.tensor_desc,
  *             <const void *> <uintptr_t> x._ptr,             # <<<<<<<<<<<<<<
  *             yDesc.tensor_desc,
  *             <void *> <uintptr_t> y._ptr,
  */
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 255, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 278, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 255, __pyx_L1_error)
+    __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 278, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "renom/cuda/cudnn.pyx":257
+    /* "renom/cuda/cudnn.pyx":280
  *             <const void *> <uintptr_t> x._ptr,
  *             yDesc.tensor_desc,
  *             <void *> <uintptr_t> y._ptr,             # <<<<<<<<<<<<<<
  *             wDesc.tensor_desc,
  *             <const void *> <uintptr_t> w._ptr,
  */
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 257, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 280, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_18 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_18 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 257, __pyx_L1_error)
+    __pyx_t_18 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_18 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 280, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "renom/cuda/cudnn.pyx":259
+    /* "renom/cuda/cudnn.pyx":282
  *             <void *> <uintptr_t> y._ptr,
  *             wDesc.tensor_desc,
  *             <const void *> <uintptr_t> w._ptr,             # <<<<<<<<<<<<<<
  *             <const void *> <uintptr_t> b._ptr,
  *             exponentialAverageFactor,
  */
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 259, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 282, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_19 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_19 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 259, __pyx_L1_error)
+    __pyx_t_19 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_19 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 282, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "renom/cuda/cudnn.pyx":260
+    /* "renom/cuda/cudnn.pyx":283
  *             wDesc.tensor_desc,
  *             <const void *> <uintptr_t> w._ptr,
  *             <const void *> <uintptr_t> b._ptr,             # <<<<<<<<<<<<<<
  *             exponentialAverageFactor,
  *             mean_ptr,
  */
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_b, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 260, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_b, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 283, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_20 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_20 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 260, __pyx_L1_error)
+    __pyx_t_20 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_20 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 283, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "renom/cuda/cudnn.pyx":265
+    /* "renom/cuda/cudnn.pyx":288
  *             var_ptr,
  *             epsilon,
  *             <void *> <uintptr_t> rm._ptr,             # <<<<<<<<<<<<<<
  *             <void *> <uintptr_t> rv._ptr))
  *     else:
  */
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_rm, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 265, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_rm, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 288, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_21 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 265, __pyx_L1_error)
+    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_21 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 288, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "renom/cuda/cudnn.pyx":266
+    /* "renom/cuda/cudnn.pyx":289
  *             epsilon,
  *             <void *> <uintptr_t> rm._ptr,
  *             <void *> <uintptr_t> rv._ptr))             # <<<<<<<<<<<<<<
  *     else:
  *         check(cudnnBatchNormalizationForwardInference(
  */
-    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_rv, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 266, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_rv, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 289, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_22 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 266, __pyx_L1_error)
+    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_22 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 289, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-    /* "renom/cuda/cudnn.pyx":249
+    /* "renom/cuda/cudnn.pyx":272
  * 
  *     if not inference:
  *         check(cudnnBatchNormalizationForwardTraining(             # <<<<<<<<<<<<<<
  *             handler,
  *             md,
  */
-    __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnBatchNormalizationForwardTraining(__pyx_v_handler, __pyx_v_md, __pyx_v_alf->ptr, __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_12)), __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_18)), __pyx_v_wDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_19)), ((void const *)((uintptr_t)__pyx_t_20)), __pyx_v_exponentialAverageFactor, __pyx_v_mean_ptr, __pyx_v_var_ptr, __pyx_v_epsilon, ((void *)((uintptr_t)__pyx_t_21)), ((void *)((uintptr_t)__pyx_t_22)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 249, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnBatchNormalizationForwardTraining(__pyx_v_handler, __pyx_v_md, __pyx_v_alf->ptr, __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_12)), __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_18)), __pyx_v_wDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_19)), ((void const *)((uintptr_t)__pyx_t_20)), __pyx_v_exponentialAverageFactor, __pyx_v_mean_ptr, __pyx_v_var_ptr, __pyx_v_epsilon, ((void *)((uintptr_t)__pyx_t_21)), ((void *)((uintptr_t)__pyx_t_22)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 272, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __pyx_t_7 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -7761,14 +8123,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
       }
     }
     if (!__pyx_t_7) {
-      __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 249, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 272, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GOTREF(__pyx_t_9);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_8)) {
         PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_2};
-        __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 249, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 272, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -7777,20 +8139,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
         PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_2};
-        __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 249, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 272, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
       } else
       #endif
       {
-        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 249, __pyx_L1_error)
+        __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 272, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_6);
         __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_7); __pyx_t_7 = NULL;
         __Pyx_GIVEREF(__pyx_t_2);
         PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_2);
         __pyx_t_2 = 0;
-        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_6, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 249, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_6, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 272, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       }
@@ -7798,7 +8160,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-    /* "renom/cuda/cudnn.pyx":248
+    /* "renom/cuda/cudnn.pyx":271
  *     md = cudnnBatchNormMode_t.CUDNN_BATCHNORM_SPATIAL if mode == 1 else cudnnBatchNormMode_t.CUDNN_BATCHNORM_PER_ACTIVATION
  * 
  *     if not inference:             # <<<<<<<<<<<<<<
@@ -7808,7 +8170,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
     goto __pyx_L5;
   }
 
-  /* "renom/cuda/cudnn.pyx":268
+  /* "renom/cuda/cudnn.pyx":291
  *             <void *> <uintptr_t> rv._ptr))
  *     else:
  *         check(cudnnBatchNormalizationForwardInference(             # <<<<<<<<<<<<<<
@@ -7816,65 +8178,65 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
  *             md,
  */
   /*else*/ {
-    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 268, __pyx_L1_error)
+    __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 291, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
 
-    /* "renom/cuda/cudnn.pyx":274
+    /* "renom/cuda/cudnn.pyx":297
  *             bt.ptr,
  *             xDesc.tensor_desc,
  *             <const void *> <uintptr_t> x._ptr,             # <<<<<<<<<<<<<<
  *             yDesc.tensor_desc,
  *             <void *> <uintptr_t> y._ptr,
  */
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 274, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 297, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_t_6); if (unlikely((__pyx_t_22 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 274, __pyx_L1_error)
+    __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_t_6); if (unlikely((__pyx_t_22 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 297, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "renom/cuda/cudnn.pyx":276
+    /* "renom/cuda/cudnn.pyx":299
  *             <const void *> <uintptr_t> x._ptr,
  *             yDesc.tensor_desc,
  *             <void *> <uintptr_t> y._ptr,             # <<<<<<<<<<<<<<
  *             wDesc.tensor_desc,
  *             <const void *> <uintptr_t> w._ptr,
  */
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 276, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 299, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_t_6); if (unlikely((__pyx_t_21 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 276, __pyx_L1_error)
+    __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_t_6); if (unlikely((__pyx_t_21 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 299, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "renom/cuda/cudnn.pyx":278
+    /* "renom/cuda/cudnn.pyx":301
  *             <void *> <uintptr_t> y._ptr,
  *             wDesc.tensor_desc,
  *             <const void *> <uintptr_t> w._ptr,             # <<<<<<<<<<<<<<
  *             <const void *> <uintptr_t> b._ptr,
  *             mean_ptr,
  */
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 278, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 301, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_20 = __Pyx_PyInt_As_size_t(__pyx_t_6); if (unlikely((__pyx_t_20 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 278, __pyx_L1_error)
+    __pyx_t_20 = __Pyx_PyInt_As_size_t(__pyx_t_6); if (unlikely((__pyx_t_20 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 301, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "renom/cuda/cudnn.pyx":279
+    /* "renom/cuda/cudnn.pyx":302
  *             wDesc.tensor_desc,
  *             <const void *> <uintptr_t> w._ptr,
  *             <const void *> <uintptr_t> b._ptr,             # <<<<<<<<<<<<<<
  *             mean_ptr,
  *             var_ptr,
  */
-    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_b, __pyx_n_s_ptr); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 279, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_b, __pyx_n_s_ptr); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 302, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
-    __pyx_t_19 = __Pyx_PyInt_As_size_t(__pyx_t_6); if (unlikely((__pyx_t_19 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 279, __pyx_L1_error)
+    __pyx_t_19 = __Pyx_PyInt_As_size_t(__pyx_t_6); if (unlikely((__pyx_t_19 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 302, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-    /* "renom/cuda/cudnn.pyx":268
+    /* "renom/cuda/cudnn.pyx":291
  *             <void *> <uintptr_t> rv._ptr))
  *     else:
  *         check(cudnnBatchNormalizationForwardInference(             # <<<<<<<<<<<<<<
  *             handler,
  *             md,
  */
-    __pyx_t_6 = __Pyx_PyInt_From_cudnnStatus_t(cudnnBatchNormalizationForwardInference(__pyx_v_handler, __pyx_v_md, __pyx_v_alf->ptr, __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_22)), __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_21)), __pyx_v_wDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_20)), ((void const *)((uintptr_t)__pyx_t_19)), __pyx_v_mean_ptr, __pyx_v_var_ptr, __pyx_v_epsilon)); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 268, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyInt_From_cudnnStatus_t(cudnnBatchNormalizationForwardInference(__pyx_v_handler, __pyx_v_md, __pyx_v_alf->ptr, __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_22)), __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_21)), __pyx_v_wDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_20)), ((void const *)((uintptr_t)__pyx_t_19)), __pyx_v_mean_ptr, __pyx_v_var_ptr, __pyx_v_epsilon)); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 291, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __pyx_t_2 = NULL;
     if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -7887,14 +8249,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
       }
     }
     if (!__pyx_t_2) {
-      __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_6); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 268, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_6); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 291, __pyx_L1_error)
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       __Pyx_GOTREF(__pyx_t_9);
     } else {
       #if CYTHON_FAST_PYCALL
       if (PyFunction_Check(__pyx_t_8)) {
         PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_6};
-        __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 268, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 291, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
@@ -7903,20 +8265,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
       #if CYTHON_FAST_PYCCALL
       if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
         PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_6};
-        __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 268, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 291, __pyx_L1_error)
         __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
       } else
       #endif
       {
-        __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 268, __pyx_L1_error)
+        __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 291, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_7);
         __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_2); __pyx_t_2 = NULL;
         __Pyx_GIVEREF(__pyx_t_6);
         PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_6);
         __pyx_t_6 = 0;
-        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_7, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 268, __pyx_L1_error)
+        __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_7, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 291, __pyx_L1_error)
         __Pyx_GOTREF(__pyx_t_9);
         __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
       }
@@ -7926,7 +8288,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
   }
   __pyx_L5:;
 
-  /* "renom/cuda/cudnn.pyx":226
+  /* "renom/cuda/cudnn.pyx":249
  * 
  * 
  * def cuBatchNormalizatoinForward(handle, x, mean, var, w, b, y, rm, rv, momentum=0.0, mode=None, inference=False, eps=1e-5):             # <<<<<<<<<<<<<<
@@ -7969,7 +8331,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_9cuBatchNormalizatoinForward(CYTHO
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":285
+/* "renom/cuda/cudnn.pyx":308
  * 
  * 
  * def cuBatchNormalizatoinBackward(handle, x, w, dy, saved_mean, saved_var, dx, dw, db, mode=None):             # <<<<<<<<<<<<<<
@@ -8034,49 +8396,49 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_12cuBatchNormalizatoinBackward(PyO
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 1); __PYX_ERR(1, 285, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 1); __PYX_ERR(0, 308, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_w)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 2); __PYX_ERR(1, 285, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 2); __PYX_ERR(0, 308, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dy)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 3); __PYX_ERR(1, 285, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 3); __PYX_ERR(0, 308, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_saved_mean)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 4); __PYX_ERR(1, 285, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 4); __PYX_ERR(0, 308, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_saved_var)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 5); __PYX_ERR(1, 285, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 5); __PYX_ERR(0, 308, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
         if (likely((values[6] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dx)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 6); __PYX_ERR(1, 285, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 6); __PYX_ERR(0, 308, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  7:
         if (likely((values[7] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dw)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 7); __PYX_ERR(1, 285, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 7); __PYX_ERR(0, 308, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  8:
         if (likely((values[8] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_db)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 8); __PYX_ERR(1, 285, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, 8); __PYX_ERR(0, 308, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  9:
@@ -8086,7 +8448,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_12cuBatchNormalizatoinBackward(PyO
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuBatchNormalizatoinBackward") < 0)) __PYX_ERR(1, 285, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuBatchNormalizatoinBackward") < 0)) __PYX_ERR(0, 308, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -8118,7 +8480,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_12cuBatchNormalizatoinBackward(PyO
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 285, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuBatchNormalizatoinBackward", 0, 9, 10, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 308, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuBatchNormalizatoinBackward", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -8174,16 +8536,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
   __Pyx_INCREF(__pyx_v_dw);
   __Pyx_INCREF(__pyx_v_db);
 
-  /* "renom/cuda/cudnn.pyx":287
+  /* "renom/cuda/cudnn.pyx":310
  * def cuBatchNormalizatoinBackward(handle, x, w, dy, saved_mean, saved_var, dx, dw, db, mode=None):
  *     x, w, dy, saved_mean, saved_var, dx, dw, db = map(
  *         get_gpu, [x, w, dy, saved_mean, saved_var, dx, dw, db])             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 287, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 310, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(8); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 287, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 310, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
@@ -8210,14 +8572,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
   __Pyx_GIVEREF(__pyx_v_db);
   PyList_SET_ITEM(__pyx_t_2, 7, __pyx_v_db);
 
-  /* "renom/cuda/cudnn.pyx":286
+  /* "renom/cuda/cudnn.pyx":309
  * 
  * def cuBatchNormalizatoinBackward(handle, x, w, dy, saved_mean, saved_var, dx, dw, db, mode=None):
  *     x, w, dy, saved_mean, saved_var, dx, dw, db = map(             # <<<<<<<<<<<<<<
  *         get_gpu, [x, w, dy, saved_mean, saved_var, dx, dw, db])
  * 
  */
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 286, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 309, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -8225,7 +8587,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 286, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 309, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -8238,7 +8600,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
     if (unlikely(size != 8)) {
       if (size > 8) __Pyx_RaiseTooManyValuesError(8);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 286, __pyx_L1_error)
+      __PYX_ERR(0, 309, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -8273,7 +8635,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
       Py_ssize_t i;
       PyObject** temps[8] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_4,&__pyx_t_5,&__pyx_t_6,&__pyx_t_7,&__pyx_t_8,&__pyx_t_9};
       for (i=0; i < 8; i++) {
-        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(1, 286, __pyx_L1_error)
+        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(0, 309, __pyx_L1_error)
         __Pyx_GOTREF(item);
         *(temps[i]) = item;
       }
@@ -8283,7 +8645,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
   } else {
     Py_ssize_t index = -1;
     PyObject** temps[8] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_4,&__pyx_t_5,&__pyx_t_6,&__pyx_t_7,&__pyx_t_8,&__pyx_t_9};
-    __pyx_t_10 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 286, __pyx_L1_error)
+    __pyx_t_10 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 309, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_10);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_11 = Py_TYPE(__pyx_t_10)->tp_iternext;
@@ -8292,7 +8654,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
       __Pyx_GOTREF(item);
       *(temps[index]) = item;
     }
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 8) < 0) __PYX_ERR(1, 286, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_11(__pyx_t_10), 8) < 0) __PYX_ERR(0, 309, __pyx_L1_error)
     __pyx_t_11 = NULL;
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     goto __pyx_L4_unpacking_done;
@@ -8300,7 +8662,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
     __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     __pyx_t_11 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 286, __pyx_L1_error)
+    __PYX_ERR(0, 309, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_3);
@@ -8320,186 +8682,186 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
   __Pyx_DECREF_SET(__pyx_v_db, __pyx_t_9);
   __pyx_t_9 = 0;
 
-  /* "renom/cuda/cudnn.pyx":289
+  /* "renom/cuda/cudnn.pyx":312
  *         get_gpu, [x, w, dy, saved_mean, saved_var, dx, dw, db])
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  */
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 289, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 312, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_12));
 
-  /* "renom/cuda/cudnn.pyx":291
+  /* "renom/cuda/cudnn.pyx":314
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 291, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 291, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 291, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_float_1_0);
-  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 291, __pyx_L1_error)
+  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 291, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 291, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(1, 291, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_8, __pyx_t_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 291, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_9, __pyx_t_8, __pyx_t_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 291, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 291, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 314, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_alf = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "renom/cuda/cudnn.pyx":292
+  /* "renom/cuda/cudnn.pyx":315
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnBatchNormMode_t md
  */
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 292, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 292, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyList_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 292, __pyx_L1_error)
+  __pyx_t_7 = PyList_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_7, 0, __pyx_float_0_0);
-  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 292, __pyx_L1_error)
+  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 292, __pyx_L1_error)
+  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 292, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(1, 292, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 292, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 292, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_9);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_9);
   __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_7, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 292, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_7, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 315, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_v_bt = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_9);
   __pyx_t_9 = 0;
 
-  /* "renom/cuda/cudnn.pyx":295
+  /* "renom/cuda/cudnn.pyx":318
  * 
  *     cdef cudnnBatchNormMode_t md
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc dwDesc = TensorDesc(dw.shape, dtype=dw.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  */
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 295, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 318, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 295, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 318, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_9);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_9);
   __pyx_t_9 = 0;
-  __pyx_t_9 = PyDict_New(); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 295, __pyx_L1_error)
+  __pyx_t_9 = PyDict_New(); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 318, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 295, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 318, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_dtype, __pyx_t_8) < 0) __PYX_ERR(1, 295, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_9, __pyx_n_s_dtype, __pyx_t_8) < 0) __PYX_ERR(0, 318, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
-  __pyx_t_8 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_7, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 295, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_7, __pyx_t_9); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 318, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __pyx_v_xDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_8);
   __pyx_t_8 = 0;
 
-  /* "renom/cuda/cudnn.pyx":296
+  /* "renom/cuda/cudnn.pyx":319
  *     cdef cudnnBatchNormMode_t md
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc dwDesc = TensorDesc(dw.shape, dtype=dw.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef double epsilon = 1e-5
  */
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_dw, __pyx_n_s_shape); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 296, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_v_dw, __pyx_n_s_shape); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_9 = PyTuple_New(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 296, __pyx_L1_error)
+  __pyx_t_9 = PyTuple_New(1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_GIVEREF(__pyx_t_8);
   PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_8);
   __pyx_t_8 = 0;
-  __pyx_t_8 = PyDict_New(); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 296, __pyx_L1_error)
+  __pyx_t_8 = PyDict_New(); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_dw, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 296, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_dw, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(1, 296, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_8, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_9, __pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 296, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_9, __pyx_t_8); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 319, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __pyx_v_dwDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "renom/cuda/cudnn.pyx":297
+  /* "renom/cuda/cudnn.pyx":320
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc dwDesc = TensorDesc(dw.shape, dtype=dw.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)             # <<<<<<<<<<<<<<
  *     cdef double epsilon = 1e-5
  * 
  */
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 297, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 320, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 297, __pyx_L1_error)
+  __pyx_t_8 = PyTuple_New(1); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 320, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_8, 0, __pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 297, __pyx_L1_error)
+  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 320, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 297, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 320, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(1, 297, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_9) < 0) __PYX_ERR(0, 320, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
-  __pyx_t_9 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 297, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_8, __pyx_t_7); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 320, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_v_dyDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_9);
   __pyx_t_9 = 0;
 
-  /* "renom/cuda/cudnn.pyx":298
+  /* "renom/cuda/cudnn.pyx":321
  *     cdef TensorDesc dwDesc = TensorDesc(dw.shape, dtype=dw.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef double epsilon = 1e-5             # <<<<<<<<<<<<<<
@@ -8508,16 +8870,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
  */
   __pyx_v_epsilon = 1e-5;
 
-  /* "renom/cuda/cudnn.pyx":300
+  /* "renom/cuda/cudnn.pyx":323
  *     cdef double epsilon = 1e-5
  * 
  *     md = cudnnBatchNormMode_t.CUDNN_BATCHNORM_SPATIAL if mode == 1 else cudnnBatchNormMode_t.CUDNN_BATCHNORM_PER_ACTIVATION             # <<<<<<<<<<<<<<
  * 
  *     cuda_base.check_heap_device(x, w, dy, saved_mean, saved_var, dx, dw, db)
  */
-  __pyx_t_9 = __Pyx_PyInt_EqObjC(__pyx_v_mode, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 300, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_EqObjC(__pyx_v_mode, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 323, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_9);
-  __pyx_t_14 = __Pyx_PyObject_IsTrue(__pyx_t_9); if (unlikely(__pyx_t_14 < 0)) __PYX_ERR(1, 300, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyObject_IsTrue(__pyx_t_9); if (unlikely(__pyx_t_14 < 0)) __PYX_ERR(0, 323, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
   if (__pyx_t_14) {
     __pyx_t_13 = CUDNN_BATCHNORM_SPATIAL;
@@ -8526,16 +8888,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
   }
   __pyx_v_md = __pyx_t_13;
 
-  /* "renom/cuda/cudnn.pyx":302
+  /* "renom/cuda/cudnn.pyx":325
  *     md = cudnnBatchNormMode_t.CUDNN_BATCHNORM_SPATIAL if mode == 1 else cudnnBatchNormMode_t.CUDNN_BATCHNORM_PER_ACTIVATION
  * 
  *     cuda_base.check_heap_device(x, w, dy, saved_mean, saved_var, dx, dw, db)             # <<<<<<<<<<<<<<
  *     check(cudnnBatchNormalizationBackward(
  *         handler,
  */
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 302, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 325, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 302, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 325, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_t_7 = NULL;
@@ -8553,7 +8915,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_8)) {
     PyObject *__pyx_temp[9] = {__pyx_t_7, __pyx_v_x, __pyx_v_w, __pyx_v_dy, __pyx_v_saved_mean, __pyx_v_saved_var, __pyx_v_dx, __pyx_v_dw, __pyx_v_db};
-    __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_15, 8+__pyx_t_15); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 302, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_15, 8+__pyx_t_15); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 325, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_GOTREF(__pyx_t_9);
   } else
@@ -8561,13 +8923,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
     PyObject *__pyx_temp[9] = {__pyx_t_7, __pyx_v_x, __pyx_v_w, __pyx_v_dy, __pyx_v_saved_mean, __pyx_v_saved_var, __pyx_v_dx, __pyx_v_dw, __pyx_v_db};
-    __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_15, 8+__pyx_t_15); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 302, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-__pyx_t_15, 8+__pyx_t_15); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 325, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_GOTREF(__pyx_t_9);
   } else
   #endif
   {
-    __pyx_t_2 = PyTuple_New(8+__pyx_t_15); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 302, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(8+__pyx_t_15); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 325, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     if (__pyx_t_7) {
       __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_7); __pyx_t_7 = NULL;
@@ -8596,127 +8958,127 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
     __Pyx_INCREF(__pyx_v_db);
     __Pyx_GIVEREF(__pyx_v_db);
     PyTuple_SET_ITEM(__pyx_t_2, 7+__pyx_t_15, __pyx_v_db);
-    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_2, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 302, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_2, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 325, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_9);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-  /* "renom/cuda/cudnn.pyx":303
+  /* "renom/cuda/cudnn.pyx":326
  * 
  *     cuda_base.check_heap_device(x, w, dy, saved_mean, saved_var, dx, dw, db)
  *     check(cudnnBatchNormalizationBackward(             # <<<<<<<<<<<<<<
  *         handler,
  *         md,
  */
-  __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 303, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 326, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_8);
 
-  /* "renom/cuda/cudnn.pyx":311
+  /* "renom/cuda/cudnn.pyx":334
  *         bt.ptr,
  *         xDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,             # <<<<<<<<<<<<<<
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 311, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 334, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 311, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 334, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":313
+  /* "renom/cuda/cudnn.pyx":336
  *         <const void *> <uintptr_t> x._ptr,
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,             # <<<<<<<<<<<<<<
  *         xDesc.tensor_desc,
  *         <void *> <uintptr_t> dx._ptr,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 313, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 336, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_16 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_16 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 313, __pyx_L1_error)
+  __pyx_t_16 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_16 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 336, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":315
+  /* "renom/cuda/cudnn.pyx":338
  *         <const void *> <uintptr_t> dy._ptr,
  *         xDesc.tensor_desc,
  *         <void *> <uintptr_t> dx._ptr,             # <<<<<<<<<<<<<<
  *         dwDesc.tensor_desc,
  *         <const void *> <uintptr_t> w._ptr,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 315, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 338, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_17 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_17 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 315, __pyx_L1_error)
+  __pyx_t_17 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_17 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 338, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":317
+  /* "renom/cuda/cudnn.pyx":340
  *         <void *> <uintptr_t> dx._ptr,
  *         dwDesc.tensor_desc,
  *         <const void *> <uintptr_t> w._ptr,             # <<<<<<<<<<<<<<
  *         <void *> <uintptr_t> dw._ptr,
  *         <void *> <uintptr_t> db._ptr,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 317, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 340, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_18 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_18 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 317, __pyx_L1_error)
+  __pyx_t_18 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_18 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 340, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":318
+  /* "renom/cuda/cudnn.pyx":341
  *         dwDesc.tensor_desc,
  *         <const void *> <uintptr_t> w._ptr,
  *         <void *> <uintptr_t> dw._ptr,             # <<<<<<<<<<<<<<
  *         <void *> <uintptr_t> db._ptr,
  *         epsilon,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dw, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 318, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dw, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 341, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_19 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_19 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 318, __pyx_L1_error)
+  __pyx_t_19 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_19 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 341, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":319
+  /* "renom/cuda/cudnn.pyx":342
  *         <const void *> <uintptr_t> w._ptr,
  *         <void *> <uintptr_t> dw._ptr,
  *         <void *> <uintptr_t> db._ptr,             # <<<<<<<<<<<<<<
  *         epsilon,
  *         <const void *> <uintptr_t> saved_mean._ptr,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 319, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 342, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_20 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_20 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 319, __pyx_L1_error)
+  __pyx_t_20 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_20 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 342, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":321
+  /* "renom/cuda/cudnn.pyx":344
  *         <void *> <uintptr_t> db._ptr,
  *         epsilon,
  *         <const void *> <uintptr_t> saved_mean._ptr,             # <<<<<<<<<<<<<<
  *         <const void *> <uintptr_t> saved_var._ptr))
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_saved_mean, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 321, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_saved_mean, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 344, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_21 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 321, __pyx_L1_error)
+  __pyx_t_21 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_21 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 344, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":322
+  /* "renom/cuda/cudnn.pyx":345
  *         epsilon,
  *         <const void *> <uintptr_t> saved_mean._ptr,
  *         <const void *> <uintptr_t> saved_var._ptr))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_saved_var, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 322, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_saved_var, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 345, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_22 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 322, __pyx_L1_error)
+  __pyx_t_22 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_22 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 345, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":303
+  /* "renom/cuda/cudnn.pyx":326
  * 
  *     cuda_base.check_heap_device(x, w, dy, saved_mean, saved_var, dx, dw, db)
  *     check(cudnnBatchNormalizationBackward(             # <<<<<<<<<<<<<<
  *         handler,
  *         md,
  */
-  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnBatchNormalizationBackward(__pyx_v_handler, __pyx_v_md, __pyx_v_alf->ptr, __pyx_v_bt->ptr, __pyx_v_alf->ptr, __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_12)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_16)), __pyx_v_xDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_17)), __pyx_v_dwDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_18)), ((void *)((uintptr_t)__pyx_t_19)), ((void *)((uintptr_t)__pyx_t_20)), __pyx_v_epsilon, ((void const *)((uintptr_t)__pyx_t_21)), ((void const *)((uintptr_t)__pyx_t_22)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 303, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnBatchNormalizationBackward(__pyx_v_handler, __pyx_v_md, __pyx_v_alf->ptr, __pyx_v_bt->ptr, __pyx_v_alf->ptr, __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_12)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_16)), __pyx_v_xDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_17)), __pyx_v_dwDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_18)), ((void *)((uintptr_t)__pyx_t_19)), ((void *)((uintptr_t)__pyx_t_20)), __pyx_v_epsilon, ((void const *)((uintptr_t)__pyx_t_21)), ((void const *)((uintptr_t)__pyx_t_22)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 326, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_7 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_8))) {
@@ -8729,14 +9091,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
     }
   }
   if (!__pyx_t_7) {
-    __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 303, __pyx_L1_error)
+    __pyx_t_9 = __Pyx_PyObject_CallOneArg(__pyx_t_8, __pyx_t_2); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 326, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_9);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_8)) {
       PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_2};
-      __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 303, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 326, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -8745,20 +9107,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_8)) {
       PyObject *__pyx_temp[2] = {__pyx_t_7, __pyx_t_2};
-      __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 303, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyCFunction_FastCall(__pyx_t_8, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 326, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 303, __pyx_L1_error)
+      __pyx_t_6 = PyTuple_New(1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 326, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_7); __pyx_t_7 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_6, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_6, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 303, __pyx_L1_error)
+      __pyx_t_9 = __Pyx_PyObject_Call(__pyx_t_8, __pyx_t_6, NULL); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 326, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     }
@@ -8766,7 +9128,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
   __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
   __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
 
-  /* "renom/cuda/cudnn.pyx":285
+  /* "renom/cuda/cudnn.pyx":308
  * 
  * 
  * def cuBatchNormalizatoinBackward(handle, x, w, dy, saved_mean, saved_var, dx, dw, db, mode=None):             # <<<<<<<<<<<<<<
@@ -8809,7 +9171,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_11cuBatchNormalizatoinBackward(CYT
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":325
+/* "renom/cuda/cudnn.pyx":348
  * 
  * 
  * def cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y):             # <<<<<<<<<<<<<<
@@ -8858,29 +9220,29 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_14cuGetConvolutionFwdAlgo(PyObject
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_conv_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuGetConvolutionFwdAlgo", 1, 5, 5, 1); __PYX_ERR(1, 325, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuGetConvolutionFwdAlgo", 1, 5, 5, 1); __PYX_ERR(0, 348, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_filter_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuGetConvolutionFwdAlgo", 1, 5, 5, 2); __PYX_ERR(1, 325, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuGetConvolutionFwdAlgo", 1, 5, 5, 2); __PYX_ERR(0, 348, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuGetConvolutionFwdAlgo", 1, 5, 5, 3); __PYX_ERR(1, 325, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuGetConvolutionFwdAlgo", 1, 5, 5, 3); __PYX_ERR(0, 348, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuGetConvolutionFwdAlgo", 1, 5, 5, 4); __PYX_ERR(1, 325, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuGetConvolutionFwdAlgo", 1, 5, 5, 4); __PYX_ERR(0, 348, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuGetConvolutionFwdAlgo") < 0)) __PYX_ERR(1, 325, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuGetConvolutionFwdAlgo") < 0)) __PYX_ERR(0, 348, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 5) {
       goto __pyx_L5_argtuple_error;
@@ -8899,7 +9261,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_14cuGetConvolutionFwdAlgo(PyObject
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuGetConvolutionFwdAlgo", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 325, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuGetConvolutionFwdAlgo", 1, 5, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 348, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuGetConvolutionFwdAlgo", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -8933,16 +9295,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_INCREF(__pyx_v_y);
 
-  /* "renom/cuda/cudnn.pyx":326
+  /* "renom/cuda/cudnn.pyx":349
  * 
  * def cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y):
  *     x, y = map(get_gpu, [x, y])             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 326, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 326, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
@@ -8950,7 +9312,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
   __Pyx_INCREF(__pyx_v_y);
   __Pyx_GIVEREF(__pyx_v_y);
   PyList_SET_ITEM(__pyx_t_2, 1, __pyx_v_y);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 326, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -8958,7 +9320,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 326, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 349, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -8971,7 +9333,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 326, __pyx_L1_error)
+      __PYX_ERR(0, 349, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -8984,15 +9346,15 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
     __Pyx_INCREF(__pyx_t_3);
     __Pyx_INCREF(__pyx_t_1);
     #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 326, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 349, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 326, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 349, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     #endif
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 326, __pyx_L1_error)
+    __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 349, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_5 = Py_TYPE(__pyx_t_4)->tp_iternext;
@@ -9000,7 +9362,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
     __Pyx_GOTREF(__pyx_t_3);
     index = 1; __pyx_t_1 = __pyx_t_5(__pyx_t_4); if (unlikely(!__pyx_t_1)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_1);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(1, 326, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(0, 349, __pyx_L1_error)
     __pyx_t_5 = NULL;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     goto __pyx_L4_unpacking_done;
@@ -9008,7 +9370,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_5 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 326, __pyx_L1_error)
+    __PYX_ERR(0, 349, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_3);
@@ -9016,17 +9378,17 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
   __Pyx_DECREF_SET(__pyx_v_y, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":328
+  /* "renom/cuda/cudnn.pyx":351
  *     x, y = map(get_gpu, [x, y])
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  *     cdef cudnnConvolutionFwdAlgo_t algo
  *     cdef cudnnConvolutionFwdPreference_t pref = cudnnConvolutionFwdPreference_t.CUDNN_CONVOLUTION_FWD_NO_WORKSPACE
  */
-  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 328, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 351, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_6));
 
-  /* "renom/cuda/cudnn.pyx":330
+  /* "renom/cuda/cudnn.pyx":353
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef cudnnConvolutionFwdAlgo_t algo
  *     cdef cudnnConvolutionFwdPreference_t pref = cudnnConvolutionFwdPreference_t.CUDNN_CONVOLUTION_FWD_NO_WORKSPACE             # <<<<<<<<<<<<<<
@@ -9035,98 +9397,98 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
  */
   __pyx_v_pref = CUDNN_CONVOLUTION_FWD_NO_WORKSPACE;
 
-  /* "renom/cuda/cudnn.pyx":331
+  /* "renom/cuda/cudnn.pyx":354
  *     cdef cudnnConvolutionFwdAlgo_t algo
  *     cdef cudnnConvolutionFwdPreference_t pref = cudnnConvolutionFwdPreference_t.CUDNN_CONVOLUTION_FWD_NO_WORKSPACE
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)             # <<<<<<<<<<<<<<
  *     cdef cudnnFilterDescriptor_t wDesc = <cudnnFilterDescriptor_t> <uintptr_t> filter_desc
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 331, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 354, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 331, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 354, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 331, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 354, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 331, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 354, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 331, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 354, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 331, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 354, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_xDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":332
+  /* "renom/cuda/cudnn.pyx":355
  *     cdef cudnnConvolutionFwdPreference_t pref = cudnnConvolutionFwdPreference_t.CUDNN_CONVOLUTION_FWD_NO_WORKSPACE
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef cudnnFilterDescriptor_t wDesc = <cudnnFilterDescriptor_t> <uintptr_t> filter_desc             # <<<<<<<<<<<<<<
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  *     cdef cudnnConvolutionDescriptor_t convDesc = <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc
  */
-  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 332, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 355, __pyx_L1_error)
   __pyx_v_wDesc = ((cudnnFilterDescriptor_t)((uintptr_t)__pyx_t_6));
 
-  /* "renom/cuda/cudnn.pyx":333
+  /* "renom/cuda/cudnn.pyx":356
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef cudnnFilterDescriptor_t wDesc = <cudnnFilterDescriptor_t> <uintptr_t> filter_desc
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)             # <<<<<<<<<<<<<<
  *     cdef cudnnConvolutionDescriptor_t convDesc = <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc
  * 
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 333, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 333, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 333, __pyx_L1_error)
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 333, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 333, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 333, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 356, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_yDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":334
+  /* "renom/cuda/cudnn.pyx":357
  *     cdef cudnnFilterDescriptor_t wDesc = <cudnnFilterDescriptor_t> <uintptr_t> filter_desc
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  *     cdef cudnnConvolutionDescriptor_t convDesc = <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc             # <<<<<<<<<<<<<<
  * 
  *     check(cudnnGetConvolutionForwardAlgorithm(
  */
-  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 334, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 357, __pyx_L1_error)
   __pyx_v_convDesc = ((cudnnConvolutionDescriptor_t)((uintptr_t)__pyx_t_6));
 
-  /* "renom/cuda/cudnn.pyx":336
+  /* "renom/cuda/cudnn.pyx":359
  *     cdef cudnnConvolutionDescriptor_t convDesc = <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc
  * 
  *     check(cudnnGetConvolutionForwardAlgorithm(             # <<<<<<<<<<<<<<
  *         handler,
  *         xDesc.tensor_desc,
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 336, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 359, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
 
-  /* "renom/cuda/cudnn.pyx":344
+  /* "renom/cuda/cudnn.pyx":367
  *         pref,
  *         0,
  *         & algo))             # <<<<<<<<<<<<<<
  *     return <uintptr_t> algo
  * 
  */
-  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnGetConvolutionForwardAlgorithm(__pyx_v_handler, __pyx_v_xDesc->tensor_desc, __pyx_v_wDesc, __pyx_v_convDesc, __pyx_v_yDesc->tensor_desc, __pyx_v_pref, 0, (&__pyx_v_algo))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 336, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnGetConvolutionForwardAlgorithm(__pyx_v_handler, __pyx_v_xDesc->tensor_desc, __pyx_v_wDesc, __pyx_v_convDesc, __pyx_v_yDesc->tensor_desc, __pyx_v_pref, 0, (&__pyx_v_algo))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 359, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -9139,14 +9501,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 336, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 359, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 336, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 359, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -9155,20 +9517,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 336, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 359, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 336, __pyx_L1_error)
+      __pyx_t_7 = PyTuple_New(1+1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 359, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_7);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_7, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 336, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_7, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 359, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
     }
@@ -9176,7 +9538,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":345
+  /* "renom/cuda/cudnn.pyx":368
  *         0,
  *         & algo))
  *     return <uintptr_t> algo             # <<<<<<<<<<<<<<
@@ -9184,13 +9546,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
  * 
  */
   __Pyx_XDECREF(__pyx_r);
-  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_algo)); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 345, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_FromSize_t(((uintptr_t)__pyx_v_algo)); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 368, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_r = __pyx_t_1;
   __pyx_t_1 = 0;
   goto __pyx_L0;
 
-  /* "renom/cuda/cudnn.pyx":325
+  /* "renom/cuda/cudnn.pyx":348
  * 
  * 
  * def cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y):             # <<<<<<<<<<<<<<
@@ -9217,7 +9579,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_13cuGetConvolutionFwdAlgo(CYTHON_U
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":348
+/* "renom/cuda/cudnn.pyx":371
  * 
  * 
  * def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):             # <<<<<<<<<<<<<<
@@ -9269,35 +9631,35 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_16cuConvolutionForward(PyObject *_
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_conv_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, 1); __PYX_ERR(1, 348, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, 1); __PYX_ERR(0, 371, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_filter_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, 2); __PYX_ERR(1, 348, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, 2); __PYX_ERR(0, 371, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, 3); __PYX_ERR(1, 348, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, 3); __PYX_ERR(0, 371, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_w)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, 4); __PYX_ERR(1, 348, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, 4); __PYX_ERR(0, 371, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, 5); __PYX_ERR(1, 348, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, 5); __PYX_ERR(0, 371, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuConvolutionForward") < 0)) __PYX_ERR(1, 348, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuConvolutionForward") < 0)) __PYX_ERR(0, 371, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
@@ -9318,7 +9680,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_16cuConvolutionForward(PyObject *_
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 348, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuConvolutionForward", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 371, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuConvolutionForward", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -9358,16 +9720,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
   __Pyx_INCREF(__pyx_v_w);
   __Pyx_INCREF(__pyx_v_y);
 
-  /* "renom/cuda/cudnn.pyx":349
+  /* "renom/cuda/cudnn.pyx":372
  * 
  * def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):
  *     x, w, y = map(get_gpu, [x, w, y])             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 349, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 372, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 349, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 372, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
@@ -9378,7 +9740,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
   __Pyx_INCREF(__pyx_v_y);
   __Pyx_GIVEREF(__pyx_v_y);
   PyList_SET_ITEM(__pyx_t_2, 2, __pyx_v_y);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 349, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 372, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -9386,7 +9748,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 349, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 372, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -9399,7 +9761,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 349, __pyx_L1_error)
+      __PYX_ERR(0, 372, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -9415,17 +9777,17 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
     __Pyx_INCREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 349, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 372, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 349, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 372, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 349, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 372, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 349, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 372, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_6 = Py_TYPE(__pyx_t_5)->tp_iternext;
@@ -9435,7 +9797,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
     __Pyx_GOTREF(__pyx_t_1);
     index = 2; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(1, 349, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 372, __pyx_L1_error)
     __pyx_t_6 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L4_unpacking_done;
@@ -9443,7 +9805,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 349, __pyx_L1_error)
+    __PYX_ERR(0, 372, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_3);
@@ -9453,159 +9815,159 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
   __Pyx_DECREF_SET(__pyx_v_y, __pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":351
+  /* "renom/cuda/cudnn.pyx":374
  *     x, w, y = map(get_gpu, [x, w, y])
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  */
-  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 351, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 374, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_7));
 
-  /* "renom/cuda/cudnn.pyx":353
+  /* "renom/cuda/cudnn.pyx":376
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 353, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 353, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 353, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_float_1_0);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 353, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 353, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 353, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 353, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 353, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 353, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 353, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 376, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_alf = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":354
+  /* "renom/cuda/cudnn.pyx":377
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 354, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 354, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 354, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_3, 0, __pyx_float_0_0);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 354, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 354, __pyx_L1_error)
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 354, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 354, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 354, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 354, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 354, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 377, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_bt = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":356
+  /* "renom/cuda/cudnn.pyx":379
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  *     # cdef cudnnConvolutionFwdAlgo_t algo = <cudnnConvolutionFwdAlgo_t><uintptr_t>cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y)
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 356, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 379, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 356, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 379, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 356, __pyx_L1_error)
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 379, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 356, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 379, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 356, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 379, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 356, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 379, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_xDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":357
+  /* "renom/cuda/cudnn.pyx":380
  * 
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)             # <<<<<<<<<<<<<<
  *     # cdef cudnnConvolutionFwdAlgo_t algo = <cudnnConvolutionFwdAlgo_t><uintptr_t>cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y)
  *     # output of CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM is not deterministic
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 357, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 380, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 357, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 380, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 357, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 380, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 357, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 380, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 357, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 380, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 357, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 380, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_yDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":360
+  /* "renom/cuda/cudnn.pyx":383
  *     # cdef cudnnConvolutionFwdAlgo_t algo = <cudnnConvolutionFwdAlgo_t><uintptr_t>cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y)
  *     # output of CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM is not deterministic
  *     cdef cudnnConvolutionFwdAlgo_t algo = cudnnConvolutionFwdAlgo_t.CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM             # <<<<<<<<<<<<<<
@@ -9614,7 +9976,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
  */
   __pyx_v_algo = CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM;
 
-  /* "renom/cuda/cudnn.pyx":361
+  /* "renom/cuda/cudnn.pyx":384
  *     # output of CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM is not deterministic
  *     cdef cudnnConvolutionFwdAlgo_t algo = cudnnConvolutionFwdAlgo_t.CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM
  *     cdef int workSpace = 0             # <<<<<<<<<<<<<<
@@ -9623,16 +9985,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
  */
   __pyx_v_workSpace = 0;
 
-  /* "renom/cuda/cudnn.pyx":363
+  /* "renom/cuda/cudnn.pyx":386
  *     cdef int workSpace = 0
  * 
  *     cuda_base.check_heap_device(x, w, y)             # <<<<<<<<<<<<<<
  *     check(cudnnConvolutionForward(
  *         handler,
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 363, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 386, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 363, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 386, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = NULL;
@@ -9650,7 +10012,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[4] = {__pyx_t_1, __pyx_v_x, __pyx_v_w, __pyx_v_y};
-    __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 363, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 386, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else
@@ -9658,13 +10020,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[4] = {__pyx_t_1, __pyx_v_x, __pyx_v_w, __pyx_v_y};
-    __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 363, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 386, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else
   #endif
   {
-    __pyx_t_2 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 363, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 386, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     if (__pyx_t_1) {
       __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1); __pyx_t_1 = NULL;
@@ -9678,85 +10040,85 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
     __Pyx_INCREF(__pyx_v_y);
     __Pyx_GIVEREF(__pyx_v_y);
     PyTuple_SET_ITEM(__pyx_t_2, 2+__pyx_t_8, __pyx_v_y);
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 363, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 386, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":364
+  /* "renom/cuda/cudnn.pyx":387
  * 
  *     cuda_base.check_heap_device(x, w, y)
  *     check(cudnnConvolutionForward(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 364, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 387, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
 
-  /* "renom/cuda/cudnn.pyx":368
+  /* "renom/cuda/cudnn.pyx":391
  *         alf.ptr,
  *         xDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,             # <<<<<<<<<<<<<<
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,
  *         <void *> <uintptr_t> w._ptr,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 368, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 391, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 368, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 391, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":369
+  /* "renom/cuda/cudnn.pyx":392
  *         xDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,             # <<<<<<<<<<<<<<
  *         <void *> <uintptr_t> w._ptr,
  *         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,
  */
-  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_9 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 369, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_9 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 392, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":370
+  /* "renom/cuda/cudnn.pyx":393
  *         <const void *> <uintptr_t> x._ptr,
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,
  *         <void *> <uintptr_t> w._ptr,             # <<<<<<<<<<<<<<
  *         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,
  *         algo,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 370, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 393, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 370, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 393, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":371
+  /* "renom/cuda/cudnn.pyx":394
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,
  *         <void *> <uintptr_t> w._ptr,
  *         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,             # <<<<<<<<<<<<<<
  *         algo,
  *         <void *>workSpace,
  */
-  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 371, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 394, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":377
+  /* "renom/cuda/cudnn.pyx":400
  *         bt.ptr,
  *         yDesc.tensor_desc,
  *         <void *> <uintptr_t> y._ptr))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 377, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 400, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 377, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 400, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":364
+  /* "renom/cuda/cudnn.pyx":387
  * 
  *     cuda_base.check_heap_device(x, w, y)
  *     check(cudnnConvolutionForward(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionForward(__pyx_v_handler, __pyx_v_alf->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_7)), ((cudnnFilterDescriptor_t)((uintptr_t)__pyx_t_9)), ((void *)((uintptr_t)__pyx_t_10)), ((cudnnConvolutionDescriptor_t)((uintptr_t)__pyx_t_11)), __pyx_v_algo, ((void *)__pyx_v_workSpace), 0, __pyx_v_bt->ptr, __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_12)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 364, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionForward(__pyx_v_handler, __pyx_v_alf->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_7)), ((cudnnFilterDescriptor_t)((uintptr_t)__pyx_t_9)), ((void *)((uintptr_t)__pyx_t_10)), ((cudnnConvolutionDescriptor_t)((uintptr_t)__pyx_t_11)), __pyx_v_algo, ((void *)__pyx_v_workSpace), 0, __pyx_v_bt->ptr, __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_12)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 387, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
@@ -9769,14 +10131,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
     }
   }
   if (!__pyx_t_1) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 364, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 387, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_2};
-      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 364, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 387, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -9785,20 +10147,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_2};
-      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 364, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 387, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 364, __pyx_L1_error)
+      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 387, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1); __pyx_t_1 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 364, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 387, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
@@ -9806,7 +10168,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":348
+  /* "renom/cuda/cudnn.pyx":371
  * 
  * 
  * def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):             # <<<<<<<<<<<<<<
@@ -9838,7 +10200,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_15cuConvolutionForward(CYTHON_UNUS
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":380
+/* "renom/cuda/cudnn.pyx":403
  * 
  * 
  * def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):             # <<<<<<<<<<<<<<
@@ -9899,53 +10261,53 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_18cuConvolutionBackward(PyObject *
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_conv_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 1); __PYX_ERR(1, 380, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 1); __PYX_ERR(0, 403, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_filter_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 2); __PYX_ERR(1, 380, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 2); __PYX_ERR(0, 403, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 3); __PYX_ERR(1, 380, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 3); __PYX_ERR(0, 403, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_w)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 4); __PYX_ERR(1, 380, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 4); __PYX_ERR(0, 403, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dy)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 5); __PYX_ERR(1, 380, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 5); __PYX_ERR(0, 403, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  6:
         if (likely((values[6] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dw)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 6); __PYX_ERR(1, 380, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 6); __PYX_ERR(0, 403, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  7:
         if (likely((values[7] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_db)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 7); __PYX_ERR(1, 380, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 7); __PYX_ERR(0, 403, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  8:
         if (likely((values[8] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dx)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 8); __PYX_ERR(1, 380, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, 8); __PYX_ERR(0, 403, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuConvolutionBackward") < 0)) __PYX_ERR(1, 380, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuConvolutionBackward") < 0)) __PYX_ERR(0, 403, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 9) {
       goto __pyx_L5_argtuple_error;
@@ -9972,7 +10334,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_18cuConvolutionBackward(PyObject *
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 380, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuConvolutionBackward", 1, 9, 9, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 403, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuConvolutionBackward", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -10020,16 +10382,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
   __Pyx_INCREF(__pyx_v_db);
   __Pyx_INCREF(__pyx_v_dx);
 
-  /* "renom/cuda/cudnn.pyx":381
+  /* "renom/cuda/cudnn.pyx":404
  * 
  * def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
  *     x, w, dy, dw, db, dx = map(get_gpu, [x, w, dy, dw, db, dx])             # <<<<<<<<<<<<<<
  *     cuda_base.check_heap_device(x, w, dy, dw, db, dx)
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 381, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 404, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(6); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 381, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(6); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 404, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
@@ -10049,7 +10411,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
   __Pyx_INCREF(__pyx_v_dx);
   __Pyx_GIVEREF(__pyx_v_dx);
   PyList_SET_ITEM(__pyx_t_2, 5, __pyx_v_dx);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 381, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 404, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -10057,7 +10419,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 381, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 404, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -10070,7 +10432,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
     if (unlikely(size != 6)) {
       if (size > 6) __Pyx_RaiseTooManyValuesError(6);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 381, __pyx_L1_error)
+      __PYX_ERR(0, 404, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -10099,7 +10461,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
       Py_ssize_t i;
       PyObject** temps[6] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_4,&__pyx_t_5,&__pyx_t_6,&__pyx_t_7};
       for (i=0; i < 6; i++) {
-        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(1, 381, __pyx_L1_error)
+        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(0, 404, __pyx_L1_error)
         __Pyx_GOTREF(item);
         *(temps[i]) = item;
       }
@@ -10109,7 +10471,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
   } else {
     Py_ssize_t index = -1;
     PyObject** temps[6] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_4,&__pyx_t_5,&__pyx_t_6,&__pyx_t_7};
-    __pyx_t_8 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_8)) __PYX_ERR(1, 381, __pyx_L1_error)
+    __pyx_t_8 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_8)) __PYX_ERR(0, 404, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_8);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_9 = Py_TYPE(__pyx_t_8)->tp_iternext;
@@ -10118,7 +10480,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
       __Pyx_GOTREF(item);
       *(temps[index]) = item;
     }
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_9(__pyx_t_8), 6) < 0) __PYX_ERR(1, 381, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_9(__pyx_t_8), 6) < 0) __PYX_ERR(0, 404, __pyx_L1_error)
     __pyx_t_9 = NULL;
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     goto __pyx_L4_unpacking_done;
@@ -10126,7 +10488,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
     __Pyx_DECREF(__pyx_t_8); __pyx_t_8 = 0;
     __pyx_t_9 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 381, __pyx_L1_error)
+    __PYX_ERR(0, 404, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_3);
@@ -10142,16 +10504,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
   __Pyx_DECREF_SET(__pyx_v_dx, __pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "renom/cuda/cudnn.pyx":382
+  /* "renom/cuda/cudnn.pyx":405
  * def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
  *     x, w, dy, dw, db, dx = map(get_gpu, [x, w, dy, dw, db, dx])
  *     cuda_base.check_heap_device(x, w, dy, dw, db, dx)             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  */
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 382, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 405, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 382, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 405, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_t_7 = NULL;
@@ -10169,7 +10531,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_6)) {
     PyObject *__pyx_temp[7] = {__pyx_t_7, __pyx_v_x, __pyx_v_w, __pyx_v_dy, __pyx_v_dw, __pyx_v_db, __pyx_v_dx};
-    __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_10, 6+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 382, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_10, 6+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 405, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_GOTREF(__pyx_t_2);
   } else
@@ -10177,13 +10539,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_6)) {
     PyObject *__pyx_temp[7] = {__pyx_t_7, __pyx_v_x, __pyx_v_w, __pyx_v_dy, __pyx_v_dw, __pyx_v_db, __pyx_v_dx};
-    __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_10, 6+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 382, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyCFunction_FastCall(__pyx_t_6, __pyx_temp+1-__pyx_t_10, 6+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 405, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_7); __pyx_t_7 = 0;
     __Pyx_GOTREF(__pyx_t_2);
   } else
   #endif
   {
-    __pyx_t_5 = PyTuple_New(6+__pyx_t_10); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 382, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(6+__pyx_t_10); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 405, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     if (__pyx_t_7) {
       __Pyx_GIVEREF(__pyx_t_7); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_7); __pyx_t_7 = NULL;
@@ -10206,193 +10568,193 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
     __Pyx_INCREF(__pyx_v_dx);
     __Pyx_GIVEREF(__pyx_v_dx);
     PyTuple_SET_ITEM(__pyx_t_5, 5+__pyx_t_10, __pyx_v_dx);
-    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 382, __pyx_L1_error)
+    __pyx_t_2 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_5, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 405, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":384
+  /* "renom/cuda/cudnn.pyx":407
  *     cuda_base.check_heap_device(x, w, dy, dw, db, dx)
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 384, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 407, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 384, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 407, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 384, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 407, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_float_1_0);
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 384, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 407, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 384, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 407, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 384, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 407, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(1, 384, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(0, 407, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_5, __pyx_t_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 384, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(__pyx_t_6, __pyx_t_5, __pyx_t_2); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 407, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 384, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 407, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 384, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 407, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_alf = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "renom/cuda/cudnn.pyx":385
+  /* "renom/cuda/cudnn.pyx":408
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 385, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 385, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_7, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyList_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 385, __pyx_L1_error)
+  __pyx_t_7 = PyList_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_7, 0, __pyx_float_0_0);
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 385, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 385, __pyx_L1_error)
+  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 385, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_6) < 0) __PYX_ERR(1, 385, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_6) < 0) __PYX_ERR(0, 408, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 385, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 385, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_6);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_6);
   __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_7, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 385, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_7, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 408, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_v_bt = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_6);
   __pyx_t_6 = 0;
 
-  /* "renom/cuda/cudnn.pyx":387
+  /* "renom/cuda/cudnn.pyx":410
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  */
-  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 387, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 410, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_11));
 
-  /* "renom/cuda/cudnn.pyx":388
+  /* "renom/cuda/cudnn.pyx":411
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef TensorDesc dbDesc = TensorDesc(db.shape, dtype=db.dtype)
  */
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 388, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 411, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 388, __pyx_L1_error)
+  __pyx_t_7 = PyTuple_New(1); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 411, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_GIVEREF(__pyx_t_6);
   PyTuple_SET_ITEM(__pyx_t_7, 0, __pyx_t_6);
   __pyx_t_6 = 0;
-  __pyx_t_6 = PyDict_New(); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 388, __pyx_L1_error)
+  __pyx_t_6 = PyDict_New(); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 411, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 388, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 411, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(1, 388, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_6, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 411, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 388, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_7, __pyx_t_6); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 411, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __pyx_v_xDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":389
+  /* "renom/cuda/cudnn.pyx":412
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc dbDesc = TensorDesc(db.shape, dtype=db.dtype)
  *     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
  */
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 389, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 412, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 389, __pyx_L1_error)
+  __pyx_t_6 = PyTuple_New(1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 412, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_6, 0, __pyx_t_5);
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 389, __pyx_L1_error)
+  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 412, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 389, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 412, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(1, 389, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_7) < 0) __PYX_ERR(0, 412, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
-  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 389, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_6, __pyx_t_5); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 412, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_dyDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_7);
   __pyx_t_7 = 0;
 
-  /* "renom/cuda/cudnn.pyx":390
+  /* "renom/cuda/cudnn.pyx":413
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef TensorDesc dbDesc = TensorDesc(db.shape, dtype=db.dtype)             # <<<<<<<<<<<<<<
  *     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
  *     cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
  */
-  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_shape); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 390, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_shape); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 413, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 390, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 413, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_7);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_7);
   __pyx_t_7 = 0;
-  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 390, __pyx_L1_error)
+  __pyx_t_7 = PyDict_New(); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 413, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
-  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_dtype); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 390, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_dtype); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 413, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
-  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_6) < 0) __PYX_ERR(1, 390, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_7, __pyx_n_s_dtype, __pyx_t_6) < 0) __PYX_ERR(0, 413, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
-  __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_5, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 390, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_5, __pyx_t_7); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 413, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_6);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __pyx_v_dbDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_6);
   __pyx_t_6 = 0;
 
-  /* "renom/cuda/cudnn.pyx":391
+  /* "renom/cuda/cudnn.pyx":414
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef TensorDesc dbDesc = TensorDesc(db.shape, dtype=db.dtype)
  *     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0             # <<<<<<<<<<<<<<
@@ -10401,7 +10763,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
  */
   __pyx_v_algo_filter = CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0;
 
-  /* "renom/cuda/cudnn.pyx":392
+  /* "renom/cuda/cudnn.pyx":415
  *     cdef TensorDesc dbDesc = TensorDesc(db.shape, dtype=db.dtype)
  *     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
  *     cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0             # <<<<<<<<<<<<<<
@@ -10410,7 +10772,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
  */
   __pyx_v_algo_data = CUDNN_CONVOLUTION_BWD_DATA_ALGO_0;
 
-  /* "renom/cuda/cudnn.pyx":393
+  /* "renom/cuda/cudnn.pyx":416
  *     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
  *     cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
  *     cdef int workSpace = 0             # <<<<<<<<<<<<<<
@@ -10419,78 +10781,78 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
  */
   __pyx_v_workSpace = 0;
 
-  /* "renom/cuda/cudnn.pyx":395
+  /* "renom/cuda/cudnn.pyx":418
  *     cdef int workSpace = 0
  * 
  *     check(cudnnConvolutionBackwardFilter(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 395, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 418, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
 
-  /* "renom/cuda/cudnn.pyx":399
+  /* "renom/cuda/cudnn.pyx":422
  *         alf.ptr,
  *         xDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,             # <<<<<<<<<<<<<<
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  */
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 399, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 422, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 399, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 422, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":401
+  /* "renom/cuda/cudnn.pyx":424
  *         <const void *> <uintptr_t> x._ptr,
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,             # <<<<<<<<<<<<<<
  *         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,
  *         algo_filter,
  */
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 401, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 424, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 401, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 424, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":402
+  /* "renom/cuda/cudnn.pyx":425
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  *         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,             # <<<<<<<<<<<<<<
  *         algo_filter,
  *         <void *>workSpace,
  */
-  __pyx_t_13 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_13 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 402, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_13 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 425, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":407
+  /* "renom/cuda/cudnn.pyx":430
  *         0,
  *         bt.ptr,
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,             # <<<<<<<<<<<<<<
  *         <void *> <uintptr_t> dw._ptr))
  * 
  */
-  __pyx_t_14 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_14 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 407, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_14 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 430, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":408
+  /* "renom/cuda/cudnn.pyx":431
  *         bt.ptr,
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,
  *         <void *> <uintptr_t> dw._ptr))             # <<<<<<<<<<<<<<
  * 
  *     check(cudnnConvolutionBackwardData(
  */
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_dw, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 408, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_dw, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 431, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_15 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_15 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 408, __pyx_L1_error)
+  __pyx_t_15 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_15 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 431, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":395
+  /* "renom/cuda/cudnn.pyx":418
  *     cdef int workSpace = 0
  * 
  *     check(cudnnConvolutionBackwardFilter(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_5 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardFilter(__pyx_v_handler, __pyx_v_alf->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_11)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_12)), ((cudnnConvolutionDescriptor_t)((uintptr_t)__pyx_t_13)), __pyx_v_algo_filter, ((void *)__pyx_v_workSpace), 0, __pyx_v_bt->ptr, ((cudnnFilterDescriptor_t)((uintptr_t)__pyx_t_14)), ((void *)((uintptr_t)__pyx_t_15)))); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 395, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardFilter(__pyx_v_handler, __pyx_v_alf->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_11)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_12)), ((cudnnConvolutionDescriptor_t)((uintptr_t)__pyx_t_13)), __pyx_v_algo_filter, ((void *)__pyx_v_workSpace), 0, __pyx_v_bt->ptr, ((cudnnFilterDescriptor_t)((uintptr_t)__pyx_t_14)), ((void *)((uintptr_t)__pyx_t_15)))); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 418, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_2 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -10503,14 +10865,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
     }
   }
   if (!__pyx_t_2) {
-    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 395, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_5); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 418, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_6);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_7)) {
       PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_5};
-      __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 395, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 418, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -10519,20 +10881,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
       PyObject *__pyx_temp[2] = {__pyx_t_2, __pyx_t_5};
-      __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 395, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 418, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_2); __pyx_t_2 = 0;
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else
     #endif
     {
-      __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 395, __pyx_L1_error)
+      __pyx_t_4 = PyTuple_New(1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 418, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_GIVEREF(__pyx_t_2); PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_2); __pyx_t_2 = NULL;
       __Pyx_GIVEREF(__pyx_t_5);
       PyTuple_SET_ITEM(__pyx_t_4, 0+1, __pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_4, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 395, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_4, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 418, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     }
@@ -10540,78 +10902,78 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-  /* "renom/cuda/cudnn.pyx":410
+  /* "renom/cuda/cudnn.pyx":433
  *         <void *> <uintptr_t> dw._ptr))
  * 
  *     check(cudnnConvolutionBackwardData(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 410, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 433, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
 
-  /* "renom/cuda/cudnn.pyx":413
+  /* "renom/cuda/cudnn.pyx":436
  *         handler,
  *         alf.ptr,
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,             # <<<<<<<<<<<<<<
  *         <void *> <uintptr_t> w._ptr,
  *         dyDesc.tensor_desc,
  */
-  __pyx_t_15 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_15 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 413, __pyx_L1_error)
+  __pyx_t_15 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_15 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 436, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":414
+  /* "renom/cuda/cudnn.pyx":437
  *         alf.ptr,
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,
  *         <void *> <uintptr_t> w._ptr,             # <<<<<<<<<<<<<<
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 414, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 437, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_14 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_14 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 414, __pyx_L1_error)
+  __pyx_t_14 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_14 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 437, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":416
+  /* "renom/cuda/cudnn.pyx":439
  *         <void *> <uintptr_t> w._ptr,
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,             # <<<<<<<<<<<<<<
  *         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,
  *         algo_data,
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 416, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 439, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_13 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_13 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 416, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_13 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 439, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":417
+  /* "renom/cuda/cudnn.pyx":440
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  *         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,             # <<<<<<<<<<<<<<
  *         algo_data,
  *         <void *>workSpace,
  */
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 417, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 440, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":423
+  /* "renom/cuda/cudnn.pyx":446
  *         bt.ptr,
  *         xDesc.tensor_desc,
  *         <void *> <uintptr_t> dx._ptr))             # <<<<<<<<<<<<<<
  * 
  *     check(cudnnConvolutionBackwardBias(
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 423, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 446, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 423, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_4); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 446, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":410
+  /* "renom/cuda/cudnn.pyx":433
  *         <void *> <uintptr_t> dw._ptr))
  * 
  *     check(cudnnConvolutionBackwardData(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardData(__pyx_v_handler, __pyx_v_alf->ptr, ((cudnnFilterDescriptor_t)((uintptr_t)__pyx_t_15)), ((void *)((uintptr_t)__pyx_t_14)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_13)), ((cudnnConvolutionDescriptor_t)((uintptr_t)__pyx_t_12)), __pyx_v_algo_data, ((void *)__pyx_v_workSpace), 0, __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_11)))); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 410, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardData(__pyx_v_handler, __pyx_v_alf->ptr, ((cudnnFilterDescriptor_t)((uintptr_t)__pyx_t_15)), ((void *)((uintptr_t)__pyx_t_14)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_13)), ((cudnnConvolutionDescriptor_t)((uintptr_t)__pyx_t_12)), __pyx_v_algo_data, ((void *)__pyx_v_workSpace), 0, __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_11)))); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 433, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __pyx_t_5 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -10624,14 +10986,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
     }
   }
   if (!__pyx_t_5) {
-    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 410, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_4); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 433, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GOTREF(__pyx_t_6);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_7)) {
       PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-      __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 410, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 433, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
@@ -10640,20 +11002,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
       PyObject *__pyx_temp[2] = {__pyx_t_5, __pyx_t_4};
-      __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 410, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 433, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_5); __pyx_t_5 = 0;
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     } else
     #endif
     {
-      __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 410, __pyx_L1_error)
+      __pyx_t_2 = PyTuple_New(1+1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 433, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_2);
       __Pyx_GIVEREF(__pyx_t_5); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5); __pyx_t_5 = NULL;
       __Pyx_GIVEREF(__pyx_t_4);
       PyTuple_SET_ITEM(__pyx_t_2, 0+1, __pyx_t_4);
       __pyx_t_4 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_2, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 410, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_2, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 433, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     }
@@ -10661,48 +11023,48 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-  /* "renom/cuda/cudnn.pyx":425
+  /* "renom/cuda/cudnn.pyx":448
  *         <void *> <uintptr_t> dx._ptr))
  * 
  *     check(cudnnConvolutionBackwardBias(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_7)) __PYX_ERR(1, 425, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_7)) __PYX_ERR(0, 448, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_7);
 
-  /* "renom/cuda/cudnn.pyx":429
+  /* "renom/cuda/cudnn.pyx":452
  *         alf.ptr,
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,             # <<<<<<<<<<<<<<
  *         bt.ptr,
  *         dbDesc.tensor_desc,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 429, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 452, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 429, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 452, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":432
+  /* "renom/cuda/cudnn.pyx":455
  *         bt.ptr,
  *         dbDesc.tensor_desc,
  *         <void *> <uintptr_t> db._ptr))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 432, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 455, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 432, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 455, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":425
+  /* "renom/cuda/cudnn.pyx":448
  *         <void *> <uintptr_t> dx._ptr))
  * 
  *     check(cudnnConvolutionBackwardBias(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardBias(__pyx_v_handler, __pyx_v_alf->ptr, __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_11)), __pyx_v_bt->ptr, __pyx_v_dbDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_12)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 425, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardBias(__pyx_v_handler, __pyx_v_alf->ptr, __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_11)), __pyx_v_bt->ptr, __pyx_v_dbDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_12)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 448, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_7))) {
@@ -10715,14 +11077,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 425, __pyx_L1_error)
+    __pyx_t_6 = __Pyx_PyObject_CallOneArg(__pyx_t_7, __pyx_t_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 448, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_6);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_7)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 425, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 448, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -10731,20 +11093,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_7)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 425, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyCFunction_FastCall(__pyx_t_7, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 448, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 425, __pyx_L1_error)
+      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 448, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_5, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 425, __pyx_L1_error)
+      __pyx_t_6 = __Pyx_PyObject_Call(__pyx_t_7, __pyx_t_5, NULL); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 448, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_6);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
@@ -10752,7 +11114,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
   __Pyx_DECREF(__pyx_t_7); __pyx_t_7 = 0;
   __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
 
-  /* "renom/cuda/cudnn.pyx":380
+  /* "renom/cuda/cudnn.pyx":403
  * 
  * 
  * def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):             # <<<<<<<<<<<<<<
@@ -10791,7 +11153,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_17cuConvolutionBackward(CYTHON_UNU
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":435
+/* "renom/cuda/cudnn.pyx":458
  * 
  * 
  * def cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, dy, dx):             # <<<<<<<<<<<<<<
@@ -10843,35 +11205,35 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_20cuConvolutionBackwardData(PyObje
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_conv_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, 1); __PYX_ERR(1, 435, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, 1); __PYX_ERR(0, 458, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_filter_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, 2); __PYX_ERR(1, 435, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, 2); __PYX_ERR(0, 458, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_w)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, 3); __PYX_ERR(1, 435, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, 3); __PYX_ERR(0, 458, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dy)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, 4); __PYX_ERR(1, 435, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, 4); __PYX_ERR(0, 458, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dx)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, 5); __PYX_ERR(1, 435, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, 5); __PYX_ERR(0, 458, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuConvolutionBackwardData") < 0)) __PYX_ERR(1, 435, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuConvolutionBackwardData") < 0)) __PYX_ERR(0, 458, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
@@ -10892,7 +11254,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_20cuConvolutionBackwardData(PyObje
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 435, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardData", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 458, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuConvolutionBackwardData", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -10932,16 +11294,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
   __Pyx_INCREF(__pyx_v_dy);
   __Pyx_INCREF(__pyx_v_dx);
 
-  /* "renom/cuda/cudnn.pyx":436
+  /* "renom/cuda/cudnn.pyx":459
  * 
  * def cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, dy, dx):
  *     w, dy, dx = map(get_gpu, [w, dy, dx])             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=w.dtype))
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 436, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 459, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 436, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 459, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_w);
   __Pyx_GIVEREF(__pyx_v_w);
@@ -10952,7 +11314,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
   __Pyx_INCREF(__pyx_v_dx);
   __Pyx_GIVEREF(__pyx_v_dx);
   PyList_SET_ITEM(__pyx_t_2, 2, __pyx_v_dx);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 436, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 459, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -10960,7 +11322,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 436, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 459, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -10973,7 +11335,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 436, __pyx_L1_error)
+      __PYX_ERR(0, 459, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -10989,17 +11351,17 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
     __Pyx_INCREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 436, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 459, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 436, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 459, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 436, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 459, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 436, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 459, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_6 = Py_TYPE(__pyx_t_5)->tp_iternext;
@@ -11009,7 +11371,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
     __Pyx_GOTREF(__pyx_t_1);
     index = 2; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(1, 436, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 459, __pyx_L1_error)
     __pyx_t_6 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L4_unpacking_done;
@@ -11017,7 +11379,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 436, __pyx_L1_error)
+    __PYX_ERR(0, 459, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_w, __pyx_t_3);
@@ -11027,159 +11389,159 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
   __Pyx_DECREF_SET(__pyx_v_dx, __pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":438
+  /* "renom/cuda/cudnn.pyx":461
  *     w, dy, dx = map(get_gpu, [w, dy, dx])
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=w.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=w.dtype))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 438, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 461, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 438, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 461, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 438, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 461, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_float_1_0);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 438, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 461, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 438, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 461, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 438, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 461, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 438, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 461, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 438, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 461, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 438, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 461, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 438, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 461, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_alf = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":439
+  /* "renom/cuda/cudnn.pyx":462
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=w.dtype))
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=w.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 439, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 462, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 439, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 462, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 439, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 462, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_3, 0, __pyx_float_0_0);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 439, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 462, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 439, __pyx_L1_error)
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 462, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 439, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 462, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 439, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 462, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 439, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 462, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 439, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 462, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 439, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 462, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_bt = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":441
+  /* "renom/cuda/cudnn.pyx":464
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=w.dtype))
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  *     cdef TensorDesc xDesc = TensorDesc(dx.shape, dtype=dx.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  */
-  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 441, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 464, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_7));
 
-  /* "renom/cuda/cudnn.pyx":442
+  /* "renom/cuda/cudnn.pyx":465
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc xDesc = TensorDesc(dx.shape, dtype=dx.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 442, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 442, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 442, __pyx_L1_error)
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 442, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 442, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 442, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 465, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_xDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":443
+  /* "renom/cuda/cudnn.pyx":466
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc xDesc = TensorDesc(dx.shape, dtype=dx.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)             # <<<<<<<<<<<<<<
  *     cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
  *     cdef int workSpace = 0
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 443, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 443, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 443, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 443, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 443, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 443, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 466, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_dyDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":444
+  /* "renom/cuda/cudnn.pyx":467
  *     cdef TensorDesc xDesc = TensorDesc(dx.shape, dtype=dx.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0             # <<<<<<<<<<<<<<
@@ -11188,7 +11550,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
  */
   __pyx_v_algo_data = CUDNN_CONVOLUTION_BWD_DATA_ALGO_0;
 
-  /* "renom/cuda/cudnn.pyx":445
+  /* "renom/cuda/cudnn.pyx":468
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
  *     cdef int workSpace = 0             # <<<<<<<<<<<<<<
@@ -11197,16 +11559,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
  */
   __pyx_v_workSpace = 0;
 
-  /* "renom/cuda/cudnn.pyx":447
+  /* "renom/cuda/cudnn.pyx":470
  *     cdef int workSpace = 0
  * 
  *     cuda_base.check_heap_device(w, dy, dx)             # <<<<<<<<<<<<<<
  *     check(cudnnConvolutionBackwardData(
  *         handler,
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 447, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 470, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 447, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 470, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = NULL;
@@ -11224,7 +11586,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[4] = {__pyx_t_1, __pyx_v_w, __pyx_v_dy, __pyx_v_dx};
-    __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 447, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 470, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else
@@ -11232,13 +11594,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[4] = {__pyx_t_1, __pyx_v_w, __pyx_v_dy, __pyx_v_dx};
-    __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 447, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 470, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else
   #endif
   {
-    __pyx_t_2 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 447, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 470, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     if (__pyx_t_1) {
       __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1); __pyx_t_1 = NULL;
@@ -11252,85 +11614,85 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
     __Pyx_INCREF(__pyx_v_dx);
     __Pyx_GIVEREF(__pyx_v_dx);
     PyTuple_SET_ITEM(__pyx_t_2, 2+__pyx_t_8, __pyx_v_dx);
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 447, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 470, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":448
+  /* "renom/cuda/cudnn.pyx":471
  * 
  *     cuda_base.check_heap_device(w, dy, dx)
  *     check(cudnnConvolutionBackwardData(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 448, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 471, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
 
-  /* "renom/cuda/cudnn.pyx":451
+  /* "renom/cuda/cudnn.pyx":474
  *         handler,
  *         alf.ptr,
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,             # <<<<<<<<<<<<<<
  *         <void *> <uintptr_t> w._ptr,
  *         dyDesc.tensor_desc,
  */
-  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 451, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 474, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":452
+  /* "renom/cuda/cudnn.pyx":475
  *         alf.ptr,
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,
  *         <void *> <uintptr_t> w._ptr,             # <<<<<<<<<<<<<<
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 452, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_w, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 475, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_9 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 452, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_9 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 475, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":454
+  /* "renom/cuda/cudnn.pyx":477
  *         <void *> <uintptr_t> w._ptr,
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,             # <<<<<<<<<<<<<<
  *         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,
  *         algo_data,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 454, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 477, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 454, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 477, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":455
+  /* "renom/cuda/cudnn.pyx":478
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  *         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,             # <<<<<<<<<<<<<<
  *         algo_data,
  *         <void *>workSpace,
  */
-  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 455, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 478, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":461
+  /* "renom/cuda/cudnn.pyx":484
  *         bt.ptr,
  *         xDesc.tensor_desc,
  *         <void *> <uintptr_t> dx._ptr))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 461, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 484, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 461, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 484, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":448
+  /* "renom/cuda/cudnn.pyx":471
  * 
  *     cuda_base.check_heap_device(w, dy, dx)
  *     check(cudnnConvolutionBackwardData(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardData(__pyx_v_handler, __pyx_v_alf->ptr, ((cudnnFilterDescriptor_t)((uintptr_t)__pyx_t_7)), ((void *)((uintptr_t)__pyx_t_9)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_10)), ((cudnnConvolutionDescriptor_t)((uintptr_t)__pyx_t_11)), __pyx_v_algo_data, ((void *)__pyx_v_workSpace), 0, __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_12)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 448, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardData(__pyx_v_handler, __pyx_v_alf->ptr, ((cudnnFilterDescriptor_t)((uintptr_t)__pyx_t_7)), ((void *)((uintptr_t)__pyx_t_9)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_10)), ((cudnnConvolutionDescriptor_t)((uintptr_t)__pyx_t_11)), __pyx_v_algo_data, ((void *)__pyx_v_workSpace), 0, __pyx_v_bt->ptr, __pyx_v_xDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_12)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 471, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
@@ -11343,14 +11705,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
     }
   }
   if (!__pyx_t_1) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 448, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 471, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_2};
-      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 448, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 471, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -11359,20 +11721,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_2};
-      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 448, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 471, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 448, __pyx_L1_error)
+      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 471, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1); __pyx_t_1 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 448, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 471, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
@@ -11380,7 +11742,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":435
+  /* "renom/cuda/cudnn.pyx":458
  * 
  * 
  * def cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, dy, dx):             # <<<<<<<<<<<<<<
@@ -11412,7 +11774,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_19cuConvolutionBackwardData(CYTHON
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":464
+/* "renom/cuda/cudnn.pyx":487
  * 
  * 
  * def cuConvolutionBackwardFilter(handle, conv_desc, filter_desc, x, dy, dw):             # <<<<<<<<<<<<<<
@@ -11464,35 +11826,35 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_22cuConvolutionBackwardFilter(PyOb
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_conv_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, 1); __PYX_ERR(1, 464, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, 1); __PYX_ERR(0, 487, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_filter_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, 2); __PYX_ERR(1, 464, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, 2); __PYX_ERR(0, 487, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, 3); __PYX_ERR(1, 464, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, 3); __PYX_ERR(0, 487, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dy)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, 4); __PYX_ERR(1, 464, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, 4); __PYX_ERR(0, 487, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dw)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, 5); __PYX_ERR(1, 464, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, 5); __PYX_ERR(0, 487, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuConvolutionBackwardFilter") < 0)) __PYX_ERR(1, 464, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuConvolutionBackwardFilter") < 0)) __PYX_ERR(0, 487, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
@@ -11513,7 +11875,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_22cuConvolutionBackwardFilter(PyOb
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 464, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardFilter", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 487, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuConvolutionBackwardFilter", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -11553,16 +11915,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
   __Pyx_INCREF(__pyx_v_dy);
   __Pyx_INCREF(__pyx_v_dw);
 
-  /* "renom/cuda/cudnn.pyx":465
+  /* "renom/cuda/cudnn.pyx":488
  * 
  * def cuConvolutionBackwardFilter(handle, conv_desc, filter_desc, x, dy, dw):
  *     x, dy, dw = map(get_gpu, [x, dy, dw])             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 465, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 488, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 465, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 488, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
@@ -11573,7 +11935,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
   __Pyx_INCREF(__pyx_v_dw);
   __Pyx_GIVEREF(__pyx_v_dw);
   PyList_SET_ITEM(__pyx_t_2, 2, __pyx_v_dw);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 465, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 488, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -11581,7 +11943,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 465, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 488, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -11594,7 +11956,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 465, __pyx_L1_error)
+      __PYX_ERR(0, 488, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -11610,17 +11972,17 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
     __Pyx_INCREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 465, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 488, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 465, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 488, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 465, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 488, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 465, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 488, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_6 = Py_TYPE(__pyx_t_5)->tp_iternext;
@@ -11630,7 +11992,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
     __Pyx_GOTREF(__pyx_t_1);
     index = 2; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(1, 465, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 488, __pyx_L1_error)
     __pyx_t_6 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L4_unpacking_done;
@@ -11638,7 +12000,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 465, __pyx_L1_error)
+    __PYX_ERR(0, 488, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_3);
@@ -11648,159 +12010,159 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
   __Pyx_DECREF_SET(__pyx_v_dw, __pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":467
+  /* "renom/cuda/cudnn.pyx":490
  *     x, dy, dw = map(get_gpu, [x, dy, dw])
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 467, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 490, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 467, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 490, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 467, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 490, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_float_1_0);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 467, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 490, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 467, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 490, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 467, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 490, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 467, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 490, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 467, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 490, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 467, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 490, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 467, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 490, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_alf = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":468
+  /* "renom/cuda/cudnn.pyx":491
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 468, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 468, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 468, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_3, 0, __pyx_float_0_0);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 468, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 468, __pyx_L1_error)
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 468, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 468, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 468, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 468, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 468, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 491, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_bt = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":470
+  /* "renom/cuda/cudnn.pyx":493
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  */
-  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 470, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 493, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_7));
 
-  /* "renom/cuda/cudnn.pyx":471
+  /* "renom/cuda/cudnn.pyx":494
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 471, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 471, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 471, __pyx_L1_error)
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 471, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 471, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 471, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 494, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_xDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":472
+  /* "renom/cuda/cudnn.pyx":495
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)             # <<<<<<<<<<<<<<
  *     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
  *     cdef int workSpace = 0
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 472, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 472, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 472, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 472, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 472, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 472, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 495, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_dyDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":473
+  /* "renom/cuda/cudnn.pyx":496
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0             # <<<<<<<<<<<<<<
@@ -11809,7 +12171,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
  */
   __pyx_v_algo_filter = CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0;
 
-  /* "renom/cuda/cudnn.pyx":474
+  /* "renom/cuda/cudnn.pyx":497
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
  *     cdef int workSpace = 0             # <<<<<<<<<<<<<<
@@ -11818,16 +12180,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
  */
   __pyx_v_workSpace = 0;
 
-  /* "renom/cuda/cudnn.pyx":476
+  /* "renom/cuda/cudnn.pyx":499
  *     cdef int workSpace = 0
  * 
  *     cuda_base.check_heap_device(x, dy, dw)             # <<<<<<<<<<<<<<
  *     check(cudnnConvolutionBackwardFilter(
  *         handler,
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 476, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 499, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 476, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 499, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = NULL;
@@ -11845,7 +12207,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[4] = {__pyx_t_1, __pyx_v_x, __pyx_v_dy, __pyx_v_dw};
-    __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 476, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 499, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else
@@ -11853,13 +12215,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[4] = {__pyx_t_1, __pyx_v_x, __pyx_v_dy, __pyx_v_dw};
-    __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 476, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_8, 3+__pyx_t_8); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 499, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else
   #endif
   {
-    __pyx_t_2 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 476, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(3+__pyx_t_8); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 499, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     if (__pyx_t_1) {
       __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1); __pyx_t_1 = NULL;
@@ -11873,85 +12235,85 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
     __Pyx_INCREF(__pyx_v_dw);
     __Pyx_GIVEREF(__pyx_v_dw);
     PyTuple_SET_ITEM(__pyx_t_2, 2+__pyx_t_8, __pyx_v_dw);
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 476, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 499, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":477
+  /* "renom/cuda/cudnn.pyx":500
  * 
  *     cuda_base.check_heap_device(x, dy, dw)
  *     check(cudnnConvolutionBackwardFilter(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 477, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 500, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
 
-  /* "renom/cuda/cudnn.pyx":481
+  /* "renom/cuda/cudnn.pyx":504
  *         alf.ptr,
  *         xDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,             # <<<<<<<<<<<<<<
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 481, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 504, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 481, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 504, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":483
+  /* "renom/cuda/cudnn.pyx":506
  *         <const void *> <uintptr_t> x._ptr,
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,             # <<<<<<<<<<<<<<
  *         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,
  *         algo_filter,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 483, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 506, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_9 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 483, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_9 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 506, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":484
+  /* "renom/cuda/cudnn.pyx":507
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  *         <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc,             # <<<<<<<<<<<<<<
  *         algo_filter,
  *         <void *>workSpace,
  */
-  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 484, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_v_conv_desc); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 507, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":489
+  /* "renom/cuda/cudnn.pyx":512
  *         0,
  *         bt.ptr,
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,             # <<<<<<<<<<<<<<
  *         <void *> <uintptr_t> dw._ptr))
  * 
  */
-  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 489, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_v_filter_desc); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 512, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":490
+  /* "renom/cuda/cudnn.pyx":513
  *         bt.ptr,
  *         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,
  *         <void *> <uintptr_t> dw._ptr))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dw, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 490, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dw, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 513, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 490, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 513, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":477
+  /* "renom/cuda/cudnn.pyx":500
  * 
  *     cuda_base.check_heap_device(x, dy, dw)
  *     check(cudnnConvolutionBackwardFilter(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardFilter(__pyx_v_handler, __pyx_v_alf->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_7)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_9)), ((cudnnConvolutionDescriptor_t)((uintptr_t)__pyx_t_10)), __pyx_v_algo_filter, ((void *)__pyx_v_workSpace), 0, __pyx_v_bt->ptr, ((cudnnFilterDescriptor_t)((uintptr_t)__pyx_t_11)), ((void *)((uintptr_t)__pyx_t_12)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 477, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardFilter(__pyx_v_handler, __pyx_v_alf->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_7)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_9)), ((cudnnConvolutionDescriptor_t)((uintptr_t)__pyx_t_10)), __pyx_v_algo_filter, ((void *)__pyx_v_workSpace), 0, __pyx_v_bt->ptr, ((cudnnFilterDescriptor_t)((uintptr_t)__pyx_t_11)), ((void *)((uintptr_t)__pyx_t_12)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 500, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
@@ -11964,14 +12326,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
     }
   }
   if (!__pyx_t_1) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 477, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 500, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_2};
-      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 477, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 500, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -11980,20 +12342,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_2};
-      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 477, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 500, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 477, __pyx_L1_error)
+      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 500, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1); __pyx_t_1 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 477, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_5, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 500, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
@@ -12001,7 +12363,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":464
+  /* "renom/cuda/cudnn.pyx":487
  * 
  * 
  * def cuConvolutionBackwardFilter(handle, conv_desc, filter_desc, x, dy, dw):             # <<<<<<<<<<<<<<
@@ -12033,7 +12395,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_21cuConvolutionBackwardFilter(CYTH
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":493
+/* "renom/cuda/cudnn.pyx":516
  * 
  * 
  * def cuConvolutionBackwardBias(handle, dy, db):             # <<<<<<<<<<<<<<
@@ -12076,17 +12438,17 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_24cuConvolutionBackwardBias(PyObje
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dy)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardBias", 1, 3, 3, 1); __PYX_ERR(1, 493, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardBias", 1, 3, 3, 1); __PYX_ERR(0, 516, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_db)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardBias", 1, 3, 3, 2); __PYX_ERR(1, 493, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardBias", 1, 3, 3, 2); __PYX_ERR(0, 516, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuConvolutionBackwardBias") < 0)) __PYX_ERR(1, 493, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuConvolutionBackwardBias") < 0)) __PYX_ERR(0, 516, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 3) {
       goto __pyx_L5_argtuple_error;
@@ -12101,7 +12463,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_24cuConvolutionBackwardBias(PyObje
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardBias", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 493, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuConvolutionBackwardBias", 1, 3, 3, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 516, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuConvolutionBackwardBias", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -12135,16 +12497,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
   __Pyx_INCREF(__pyx_v_dy);
   __Pyx_INCREF(__pyx_v_db);
 
-  /* "renom/cuda/cudnn.pyx":494
+  /* "renom/cuda/cudnn.pyx":517
  * 
  * def cuConvolutionBackwardBias(handle, dy, db):
  *     dy, db = map(get_gpu, [dy, db])             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=dy.dtype))
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 494, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 494, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_dy);
   __Pyx_GIVEREF(__pyx_v_dy);
@@ -12152,7 +12514,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
   __Pyx_INCREF(__pyx_v_db);
   __Pyx_GIVEREF(__pyx_v_db);
   PyList_SET_ITEM(__pyx_t_2, 1, __pyx_v_db);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 494, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -12160,7 +12522,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 494, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 517, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -12173,7 +12535,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 494, __pyx_L1_error)
+      __PYX_ERR(0, 517, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -12186,15 +12548,15 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
     __Pyx_INCREF(__pyx_t_3);
     __Pyx_INCREF(__pyx_t_1);
     #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 494, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 517, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 494, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 517, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     #endif
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 494, __pyx_L1_error)
+    __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 517, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_5 = Py_TYPE(__pyx_t_4)->tp_iternext;
@@ -12202,7 +12564,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
     __Pyx_GOTREF(__pyx_t_3);
     index = 1; __pyx_t_1 = __pyx_t_5(__pyx_t_4); if (unlikely(!__pyx_t_1)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_1);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(1, 494, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(0, 517, __pyx_L1_error)
     __pyx_t_5 = NULL;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     goto __pyx_L4_unpacking_done;
@@ -12210,7 +12572,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_5 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 494, __pyx_L1_error)
+    __PYX_ERR(0, 517, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_dy, __pyx_t_3);
@@ -12218,168 +12580,168 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
   __Pyx_DECREF_SET(__pyx_v_db, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":496
+  /* "renom/cuda/cudnn.pyx":519
  *     dy, db = map(get_gpu, [dy, db])
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=dy.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=dy.dtype))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 496, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 496, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 496, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_float_1_0);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 496, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 496, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 496, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 496, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 496, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 496, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 496, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 519, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_alf = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":497
+  /* "renom/cuda/cudnn.pyx":520
  * 
  *     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=dy.dtype))
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=dy.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 497, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 520, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 497, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 520, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 497, __pyx_L1_error)
+  __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 520, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_4, 0, __pyx_float_0_0);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 497, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 520, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 497, __pyx_L1_error)
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 520, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 497, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 520, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 497, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 520, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 497, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 520, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 497, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 520, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 497, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 520, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_bt = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":499
+  /* "renom/cuda/cudnn.pyx":522
  *     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=dy.dtype))
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef TensorDesc dbDesc = TensorDesc(db.shape, dtype=db.dtype)
  */
-  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 499, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 522, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_6));
 
-  /* "renom/cuda/cudnn.pyx":500
+  /* "renom/cuda/cudnn.pyx":523
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc dbDesc = TensorDesc(db.shape, dtype=db.dtype)
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 500, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 523, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 500, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 523, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 500, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 523, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 500, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 523, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 500, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 523, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 500, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 523, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_dyDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":501
+  /* "renom/cuda/cudnn.pyx":524
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef TensorDesc dbDesc = TensorDesc(db.shape, dtype=db.dtype)             # <<<<<<<<<<<<<<
  * 
  *     cuda_base.check_heap_device(dy, db)
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_shape); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 501, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_shape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 524, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 501, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 524, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 501, __pyx_L1_error)
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 524, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 501, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 524, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 501, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 524, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 501, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 524, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_dbDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":503
+  /* "renom/cuda/cudnn.pyx":526
  *     cdef TensorDesc dbDesc = TensorDesc(db.shape, dtype=db.dtype)
  * 
  *     cuda_base.check_heap_device(dy, db)             # <<<<<<<<<<<<<<
  *     check(cudnnConvolutionBackwardBias(
  *         handler,
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 503, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 526, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 503, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 526, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_t_3 = NULL;
@@ -12397,7 +12759,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_1)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_v_dy, __pyx_v_db};
-    __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 503, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 526, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else
@@ -12405,13 +12767,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_1)) {
     PyObject *__pyx_temp[3] = {__pyx_t_3, __pyx_v_dy, __pyx_v_db};
-    __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 503, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 526, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else
   #endif
   {
-    __pyx_t_2 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 503, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 526, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     if (__pyx_t_3) {
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3); __pyx_t_3 = NULL;
@@ -12422,55 +12784,55 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
     __Pyx_INCREF(__pyx_v_db);
     __Pyx_GIVEREF(__pyx_v_db);
     PyTuple_SET_ITEM(__pyx_t_2, 1+__pyx_t_7, __pyx_v_db);
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 503, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 526, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":504
+  /* "renom/cuda/cudnn.pyx":527
  * 
  *     cuda_base.check_heap_device(dy, db)
  *     check(cudnnConvolutionBackwardBias(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 504, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 527, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
 
-  /* "renom/cuda/cudnn.pyx":508
+  /* "renom/cuda/cudnn.pyx":531
  *         alf.ptr,
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,             # <<<<<<<<<<<<<<
  *         bt.ptr,
  *         dbDesc.tensor_desc,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 508, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 531, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 508, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 531, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":511
+  /* "renom/cuda/cudnn.pyx":534
  *         bt.ptr,
  *         dbDesc.tensor_desc,
  *         <void *> <uintptr_t> db._ptr))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 511, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_db, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 534, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 511, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 534, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":504
+  /* "renom/cuda/cudnn.pyx":527
  * 
  *     cuda_base.check_heap_device(dy, db)
  *     check(cudnnConvolutionBackwardBias(             # <<<<<<<<<<<<<<
  *         handler,
  *         alf.ptr,
  */
-  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardBias(__pyx_v_handler, __pyx_v_alf->ptr, __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_6)), __pyx_v_bt->ptr, __pyx_v_dbDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_8)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 504, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnConvolutionBackwardBias(__pyx_v_handler, __pyx_v_alf->ptr, __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_6)), __pyx_v_bt->ptr, __pyx_v_dbDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_8)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 527, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_3 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_1))) {
@@ -12483,14 +12845,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
     }
   }
   if (!__pyx_t_3) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 504, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 527, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_1)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_2};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 504, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 527, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -12499,20 +12861,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_1)) {
       PyObject *__pyx_temp[2] = {__pyx_t_3, __pyx_t_2};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 504, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_1, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 527, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_3); __pyx_t_3 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(1, 504, __pyx_L1_error)
+      __pyx_t_9 = PyTuple_New(1+1); if (unlikely(!__pyx_t_9)) __PYX_ERR(0, 527, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_9);
       __Pyx_GIVEREF(__pyx_t_3); PyTuple_SET_ITEM(__pyx_t_9, 0, __pyx_t_3); __pyx_t_3 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_9, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_9, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 504, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_9, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 527, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_9); __pyx_t_9 = 0;
     }
@@ -12520,7 +12882,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":493
+  /* "renom/cuda/cudnn.pyx":516
  * 
  * 
  * def cuConvolutionBackwardBias(handle, dy, db):             # <<<<<<<<<<<<<<
@@ -12551,7 +12913,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_23cuConvolutionBackwardBias(CYTHON
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":514
+/* "renom/cuda/cudnn.pyx":537
  * 
  * 
  * def cuSoftmaxForward(handle, x, y, mode=0):             # <<<<<<<<<<<<<<
@@ -12598,13 +12960,13 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_26cuSoftmaxForward(PyObject *__pyx
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuSoftmaxForward", 0, 3, 4, 1); __PYX_ERR(1, 514, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuSoftmaxForward", 0, 3, 4, 1); __PYX_ERR(0, 537, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuSoftmaxForward", 0, 3, 4, 2); __PYX_ERR(1, 514, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuSoftmaxForward", 0, 3, 4, 2); __PYX_ERR(0, 537, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
@@ -12614,7 +12976,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_26cuSoftmaxForward(PyObject *__pyx
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuSoftmaxForward") < 0)) __PYX_ERR(1, 514, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuSoftmaxForward") < 0)) __PYX_ERR(0, 537, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -12634,7 +12996,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_26cuSoftmaxForward(PyObject *__pyx
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuSoftmaxForward", 0, 3, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 514, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuSoftmaxForward", 0, 3, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 537, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuSoftmaxForward", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -12670,16 +13032,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_INCREF(__pyx_v_y);
 
-  /* "renom/cuda/cudnn.pyx":515
+  /* "renom/cuda/cudnn.pyx":538
  * 
  * def cuSoftmaxForward(handle, x, y, mode=0):
  *     x, y = map(get_gpu, [x, y])             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=x.dtype))
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 515, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 538, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 515, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 538, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
@@ -12687,7 +13049,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
   __Pyx_INCREF(__pyx_v_y);
   __Pyx_GIVEREF(__pyx_v_y);
   PyList_SET_ITEM(__pyx_t_2, 1, __pyx_v_y);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 515, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 538, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -12695,7 +13057,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 515, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 538, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -12708,7 +13070,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 515, __pyx_L1_error)
+      __PYX_ERR(0, 538, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -12721,15 +13083,15 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
     __Pyx_INCREF(__pyx_t_3);
     __Pyx_INCREF(__pyx_t_1);
     #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 515, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 538, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 515, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 538, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     #endif
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 515, __pyx_L1_error)
+    __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 538, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_5 = Py_TYPE(__pyx_t_4)->tp_iternext;
@@ -12737,7 +13099,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
     __Pyx_GOTREF(__pyx_t_3);
     index = 1; __pyx_t_1 = __pyx_t_5(__pyx_t_4); if (unlikely(!__pyx_t_1)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_1);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(1, 515, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(0, 538, __pyx_L1_error)
     __pyx_t_5 = NULL;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     goto __pyx_L4_unpacking_done;
@@ -12745,7 +13107,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_5 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 515, __pyx_L1_error)
+    __PYX_ERR(0, 538, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_3);
@@ -12753,141 +13115,141 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
   __Pyx_DECREF_SET(__pyx_v_y, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":517
+  /* "renom/cuda/cudnn.pyx":540
  *     x, y = map(get_gpu, [x, y])
  * 
  *     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 517, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 517, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 517, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_float_1_0);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 517, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 517, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 517, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 517, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 517, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 517, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 517, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 540, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_a = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":518
+  /* "renom/cuda/cudnn.pyx":541
  * 
  *     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=x.dtype))
  *     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 518, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 518, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 518, __pyx_L1_error)
+  __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_4, 0, __pyx_float_0_0);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 518, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 518, __pyx_L1_error)
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 518, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 518, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 518, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 518, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 518, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_4, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 541, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_b = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":520
+  /* "renom/cuda/cudnn.pyx":543
  *     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  *     cdef cd.cudnnSoftmaxMode_t md = cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_CHANNEL if mode == 1 else cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_INSTANCE
  */
-  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 520, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 543, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_6));
 
-  /* "renom/cuda/cudnn.pyx":521
+  /* "renom/cuda/cudnn.pyx":544
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)             # <<<<<<<<<<<<<<
  *     cdef cd.cudnnSoftmaxMode_t md = cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_CHANNEL if mode == 1 else cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_INSTANCE
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 521, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 544, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 521, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 544, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 521, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 544, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 521, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 544, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 521, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 544, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 521, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_4, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 544, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_yDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":522
+  /* "renom/cuda/cudnn.pyx":545
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  *     cdef cd.cudnnSoftmaxMode_t md = cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_CHANNEL if mode == 1 else cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_INSTANCE             # <<<<<<<<<<<<<<
  * 
  *     cuda_base.check_heap_device(x, y)
  */
-  __pyx_t_3 = __Pyx_PyInt_EqObjC(__pyx_v_mode, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 522, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyInt_EqObjC(__pyx_v_mode, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 545, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(1, 522, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyObject_IsTrue(__pyx_t_3); if (unlikely(__pyx_t_8 < 0)) __PYX_ERR(0, 545, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if (__pyx_t_8) {
     __pyx_t_7 = CUDNN_SOFTMAX_MODE_CHANNEL;
@@ -12896,16 +13258,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
   }
   __pyx_v_md = __pyx_t_7;
 
-  /* "renom/cuda/cudnn.pyx":524
+  /* "renom/cuda/cudnn.pyx":547
  *     cdef cd.cudnnSoftmaxMode_t md = cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_CHANNEL if mode == 1 else cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_INSTANCE
  * 
  *     cuda_base.check_heap_device(x, y)             # <<<<<<<<<<<<<<
  *     check(cd.cudnnSoftmaxForward(
  *         handler,
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 524, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 547, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 524, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 547, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = NULL;
@@ -12923,7 +13285,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_1, __pyx_v_x, __pyx_v_y};
-    __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 524, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 547, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else
@@ -12931,13 +13293,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
     PyObject *__pyx_temp[3] = {__pyx_t_1, __pyx_v_x, __pyx_v_y};
-    __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 524, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-__pyx_t_9, 2+__pyx_t_9); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 547, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else
   #endif
   {
-    __pyx_t_2 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 524, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(2+__pyx_t_9); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 547, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     if (__pyx_t_1) {
       __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1); __pyx_t_1 = NULL;
@@ -12948,55 +13310,55 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
     __Pyx_INCREF(__pyx_v_y);
     __Pyx_GIVEREF(__pyx_v_y);
     PyTuple_SET_ITEM(__pyx_t_2, 1+__pyx_t_9, __pyx_v_y);
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 524, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 547, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":525
+  /* "renom/cuda/cudnn.pyx":548
  * 
  *     cuda_base.check_heap_device(x, y)
  *     check(cd.cudnnSoftmaxForward(             # <<<<<<<<<<<<<<
  *         handler,
  *         cd.cudnnSoftmaxAlgorithm_t.CUDNN_SOFTMAX_ACCURATE,
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 525, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 548, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
 
-  /* "renom/cuda/cudnn.pyx":531
+  /* "renom/cuda/cudnn.pyx":554
  *         <const void *> a.ptr,
  *         yDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,             # <<<<<<<<<<<<<<
  *         <const void *> b.ptr,
  *         yDesc.tensor_desc,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 531, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 554, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 531, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 554, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":534
+  /* "renom/cuda/cudnn.pyx":557
  *         <const void *> b.ptr,
  *         yDesc.tensor_desc,
  *         <void *> <uintptr_t> y._ptr))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 534, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 557, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 534, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 557, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":525
+  /* "renom/cuda/cudnn.pyx":548
  * 
  *     cuda_base.check_heap_device(x, y)
  *     check(cd.cudnnSoftmaxForward(             # <<<<<<<<<<<<<<
  *         handler,
  *         cd.cudnnSoftmaxAlgorithm_t.CUDNN_SOFTMAX_ACCURATE,
  */
-  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSoftmaxForward(__pyx_v_handler, CUDNN_SOFTMAX_ACCURATE, __pyx_v_md, ((void const *)__pyx_v_a->ptr), __pyx_v_yDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_6)), ((void const *)__pyx_v_b->ptr), __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_10)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 525, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSoftmaxForward(__pyx_v_handler, CUDNN_SOFTMAX_ACCURATE, __pyx_v_md, ((void const *)__pyx_v_a->ptr), __pyx_v_yDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_6)), ((void const *)__pyx_v_b->ptr), __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_10)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 548, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_1 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_4))) {
@@ -13009,14 +13371,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
     }
   }
   if (!__pyx_t_1) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 525, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_4, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 548, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_2};
-      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 525, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 548, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -13025,20 +13387,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_4)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_2};
-      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 525, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_4, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 548, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_11 = PyTuple_New(1+1); if (unlikely(!__pyx_t_11)) __PYX_ERR(1, 525, __pyx_L1_error)
+      __pyx_t_11 = PyTuple_New(1+1); if (unlikely(!__pyx_t_11)) __PYX_ERR(0, 548, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_11);
       __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_11, 0, __pyx_t_1); __pyx_t_1 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_11, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_11, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 525, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_11, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 548, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_11); __pyx_t_11 = 0;
     }
@@ -13046,7 +13408,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":514
+  /* "renom/cuda/cudnn.pyx":537
  * 
  * 
  * def cuSoftmaxForward(handle, x, y, mode=0):             # <<<<<<<<<<<<<<
@@ -13076,7 +13438,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_25cuSoftmaxForward(CYTHON_UNUSED P
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":537
+/* "renom/cuda/cudnn.pyx":560
  * 
  * 
  * def cuSoftmaxBackward(handle, y, dy, dx, mode=0):             # <<<<<<<<<<<<<<
@@ -13126,19 +13488,19 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_28cuSoftmaxBackward(PyObject *__py
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuSoftmaxBackward", 0, 4, 5, 1); __PYX_ERR(1, 537, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuSoftmaxBackward", 0, 4, 5, 1); __PYX_ERR(0, 560, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dy)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuSoftmaxBackward", 0, 4, 5, 2); __PYX_ERR(1, 537, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuSoftmaxBackward", 0, 4, 5, 2); __PYX_ERR(0, 560, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dx)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuSoftmaxBackward", 0, 4, 5, 3); __PYX_ERR(1, 537, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuSoftmaxBackward", 0, 4, 5, 3); __PYX_ERR(0, 560, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
@@ -13148,7 +13510,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_28cuSoftmaxBackward(PyObject *__py
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuSoftmaxBackward") < 0)) __PYX_ERR(1, 537, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuSoftmaxBackward") < 0)) __PYX_ERR(0, 560, __pyx_L3_error)
       }
     } else {
       switch (PyTuple_GET_SIZE(__pyx_args)) {
@@ -13170,7 +13532,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_28cuSoftmaxBackward(PyObject *__py
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuSoftmaxBackward", 0, 4, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 537, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuSoftmaxBackward", 0, 4, 5, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 560, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuSoftmaxBackward", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -13208,16 +13570,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
   __Pyx_INCREF(__pyx_v_dy);
   __Pyx_INCREF(__pyx_v_dx);
 
-  /* "renom/cuda/cudnn.pyx":538
+  /* "renom/cuda/cudnn.pyx":561
  * 
  * def cuSoftmaxBackward(handle, y, dy, dx, mode=0):
  *     y, dy, dx = map(get_gpu, [y, dy, dx])             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=dy.dtype))
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 538, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 561, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 538, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(3); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 561, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_y);
   __Pyx_GIVEREF(__pyx_v_y);
@@ -13228,7 +13590,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
   __Pyx_INCREF(__pyx_v_dx);
   __Pyx_GIVEREF(__pyx_v_dx);
   PyList_SET_ITEM(__pyx_t_2, 2, __pyx_v_dx);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 538, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 561, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -13236,7 +13598,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 538, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 561, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -13249,7 +13611,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
     if (unlikely(size != 3)) {
       if (size > 3) __Pyx_RaiseTooManyValuesError(3);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 538, __pyx_L1_error)
+      __PYX_ERR(0, 561, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -13265,17 +13627,17 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
     __Pyx_INCREF(__pyx_t_1);
     __Pyx_INCREF(__pyx_t_4);
     #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 538, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 561, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 538, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 561, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
-    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 538, __pyx_L1_error)
+    __pyx_t_4 = PySequence_ITEM(sequence, 2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 561, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     #endif
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 538, __pyx_L1_error)
+    __pyx_t_5 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 561, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_6 = Py_TYPE(__pyx_t_5)->tp_iternext;
@@ -13285,7 +13647,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
     __Pyx_GOTREF(__pyx_t_1);
     index = 2; __pyx_t_4 = __pyx_t_6(__pyx_t_5); if (unlikely(!__pyx_t_4)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_4);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(1, 538, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_6(__pyx_t_5), 3) < 0) __PYX_ERR(0, 561, __pyx_L1_error)
     __pyx_t_6 = NULL;
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     goto __pyx_L4_unpacking_done;
@@ -13293,7 +13655,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __pyx_t_6 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 538, __pyx_L1_error)
+    __PYX_ERR(0, 561, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_y, __pyx_t_3);
@@ -13303,141 +13665,141 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
   __Pyx_DECREF_SET(__pyx_v_dx, __pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":540
+  /* "renom/cuda/cudnn.pyx":563
  *     y, dy, dx = map(get_gpu, [y, dy, dx])
  * 
  *     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=dy.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=dy.dtype))
  * 
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 540, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 563, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 540, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 563, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 540, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 563, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_float_1_0);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 540, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 563, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 540, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 563, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 540, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 563, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 540, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 563, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 540, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 563, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 540, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 563, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 540, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_2, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 563, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_a = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":541
+  /* "renom/cuda/cudnn.pyx":564
  * 
  *     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=dy.dtype))
  *     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=dy.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 541, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 564, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 541, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_3, __pyx_n_s_array); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 564, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 541, __pyx_L1_error)
+  __pyx_t_3 = PyList_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 564, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_3, 0, __pyx_float_0_0);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 541, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 564, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 541, __pyx_L1_error)
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 564, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 541, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 564, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 541, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 564, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 541, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, __pyx_t_3); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 564, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 541, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 564, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 541, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 564, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_b = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":543
+  /* "renom/cuda/cudnn.pyx":566
  *     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=dy.dtype))
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef cd.cudnnSoftmaxMode_t md = cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_CHANNEL if mode == 1 else cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_INSTANCE
  */
-  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 543, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 566, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_7));
 
-  /* "renom/cuda/cudnn.pyx":544
+  /* "renom/cuda/cudnn.pyx":567
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)             # <<<<<<<<<<<<<<
  *     cdef cd.cudnnSoftmaxMode_t md = cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_CHANNEL if mode == 1 else cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_INSTANCE
  * 
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 544, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 567, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 544, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 567, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 544, __pyx_L1_error)
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 567, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 544, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 567, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 544, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 567, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 544, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_3, __pyx_t_4); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 567, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_dyDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":545
+  /* "renom/cuda/cudnn.pyx":568
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
  *     cdef cd.cudnnSoftmaxMode_t md = cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_CHANNEL if mode == 1 else cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_INSTANCE             # <<<<<<<<<<<<<<
  * 
  *     cuda_base.check_heap_device(y, dx, dy)
  */
-  __pyx_t_1 = __Pyx_PyInt_EqObjC(__pyx_v_mode, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 545, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_EqObjC(__pyx_v_mode, __pyx_int_1, 1, 0); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 568, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(1, 545, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyObject_IsTrue(__pyx_t_1); if (unlikely(__pyx_t_9 < 0)) __PYX_ERR(0, 568, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   if (__pyx_t_9) {
     __pyx_t_8 = CUDNN_SOFTMAX_MODE_CHANNEL;
@@ -13446,16 +13808,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
   }
   __pyx_v_md = __pyx_t_8;
 
-  /* "renom/cuda/cudnn.pyx":547
+  /* "renom/cuda/cudnn.pyx":570
  *     cdef cd.cudnnSoftmaxMode_t md = cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_CHANNEL if mode == 1 else cd.cudnnSoftmaxMode_t.CUDNN_SOFTMAX_MODE_INSTANCE
  * 
  *     cuda_base.check_heap_device(y, dx, dy)             # <<<<<<<<<<<<<<
  *     check(cd.cudnnSoftmaxBackward(
  *         handler,
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 547, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 570, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 547, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 570, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = NULL;
@@ -13473,7 +13835,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[4] = {__pyx_t_4, __pyx_v_y, __pyx_v_dx, __pyx_v_dy};
-    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_10, 3+__pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 547, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_10, 3+__pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 570, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
@@ -13481,13 +13843,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
     PyObject *__pyx_temp[4] = {__pyx_t_4, __pyx_v_y, __pyx_v_dx, __pyx_v_dy};
-    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_10, 3+__pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 547, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-__pyx_t_10, 3+__pyx_t_10); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 570, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else
   #endif
   {
-    __pyx_t_2 = PyTuple_New(3+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 547, __pyx_L1_error)
+    __pyx_t_2 = PyTuple_New(3+__pyx_t_10); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 570, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_2);
     if (__pyx_t_4) {
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -13501,67 +13863,67 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
     __Pyx_INCREF(__pyx_v_dy);
     __Pyx_GIVEREF(__pyx_v_dy);
     PyTuple_SET_ITEM(__pyx_t_2, 2+__pyx_t_10, __pyx_v_dy);
-    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 547, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 570, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":548
+  /* "renom/cuda/cudnn.pyx":571
  * 
  *     cuda_base.check_heap_device(y, dx, dy)
  *     check(cd.cudnnSoftmaxBackward(             # <<<<<<<<<<<<<<
  *         handler,
  *         cd.cudnnSoftmaxAlgorithm_t.CUDNN_SOFTMAX_ACCURATE,
  */
-  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 548, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 571, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
 
-  /* "renom/cuda/cudnn.pyx":554
+  /* "renom/cuda/cudnn.pyx":577
  *         <const void *> a.ptr,
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> y._ptr,             # <<<<<<<<<<<<<<
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 554, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 577, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 554, __pyx_L1_error)
+  __pyx_t_7 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_7 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 577, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":556
+  /* "renom/cuda/cudnn.pyx":579
  *         <const void *> <uintptr_t> y._ptr,
  *         dyDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,             # <<<<<<<<<<<<<<
  *         <const void *> b.ptr,
  *         dyDesc.tensor_desc,
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 556, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 579, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 556, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 579, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":559
+  /* "renom/cuda/cudnn.pyx":582
  *         <const void *> b.ptr,
  *         dyDesc.tensor_desc,
  *         <void *> <uintptr_t> dx._ptr))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 559, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 582, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 559, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_2); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 582, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":548
+  /* "renom/cuda/cudnn.pyx":571
  * 
  *     cuda_base.check_heap_device(y, dx, dy)
  *     check(cd.cudnnSoftmaxBackward(             # <<<<<<<<<<<<<<
  *         handler,
  *         cd.cudnnSoftmaxAlgorithm_t.CUDNN_SOFTMAX_ACCURATE,
  */
-  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSoftmaxBackward(__pyx_v_handler, CUDNN_SOFTMAX_ACCURATE, __pyx_v_md, ((void const *)__pyx_v_a->ptr), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_7)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_11)), ((void const *)__pyx_v_b->ptr), __pyx_v_dyDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_12)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 548, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyInt_From_cudnnStatus_t(cudnnSoftmaxBackward(__pyx_v_handler, CUDNN_SOFTMAX_ACCURATE, __pyx_v_md, ((void const *)__pyx_v_a->ptr), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_7)), __pyx_v_dyDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_11)), ((void const *)__pyx_v_b->ptr), __pyx_v_dyDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_12)))); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 571, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -13574,14 +13936,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 548, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 571, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 548, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 571, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -13590,20 +13952,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 548, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 571, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 548, __pyx_L1_error)
+      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 571, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 548, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 571, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
@@ -13611,7 +13973,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":537
+  /* "renom/cuda/cudnn.pyx":560
  * 
  * 
  * def cuSoftmaxBackward(handle, y, dy, dx, mode=0):             # <<<<<<<<<<<<<<
@@ -13642,7 +14004,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_27cuSoftmaxBackward(CYTHON_UNUSED 
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":562
+/* "renom/cuda/cudnn.pyx":585
  * 
  * 
  * def cuLocalResponseNormalizationForward(handle, lrn_desc, x, y):             # <<<<<<<<<<<<<<
@@ -13688,23 +14050,23 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_30cuLocalResponseNormalizationForw
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_lrn_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationForward", 1, 4, 4, 1); __PYX_ERR(1, 562, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationForward", 1, 4, 4, 1); __PYX_ERR(0, 585, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationForward", 1, 4, 4, 2); __PYX_ERR(1, 562, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationForward", 1, 4, 4, 2); __PYX_ERR(0, 585, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationForward", 1, 4, 4, 3); __PYX_ERR(1, 562, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationForward", 1, 4, 4, 3); __PYX_ERR(0, 585, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuLocalResponseNormalizationForward") < 0)) __PYX_ERR(1, 562, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuLocalResponseNormalizationForward") < 0)) __PYX_ERR(0, 585, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 4) {
       goto __pyx_L5_argtuple_error;
@@ -13721,7 +14083,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_30cuLocalResponseNormalizationForw
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationForward", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 562, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationForward", 1, 4, 4, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 585, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuLocalResponseNormalizationForward", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -13757,16 +14119,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_INCREF(__pyx_v_y);
 
-  /* "renom/cuda/cudnn.pyx":563
+  /* "renom/cuda/cudnn.pyx":586
  * 
  * def cuLocalResponseNormalizationForward(handle, lrn_desc, x, y):
  *     x, y = map(get_gpu, [x, y])             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 563, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 586, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 563, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(2); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 586, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
@@ -13774,7 +14136,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
   __Pyx_INCREF(__pyx_v_y);
   __Pyx_GIVEREF(__pyx_v_y);
   PyList_SET_ITEM(__pyx_t_2, 1, __pyx_v_y);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 563, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 586, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -13782,7 +14144,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 563, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 586, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -13795,7 +14157,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
     if (unlikely(size != 2)) {
       if (size > 2) __Pyx_RaiseTooManyValuesError(2);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 563, __pyx_L1_error)
+      __PYX_ERR(0, 586, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -13808,15 +14170,15 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
     __Pyx_INCREF(__pyx_t_3);
     __Pyx_INCREF(__pyx_t_1);
     #else
-    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 563, __pyx_L1_error)
+    __pyx_t_3 = PySequence_ITEM(sequence, 0); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 586, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
-    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 563, __pyx_L1_error)
+    __pyx_t_1 = PySequence_ITEM(sequence, 1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 586, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     #endif
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   } else {
     Py_ssize_t index = -1;
-    __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 563, __pyx_L1_error)
+    __pyx_t_4 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 586, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_5 = Py_TYPE(__pyx_t_4)->tp_iternext;
@@ -13824,7 +14186,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
     __Pyx_GOTREF(__pyx_t_3);
     index = 1; __pyx_t_1 = __pyx_t_5(__pyx_t_4); if (unlikely(!__pyx_t_1)) goto __pyx_L3_unpacking_failed;
     __Pyx_GOTREF(__pyx_t_1);
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(1, 563, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_5(__pyx_t_4), 2) < 0) __PYX_ERR(0, 586, __pyx_L1_error)
     __pyx_t_5 = NULL;
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     goto __pyx_L4_unpacking_done;
@@ -13832,7 +14194,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
     __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
     __pyx_t_5 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 563, __pyx_L1_error)
+    __PYX_ERR(0, 586, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_3);
@@ -13840,17 +14202,17 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
   __Pyx_DECREF_SET(__pyx_v_y, __pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":565
+  /* "renom/cuda/cudnn.pyx":588
  *     x, y = map(get_gpu, [x, y])
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  *     cdef cudnnLRNMode_t mode = cudnnLRNMode_t.CUDNN_LRN_CROSS_CHANNEL_DIM1
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  */
-  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 565, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 588, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_6));
 
-  /* "renom/cuda/cudnn.pyx":566
+  /* "renom/cuda/cudnn.pyx":589
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef cudnnLRNMode_t mode = cudnnLRNMode_t.CUDNN_LRN_CROSS_CHANNEL_DIM1             # <<<<<<<<<<<<<<
@@ -13859,158 +14221,158 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
  */
   __pyx_v_mode = CUDNN_LRN_CROSS_CHANNEL_DIM1;
 
-  /* "renom/cuda/cudnn.pyx":567
+  /* "renom/cuda/cudnn.pyx":590
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef cudnnLRNMode_t mode = cudnnLRNMode_t.CUDNN_LRN_CROSS_CHANNEL_DIM1
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 567, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 590, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 567, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 590, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 567, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 590, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 567, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 590, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 567, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 590, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 567, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_1, __pyx_t_2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 590, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_xDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":568
+  /* "renom/cuda/cudnn.pyx":591
  *     cdef cudnnLRNMode_t mode = cudnnLRNMode_t.CUDNN_LRN_CROSS_CHANNEL_DIM1
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr d = _VoidPtr(np.array([1.0], dtype=x.dtype))
  */
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 568, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 591, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 568, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 591, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 568, __pyx_L1_error)
+  __pyx_t_3 = PyDict_New(); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 591, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 568, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 591, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 568, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_3, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 591, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 568, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_2, __pyx_t_3); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 591, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __pyx_v_yDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":570
+  /* "renom/cuda/cudnn.pyx":593
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  * 
  *     cdef _VoidPtr d = _VoidPtr(np.array([1.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr e = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 570, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 570, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 570, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_float_1_0);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 570, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 570, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 570, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 570, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 570, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 570, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_1, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 570, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_1, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 593, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_d = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":571
+  /* "renom/cuda/cudnn.pyx":594
  * 
  *     cdef _VoidPtr d = _VoidPtr(np.array([1.0], dtype=x.dtype))
  *     cdef _VoidPtr e = _VoidPtr(np.array([0.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cuda_base.check_heap_device(x, y)
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 571, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 594, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 571, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_array); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 594, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 571, __pyx_L1_error)
+  __pyx_t_4 = PyList_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 594, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_4, 0, __pyx_float_0_0);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 571, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 594, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 571, __pyx_L1_error)
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 594, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 571, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 594, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(1, 571, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_3) < 0) __PYX_ERR(0, 594, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 571, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_1, __pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 594, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 571, __pyx_L1_error)
+  __pyx_t_4 = PyTuple_New(1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 594, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_GIVEREF(__pyx_t_3);
   PyTuple_SET_ITEM(__pyx_t_4, 0, __pyx_t_3);
   __pyx_t_3 = 0;
-  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 571, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_4, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 594, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_e = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_3);
   __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":573
+  /* "renom/cuda/cudnn.pyx":596
  *     cdef _VoidPtr e = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  *     cuda_base.check_heap_device(x, y)             # <<<<<<<<<<<<<<
  *     check(cudnnLRNCrossChannelForward(
  *         handler,
  */
-  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 573, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 596, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 573, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_4, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 596, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_t_4 = NULL;
@@ -14028,7 +14390,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_2)) {
     PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_v_x, __pyx_v_y};
-    __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 573, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 596, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else
@@ -14036,13 +14398,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
     PyObject *__pyx_temp[3] = {__pyx_t_4, __pyx_v_x, __pyx_v_y};
-    __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 573, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_7, 2+__pyx_t_7); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 596, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else
   #endif
   {
-    __pyx_t_1 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 573, __pyx_L1_error)
+    __pyx_t_1 = PyTuple_New(2+__pyx_t_7); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 596, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_1);
     if (__pyx_t_4) {
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_4); __pyx_t_4 = NULL;
@@ -14053,64 +14415,64 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
     __Pyx_INCREF(__pyx_v_y);
     __Pyx_GIVEREF(__pyx_v_y);
     PyTuple_SET_ITEM(__pyx_t_1, 1+__pyx_t_7, __pyx_v_y);
-    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 573, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_1, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 596, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_3);
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":574
+  /* "renom/cuda/cudnn.pyx":597
  * 
  *     cuda_base.check_heap_device(x, y)
  *     check(cudnnLRNCrossChannelForward(             # <<<<<<<<<<<<<<
  *         handler,
  *         <cudnnLRNDescriptor_t> <uintptr_t> lrn_desc,
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 574, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 597, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
 
-  /* "renom/cuda/cudnn.pyx":576
+  /* "renom/cuda/cudnn.pyx":599
  *     check(cudnnLRNCrossChannelForward(
  *         handler,
  *         <cudnnLRNDescriptor_t> <uintptr_t> lrn_desc,             # <<<<<<<<<<<<<<
  *         mode,
  *         d.ptr,
  */
-  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_lrn_desc); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 576, __pyx_L1_error)
+  __pyx_t_6 = __Pyx_PyInt_As_size_t(__pyx_v_lrn_desc); if (unlikely((__pyx_t_6 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 599, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":580
+  /* "renom/cuda/cudnn.pyx":603
  *         d.ptr,
  *         xDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,             # <<<<<<<<<<<<<<
  *         e.ptr,
  *         yDesc.tensor_desc,
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 580, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 603, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_t_1); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 580, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_t_1); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 603, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":583
+  /* "renom/cuda/cudnn.pyx":606
  *         e.ptr,
  *         yDesc.tensor_desc,
  *         <void *> <uintptr_t> y._ptr))             # <<<<<<<<<<<<<<
  * 
  * 
  */
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 583, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 606, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_1); if (unlikely((__pyx_t_9 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 583, __pyx_L1_error)
+  __pyx_t_9 = __Pyx_PyInt_As_size_t(__pyx_t_1); if (unlikely((__pyx_t_9 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 606, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":574
+  /* "renom/cuda/cudnn.pyx":597
  * 
  *     cuda_base.check_heap_device(x, y)
  *     check(cudnnLRNCrossChannelForward(             # <<<<<<<<<<<<<<
  *         handler,
  *         <cudnnLRNDescriptor_t> <uintptr_t> lrn_desc,
  */
-  __pyx_t_1 = __Pyx_PyInt_From_cudnnStatus_t(cudnnLRNCrossChannelForward(__pyx_v_handler, ((cudnnLRNDescriptor_t)((uintptr_t)__pyx_t_6)), __pyx_v_mode, __pyx_v_d->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_8)), __pyx_v_e->ptr, __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_9)))); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 574, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyInt_From_cudnnStatus_t(cudnnLRNCrossChannelForward(__pyx_v_handler, ((cudnnLRNDescriptor_t)((uintptr_t)__pyx_t_6)), __pyx_v_mode, __pyx_v_d->ptr, __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_8)), __pyx_v_e->ptr, __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_9)))); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 597, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -14123,14 +14485,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 574, __pyx_L1_error)
+    __pyx_t_3 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 597, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_3);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_1};
-      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 574, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 597, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
@@ -14139,20 +14501,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_1};
-      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 574, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 597, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
     } else
     #endif
     {
-      __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(1, 574, __pyx_L1_error)
+      __pyx_t_10 = PyTuple_New(1+1); if (unlikely(!__pyx_t_10)) __PYX_ERR(0, 597, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_10);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_10, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_1);
       PyTuple_SET_ITEM(__pyx_t_10, 0+1, __pyx_t_1);
       __pyx_t_1 = 0;
-      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_10, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 574, __pyx_L1_error)
+      __pyx_t_3 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_10, NULL); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 597, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_DECREF(__pyx_t_10); __pyx_t_10 = 0;
     }
@@ -14160,7 +14522,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "renom/cuda/cudnn.pyx":562
+  /* "renom/cuda/cudnn.pyx":585
  * 
  * 
  * def cuLocalResponseNormalizationForward(handle, lrn_desc, x, y):             # <<<<<<<<<<<<<<
@@ -14191,7 +14553,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_29cuLocalResponseNormalizationForw
   return __pyx_r;
 }
 
-/* "renom/cuda/cudnn.pyx":586
+/* "renom/cuda/cudnn.pyx":609
  * 
  * 
  * def cuLocalResponseNormalizationBackward(handle, lrn_desc, x, y, dx, dy):             # <<<<<<<<<<<<<<
@@ -14243,35 +14605,35 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_32cuLocalResponseNormalizationBack
         case  1:
         if (likely((values[1] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_lrn_desc)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, 1); __PYX_ERR(1, 586, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, 1); __PYX_ERR(0, 609, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  2:
         if (likely((values[2] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_x)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, 2); __PYX_ERR(1, 586, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, 2); __PYX_ERR(0, 609, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  3:
         if (likely((values[3] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_y)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, 3); __PYX_ERR(1, 586, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, 3); __PYX_ERR(0, 609, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  4:
         if (likely((values[4] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dx)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, 4); __PYX_ERR(1, 586, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, 4); __PYX_ERR(0, 609, __pyx_L3_error)
         }
         CYTHON_FALLTHROUGH;
         case  5:
         if (likely((values[5] = PyDict_GetItem(__pyx_kwds, __pyx_n_s_dy)) != 0)) kw_args--;
         else {
-          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, 5); __PYX_ERR(1, 586, __pyx_L3_error)
+          __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, 5); __PYX_ERR(0, 609, __pyx_L3_error)
         }
       }
       if (unlikely(kw_args > 0)) {
-        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuLocalResponseNormalizationBackward") < 0)) __PYX_ERR(1, 586, __pyx_L3_error)
+        if (unlikely(__Pyx_ParseOptionalKeywords(__pyx_kwds, __pyx_pyargnames, 0, values, pos_args, "cuLocalResponseNormalizationBackward") < 0)) __PYX_ERR(0, 609, __pyx_L3_error)
       }
     } else if (PyTuple_GET_SIZE(__pyx_args) != 6) {
       goto __pyx_L5_argtuple_error;
@@ -14292,7 +14654,7 @@ static PyObject *__pyx_pw_5renom_4cuda_5cudnn_32cuLocalResponseNormalizationBack
   }
   goto __pyx_L4_argument_unpacking_done;
   __pyx_L5_argtuple_error:;
-  __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(1, 586, __pyx_L3_error)
+  __Pyx_RaiseArgtupleInvalid("cuLocalResponseNormalizationBackward", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 609, __pyx_L3_error)
   __pyx_L3_error:;
   __Pyx_AddTraceback("renom.cuda.cudnn.cuLocalResponseNormalizationBackward", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
@@ -14333,16 +14695,16 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
   __Pyx_INCREF(__pyx_v_dx);
   __Pyx_INCREF(__pyx_v_dy);
 
-  /* "renom/cuda/cudnn.pyx":587
+  /* "renom/cuda/cudnn.pyx":610
  * 
  * def cuLocalResponseNormalizationBackward(handle, lrn_desc, x, y, dx, dy):
  *     x, y, dx, dy = map(get_gpu, [x, y, dx, dy])             # <<<<<<<<<<<<<<
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 587, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = PyList_New(4); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 587, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(4); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_v_x);
   __Pyx_GIVEREF(__pyx_v_x);
@@ -14356,7 +14718,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
   __Pyx_INCREF(__pyx_v_dy);
   __Pyx_GIVEREF(__pyx_v_dy);
   PyList_SET_ITEM(__pyx_t_2, 3, __pyx_v_dy);
-  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 587, __pyx_L1_error)
+  __pyx_t_3 = PyTuple_New(2); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1);
@@ -14364,7 +14726,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
   PyTuple_SET_ITEM(__pyx_t_3, 1, __pyx_t_2);
   __pyx_t_1 = 0;
   __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 587, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_Call(__pyx_builtin_map, __pyx_t_3, NULL); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 610, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
   if ((likely(PyTuple_CheckExact(__pyx_t_2))) || (PyList_CheckExact(__pyx_t_2))) {
@@ -14377,7 +14739,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
     if (unlikely(size != 4)) {
       if (size > 4) __Pyx_RaiseTooManyValuesError(4);
       else if (size >= 0) __Pyx_RaiseNeedMoreValuesError(size);
-      __PYX_ERR(1, 587, __pyx_L1_error)
+      __PYX_ERR(0, 610, __pyx_L1_error)
     }
     #if CYTHON_ASSUME_SAFE_MACROS && !CYTHON_AVOID_BORROWED_REFS
     if (likely(PyTuple_CheckExact(sequence))) {
@@ -14400,7 +14762,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
       Py_ssize_t i;
       PyObject** temps[4] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_4,&__pyx_t_5};
       for (i=0; i < 4; i++) {
-        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(1, 587, __pyx_L1_error)
+        PyObject* item = PySequence_ITEM(sequence, i); if (unlikely(!item)) __PYX_ERR(0, 610, __pyx_L1_error)
         __Pyx_GOTREF(item);
         *(temps[i]) = item;
       }
@@ -14410,7 +14772,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
   } else {
     Py_ssize_t index = -1;
     PyObject** temps[4] = {&__pyx_t_3,&__pyx_t_1,&__pyx_t_4,&__pyx_t_5};
-    __pyx_t_6 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(1, 587, __pyx_L1_error)
+    __pyx_t_6 = PyObject_GetIter(__pyx_t_2); if (unlikely(!__pyx_t_6)) __PYX_ERR(0, 610, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_6);
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __pyx_t_7 = Py_TYPE(__pyx_t_6)->tp_iternext;
@@ -14419,7 +14781,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
       __Pyx_GOTREF(item);
       *(temps[index]) = item;
     }
-    if (__Pyx_IternextUnpackEndCheck(__pyx_t_7(__pyx_t_6), 4) < 0) __PYX_ERR(1, 587, __pyx_L1_error)
+    if (__Pyx_IternextUnpackEndCheck(__pyx_t_7(__pyx_t_6), 4) < 0) __PYX_ERR(0, 610, __pyx_L1_error)
     __pyx_t_7 = NULL;
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     goto __pyx_L4_unpacking_done;
@@ -14427,7 +14789,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
     __Pyx_DECREF(__pyx_t_6); __pyx_t_6 = 0;
     __pyx_t_7 = NULL;
     if (__Pyx_IterFinish() == 0) __Pyx_RaiseNeedMoreValuesError(index);
-    __PYX_ERR(1, 587, __pyx_L1_error)
+    __PYX_ERR(0, 610, __pyx_L1_error)
     __pyx_L4_unpacking_done:;
   }
   __Pyx_DECREF_SET(__pyx_v_x, __pyx_t_3);
@@ -14439,17 +14801,17 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
   __Pyx_DECREF_SET(__pyx_v_dy, __pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":589
+  /* "renom/cuda/cudnn.pyx":612
  *     x, y, dx, dy = map(get_gpu, [x, y, dx, dy])
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle             # <<<<<<<<<<<<<<
  *     cdef cudnnLRNMode_t mode = cudnnLRNMode_t.CUDNN_LRN_CROSS_CHANNEL_DIM1
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  */
-  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 589, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_v_handle); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 612, __pyx_L1_error)
   __pyx_v_handler = ((cudnnHandle_t)((uintptr_t)__pyx_t_8));
 
-  /* "renom/cuda/cudnn.pyx":590
+  /* "renom/cuda/cudnn.pyx":613
  * 
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef cudnnLRNMode_t mode = cudnnLRNMode_t.CUDNN_LRN_CROSS_CHANNEL_DIM1             # <<<<<<<<<<<<<<
@@ -14458,158 +14820,158 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
  */
   __pyx_v_mode = CUDNN_LRN_CROSS_CHANNEL_DIM1;
 
-  /* "renom/cuda/cudnn.pyx":591
+  /* "renom/cuda/cudnn.pyx":614
  *     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
  *     cdef cudnnLRNMode_t mode = cudnnLRNMode_t.CUDNN_LRN_CROSS_CHANNEL_DIM1
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)             # <<<<<<<<<<<<<<
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  * 
  */
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 591, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_shape); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 614, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 591, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 614, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_2);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_2);
   __pyx_t_2 = 0;
-  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 591, __pyx_L1_error)
+  __pyx_t_2 = PyDict_New(); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 614, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 591, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 614, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 591, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_2, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 614, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_5, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 591, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_5, __pyx_t_2); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 614, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __pyx_v_xDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":592
+  /* "renom/cuda/cudnn.pyx":615
  *     cdef cudnnLRNMode_t mode = cudnnLRNMode_t.CUDNN_LRN_CROSS_CHANNEL_DIM1
  *     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)             # <<<<<<<<<<<<<<
  * 
  *     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=x.dtype))
  */
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 592, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_shape); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 615, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 592, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 615, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 592, __pyx_L1_error)
+  __pyx_t_4 = PyDict_New(); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 615, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 592, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_dtype); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 615, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(1, 592, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_4, __pyx_n_s_dtype, __pyx_t_5) < 0) __PYX_ERR(0, 615, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 592, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_5cudnn_TensorDesc), __pyx_t_2, __pyx_t_4); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 615, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __pyx_v_yDesc = ((struct __pyx_obj_5renom_4cuda_5cudnn_TensorDesc *)__pyx_t_5);
   __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":594
+  /* "renom/cuda/cudnn.pyx":617
  *     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
  * 
  *     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  *     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  */
-  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 594, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 617, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 594, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_t_5, __pyx_n_s_array); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 617, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = PyList_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 594, __pyx_L1_error)
+  __pyx_t_5 = PyList_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 617, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_INCREF(__pyx_float_1_0);
   __Pyx_GIVEREF(__pyx_float_1_0);
   PyList_SET_ITEM(__pyx_t_5, 0, __pyx_float_1_0);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 594, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 617, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_5);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_5);
   __pyx_t_5 = 0;
-  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 594, __pyx_L1_error)
+  __pyx_t_5 = PyDict_New(); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 617, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 594, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 617, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(1, 594, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_5, __pyx_n_s_dtype, __pyx_t_1) < 0) __PYX_ERR(0, 617, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 594, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_4, __pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 617, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
-  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 594, __pyx_L1_error)
+  __pyx_t_5 = PyTuple_New(1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 617, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 594, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 617, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __pyx_v_a = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":595
+  /* "renom/cuda/cudnn.pyx":618
  * 
  *     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=x.dtype))
  *     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=x.dtype))             # <<<<<<<<<<<<<<
  * 
  *     cuda_base.check_heap_device(x, y, dx, dy)
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 595, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_np); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 618, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 595, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_array); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 618, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 595, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 618, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_float_0_0);
   __Pyx_GIVEREF(__pyx_float_0_0);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_float_0_0);
-  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 595, __pyx_L1_error)
+  __pyx_t_2 = PyTuple_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 618, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_GIVEREF(__pyx_t_1);
   PyTuple_SET_ITEM(__pyx_t_2, 0, __pyx_t_1);
   __pyx_t_1 = 0;
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 595, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 618, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 595, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_dtype); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 618, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
-  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(1, 595, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_t_1, __pyx_n_s_dtype, __pyx_t_4) < 0) __PYX_ERR(0, 618, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 595, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_5, __pyx_t_2, __pyx_t_1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 618, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 595, __pyx_L1_error)
+  __pyx_t_1 = PyTuple_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 618, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_GIVEREF(__pyx_t_4);
   PyTuple_SET_ITEM(__pyx_t_1, 0, __pyx_t_4);
   __pyx_t_4 = 0;
-  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_1, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 595, __pyx_L1_error)
+  __pyx_t_4 = __Pyx_PyObject_Call(((PyObject *)__pyx_ptype_5renom_4cuda_10cuda_utils__VoidPtr), __pyx_t_1, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 618, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_4);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_v_b = ((struct __pyx_obj_5renom_4cuda_10cuda_utils__VoidPtr *)__pyx_t_4);
   __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":597
+  /* "renom/cuda/cudnn.pyx":620
  *     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=x.dtype))
  * 
  *     cuda_base.check_heap_device(x, y, dx, dy)             # <<<<<<<<<<<<<<
  *     check(cudnnLRNCrossChannelBackward(
  *         handler,
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 597, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_cuda_base); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 620, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 597, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_PyObject_GetAttrStr(__pyx_t_1, __pyx_n_s_check_heap_device); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 620, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __pyx_t_1 = NULL;
@@ -14627,7 +14989,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
   #if CYTHON_FAST_PYCALL
   if (PyFunction_Check(__pyx_t_2)) {
     PyObject *__pyx_temp[5] = {__pyx_t_1, __pyx_v_x, __pyx_v_y, __pyx_v_dx, __pyx_v_dy};
-    __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 597, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 620, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else
@@ -14635,13 +14997,13 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
   #if CYTHON_FAST_PYCCALL
   if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
     PyObject *__pyx_temp[5] = {__pyx_t_1, __pyx_v_x, __pyx_v_y, __pyx_v_dx, __pyx_v_dy};
-    __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 597, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-__pyx_t_9, 4+__pyx_t_9); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 620, __pyx_L1_error)
     __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else
   #endif
   {
-    __pyx_t_5 = PyTuple_New(4+__pyx_t_9); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 597, __pyx_L1_error)
+    __pyx_t_5 = PyTuple_New(4+__pyx_t_9); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 620, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_5);
     if (__pyx_t_1) {
       __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_1); __pyx_t_1 = NULL;
@@ -14658,86 +15020,86 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
     __Pyx_INCREF(__pyx_v_dy);
     __Pyx_GIVEREF(__pyx_v_dy);
     PyTuple_SET_ITEM(__pyx_t_5, 3+__pyx_t_9, __pyx_v_dy);
-    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 597, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_5, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 620, __pyx_L1_error)
     __Pyx_GOTREF(__pyx_t_4);
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
   }
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":598
+  /* "renom/cuda/cudnn.pyx":621
  * 
  *     cuda_base.check_heap_device(x, y, dx, dy)
  *     check(cudnnLRNCrossChannelBackward(             # <<<<<<<<<<<<<<
  *         handler,
  *         <cudnnLRNDescriptor_t> <uintptr_t> lrn_desc,
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 598, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_check); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 621, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
 
-  /* "renom/cuda/cudnn.pyx":600
+  /* "renom/cuda/cudnn.pyx":623
  *     check(cudnnLRNCrossChannelBackward(
  *         handler,
  *         <cudnnLRNDescriptor_t> <uintptr_t> lrn_desc,             # <<<<<<<<<<<<<<
  *         mode,
  *         a.ptr,
  */
-  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_v_lrn_desc); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 600, __pyx_L1_error)
+  __pyx_t_8 = __Pyx_PyInt_As_size_t(__pyx_v_lrn_desc); if (unlikely((__pyx_t_8 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 623, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":604
+  /* "renom/cuda/cudnn.pyx":627
  *         a.ptr,
  *         yDesc.tensor_desc,
  *         <void *> <uintptr_t> y._ptr,             # <<<<<<<<<<<<<<
  *         yDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,
  */
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 604, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_y, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 627, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 604, __pyx_L1_error)
+  __pyx_t_10 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_10 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 627, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":606
+  /* "renom/cuda/cudnn.pyx":629
  *         <void *> <uintptr_t> y._ptr,
  *         yDesc.tensor_desc,
  *         <const void *> <uintptr_t> dy._ptr,             # <<<<<<<<<<<<<<
  *         xDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,
  */
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 606, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_dy, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 629, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 606, __pyx_L1_error)
+  __pyx_t_11 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_11 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 629, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":608
+  /* "renom/cuda/cudnn.pyx":631
  *         <const void *> <uintptr_t> dy._ptr,
  *         xDesc.tensor_desc,
  *         <const void *> <uintptr_t> x._ptr,             # <<<<<<<<<<<<<<
  *         b.ptr,
  *         xDesc.tensor_desc,
  */
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 608, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_x, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 631, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 608, __pyx_L1_error)
+  __pyx_t_12 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_12 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 631, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":611
+  /* "renom/cuda/cudnn.pyx":634
  *         b.ptr,
  *         xDesc.tensor_desc,
  *         <void *> <uintptr_t> dx._ptr))             # <<<<<<<<<<<<<<
  */
-  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 611, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyObject_GetAttrStr(__pyx_v_dx, __pyx_n_s_ptr); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 634, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
-  __pyx_t_13 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_13 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(1, 611, __pyx_L1_error)
+  __pyx_t_13 = __Pyx_PyInt_As_size_t(__pyx_t_5); if (unlikely((__pyx_t_13 == ((uintptr_t)-1)) && PyErr_Occurred())) __PYX_ERR(0, 634, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
 
-  /* "renom/cuda/cudnn.pyx":598
+  /* "renom/cuda/cudnn.pyx":621
  * 
  *     cuda_base.check_heap_device(x, y, dx, dy)
  *     check(cudnnLRNCrossChannelBackward(             # <<<<<<<<<<<<<<
  *         handler,
  *         <cudnnLRNDescriptor_t> <uintptr_t> lrn_desc,
  */
-  __pyx_t_5 = __Pyx_PyInt_From_cudnnStatus_t(cudnnLRNCrossChannelBackward(__pyx_v_handler, ((cudnnLRNDescriptor_t)((uintptr_t)__pyx_t_8)), __pyx_v_mode, __pyx_v_a->ptr, __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_10)), __pyx_v_yDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_11)), __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_12)), __pyx_v_b->ptr, __pyx_v_xDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_13)))); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 598, __pyx_L1_error)
+  __pyx_t_5 = __Pyx_PyInt_From_cudnnStatus_t(cudnnLRNCrossChannelBackward(__pyx_v_handler, ((cudnnLRNDescriptor_t)((uintptr_t)__pyx_t_8)), __pyx_v_mode, __pyx_v_a->ptr, __pyx_v_yDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_10)), __pyx_v_yDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_11)), __pyx_v_xDesc->tensor_desc, ((void const *)((uintptr_t)__pyx_t_12)), __pyx_v_b->ptr, __pyx_v_xDesc->tensor_desc, ((void *)((uintptr_t)__pyx_t_13)))); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 621, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_5);
   __pyx_t_1 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_2))) {
@@ -14750,14 +15112,14 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
     }
   }
   if (!__pyx_t_1) {
-    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 598, __pyx_L1_error)
+    __pyx_t_4 = __Pyx_PyObject_CallOneArg(__pyx_t_2, __pyx_t_5); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 621, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     __Pyx_GOTREF(__pyx_t_4);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_5};
-      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 598, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 621, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
@@ -14766,20 +15128,20 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_2)) {
       PyObject *__pyx_temp[2] = {__pyx_t_1, __pyx_t_5};
-      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 598, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyCFunction_FastCall(__pyx_t_2, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 621, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_1); __pyx_t_1 = 0;
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     } else
     #endif
     {
-      __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 598, __pyx_L1_error)
+      __pyx_t_3 = PyTuple_New(1+1); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 621, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_3);
       __Pyx_GIVEREF(__pyx_t_1); PyTuple_SET_ITEM(__pyx_t_3, 0, __pyx_t_1); __pyx_t_1 = NULL;
       __Pyx_GIVEREF(__pyx_t_5);
       PyTuple_SET_ITEM(__pyx_t_3, 0+1, __pyx_t_5);
       __pyx_t_5 = 0;
-      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(1, 598, __pyx_L1_error)
+      __pyx_t_4 = __Pyx_PyObject_Call(__pyx_t_2, __pyx_t_3, NULL); if (unlikely(!__pyx_t_4)) __PYX_ERR(0, 621, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_4);
       __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
     }
@@ -14787,7 +15149,7 @@ static PyObject *__pyx_pf_5renom_4cuda_5cudnn_31cuLocalResponseNormalizationBack
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_4); __pyx_t_4 = 0;
 
-  /* "renom/cuda/cudnn.pyx":586
+  /* "renom/cuda/cudnn.pyx":609
  * 
  * 
  * def cuLocalResponseNormalizationBackward(handle, lrn_desc, x, y, dx, dy):             # <<<<<<<<<<<<<<
@@ -15683,6 +16045,7 @@ static struct PyModuleDef __pyx_moduledef = {
 #endif
 
 static __Pyx_StringTabEntry __pyx_string_tab[] = {
+  {&__pyx_n_s_MemoryError, __pyx_k_MemoryError, sizeof(__pyx_k_MemoryError), 0, 0, 1, 1},
   {&__pyx_n_s_TypeError, __pyx_k_TypeError, sizeof(__pyx_k_TypeError), 0, 0, 1, 1},
   {&__pyx_n_s_a, __pyx_k_a, sizeof(__pyx_k_a), 0, 0, 1, 1},
   {&__pyx_n_s_alf, __pyx_k_alf, sizeof(__pyx_k_alf), 0, 0, 1, 1},
@@ -15763,7 +16126,9 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_pool_mode, __pyx_k_pool_mode, sizeof(__pyx_k_pool_mode), 0, 0, 1, 1},
   {&__pyx_n_s_precision, __pyx_k_precision, sizeof(__pyx_k_precision), 0, 0, 1, 1},
   {&__pyx_n_s_pref, __pyx_k_pref, sizeof(__pyx_k_pref), 0, 0, 1, 1},
+  {&__pyx_n_s_prod, __pyx_k_prod, sizeof(__pyx_k_prod), 0, 0, 1, 1},
   {&__pyx_n_s_ptr, __pyx_k_ptr, sizeof(__pyx_k_ptr), 0, 0, 1, 1},
+  {&__pyx_n_s_range, __pyx_k_range, sizeof(__pyx_k_range), 0, 0, 1, 1},
   {&__pyx_n_s_reduce_cython, __pyx_k_reduce_cython, sizeof(__pyx_k_reduce_cython), 0, 0, 1, 1},
   {&__pyx_n_s_renom_config, __pyx_k_renom_config, sizeof(__pyx_k_renom_config), 0, 0, 1, 1},
   {&__pyx_n_s_renom_core, __pyx_k_renom_core, sizeof(__pyx_k_renom_core), 0, 0, 1, 1},
@@ -15797,8 +16162,10 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {0, 0, 0, 0, 0, 0, 0}
 };
 static int __Pyx_InitCachedBuiltins(void) {
-  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(0, 2, __pyx_L1_error)
-  __pyx_builtin_map = __Pyx_GetBuiltinName(__pyx_n_s_map); if (!__pyx_builtin_map) __PYX_ERR(1, 158, __pyx_L1_error)
+  __pyx_builtin_MemoryError = __Pyx_GetBuiltinName(__pyx_n_s_MemoryError); if (!__pyx_builtin_MemoryError) __PYX_ERR(0, 71, __pyx_L1_error)
+  __pyx_builtin_range = __Pyx_GetBuiltinName(__pyx_n_s_range); if (!__pyx_builtin_range) __PYX_ERR(0, 73, __pyx_L1_error)
+  __pyx_builtin_TypeError = __Pyx_GetBuiltinName(__pyx_n_s_TypeError); if (!__pyx_builtin_TypeError) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_builtin_map = __Pyx_GetBuiltinName(__pyx_n_s_map); if (!__pyx_builtin_map) __PYX_ERR(0, 181, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -15814,7 +16181,7 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.tensor_desc cannot be converted to a Python object for pickling")
  */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_s_self_tensor_desc_cannot_be_conve); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_s_self_tensor_desc_cannot_be_conve); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
@@ -15823,7 +16190,7 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.tensor_desc cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_s_self_tensor_desc_cannot_be_conve); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_tuple__3 = PyTuple_Pack(1, __pyx_kp_s_self_tensor_desc_cannot_be_conve); if (unlikely(!__pyx_tuple__3)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__3);
   __Pyx_GIVEREF(__pyx_tuple__3);
 
@@ -15833,7 +16200,7 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.conv_desc cannot be converted to a Python object for pickling")
  */
-  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_kp_s_self_conv_desc_cannot_be_convert); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_tuple__4 = PyTuple_Pack(1, __pyx_kp_s_self_conv_desc_cannot_be_convert); if (unlikely(!__pyx_tuple__4)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__4);
   __Pyx_GIVEREF(__pyx_tuple__4);
 
@@ -15842,7 +16209,7 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.conv_desc cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_s_self_conv_desc_cannot_be_convert); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_tuple__5 = PyTuple_Pack(1, __pyx_kp_s_self_conv_desc_cannot_be_convert); if (unlikely(!__pyx_tuple__5)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__5);
   __Pyx_GIVEREF(__pyx_tuple__5);
 
@@ -15852,7 +16219,7 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.pool_desc cannot be converted to a Python object for pickling")
  */
-  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_s_self_pool_desc_cannot_be_convert); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_tuple__6 = PyTuple_Pack(1, __pyx_kp_s_self_pool_desc_cannot_be_convert); if (unlikely(!__pyx_tuple__6)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__6);
   __Pyx_GIVEREF(__pyx_tuple__6);
 
@@ -15861,7 +16228,7 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.pool_desc cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_self_pool_desc_cannot_be_convert); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_tuple__7 = PyTuple_Pack(1, __pyx_kp_s_self_pool_desc_cannot_be_convert); if (unlikely(!__pyx_tuple__7)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__7);
   __Pyx_GIVEREF(__pyx_tuple__7);
 
@@ -15871,7 +16238,7 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.lrn_desc cannot be converted to a Python object for pickling")
  */
-  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_s_self_lrn_desc_cannot_be_converte); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_tuple__8 = PyTuple_Pack(1, __pyx_kp_s_self_lrn_desc_cannot_be_converte); if (unlikely(!__pyx_tuple__8)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__8);
   __Pyx_GIVEREF(__pyx_tuple__8);
 
@@ -15880,7 +16247,7 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.lrn_desc cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_s_self_lrn_desc_cannot_be_converte); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_tuple__9 = PyTuple_Pack(1, __pyx_kp_s_self_lrn_desc_cannot_be_converte); if (unlikely(!__pyx_tuple__9)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__9);
   __Pyx_GIVEREF(__pyx_tuple__9);
 
@@ -15890,7 +16257,7 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.filter_desc cannot be converted to a Python object for pickling")
  */
-  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_s_self_filter_desc_cannot_be_conve); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(0, 2, __pyx_L1_error)
+  __pyx_tuple__10 = PyTuple_Pack(1, __pyx_kp_s_self_filter_desc_cannot_be_conve); if (unlikely(!__pyx_tuple__10)) __PYX_ERR(1, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__10);
   __Pyx_GIVEREF(__pyx_tuple__10);
 
@@ -15899,201 +16266,201 @@ static int __Pyx_InitCachedConstants(void) {
  * def __setstate_cython__(self, __pyx_state):
  *     raise TypeError("self.filter_desc cannot be converted to a Python object for pickling")             # <<<<<<<<<<<<<<
  */
-  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_s_self_filter_desc_cannot_be_conve); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(0, 4, __pyx_L1_error)
+  __pyx_tuple__11 = PyTuple_Pack(1, __pyx_kp_s_self_filter_desc_cannot_be_conve); if (unlikely(!__pyx_tuple__11)) __PYX_ERR(1, 4, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__11);
   __Pyx_GIVEREF(__pyx_tuple__11);
 
-  /* "renom/cuda/cudnn.pyx":13
+  /* "renom/cuda/cudnn.pyx":15
  * 
  * 
  * def check(cd.cudnnStatus_t status):             # <<<<<<<<<<<<<<
  *     if status == cd.cudnnStatus_t.CUDNN_STATUS_SUCCESS:
  *         return
  */
-  __pyx_tuple__12 = PyTuple_Pack(3, __pyx_n_s_status, __pyx_n_s_status, __pyx_n_s_error); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(1, 13, __pyx_L1_error)
+  __pyx_tuple__12 = PyTuple_Pack(3, __pyx_n_s_status, __pyx_n_s_status, __pyx_n_s_error); if (unlikely(!__pyx_tuple__12)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__12);
   __Pyx_GIVEREF(__pyx_tuple__12);
-  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_check, 13, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(1, 13, __pyx_L1_error)
+  __pyx_codeobj__13 = (PyObject*)__Pyx_PyCode_New(1, 0, 3, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__12, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_check, 15, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__13)) __PYX_ERR(0, 15, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":24
+  /* "renom/cuda/cudnn.pyx":26
  * 
  * @contextlib.contextmanager
  * def cudnn_handler():             # <<<<<<<<<<<<<<
  *     cdef cudnnHandle_t handle
  * 
  */
-  __pyx_tuple__14 = PyTuple_Pack(2, __pyx_n_s_handle, __pyx_n_s_device_id); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(1, 24, __pyx_L1_error)
+  __pyx_tuple__14 = PyTuple_Pack(2, __pyx_n_s_handle, __pyx_n_s_device_id); if (unlikely(!__pyx_tuple__14)) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__14);
   __Pyx_GIVEREF(__pyx_tuple__14);
-  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(0, 0, 2, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cudnn_handler, 24, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(1, 24, __pyx_L1_error)
+  __pyx_codeobj__15 = (PyObject*)__Pyx_PyCode_New(0, 0, 2, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__14, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cudnn_handler, 26, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__15)) __PYX_ERR(0, 26, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":157
+  /* "renom/cuda/cudnn.pyx":180
  * 
  * 
  * def cuPoolingForward(handle, pool_desc, x, y):             # <<<<<<<<<<<<<<
  *     x, y = map(get_gpu, [x, y])
  * 
  */
-  __pyx_tuple__16 = PyTuple_Pack(9, __pyx_n_s_handle, __pyx_n_s_pool_desc, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_handler, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_xDesc, __pyx_n_s_yDesc); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(1, 157, __pyx_L1_error)
+  __pyx_tuple__16 = PyTuple_Pack(9, __pyx_n_s_handle, __pyx_n_s_pool_desc, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_handler, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_xDesc, __pyx_n_s_yDesc); if (unlikely(!__pyx_tuple__16)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__16);
   __Pyx_GIVEREF(__pyx_tuple__16);
-  __pyx_codeobj__17 = (PyObject*)__Pyx_PyCode_New(4, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__16, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuPoolingForward, 157, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__17)) __PYX_ERR(1, 157, __pyx_L1_error)
+  __pyx_codeobj__17 = (PyObject*)__Pyx_PyCode_New(4, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__16, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuPoolingForward, 180, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__17)) __PYX_ERR(0, 180, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":180
+  /* "renom/cuda/cudnn.pyx":203
  * 
  * 
  * def cuPoolingBackward(handle, pool_desc, x, y, dy, dx):             # <<<<<<<<<<<<<<
  *     x, y, dy, dx = map(get_gpu, [x, y, dy, dx])
  * 
  */
-  __pyx_tuple__18 = PyTuple_Pack(11, __pyx_n_s_handle, __pyx_n_s_pool_desc, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_dy, __pyx_n_s_dx, __pyx_n_s_handler, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_xDesc, __pyx_n_s_yDesc); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(1, 180, __pyx_L1_error)
+  __pyx_tuple__18 = PyTuple_Pack(11, __pyx_n_s_handle, __pyx_n_s_pool_desc, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_dy, __pyx_n_s_dx, __pyx_n_s_handler, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_xDesc, __pyx_n_s_yDesc); if (unlikely(!__pyx_tuple__18)) __PYX_ERR(0, 203, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__18);
   __Pyx_GIVEREF(__pyx_tuple__18);
-  __pyx_codeobj__19 = (PyObject*)__Pyx_PyCode_New(6, 0, 11, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuPoolingBackward, 180, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__19)) __PYX_ERR(1, 180, __pyx_L1_error)
+  __pyx_codeobj__19 = (PyObject*)__Pyx_PyCode_New(6, 0, 11, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__18, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuPoolingBackward, 203, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__19)) __PYX_ERR(0, 203, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":226
+  /* "renom/cuda/cudnn.pyx":249
  * 
  * 
  * def cuBatchNormalizatoinForward(handle, x, mean, var, w, b, y, rm, rv, momentum=0.0, mode=None, inference=False, eps=1e-5):             # <<<<<<<<<<<<<<
  *     x, mean, var, w, b, y, rm, rv = map(get_gpu, [x, mean, var, w, b, y, rm, rv])
  * 
  */
-  __pyx_tuple__20 = PyTuple_Pack(24, __pyx_n_s_handle, __pyx_n_s_x, __pyx_n_s_mean, __pyx_n_s_var, __pyx_n_s_w, __pyx_n_s_b, __pyx_n_s_y, __pyx_n_s_rm, __pyx_n_s_rv, __pyx_n_s_momentum, __pyx_n_s_mode, __pyx_n_s_inference, __pyx_n_s_eps, __pyx_n_s_handler, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_md, __pyx_n_s_xDesc, __pyx_n_s_wDesc, __pyx_n_s_yDesc, __pyx_n_s_mean_ptr, __pyx_n_s_var_ptr, __pyx_n_s_epsilon, __pyx_n_s_exponentialAverageFactor); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(1, 226, __pyx_L1_error)
+  __pyx_tuple__20 = PyTuple_Pack(24, __pyx_n_s_handle, __pyx_n_s_x, __pyx_n_s_mean, __pyx_n_s_var, __pyx_n_s_w, __pyx_n_s_b, __pyx_n_s_y, __pyx_n_s_rm, __pyx_n_s_rv, __pyx_n_s_momentum, __pyx_n_s_mode, __pyx_n_s_inference, __pyx_n_s_eps, __pyx_n_s_handler, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_md, __pyx_n_s_xDesc, __pyx_n_s_wDesc, __pyx_n_s_yDesc, __pyx_n_s_mean_ptr, __pyx_n_s_var_ptr, __pyx_n_s_epsilon, __pyx_n_s_exponentialAverageFactor); if (unlikely(!__pyx_tuple__20)) __PYX_ERR(0, 249, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__20);
   __Pyx_GIVEREF(__pyx_tuple__20);
-  __pyx_codeobj__21 = (PyObject*)__Pyx_PyCode_New(13, 0, 24, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuBatchNormalizatoinForward, 226, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__21)) __PYX_ERR(1, 226, __pyx_L1_error)
+  __pyx_codeobj__21 = (PyObject*)__Pyx_PyCode_New(13, 0, 24, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__20, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuBatchNormalizatoinForward, 249, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__21)) __PYX_ERR(0, 249, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":285
+  /* "renom/cuda/cudnn.pyx":308
  * 
  * 
  * def cuBatchNormalizatoinBackward(handle, x, w, dy, saved_mean, saved_var, dx, dw, db, mode=None):             # <<<<<<<<<<<<<<
  *     x, w, dy, saved_mean, saved_var, dx, dw, db = map(
  *         get_gpu, [x, w, dy, saved_mean, saved_var, dx, dw, db])
  */
-  __pyx_tuple__22 = PyTuple_Pack(18, __pyx_n_s_handle, __pyx_n_s_x, __pyx_n_s_w, __pyx_n_s_dy, __pyx_n_s_saved_mean, __pyx_n_s_saved_var, __pyx_n_s_dx, __pyx_n_s_dw, __pyx_n_s_db, __pyx_n_s_mode, __pyx_n_s_handler, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_md, __pyx_n_s_xDesc, __pyx_n_s_dwDesc, __pyx_n_s_dyDesc, __pyx_n_s_epsilon); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(1, 285, __pyx_L1_error)
+  __pyx_tuple__22 = PyTuple_Pack(18, __pyx_n_s_handle, __pyx_n_s_x, __pyx_n_s_w, __pyx_n_s_dy, __pyx_n_s_saved_mean, __pyx_n_s_saved_var, __pyx_n_s_dx, __pyx_n_s_dw, __pyx_n_s_db, __pyx_n_s_mode, __pyx_n_s_handler, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_md, __pyx_n_s_xDesc, __pyx_n_s_dwDesc, __pyx_n_s_dyDesc, __pyx_n_s_epsilon); if (unlikely(!__pyx_tuple__22)) __PYX_ERR(0, 308, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__22);
   __Pyx_GIVEREF(__pyx_tuple__22);
-  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(10, 0, 18, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuBatchNormalizatoinBackward, 285, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(1, 285, __pyx_L1_error)
+  __pyx_codeobj__23 = (PyObject*)__Pyx_PyCode_New(10, 0, 18, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__22, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuBatchNormalizatoinBackward, 308, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__23)) __PYX_ERR(0, 308, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":325
+  /* "renom/cuda/cudnn.pyx":348
  * 
  * 
  * def cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y):             # <<<<<<<<<<<<<<
  *     x, y = map(get_gpu, [x, y])
  * 
  */
-  __pyx_tuple__24 = PyTuple_Pack(12, __pyx_n_s_handle, __pyx_n_s_conv_desc, __pyx_n_s_filter_desc, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_handler, __pyx_n_s_algo, __pyx_n_s_pref, __pyx_n_s_xDesc, __pyx_n_s_wDesc, __pyx_n_s_yDesc, __pyx_n_s_convDesc); if (unlikely(!__pyx_tuple__24)) __PYX_ERR(1, 325, __pyx_L1_error)
+  __pyx_tuple__24 = PyTuple_Pack(12, __pyx_n_s_handle, __pyx_n_s_conv_desc, __pyx_n_s_filter_desc, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_handler, __pyx_n_s_algo, __pyx_n_s_pref, __pyx_n_s_xDesc, __pyx_n_s_wDesc, __pyx_n_s_yDesc, __pyx_n_s_convDesc); if (unlikely(!__pyx_tuple__24)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__24);
   __Pyx_GIVEREF(__pyx_tuple__24);
-  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(5, 0, 12, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuGetConvolutionFwdAlgo, 325, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) __PYX_ERR(1, 325, __pyx_L1_error)
+  __pyx_codeobj__25 = (PyObject*)__Pyx_PyCode_New(5, 0, 12, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__24, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuGetConvolutionFwdAlgo, 348, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__25)) __PYX_ERR(0, 348, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":348
+  /* "renom/cuda/cudnn.pyx":371
  * 
  * 
  * def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):             # <<<<<<<<<<<<<<
  *     x, w, y = map(get_gpu, [x, w, y])
  * 
  */
-  __pyx_tuple__26 = PyTuple_Pack(13, __pyx_n_s_handle, __pyx_n_s_conv_desc, __pyx_n_s_filter_desc, __pyx_n_s_x, __pyx_n_s_w, __pyx_n_s_y, __pyx_n_s_handler, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_xDesc, __pyx_n_s_yDesc, __pyx_n_s_algo, __pyx_n_s_workSpace); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(1, 348, __pyx_L1_error)
+  __pyx_tuple__26 = PyTuple_Pack(13, __pyx_n_s_handle, __pyx_n_s_conv_desc, __pyx_n_s_filter_desc, __pyx_n_s_x, __pyx_n_s_w, __pyx_n_s_y, __pyx_n_s_handler, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_xDesc, __pyx_n_s_yDesc, __pyx_n_s_algo, __pyx_n_s_workSpace); if (unlikely(!__pyx_tuple__26)) __PYX_ERR(0, 371, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__26);
   __Pyx_GIVEREF(__pyx_tuple__26);
-  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(6, 0, 13, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuConvolutionForward, 348, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(1, 348, __pyx_L1_error)
+  __pyx_codeobj__27 = (PyObject*)__Pyx_PyCode_New(6, 0, 13, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__26, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuConvolutionForward, 371, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__27)) __PYX_ERR(0, 371, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":380
+  /* "renom/cuda/cudnn.pyx":403
  * 
  * 
  * def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):             # <<<<<<<<<<<<<<
  *     x, w, dy, dw, db, dx = map(get_gpu, [x, w, dy, dw, db, dx])
  *     cuda_base.check_heap_device(x, w, dy, dw, db, dx)
  */
-  __pyx_tuple__28 = PyTuple_Pack(18, __pyx_n_s_handle, __pyx_n_s_conv_desc, __pyx_n_s_filter_desc, __pyx_n_s_x, __pyx_n_s_w, __pyx_n_s_dy, __pyx_n_s_dw, __pyx_n_s_db, __pyx_n_s_dx, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_handler, __pyx_n_s_xDesc, __pyx_n_s_dyDesc, __pyx_n_s_dbDesc, __pyx_n_s_algo_filter, __pyx_n_s_algo_data, __pyx_n_s_workSpace); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(1, 380, __pyx_L1_error)
+  __pyx_tuple__28 = PyTuple_Pack(18, __pyx_n_s_handle, __pyx_n_s_conv_desc, __pyx_n_s_filter_desc, __pyx_n_s_x, __pyx_n_s_w, __pyx_n_s_dy, __pyx_n_s_dw, __pyx_n_s_db, __pyx_n_s_dx, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_handler, __pyx_n_s_xDesc, __pyx_n_s_dyDesc, __pyx_n_s_dbDesc, __pyx_n_s_algo_filter, __pyx_n_s_algo_data, __pyx_n_s_workSpace); if (unlikely(!__pyx_tuple__28)) __PYX_ERR(0, 403, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__28);
   __Pyx_GIVEREF(__pyx_tuple__28);
-  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(9, 0, 18, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuConvolutionBackward, 380, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(1, 380, __pyx_L1_error)
+  __pyx_codeobj__29 = (PyObject*)__Pyx_PyCode_New(9, 0, 18, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__28, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuConvolutionBackward, 403, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__29)) __PYX_ERR(0, 403, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":435
+  /* "renom/cuda/cudnn.pyx":458
  * 
  * 
  * def cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, dy, dx):             # <<<<<<<<<<<<<<
  *     w, dy, dx = map(get_gpu, [w, dy, dx])
  * 
  */
-  __pyx_tuple__30 = PyTuple_Pack(13, __pyx_n_s_handle, __pyx_n_s_conv_desc, __pyx_n_s_filter_desc, __pyx_n_s_w, __pyx_n_s_dy, __pyx_n_s_dx, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_handler, __pyx_n_s_xDesc, __pyx_n_s_dyDesc, __pyx_n_s_algo_data, __pyx_n_s_workSpace); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(1, 435, __pyx_L1_error)
+  __pyx_tuple__30 = PyTuple_Pack(13, __pyx_n_s_handle, __pyx_n_s_conv_desc, __pyx_n_s_filter_desc, __pyx_n_s_w, __pyx_n_s_dy, __pyx_n_s_dx, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_handler, __pyx_n_s_xDesc, __pyx_n_s_dyDesc, __pyx_n_s_algo_data, __pyx_n_s_workSpace); if (unlikely(!__pyx_tuple__30)) __PYX_ERR(0, 458, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__30);
   __Pyx_GIVEREF(__pyx_tuple__30);
-  __pyx_codeobj__31 = (PyObject*)__Pyx_PyCode_New(6, 0, 13, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuConvolutionBackwardData, 435, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(1, 435, __pyx_L1_error)
+  __pyx_codeobj__31 = (PyObject*)__Pyx_PyCode_New(6, 0, 13, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__30, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuConvolutionBackwardData, 458, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__31)) __PYX_ERR(0, 458, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":464
+  /* "renom/cuda/cudnn.pyx":487
  * 
  * 
  * def cuConvolutionBackwardFilter(handle, conv_desc, filter_desc, x, dy, dw):             # <<<<<<<<<<<<<<
  *     x, dy, dw = map(get_gpu, [x, dy, dw])
  * 
  */
-  __pyx_tuple__32 = PyTuple_Pack(13, __pyx_n_s_handle, __pyx_n_s_conv_desc, __pyx_n_s_filter_desc, __pyx_n_s_x, __pyx_n_s_dy, __pyx_n_s_dw, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_handler, __pyx_n_s_xDesc, __pyx_n_s_dyDesc, __pyx_n_s_algo_filter, __pyx_n_s_workSpace); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(1, 464, __pyx_L1_error)
+  __pyx_tuple__32 = PyTuple_Pack(13, __pyx_n_s_handle, __pyx_n_s_conv_desc, __pyx_n_s_filter_desc, __pyx_n_s_x, __pyx_n_s_dy, __pyx_n_s_dw, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_handler, __pyx_n_s_xDesc, __pyx_n_s_dyDesc, __pyx_n_s_algo_filter, __pyx_n_s_workSpace); if (unlikely(!__pyx_tuple__32)) __PYX_ERR(0, 487, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__32);
   __Pyx_GIVEREF(__pyx_tuple__32);
-  __pyx_codeobj__33 = (PyObject*)__Pyx_PyCode_New(6, 0, 13, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuConvolutionBackwardFilter, 464, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(1, 464, __pyx_L1_error)
+  __pyx_codeobj__33 = (PyObject*)__Pyx_PyCode_New(6, 0, 13, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__32, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuConvolutionBackwardFilter, 487, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__33)) __PYX_ERR(0, 487, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":493
+  /* "renom/cuda/cudnn.pyx":516
  * 
  * 
  * def cuConvolutionBackwardBias(handle, dy, db):             # <<<<<<<<<<<<<<
  *     dy, db = map(get_gpu, [dy, db])
  * 
  */
-  __pyx_tuple__34 = PyTuple_Pack(8, __pyx_n_s_handle, __pyx_n_s_dy, __pyx_n_s_db, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_handler, __pyx_n_s_dyDesc, __pyx_n_s_dbDesc); if (unlikely(!__pyx_tuple__34)) __PYX_ERR(1, 493, __pyx_L1_error)
+  __pyx_tuple__34 = PyTuple_Pack(8, __pyx_n_s_handle, __pyx_n_s_dy, __pyx_n_s_db, __pyx_n_s_alf, __pyx_n_s_bt, __pyx_n_s_handler, __pyx_n_s_dyDesc, __pyx_n_s_dbDesc); if (unlikely(!__pyx_tuple__34)) __PYX_ERR(0, 516, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__34);
   __Pyx_GIVEREF(__pyx_tuple__34);
-  __pyx_codeobj__35 = (PyObject*)__Pyx_PyCode_New(3, 0, 8, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__34, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuConvolutionBackwardBias, 493, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__35)) __PYX_ERR(1, 493, __pyx_L1_error)
+  __pyx_codeobj__35 = (PyObject*)__Pyx_PyCode_New(3, 0, 8, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__34, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuConvolutionBackwardBias, 516, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__35)) __PYX_ERR(0, 516, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":514
+  /* "renom/cuda/cudnn.pyx":537
  * 
  * 
  * def cuSoftmaxForward(handle, x, y, mode=0):             # <<<<<<<<<<<<<<
  *     x, y = map(get_gpu, [x, y])
  * 
  */
-  __pyx_tuple__36 = PyTuple_Pack(9, __pyx_n_s_handle, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_mode, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_handler, __pyx_n_s_yDesc, __pyx_n_s_md); if (unlikely(!__pyx_tuple__36)) __PYX_ERR(1, 514, __pyx_L1_error)
+  __pyx_tuple__36 = PyTuple_Pack(9, __pyx_n_s_handle, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_mode, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_handler, __pyx_n_s_yDesc, __pyx_n_s_md); if (unlikely(!__pyx_tuple__36)) __PYX_ERR(0, 537, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__36);
   __Pyx_GIVEREF(__pyx_tuple__36);
-  __pyx_codeobj__37 = (PyObject*)__Pyx_PyCode_New(4, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__36, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuSoftmaxForward, 514, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__37)) __PYX_ERR(1, 514, __pyx_L1_error)
+  __pyx_codeobj__37 = (PyObject*)__Pyx_PyCode_New(4, 0, 9, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__36, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuSoftmaxForward, 537, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__37)) __PYX_ERR(0, 537, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":537
+  /* "renom/cuda/cudnn.pyx":560
  * 
  * 
  * def cuSoftmaxBackward(handle, y, dy, dx, mode=0):             # <<<<<<<<<<<<<<
  *     y, dy, dx = map(get_gpu, [y, dy, dx])
  * 
  */
-  __pyx_tuple__38 = PyTuple_Pack(10, __pyx_n_s_handle, __pyx_n_s_y, __pyx_n_s_dy, __pyx_n_s_dx, __pyx_n_s_mode, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_handler, __pyx_n_s_dyDesc, __pyx_n_s_md); if (unlikely(!__pyx_tuple__38)) __PYX_ERR(1, 537, __pyx_L1_error)
+  __pyx_tuple__38 = PyTuple_Pack(10, __pyx_n_s_handle, __pyx_n_s_y, __pyx_n_s_dy, __pyx_n_s_dx, __pyx_n_s_mode, __pyx_n_s_a, __pyx_n_s_b, __pyx_n_s_handler, __pyx_n_s_dyDesc, __pyx_n_s_md); if (unlikely(!__pyx_tuple__38)) __PYX_ERR(0, 560, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__38);
   __Pyx_GIVEREF(__pyx_tuple__38);
-  __pyx_codeobj__39 = (PyObject*)__Pyx_PyCode_New(5, 0, 10, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__38, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuSoftmaxBackward, 537, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__39)) __PYX_ERR(1, 537, __pyx_L1_error)
+  __pyx_codeobj__39 = (PyObject*)__Pyx_PyCode_New(5, 0, 10, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__38, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuSoftmaxBackward, 560, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__39)) __PYX_ERR(0, 560, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":562
+  /* "renom/cuda/cudnn.pyx":585
  * 
  * 
  * def cuLocalResponseNormalizationForward(handle, lrn_desc, x, y):             # <<<<<<<<<<<<<<
  *     x, y = map(get_gpu, [x, y])
  * 
  */
-  __pyx_tuple__40 = PyTuple_Pack(10, __pyx_n_s_handle, __pyx_n_s_lrn_desc, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_handler, __pyx_n_s_mode, __pyx_n_s_xDesc, __pyx_n_s_yDesc, __pyx_n_s_d, __pyx_n_s_e); if (unlikely(!__pyx_tuple__40)) __PYX_ERR(1, 562, __pyx_L1_error)
+  __pyx_tuple__40 = PyTuple_Pack(10, __pyx_n_s_handle, __pyx_n_s_lrn_desc, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_handler, __pyx_n_s_mode, __pyx_n_s_xDesc, __pyx_n_s_yDesc, __pyx_n_s_d, __pyx_n_s_e); if (unlikely(!__pyx_tuple__40)) __PYX_ERR(0, 585, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__40);
   __Pyx_GIVEREF(__pyx_tuple__40);
-  __pyx_codeobj__41 = (PyObject*)__Pyx_PyCode_New(4, 0, 10, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__40, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuLocalResponseNormalizationForw, 562, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__41)) __PYX_ERR(1, 562, __pyx_L1_error)
+  __pyx_codeobj__41 = (PyObject*)__Pyx_PyCode_New(4, 0, 10, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__40, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuLocalResponseNormalizationForw, 585, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__41)) __PYX_ERR(0, 585, __pyx_L1_error)
 
-  /* "renom/cuda/cudnn.pyx":586
+  /* "renom/cuda/cudnn.pyx":609
  * 
  * 
  * def cuLocalResponseNormalizationBackward(handle, lrn_desc, x, y, dx, dy):             # <<<<<<<<<<<<<<
  *     x, y, dx, dy = map(get_gpu, [x, y, dx, dy])
  * 
  */
-  __pyx_tuple__42 = PyTuple_Pack(12, __pyx_n_s_handle, __pyx_n_s_lrn_desc, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_dx, __pyx_n_s_dy, __pyx_n_s_handler, __pyx_n_s_mode, __pyx_n_s_xDesc, __pyx_n_s_yDesc, __pyx_n_s_a, __pyx_n_s_b); if (unlikely(!__pyx_tuple__42)) __PYX_ERR(1, 586, __pyx_L1_error)
+  __pyx_tuple__42 = PyTuple_Pack(12, __pyx_n_s_handle, __pyx_n_s_lrn_desc, __pyx_n_s_x, __pyx_n_s_y, __pyx_n_s_dx, __pyx_n_s_dy, __pyx_n_s_handler, __pyx_n_s_mode, __pyx_n_s_xDesc, __pyx_n_s_yDesc, __pyx_n_s_a, __pyx_n_s_b); if (unlikely(!__pyx_tuple__42)) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__42);
   __Pyx_GIVEREF(__pyx_tuple__42);
-  __pyx_codeobj__43 = (PyObject*)__Pyx_PyCode_New(6, 0, 12, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__42, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuLocalResponseNormalizationBack, 586, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__43)) __PYX_ERR(1, 586, __pyx_L1_error)
+  __pyx_codeobj__43 = (PyObject*)__Pyx_PyCode_New(6, 0, 12, 0, 0, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__42, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_renom_cuda_cudnn_pyx, __pyx_n_s_cuLocalResponseNormalizationBack, 609, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__43)) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_RefNannyFinishContext();
   return 0;
   __pyx_L1_error:;
@@ -16102,12 +16469,12 @@ static int __Pyx_InitCachedConstants(void) {
 }
 
 static int __Pyx_InitGlobals(void) {
-  if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(1, 1, __pyx_L1_error);
-  __pyx_float_0_0 = PyFloat_FromDouble(0.0); if (unlikely(!__pyx_float_0_0)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __pyx_float_1_0 = PyFloat_FromDouble(1.0); if (unlikely(!__pyx_float_1_0)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __pyx_float_1eneg_5 = PyFloat_FromDouble(1e-5); if (unlikely(!__pyx_float_1eneg_5)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_InitStrings(__pyx_string_tab) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
+  __pyx_float_0_0 = PyFloat_FromDouble(0.0); if (unlikely(!__pyx_float_0_0)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_float_1_0 = PyFloat_FromDouble(1.0); if (unlikely(!__pyx_float_1_0)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_float_1eneg_5 = PyFloat_FromDouble(1e-5); if (unlikely(!__pyx_float_1eneg_5)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_int_0 = PyInt_FromLong(0); if (unlikely(!__pyx_int_0)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_int_1 = PyInt_FromLong(1); if (unlikely(!__pyx_int_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   return 0;
   __pyx_L1_error:;
   return -1;
@@ -16137,24 +16504,24 @@ PyMODINIT_FUNC PyInit_cudnn(void)
   }
   #endif
   __Pyx_RefNannySetupContext("PyMODINIT_FUNC PyInit_cudnn(void)", 0);
-  if (__Pyx_check_binary_version() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
-  __pyx_empty_tuple = PyTuple_New(0); if (unlikely(!__pyx_empty_tuple)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __pyx_empty_bytes = PyBytes_FromStringAndSize("", 0); if (unlikely(!__pyx_empty_bytes)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __pyx_empty_unicode = PyUnicode_FromStringAndSize("", 0); if (unlikely(!__pyx_empty_unicode)) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_check_binary_version() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_empty_tuple = PyTuple_New(0); if (unlikely(!__pyx_empty_tuple)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_empty_bytes = PyBytes_FromStringAndSize("", 0); if (unlikely(!__pyx_empty_bytes)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_empty_unicode = PyUnicode_FromStringAndSize("", 0); if (unlikely(!__pyx_empty_unicode)) __PYX_ERR(0, 1, __pyx_L1_error)
   #ifdef __Pyx_CyFunction_USED
-  if (__pyx_CyFunction_init() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__pyx_CyFunction_init() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
   #ifdef __Pyx_FusedFunction_USED
-  if (__pyx_FusedFunction_init() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__pyx_FusedFunction_init() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
   #ifdef __Pyx_Coroutine_USED
-  if (__pyx_Coroutine_init() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__pyx_Coroutine_init() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
   #ifdef __Pyx_Generator_USED
-  if (__pyx_Generator_init() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__pyx_Generator_init() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
   #ifdef __Pyx_StopAsyncIteration_USED
-  if (__pyx_StopAsyncIteration_init() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__pyx_StopAsyncIteration_init() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
   /*--- Library function declarations ---*/
   /*--- Threads initialization code ---*/
@@ -16169,65 +16536,65 @@ PyMODINIT_FUNC PyInit_cudnn(void)
   #else
   __pyx_m = PyModule_Create(&__pyx_moduledef);
   #endif
-  if (unlikely(!__pyx_m)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (unlikely(!__pyx_m)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_d = PyModule_GetDict(__pyx_m); if (unlikely(!__pyx_d)) __PYX_ERR(0, 1, __pyx_L1_error)
   Py_INCREF(__pyx_d);
-  __pyx_b = PyImport_AddModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_b)) __PYX_ERR(1, 1, __pyx_L1_error)
-  __pyx_cython_runtime = PyImport_AddModule((char *) "cython_runtime"); if (unlikely(!__pyx_cython_runtime)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_b = PyImport_AddModule(__Pyx_BUILTIN_MODULE_NAME); if (unlikely(!__pyx_b)) __PYX_ERR(0, 1, __pyx_L1_error)
+  __pyx_cython_runtime = PyImport_AddModule((char *) "cython_runtime"); if (unlikely(!__pyx_cython_runtime)) __PYX_ERR(0, 1, __pyx_L1_error)
   #if CYTHON_COMPILING_IN_PYPY
   Py_INCREF(__pyx_b);
   #endif
-  if (PyObject_SetAttrString(__pyx_m, "__builtins__", __pyx_b) < 0) __PYX_ERR(1, 1, __pyx_L1_error);
+  if (PyObject_SetAttrString(__pyx_m, "__builtins__", __pyx_b) < 0) __PYX_ERR(0, 1, __pyx_L1_error);
   /*--- Initialize various global constants etc. ---*/
-  if (__Pyx_InitGlobals() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_InitGlobals() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
-  if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
   if (__pyx_module_is_main_renom__cuda__cudnn) {
-    if (PyObject_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+    if (PyObject_SetAttrString(__pyx_m, "__name__", __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
-    PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(1, 1, __pyx_L1_error)
+    PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
     if (!PyDict_GetItemString(modules, "renom.cuda.cudnn")) {
-      if (unlikely(PyDict_SetItemString(modules, "renom.cuda.cudnn", __pyx_m) < 0)) __PYX_ERR(1, 1, __pyx_L1_error)
+      if (unlikely(PyDict_SetItemString(modules, "renom.cuda.cudnn", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
   /*--- Builtin init code ---*/
-  if (__Pyx_InitCachedBuiltins() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_InitCachedBuiltins() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   /*--- Constants init code ---*/
-  if (__Pyx_InitCachedConstants() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_InitCachedConstants() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   /*--- Global init code ---*/
   /*--- Variable export code ---*/
   /*--- Function export code ---*/
   /*--- Type init code ---*/
-  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn_TensorDesc) < 0) __PYX_ERR(1, 49, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn_TensorDesc) < 0) __PYX_ERR(0, 51, __pyx_L1_error)
   __pyx_type_5renom_4cuda_5cudnn_TensorDesc.tp_print = 0;
-  if (PyObject_SetAttrString(__pyx_m, "TensorDesc", (PyObject *)&__pyx_type_5renom_4cuda_5cudnn_TensorDesc) < 0) __PYX_ERR(1, 49, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5renom_4cuda_5cudnn_TensorDesc) < 0) __PYX_ERR(1, 49, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "TensorDesc", (PyObject *)&__pyx_type_5renom_4cuda_5cudnn_TensorDesc) < 0) __PYX_ERR(0, 51, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5renom_4cuda_5cudnn_TensorDesc) < 0) __PYX_ERR(0, 51, __pyx_L1_error)
   __pyx_ptype_5renom_4cuda_5cudnn_TensorDesc = &__pyx_type_5renom_4cuda_5cudnn_TensorDesc;
-  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn_ConvolutionDescriptor) < 0) __PYX_ERR(1, 88, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn_ConvolutionDescriptor) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
   __pyx_type_5renom_4cuda_5cudnn_ConvolutionDescriptor.tp_print = 0;
-  if (PyObject_SetAttrString(__pyx_m, "ConvolutionDescriptor", (PyObject *)&__pyx_type_5renom_4cuda_5cudnn_ConvolutionDescriptor) < 0) __PYX_ERR(1, 88, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5renom_4cuda_5cudnn_ConvolutionDescriptor) < 0) __PYX_ERR(1, 88, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "ConvolutionDescriptor", (PyObject *)&__pyx_type_5renom_4cuda_5cudnn_ConvolutionDescriptor) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5renom_4cuda_5cudnn_ConvolutionDescriptor) < 0) __PYX_ERR(0, 111, __pyx_L1_error)
   __pyx_ptype_5renom_4cuda_5cudnn_ConvolutionDescriptor = &__pyx_type_5renom_4cuda_5cudnn_ConvolutionDescriptor;
-  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn_PoolingDescriptor) < 0) __PYX_ERR(1, 112, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn_PoolingDescriptor) < 0) __PYX_ERR(0, 135, __pyx_L1_error)
   __pyx_type_5renom_4cuda_5cudnn_PoolingDescriptor.tp_print = 0;
-  if (PyObject_SetAttrString(__pyx_m, "PoolingDescriptor", (PyObject *)&__pyx_type_5renom_4cuda_5cudnn_PoolingDescriptor) < 0) __PYX_ERR(1, 112, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5renom_4cuda_5cudnn_PoolingDescriptor) < 0) __PYX_ERR(1, 112, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "PoolingDescriptor", (PyObject *)&__pyx_type_5renom_4cuda_5cudnn_PoolingDescriptor) < 0) __PYX_ERR(0, 135, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5renom_4cuda_5cudnn_PoolingDescriptor) < 0) __PYX_ERR(0, 135, __pyx_L1_error)
   __pyx_ptype_5renom_4cuda_5cudnn_PoolingDescriptor = &__pyx_type_5renom_4cuda_5cudnn_PoolingDescriptor;
-  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn_LRNDescriptor) < 0) __PYX_ERR(1, 138, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn_LRNDescriptor) < 0) __PYX_ERR(0, 161, __pyx_L1_error)
   __pyx_type_5renom_4cuda_5cudnn_LRNDescriptor.tp_print = 0;
-  if (PyObject_SetAttrString(__pyx_m, "LRNDescriptor", (PyObject *)&__pyx_type_5renom_4cuda_5cudnn_LRNDescriptor) < 0) __PYX_ERR(1, 138, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5renom_4cuda_5cudnn_LRNDescriptor) < 0) __PYX_ERR(1, 138, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "LRNDescriptor", (PyObject *)&__pyx_type_5renom_4cuda_5cudnn_LRNDescriptor) < 0) __PYX_ERR(0, 161, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5renom_4cuda_5cudnn_LRNDescriptor) < 0) __PYX_ERR(0, 161, __pyx_L1_error)
   __pyx_ptype_5renom_4cuda_5cudnn_LRNDescriptor = &__pyx_type_5renom_4cuda_5cudnn_LRNDescriptor;
-  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn_FilterDescriptor) < 0) __PYX_ERR(1, 206, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn_FilterDescriptor) < 0) __PYX_ERR(0, 229, __pyx_L1_error)
   __pyx_type_5renom_4cuda_5cudnn_FilterDescriptor.tp_print = 0;
-  if (PyObject_SetAttrString(__pyx_m, "FilterDescriptor", (PyObject *)&__pyx_type_5renom_4cuda_5cudnn_FilterDescriptor) < 0) __PYX_ERR(1, 206, __pyx_L1_error)
-  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5renom_4cuda_5cudnn_FilterDescriptor) < 0) __PYX_ERR(1, 206, __pyx_L1_error)
+  if (PyObject_SetAttrString(__pyx_m, "FilterDescriptor", (PyObject *)&__pyx_type_5renom_4cuda_5cudnn_FilterDescriptor) < 0) __PYX_ERR(0, 229, __pyx_L1_error)
+  if (__Pyx_setup_reduce((PyObject*)&__pyx_type_5renom_4cuda_5cudnn_FilterDescriptor) < 0) __PYX_ERR(0, 229, __pyx_L1_error)
   __pyx_ptype_5renom_4cuda_5cudnn_FilterDescriptor = &__pyx_type_5renom_4cuda_5cudnn_FilterDescriptor;
-  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn___pyx_scope_struct__cudnn_handler) < 0) __PYX_ERR(1, 24, __pyx_L1_error)
+  if (PyType_Ready(&__pyx_type_5renom_4cuda_5cudnn___pyx_scope_struct__cudnn_handler) < 0) __PYX_ERR(0, 26, __pyx_L1_error)
   __pyx_type_5renom_4cuda_5cudnn___pyx_scope_struct__cudnn_handler.tp_print = 0;
   __pyx_ptype_5renom_4cuda_5cudnn___pyx_scope_struct__cudnn_handler = &__pyx_type_5renom_4cuda_5cudnn___pyx_scope_struct__cudnn_handler;
   /*--- Type import code ---*/
@@ -16245,7 +16612,7 @@ PyMODINIT_FUNC PyInit_cudnn(void)
   /*--- Function import code ---*/
   /*--- Execution code ---*/
   #if defined(__Pyx_Generator_USED) || defined(__Pyx_Coroutine_USED)
-  if (__Pyx_patch_abc() < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
   /* "renom/cuda/cudnn.pyx":1
@@ -16253,77 +16620,77 @@ PyMODINIT_FUNC PyInit_cudnn(void)
  * import numpy as np
  * cimport cudnn as cd
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_contextlib, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_contextlib, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_contextlib, __pyx_t_1) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_contextlib, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renom/cuda/cudnn.pyx":2
  * import contextlib
  * import numpy as np             # <<<<<<<<<<<<<<
  * cimport cudnn as cd
- * from libc.stdint cimport uintptr_t
+ * cimport cython
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 2, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_numpy, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(1, 2, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 2, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":5
- * cimport cudnn as cd
+  /* "renom/cuda/cudnn.pyx":7
+ * from libc.stdlib cimport malloc, free
  * from libc.stdint cimport uintptr_t
  * from renom.core import get_gpu             # <<<<<<<<<<<<<<
  * from renom.config import precision
  * from cuda_utils cimport _VoidPtr
  */
-  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 5, __pyx_L1_error)
+  __pyx_t_1 = PyList_New(1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_INCREF(__pyx_n_s_get_gpu);
   __Pyx_GIVEREF(__pyx_n_s_get_gpu);
   PyList_SET_ITEM(__pyx_t_1, 0, __pyx_n_s_get_gpu);
-  __pyx_t_2 = __Pyx_Import(__pyx_n_s_renom_core, __pyx_t_1, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 5, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_Import(__pyx_n_s_renom_core, __pyx_t_1, -1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
-  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 5, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_ImportFrom(__pyx_t_2, __pyx_n_s_get_gpu); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_gpu, __pyx_t_1) < 0) __PYX_ERR(1, 5, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_get_gpu, __pyx_t_1) < 0) __PYX_ERR(0, 7, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":6
+  /* "renom/cuda/cudnn.pyx":8
  * from libc.stdint cimport uintptr_t
  * from renom.core import get_gpu
  * from renom.config import precision             # <<<<<<<<<<<<<<
  * from cuda_utils cimport _VoidPtr
  * import cuda_base
  */
-  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 6, __pyx_L1_error)
+  __pyx_t_2 = PyList_New(1); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __Pyx_INCREF(__pyx_n_s_precision);
   __Pyx_GIVEREF(__pyx_n_s_precision);
   PyList_SET_ITEM(__pyx_t_2, 0, __pyx_n_s_precision);
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_renom_config, __pyx_t_2, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 6, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_renom_config, __pyx_t_2, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
-  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 6, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_ImportFrom(__pyx_t_1, __pyx_n_s_precision); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_precision, __pyx_t_2) < 0) __PYX_ERR(1, 6, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_precision, __pyx_t_2) < 0) __PYX_ERR(0, 8, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":8
+  /* "renom/cuda/cudnn.pyx":10
  * from renom.config import precision
  * from cuda_utils cimport _VoidPtr
  * import cuda_base             # <<<<<<<<<<<<<<
  * 
  * cdef cudnnTensorFormat_t tensor_format = cd.cudnnTensorFormat_t.CUDNN_TENSOR_NCHW
  */
-  __pyx_t_1 = __Pyx_Import(__pyx_n_s_cuda_base, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 8, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_Import(__pyx_n_s_cuda_base, 0, -1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuda_base, __pyx_t_1) < 0) __PYX_ERR(1, 8, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuda_base, __pyx_t_1) < 0) __PYX_ERR(0, 10, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":10
+  /* "renom/cuda/cudnn.pyx":12
  * import cuda_base
  * 
  * cdef cudnnTensorFormat_t tensor_format = cd.cudnnTensorFormat_t.CUDNN_TENSOR_NCHW             # <<<<<<<<<<<<<<
@@ -16332,51 +16699,51 @@ PyMODINIT_FUNC PyInit_cudnn(void)
  */
   __pyx_v_5renom_4cuda_5cudnn_tensor_format = CUDNN_TENSOR_NCHW;
 
-  /* "renom/cuda/cudnn.pyx":13
+  /* "renom/cuda/cudnn.pyx":15
  * 
  * 
  * def check(cd.cudnnStatus_t status):             # <<<<<<<<<<<<<<
  *     if status == cd.cudnnStatus_t.CUDNN_STATUS_SUCCESS:
  *         return
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_1check, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 13, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_1check, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_check, __pyx_t_1) < 0) __PYX_ERR(1, 13, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_check, __pyx_t_1) < 0) __PYX_ERR(0, 15, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":21
+  /* "renom/cuda/cudnn.pyx":23
  * 
  * 
  * _cudnn_handlers = {}             # <<<<<<<<<<<<<<
  * 
  * @contextlib.contextmanager
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 21, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 23, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cudnn_handlers, __pyx_t_1) < 0) __PYX_ERR(1, 21, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cudnn_handlers, __pyx_t_1) < 0) __PYX_ERR(0, 23, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":23
+  /* "renom/cuda/cudnn.pyx":25
  * _cudnn_handlers = {}
  * 
  * @contextlib.contextmanager             # <<<<<<<<<<<<<<
  * def cudnn_handler():
  *     cdef cudnnHandle_t handle
  */
-  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_contextlib); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 23, __pyx_L1_error)
+  __pyx_t_2 = __Pyx_GetModuleGlobalName(__pyx_n_s_contextlib); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
-  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_contextmanager); if (unlikely(!__pyx_t_3)) __PYX_ERR(1, 23, __pyx_L1_error)
+  __pyx_t_3 = __Pyx_PyObject_GetAttrStr(__pyx_t_2, __pyx_n_s_contextmanager); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 25, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
 
-  /* "renom/cuda/cudnn.pyx":24
+  /* "renom/cuda/cudnn.pyx":26
  * 
  * @contextlib.contextmanager
  * def cudnn_handler():             # <<<<<<<<<<<<<<
  *     cdef cudnnHandle_t handle
  * 
  */
-  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_3cudnn_handler, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_2)) __PYX_ERR(1, 24, __pyx_L1_error)
+  __pyx_t_2 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_3cudnn_handler, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_2)) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_2);
   __pyx_t_4 = NULL;
   if (CYTHON_UNPACK_METHODS && unlikely(PyMethod_Check(__pyx_t_3))) {
@@ -16389,14 +16756,14 @@ PyMODINIT_FUNC PyInit_cudnn(void)
     }
   }
   if (!__pyx_t_4) {
-    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 23, __pyx_L1_error)
+    __pyx_t_1 = __Pyx_PyObject_CallOneArg(__pyx_t_3, __pyx_t_2); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
     __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     __Pyx_GOTREF(__pyx_t_1);
   } else {
     #if CYTHON_FAST_PYCALL
     if (PyFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 23, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
@@ -16405,207 +16772,207 @@ PyMODINIT_FUNC PyInit_cudnn(void)
     #if CYTHON_FAST_PYCCALL
     if (__Pyx_PyFastCFunction_Check(__pyx_t_3)) {
       PyObject *__pyx_temp[2] = {__pyx_t_4, __pyx_t_2};
-      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 23, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyCFunction_FastCall(__pyx_t_3, __pyx_temp+1-1, 1+1); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
       __Pyx_XDECREF(__pyx_t_4); __pyx_t_4 = 0;
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_2); __pyx_t_2 = 0;
     } else
     #endif
     {
-      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(1, 23, __pyx_L1_error)
+      __pyx_t_5 = PyTuple_New(1+1); if (unlikely(!__pyx_t_5)) __PYX_ERR(0, 25, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_5);
       __Pyx_GIVEREF(__pyx_t_4); PyTuple_SET_ITEM(__pyx_t_5, 0, __pyx_t_4); __pyx_t_4 = NULL;
       __Pyx_GIVEREF(__pyx_t_2);
       PyTuple_SET_ITEM(__pyx_t_5, 0+1, __pyx_t_2);
       __pyx_t_2 = 0;
-      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 23, __pyx_L1_error)
+      __pyx_t_1 = __Pyx_PyObject_Call(__pyx_t_3, __pyx_t_5, NULL); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 25, __pyx_L1_error)
       __Pyx_GOTREF(__pyx_t_1);
       __Pyx_DECREF(__pyx_t_5); __pyx_t_5 = 0;
     }
   }
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cudnn_handler, __pyx_t_1) < 0) __PYX_ERR(1, 24, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cudnn_handler, __pyx_t_1) < 0) __PYX_ERR(0, 26, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":53
+  /* "renom/cuda/cudnn.pyx":55
  *     cdef cudnnTensorDescriptor_t tensor_desc
  * 
  *     def __init__(self, shape, dtype=precision):             # <<<<<<<<<<<<<<
  *         cdef int n, c, h, w
- *         n, c, h, w = list(shape) + [1] * (4 - len(shape))
+ *         cdef int ndims = len(shape)
  */
-  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_precision); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 53, __pyx_L1_error)
+  __pyx_t_1 = __Pyx_GetModuleGlobalName(__pyx_n_s_precision); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 55, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
   __pyx_k_ = __pyx_t_1;
   __Pyx_GIVEREF(__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":157
+  /* "renom/cuda/cudnn.pyx":180
  * 
  * 
  * def cuPoolingForward(handle, pool_desc, x, y):             # <<<<<<<<<<<<<<
  *     x, y = map(get_gpu, [x, y])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_6cuPoolingForward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 157, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_6cuPoolingForward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuPoolingForward, __pyx_t_1) < 0) __PYX_ERR(1, 157, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuPoolingForward, __pyx_t_1) < 0) __PYX_ERR(0, 180, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":180
+  /* "renom/cuda/cudnn.pyx":203
  * 
  * 
  * def cuPoolingBackward(handle, pool_desc, x, y, dy, dx):             # <<<<<<<<<<<<<<
  *     x, y, dy, dx = map(get_gpu, [x, y, dy, dx])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_8cuPoolingBackward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 180, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_8cuPoolingBackward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 203, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuPoolingBackward, __pyx_t_1) < 0) __PYX_ERR(1, 180, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuPoolingBackward, __pyx_t_1) < 0) __PYX_ERR(0, 203, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":226
+  /* "renom/cuda/cudnn.pyx":249
  * 
  * 
  * def cuBatchNormalizatoinForward(handle, x, mean, var, w, b, y, rm, rv, momentum=0.0, mode=None, inference=False, eps=1e-5):             # <<<<<<<<<<<<<<
  *     x, mean, var, w, b, y, rm, rv = map(get_gpu, [x, mean, var, w, b, y, rm, rv])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_10cuBatchNormalizatoinForward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 226, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_10cuBatchNormalizatoinForward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 249, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuBatchNormalizatoinForward, __pyx_t_1) < 0) __PYX_ERR(1, 226, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuBatchNormalizatoinForward, __pyx_t_1) < 0) __PYX_ERR(0, 249, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":285
+  /* "renom/cuda/cudnn.pyx":308
  * 
  * 
  * def cuBatchNormalizatoinBackward(handle, x, w, dy, saved_mean, saved_var, dx, dw, db, mode=None):             # <<<<<<<<<<<<<<
  *     x, w, dy, saved_mean, saved_var, dx, dw, db = map(
  *         get_gpu, [x, w, dy, saved_mean, saved_var, dx, dw, db])
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_12cuBatchNormalizatoinBackward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 285, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_12cuBatchNormalizatoinBackward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 308, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuBatchNormalizatoinBackward, __pyx_t_1) < 0) __PYX_ERR(1, 285, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuBatchNormalizatoinBackward, __pyx_t_1) < 0) __PYX_ERR(0, 308, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":325
+  /* "renom/cuda/cudnn.pyx":348
  * 
  * 
  * def cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y):             # <<<<<<<<<<<<<<
  *     x, y = map(get_gpu, [x, y])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_14cuGetConvolutionFwdAlgo, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 325, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_14cuGetConvolutionFwdAlgo, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuGetConvolutionFwdAlgo, __pyx_t_1) < 0) __PYX_ERR(1, 325, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuGetConvolutionFwdAlgo, __pyx_t_1) < 0) __PYX_ERR(0, 348, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":348
+  /* "renom/cuda/cudnn.pyx":371
  * 
  * 
  * def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):             # <<<<<<<<<<<<<<
  *     x, w, y = map(get_gpu, [x, w, y])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_16cuConvolutionForward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 348, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_16cuConvolutionForward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 371, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuConvolutionForward, __pyx_t_1) < 0) __PYX_ERR(1, 348, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuConvolutionForward, __pyx_t_1) < 0) __PYX_ERR(0, 371, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":380
+  /* "renom/cuda/cudnn.pyx":403
  * 
  * 
  * def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):             # <<<<<<<<<<<<<<
  *     x, w, dy, dw, db, dx = map(get_gpu, [x, w, dy, dw, db, dx])
  *     cuda_base.check_heap_device(x, w, dy, dw, db, dx)
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_18cuConvolutionBackward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 380, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_18cuConvolutionBackward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 403, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuConvolutionBackward, __pyx_t_1) < 0) __PYX_ERR(1, 380, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuConvolutionBackward, __pyx_t_1) < 0) __PYX_ERR(0, 403, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":435
+  /* "renom/cuda/cudnn.pyx":458
  * 
  * 
  * def cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, dy, dx):             # <<<<<<<<<<<<<<
  *     w, dy, dx = map(get_gpu, [w, dy, dx])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_20cuConvolutionBackwardData, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 435, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_20cuConvolutionBackwardData, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 458, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuConvolutionBackwardData, __pyx_t_1) < 0) __PYX_ERR(1, 435, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuConvolutionBackwardData, __pyx_t_1) < 0) __PYX_ERR(0, 458, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":464
+  /* "renom/cuda/cudnn.pyx":487
  * 
  * 
  * def cuConvolutionBackwardFilter(handle, conv_desc, filter_desc, x, dy, dw):             # <<<<<<<<<<<<<<
  *     x, dy, dw = map(get_gpu, [x, dy, dw])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_22cuConvolutionBackwardFilter, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 464, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_22cuConvolutionBackwardFilter, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 487, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuConvolutionBackwardFilter, __pyx_t_1) < 0) __PYX_ERR(1, 464, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuConvolutionBackwardFilter, __pyx_t_1) < 0) __PYX_ERR(0, 487, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":493
+  /* "renom/cuda/cudnn.pyx":516
  * 
  * 
  * def cuConvolutionBackwardBias(handle, dy, db):             # <<<<<<<<<<<<<<
  *     dy, db = map(get_gpu, [dy, db])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_24cuConvolutionBackwardBias, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 493, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_24cuConvolutionBackwardBias, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 516, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuConvolutionBackwardBias, __pyx_t_1) < 0) __PYX_ERR(1, 493, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuConvolutionBackwardBias, __pyx_t_1) < 0) __PYX_ERR(0, 516, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":514
+  /* "renom/cuda/cudnn.pyx":537
  * 
  * 
  * def cuSoftmaxForward(handle, x, y, mode=0):             # <<<<<<<<<<<<<<
  *     x, y = map(get_gpu, [x, y])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_26cuSoftmaxForward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 514, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_26cuSoftmaxForward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 537, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuSoftmaxForward, __pyx_t_1) < 0) __PYX_ERR(1, 514, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuSoftmaxForward, __pyx_t_1) < 0) __PYX_ERR(0, 537, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":537
+  /* "renom/cuda/cudnn.pyx":560
  * 
  * 
  * def cuSoftmaxBackward(handle, y, dy, dx, mode=0):             # <<<<<<<<<<<<<<
  *     y, dy, dx = map(get_gpu, [y, dy, dx])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_28cuSoftmaxBackward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 537, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_28cuSoftmaxBackward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 560, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuSoftmaxBackward, __pyx_t_1) < 0) __PYX_ERR(1, 537, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuSoftmaxBackward, __pyx_t_1) < 0) __PYX_ERR(0, 560, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":562
+  /* "renom/cuda/cudnn.pyx":585
  * 
  * 
  * def cuLocalResponseNormalizationForward(handle, lrn_desc, x, y):             # <<<<<<<<<<<<<<
  *     x, y = map(get_gpu, [x, y])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_30cuLocalResponseNormalizationForward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 562, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_30cuLocalResponseNormalizationForward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 585, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuLocalResponseNormalizationForw, __pyx_t_1) < 0) __PYX_ERR(1, 562, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuLocalResponseNormalizationForw, __pyx_t_1) < 0) __PYX_ERR(0, 585, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "renom/cuda/cudnn.pyx":586
+  /* "renom/cuda/cudnn.pyx":609
  * 
  * 
  * def cuLocalResponseNormalizationBackward(handle, lrn_desc, x, y, dx, dy):             # <<<<<<<<<<<<<<
  *     x, y, dx, dy = map(get_gpu, [x, y, dx, dy])
  * 
  */
-  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_32cuLocalResponseNormalizationBackward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 586, __pyx_L1_error)
+  __pyx_t_1 = PyCFunction_NewEx(&__pyx_mdef_5renom_4cuda_5cudnn_32cuLocalResponseNormalizationBackward, NULL, __pyx_n_s_renom_cuda_cudnn); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuLocalResponseNormalizationBack, __pyx_t_1) < 0) __PYX_ERR(1, 586, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_cuLocalResponseNormalizationBack, __pyx_t_1) < 0) __PYX_ERR(0, 609, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /* "renom/cuda/cudnn.pyx":1
@@ -16613,9 +16980,9 @@ PyMODINIT_FUNC PyInit_cudnn(void)
  * import numpy as np
  * cimport cudnn as cd
  */
-  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(1, 1, __pyx_L1_error)
+  __pyx_t_1 = PyDict_New(); if (unlikely(!__pyx_t_1)) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_1);
-  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(1, 1, __pyx_L1_error)
+  if (PyDict_SetItem(__pyx_d, __pyx_n_s_test, __pyx_t_1) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
   /*--- Wrapped vars code ---*/
@@ -17388,6 +17755,103 @@ bad:
     PyErr_Format(PyExc_ValueError,
                  "need more than %" CYTHON_FORMAT_SSIZE_T "d value%.1s to unpack",
                  index, (index == 1) ? "" : "s");
+}
+
+/* SliceObject */
+        static CYTHON_INLINE PyObject* __Pyx_PyObject_GetSlice(PyObject* obj,
+        Py_ssize_t cstart, Py_ssize_t cstop,
+        PyObject** _py_start, PyObject** _py_stop, PyObject** _py_slice,
+        int has_cstart, int has_cstop, CYTHON_UNUSED int wraparound) {
+#if CYTHON_USE_TYPE_SLOTS
+    PyMappingMethods* mp;
+#if PY_MAJOR_VERSION < 3
+    PySequenceMethods* ms = Py_TYPE(obj)->tp_as_sequence;
+    if (likely(ms && ms->sq_slice)) {
+        if (!has_cstart) {
+            if (_py_start && (*_py_start != Py_None)) {
+                cstart = __Pyx_PyIndex_AsSsize_t(*_py_start);
+                if ((cstart == (Py_ssize_t)-1) && PyErr_Occurred()) goto bad;
+            } else
+                cstart = 0;
+        }
+        if (!has_cstop) {
+            if (_py_stop && (*_py_stop != Py_None)) {
+                cstop = __Pyx_PyIndex_AsSsize_t(*_py_stop);
+                if ((cstop == (Py_ssize_t)-1) && PyErr_Occurred()) goto bad;
+            } else
+                cstop = PY_SSIZE_T_MAX;
+        }
+        if (wraparound && unlikely((cstart < 0) | (cstop < 0)) && likely(ms->sq_length)) {
+            Py_ssize_t l = ms->sq_length(obj);
+            if (likely(l >= 0)) {
+                if (cstop < 0) {
+                    cstop += l;
+                    if (cstop < 0) cstop = 0;
+                }
+                if (cstart < 0) {
+                    cstart += l;
+                    if (cstart < 0) cstart = 0;
+                }
+            } else {
+                if (!PyErr_ExceptionMatches(PyExc_OverflowError))
+                    goto bad;
+                PyErr_Clear();
+            }
+        }
+        return ms->sq_slice(obj, cstart, cstop);
+    }
+#endif
+    mp = Py_TYPE(obj)->tp_as_mapping;
+    if (likely(mp && mp->mp_subscript))
+#endif
+    {
+        PyObject* result;
+        PyObject *py_slice, *py_start, *py_stop;
+        if (_py_slice) {
+            py_slice = *_py_slice;
+        } else {
+            PyObject* owned_start = NULL;
+            PyObject* owned_stop = NULL;
+            if (_py_start) {
+                py_start = *_py_start;
+            } else {
+                if (has_cstart) {
+                    owned_start = py_start = PyInt_FromSsize_t(cstart);
+                    if (unlikely(!py_start)) goto bad;
+                } else
+                    py_start = Py_None;
+            }
+            if (_py_stop) {
+                py_stop = *_py_stop;
+            } else {
+                if (has_cstop) {
+                    owned_stop = py_stop = PyInt_FromSsize_t(cstop);
+                    if (unlikely(!py_stop)) {
+                        Py_XDECREF(owned_start);
+                        goto bad;
+                    }
+                } else
+                    py_stop = Py_None;
+            }
+            py_slice = PySlice_New(py_start, py_stop, Py_None);
+            Py_XDECREF(owned_start);
+            Py_XDECREF(owned_stop);
+            if (unlikely(!py_slice)) goto bad;
+        }
+#if CYTHON_USE_TYPE_SLOTS
+        result = mp->mp_subscript(obj, py_slice);
+#else
+        result = PyObject_GetItem(obj, py_slice);
+#endif
+        if (!_py_slice) {
+            Py_DECREF(py_slice);
+        }
+        return result;
+    }
+    PyErr_Format(PyExc_TypeError,
+        "'%.200s' object is unsliceable", Py_TYPE(obj)->tp_name);
+bad:
+    return NULL;
 }
 
 /* IterFinish */

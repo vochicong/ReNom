@@ -78,6 +78,8 @@ class Rescale(Image):
             x = self._vgg_preprocess(x)
         elif self.option == "zero":
             x = x / 255. - 0.5
+        elif isinstance(self.option, list):
+            x = x / 255. * (self.option[1] - self.option[0]) + self.option[0]
         else:
             x = x / 255.
         return x

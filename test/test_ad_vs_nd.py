@@ -31,7 +31,6 @@ from renom.layers.function.lstm import Lstm
 from renom.layers.function.batch_normalize import BatchNormalize,\
     BATCH_NORMALIZE_FEATUREMAP
 from renom.layers.function.lrn import Lrn
-from renom.layers.function.roi_pool2d import RoiPool2d, roi_pool2d
 from test_utility import auto_diff, numeric_diff
 
 from renom.cuda import is_cuda_active, set_cuda_active, curand_generator
@@ -466,6 +465,7 @@ def test_max_pool2d(node, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
 
+<<<<<<< HEAD
 @pytest.mark.parametrize("node, rois", [
     [Variable(rand((3, 3, 12, 8))), Variable(np.array([
             [0, 1, 1, 6, 6],
@@ -484,6 +484,8 @@ def test_roi_pool2d(node, rois,  use_gpu):
     compare(func, node, node, rois)
 
 
+=======
+>>>>>>> fd7a59bef484a9b8e70e9ee748dcc63451c0250a
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
@@ -569,6 +571,29 @@ def test_lstm(node, use_gpu):
     Variable(rand((2, 1))),
     Variable(rand((1, 2))),
 ])
+def test_lstm_temporal_connection(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer1 = Lstm(output_size=4)
+
+    def func(node):
+        loss = 0
+        for _ in range(3):
+            loss = sum(layer1(node))
+        layer1.truncate()
+        return loss
+
+    compare(func, node, node)
+    for k in layer1.params.keys():
+        compare(func, layer1.params[k], node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1, 2))),
+])
 def test_peepholelstm(node, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
@@ -579,6 +604,29 @@ def test_peepholelstm(node, use_gpu):
         loss = 0
         for _ in range(3):
             loss += sum(layer1(node))
+        layer1.truncate()
+        return loss
+
+    compare(func, node, node)
+    for k in layer1.params.keys():
+        compare(func, layer1.params[k], node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1, 2))),
+])
+def test_peepholelstm_temporal_connection(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer1 = rm.PeepholeLstm(output_size=4)
+
+    def func(node):
+        loss = 0
+        for _ in range(3):
+            loss = sum(layer1(node))
         layer1.truncate()
         return loss
 
@@ -750,6 +798,7 @@ def test_exp(node, use_gpu):
         return sum(rm.exp(node))
     compare(func, node, node)
 
+<<<<<<< HEAD
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
     Variable(rand((2, 2, 1, 1))),
@@ -758,10 +807,41 @@ def test_exp(node, use_gpu):
     Variable(rand((1,))),
 ])
 def test_sign(node, use_gpu):
+=======
+
+@pytest.mark.parametrize("node, shape", [
+    [Variable(rand((2, 2))), (1, 4)],
+    [Variable(rand((2, 2, 1, 1))), (4, 1)],
+    [Variable(rand((1, 2))), (2, 1)],
+    [Variable(rand((2, 1))), (1, 2)],
+    [Variable(rand((1,))), (1,)],
+])
+def test_reshape(node, shape, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
     def func(node):
+        return sum(rm.reshape(node, shape)) + sum(node.reshape(shape)) + sum(node.reshape(*shape))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((1, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1,))),
+])
+def test_T(node, use_gpu):
+>>>>>>> fd7a59bef484a9b8e70e9ee748dcc63451c0250a
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+<<<<<<< HEAD
         return sum(rm.sign(node))
     compare(func, node, node)
 
+=======
+        return sum(node.T)
+    compare(func, node, node)
+>>>>>>> fd7a59bef484a9b8e70e9ee748dcc63451c0250a

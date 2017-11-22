@@ -4,6 +4,8 @@
 from __future__ import division, print_function
 import numpy as np
 import pytest
+import renom.cuda
+import renom.core
 from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device
 from renom.core import to_value, Variable, get_gpu
 from renom.operation import dot, sum, sqrt
@@ -31,6 +33,11 @@ def arange(shape):
 
 def close(a, b):
     assert np.allclose(to_value(a), to_value(b), atol=1e-4, rtol=1e-3)
+
+
+def close_shape(a, b):
+    assert a.shape == b.shape
+    return close(a, b)
 
 
 @test_utility.skipgpu
@@ -213,21 +220,28 @@ def test_gpu_node_dot(a, b):
     g1 = Variable(a)
     g2 = Variable(b)
 
-    g3 = rm.sum(dot(g1, g2))
-    g = g3.grad()
+    g3 = dot(g1, g2)
+    g4 = rm.sum(g3)
+    g = g4.grad()
     g_g1 = g.get(g1)
     g_g2 = g.get(g2)
+    g_g3 = g.get(g3)
     g3.to_cpu()
+    g4.to_cpu()
 
     set_cuda_active(False)
-    c3 = rm.sum(dot(g1, g2))
-    c = c3.grad()
+    c3 = dot(g1, g2)
+    c4 = rm.sum(c3)
+    c = c4.grad()
     c_g1 = c.get(g1)
     c_g2 = c.get(g2)
+    c_c3 = c.get(c3)
 
     close(g3, c3)
+    close(g4, c4)
     close(c_g1, g_g1)
     close(c_g2, g_g2)
+    close(c_c3, g_g3)
 
 
 @test_utility.skipgpu
@@ -725,21 +739,27 @@ def test_gpu_node_convolution2d(a):
     with use_cuda():
 
         layer = rm.Conv2d(channel=32)
+        layer.params["w"] = rm.Variable(np.random.rand(32, 3, 3, 3))
+        layer.params["b"] = rm.Variable(np.random.rand(1, 32, 1, 1))
 
         g1 = Variable(a)
-        g3 = rm.sum(layer(g1))
+        g2 = layer(g1)
+        g3 = rm.sum(g2)
         g = g3.grad()
         g_g1 = g.get(layer.params["w"])
         g_g2 = g.get(layer.params["b"])
         g_g3 = g.get(g1)
+        g2.to_cpu()
         g3.to_cpu()
 
-    c3 = rm.sum(layer(g1))
+    c2 = layer(g1)
+    c3 = rm.sum(c2)
     c = c3.grad()
     c_g1 = c.get(layer.params["w"])
     c_g2 = c.get(layer.params["b"])
     c_g3 = g.get(g1)
 
+    close(g2, c2)
     close(g3, c3)
     close(c_g1, g_g1)
     close(c_g2, g_g2)
@@ -753,25 +773,31 @@ def test_gpu_node_convolution2d(a):
     rand((2, 3, 9, 9)),
     rand((2, 3, 12, 9))
 ])
-def test_gpu_node_upconvolution2d(a):
+def test_gpu_node_deconvolution2d(a):
     with use_cuda():
 
         layer = rm.Deconv2d(channel=32)
+        layer.params["w"] = rm.Variable(np.random.rand(3, 32, 3, 3))
+        layer.params["b"] = rm.Variable(np.random.rand(1, 32, 1, 1))
 
         g1 = Variable(a)
-        g3 = rm.sum(layer(g1))
+        g2 = layer(g1)
+        g3 = rm.sum(g2)
         g = g3.grad()
         g_g1 = g.get(layer.params["w"])
         g_g2 = g.get(layer.params["b"])
         g_g3 = g.get(g1)
+        g2.to_cpu()
         g3.to_cpu()
 
-    c3 = rm.sum(layer(g1))
+    c2 = layer(g1)
+    c3 = rm.sum(c2)
     c = c3.grad()
     c_g1 = c.get(layer.params["w"])
     c_g2 = c.get(layer.params["b"])
     c_g3 = g.get(g1)
 
+    close(g2, c2)
     close(g3, c3)
     close(c_g1, g_g1)
     close(c_g2, g_g2)
@@ -791,15 +817,19 @@ def test_gpu_node_max_pooling(a):
         layer = rm.MaxPool2d()
 
         g1 = Variable(a)
-        g3 = rm.sum(layer(g1))
+        g2 = layer(g1)
+        g3 = rm.sum(g2)
         g = g3.grad()
         g_g3 = g.get(g1)
+        g2.to_cpu()
         g3.to_cpu()
 
-    c3 = rm.sum(layer(g1))
+    c2 = layer(g1)
+    c3 = rm.sum(c2)
     c3.grad()
     c_g3 = g.get(g1)
 
+    close(g2, c2)
     close(g3, c3)
     close(c_g3, g_g3)
 
@@ -818,15 +848,19 @@ def test_gpu_node_average_pooling(a):
         layer = rm.AveragePool2d()
 
         g1 = Variable(a)
-        g3 = rm.sum(layer(g1))
+        g2 = layer(g1)
+        g3 = rm.sum(g2)
         g = g3.grad()
         g_g3 = g.get(g1)
+        g2.to_cpu()
         g3.to_cpu()
 
-    c3 = rm.sum(layer(g1))
+    c2 = layer(g1)
+    c3 = rm.sum(c2)
     c3.grad()
     c_g3 = g.get(g1)
 
+    close(g2, c2)
     close(g3, c3)
     close(c_g3, g_g3)
 
@@ -841,8 +875,8 @@ def test_batch_normalize(a):
     set_cuda_active(True)
 
     g1 = Variable(a)
-
-    g3 = rm.sum(layer(g1))
+    g2 = layer(g1)
+    g3 = rm.sum(g2)
     g = g3.grad()
     g_g1 = g.get(g1)
     g_g2 = g.get(layer.l0.params["w"])
@@ -852,6 +886,7 @@ def test_batch_normalize(a):
     g4 = layer(g1)
     layer.set_models(inference=False)
 
+    g2.to_cpu()
     g3.to_cpu()
     g4.to_cpu()
     g_g1.to_cpu()
@@ -862,7 +897,8 @@ def test_batch_normalize(a):
     layer.l0._mov_mean = 0
     layer.l0._mov_std = 0
 
-    c3 = rm.sum(layer(g1))
+    c2 = layer(g1)
+    c3 = rm.sum(c2)
     c = c3.grad()
     c_g1 = c.get(g1)
     c_g2 = g.get(layer.l0.params["w"])
@@ -872,6 +908,7 @@ def test_batch_normalize(a):
     c4 = layer(g1)
     layer.set_models(inference=False)
 
+    close(g2, c2)
     close(g3, c3)
     close(g4, c4)
     close(c_g1, g_g1)
@@ -1084,3 +1121,98 @@ def test_copy_from_another_gpu():
     close(src, dest)
 
     close(src._gpu.new_array(), dest._gpu.new_array())
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a, axis", [
+    [rand((1, 2, 3)), None],
+    [rand((1, 2, 3)), 0],
+    [rand((1, 2, 3)), 1],
+    [rand((1, 2, 3)), 2],
+    [rand((1, 2, 3)), (0, 1)],
+    [rand((1, 2, 3)), (0, 2)],
+    [rand((1, 2, 3)), (0, 1, 2)],
+])
+def test_cusum(a, axis):
+    with use_cuda():
+        g = renom.core.GPUValue(a)
+
+        ret = renom.cuda.cusum(g, axis, keepdims=False)
+        close(ret.new_array(), np.sum(a, axis, keepdims=False))
+
+        ret = renom.cuda.cusum(g, axis, keepdims=True)
+        close(ret.new_array(), np.sum(a, axis, keepdims=True))
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a, axis", [
+    [rand((1, 2, 3)), None],
+    [rand((1, 2, 3)), 0],
+    [rand((1, 2, 3)), 1],
+    [rand((1, 2, 3)), 2],
+    [rand((1, 2, 3)), (0, 1)],
+    [rand((1, 2, 3)), (0, 2)],
+    [rand((1, 2, 3)), (0, 1, 2)],
+])
+def test_cu_reduce_min(a, axis):
+    with use_cuda():
+        g = renom.core.GPUValue(a)
+
+        ret = renom.cuda.cu_reduce_min(g, axis, keepdims=False)
+        close_shape(ret.new_array(), np.min(a, axis, keepdims=False))
+
+        ret = renom.cuda.cu_reduce_min(g, axis, keepdims=True)
+        close_shape(ret.new_array(), np.min(a, axis, keepdims=True))
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a, axis", [
+    [rand((1, 2, 3)), None],
+    [rand((1, 2, 3)), 0],
+    [rand((1, 2, 3)), 1],
+    [rand((1, 2, 3)), 2],
+])
+def test_cu_reduce_arg_min(a, axis):
+    with use_cuda():
+        g = renom.core.GPUValue(a)
+
+        ret = renom.cuda.cu_reduce_argmin(g, axis)
+        close_shape(ret.new_array(), np.argmin(a, axis))
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a, axis", [
+    [rand((1, 2, 3)), None],
+    [rand((1, 2, 3)), 0],
+    [rand((1, 2, 3)), 1],
+    [rand((1, 2, 3)), 2],
+    [rand((1, 2, 3)), (0, 1)],
+    [rand((1, 2, 3)), (0, 2)],
+    [rand((1, 2, 3)), (0, 1, 2)],
+])
+def test_cu_reduce_max(a, axis):
+    with use_cuda():
+        g = renom.core.GPUValue(a)
+
+        ret = renom.cuda.cu_reduce_max(g, axis, keepdims=False)
+        renom.cuda.cuDeviceSynchronize()
+        close_shape(ret.new_array(), np.max(a, axis, keepdims=False))
+
+        ret = renom.cuda.cu_reduce_max(g, axis, keepdims=True)
+        close_shape(ret.new_array(), np.max(a, axis, keepdims=True))
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a, axis", [
+    [rand((1, 2, 3)), None],
+    [rand((1, 2, 3)), 0],
+    [rand((1, 2, 3)), 1],
+    [rand((1, 2, 3)), 2],
+])
+def test_cu_reduce_arg_max(a, axis):
+    with use_cuda():
+        g = renom.core.GPUValue(a)
+
+        ret = renom.cuda.cu_reduce_argmax(g, axis)
+        renom.cuda.cuDeviceSynchronize()
+        close_shape(ret.new_array(), np.argmax(a, axis))

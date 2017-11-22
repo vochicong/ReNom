@@ -61,6 +61,12 @@ cdef extern from "cuda_runtime.h":
 cdef extern from "cuda.h":
     ctypedef enum cudaError_enum:
         CUDA_SUCCESS,
+
+    ctypedef enum CUlimit:
+        CU_LIMIT_STACK_SIZE, CU_LIMIT_PRINTF_FIFO_SIZE, CU_LIMIT_MALLOC_HEAP_SIZE,
+        CU_LIMIT_DEV_RUNTIME_SYNC_DEPTH, CU_LIMIT_DEV_RUNTIME_PENDING_LAUNCH_COUNT,
+        CU_LIMIT_MAX
+
     ctypedef cudaError_enum CUresult
     ctypedef int CUcontext
     ctypedef int CUdevice
@@ -70,3 +76,7 @@ cdef extern from "cuda.h":
     CUresult cuCtxGetDevice(CUdevice * device)
     CUresult cuGetErrorString(CUresult error, const char ** pStr)
 
+    CUresult cuCtxSetLimit (CUlimit limit, size_t value)
+    CUresult cuCtxGetLimit (size_t *value, CUlimit limit)
+
+    CUresult cuInit(unsigned int)

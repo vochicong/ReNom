@@ -49,7 +49,7 @@ def culeaky_leru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def culeaky_leru_backward(s, gpu_value1, gpu_value2):
@@ -58,7 +58,7 @@ def culeaky_leru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_forward(s, gpu_value1, gpu_value2):
@@ -67,7 +67,7 @@ def cueru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_backward(s, gpu_value1, gpu_value2):
@@ -76,7 +76,7 @@ def cueru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cusigmoid(gpu_value1, gpu_value2):
@@ -287,7 +287,7 @@ def culstm_forward(u, s, ps, z):
     thrust_forward_lstm(N, M, ptr_u, ptr_s, ptr_ps, ptr_z)
 
 
-def culstm_backward(u, du, s, ps, e, pgf, dou, dou_n, temporal):
+def culstm_backward(u, du, s, ps, e, pgf, dou, dou_n):
     cdef int N = u.shape[0]
     cdef int M = u.shape[1]
     cdef VALUE_TYPE * ptr_u = < VALUE_TYPE * > < uintptr_t > u._ptr
@@ -298,9 +298,8 @@ def culstm_backward(u, du, s, ps, e, pgf, dou, dou_n, temporal):
     cdef VALUE_TYPE * ptr_pgf = < VALUE_TYPE * > < uintptr_t > pgf._ptr
     cdef VALUE_TYPE * ptr_dou = < VALUE_TYPE * > < uintptr_t > dou._ptr
     cdef VALUE_TYPE * ptr_dou_n = < VALUE_TYPE * > < uintptr_t > dou_n._ptr
-    cdef bool temp = temporal
     thrust_backward_lstm(N, M, ptr_u, ptr_du, ptr_s, ptr_ps,
-                         ptr_e, ptr_pgf, ptr_dou, ptr_dou_n, temp)
+                         ptr_e, ptr_pgf, ptr_dou, ptr_dou_n)
 
 
 def cupeepholelstm_forward(u, wc, prestate, state, z):
@@ -316,9 +315,9 @@ def cupeepholelstm_forward(u, wc, prestate, state, z):
     thrust_forward_peephole_lstm(N, M, ptr_u, ptr_wc, ptr_ps, ptr_s, ptr_z)
 
 
-def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dot, dr, dou, dwc, temporal):
+def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dot, dr, dou, dwc):
     cuda_base.check_heap_device(u, prestate, state, prestate, wc,
-                                dy, drt, dot, dou, dr, dwc, temporal)
+                                dy, drt, dot, dou, dr, dwc)
     cdef int N = u.shape[0]
     cdef int M = u.shape[1]
 
@@ -333,9 +332,8 @@ def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dot, dr, dou
     cdef VALUE_TYPE * ptr_dr = < VALUE_TYPE * > < uintptr_t > dr._ptr
     cdef VALUE_TYPE * ptr_dou = < VALUE_TYPE * > < uintptr_t > dou._ptr
     cdef VALUE_TYPE * ptr_dwc = < VALUE_TYPE * > < uintptr_t > dwc._ptr
-    cdef bool temp = temporal
     thrust_backward_peephole_lstm(N, M, ptr_u, ptr_ps, ptr_s, ptr_pfg, ptr_wc,
-                                  ptr_dy, ptr_drt, ptr_dot, ptr_dr, ptr_dou, ptr_dwc, temp)
+                                  ptr_dy, ptr_drt, ptr_dot, ptr_dr, ptr_dou, ptr_dwc)
 
 
 def cubinarize(gpu_value1, th, gpu_value2):
@@ -399,48 +397,308 @@ def cuconcat(gpu_value1, gpu_value2, gpu_value3, axis):
     thrust_copy_memory_stride(ptr3 + size1, ptr2, gpu_value2.size, rec_size, size2)
 
 
-ctypedef void(*REDUCE_FUNC)(VALUE_TYPE * a, const size_t nsize,
-                            const size_t axis_size, const size_t elem_size,
-                            const size_t child_size, VALUE_TYPE * b,
-                            const size_t result_size)
+ctypedef object(*REDUCE_FUNC)(
+    size_t max_grids, size_t num_threads,
+    VALUE_TYPE * src, size_t src_size,
+    object result_shape, size_t result_size,
+    size_t src_per_result,
+    size_t sequence_stride,
+    size_t num_axis,
+    reduce_shape_infos * reductions_infos,
+    reduce_shape_infos * seqs_infos,
+    object args)
 
-cdef _reduce_array(gpu_value1, axis, REDUCE_FUNC f):
-    cdef VALUE_TYPE xxx
-    import renom.cuda
-    nsize = functools.reduce(operator.__mul__, gpu_value1.shape, 1)
 
-    if axis is None:
-        axis_size = nsize
-        elem_size = nsize
-        child_size = 1
+import collections
+
+
+def _del_items(src, indexes):
+    ret = list(src)
+    for i in reversed(indexes):
+        del ret[i]
+    return ret
+
+
+def _calc_index(reductions, kept_shapes_size, n):
+    ret = 0
+    if kept_shapes_size:
+        ret = n % kept_shapes_size
+
+    for info in reductions:
+        v = n
+        if info.group_size:
+            v = v % info.group_size
+        v = v // info.out_size
+        ret += v * info.in_size
+
+    return ret
+
+
+cdef _reduce_array(max_grids, num_threads, gpu_value1, axis, keepdims, REDUCE_FUNC func, args):
+    assert num_threads < 600
+
+    if not gpu_value1.shape:
+        return gpu_value1
+
+    if isinstance(axis, int):
+        axis = [axis]
+    elif not axis:
+        axis = list(range(len(gpu_value1.shape)))
+
+    axis = list(sorted(set(axis)))
+
+    if (max(axis) >= len(gpu_value1.shape)) or (min(axis) < 0):
+        raise ValueError('Invalid axis: %s' % (axis,))
+
+    if len(axis) == len(gpu_value1.shape):
+        reduce_axis = [0]
+        src_shape = (gpu_value1.size,)
+        src_size = gpu_value1.size
+
         result_shape = ()
         result_size = 1
     else:
-        axis_size = gpu_value1.shape[axis]
-        elem_size = functools.reduce(operator.__mul__, gpu_value1.shape[axis:], 1)
-        child_size = functools.reduce(operator.__mul__, gpu_value1.shape[axis + 1:], 1)
-        result_shape = gpu_value1.shape[:axis] + gpu_value1.shape[axis + 1:]
-        result_size = np.product(result_shape, dtype=int)
+        reduce_axis = axis
+        src_shape = gpu_value1.shape
+        src_size = gpu_value1.size
 
-    result = renom.core.GPUValue(shape=result_shape)
+        result_shape = _del_items(src_shape, reduce_axis)
+        result_size = functools.reduce(operator.__mul__, result_shape, 1)
+
+    kept_shapes = src_shape[reduce_axis[-1] + 1:]
+    kept_shapes_size = functools.reduce(operator.__mul__, kept_shapes, 1)
+
+    src_per_result = src_size // result_size
+    sequence_per_result = src_shape[reduce_axis[0]]
+    sequence_stride = kept_shapes_size
+    src_per_sequence = src_per_result // sequence_per_result
+
+    max_threads_per_result = min(src_per_result, num_threads)
+    preferred_result_per_block = num_threads // max_threads_per_result
+
+    num_blocks = min((result_size - 1) // preferred_result_per_block + 1, max_grids)
+
+    cdef reduce_shape_infos reduction_infos
+    group_size = 0
+    f = 0
+
+    for n, i in enumerate(reduce_axis):
+        in_shape = src_shape[i:]
+        in_size = functools.reduce(operator.__mul__, in_shape, 1)
+        out_shape = _del_items(src_shape[i + 1:], [p - i - 1 for p in reduce_axis[n + 1:]])
+        out_size = functools.reduce(operator.__mul__, out_shape, 1)
+
+        reduction_infos.in_size[n] = in_size
+        reduction_infos.out_size[n] = out_size
+        reduction_infos.group_size[n] = group_size
+
+        group_size = out_size
+
+    cdef reduce_shape_infos seq_infos
+
+    group_size = 0
+    f = 0
+    for n, i in enumerate(reduce_axis):
+        in_shape = src_shape[i + 1:]
+        in_size = functools.reduce(operator.__mul__, in_shape, 1)
+        out_shape = [src_shape[p] for p in reduce_axis[n + 1:]]
+        out_size = functools.reduce(operator.__mul__, out_shape, 1)
+
+        seq_infos.in_size[n] = in_size
+        seq_infos.out_size[n] = out_size
+        seq_infos.group_size[n] = group_size
+
+        group_size = out_size
+
+    if not keepdims:
+        ret_shape = result_shape
+    else:
+        ret_shape = list(gpu_value1.shape)
+        for s in axis:
+            ret_shape[s] = 1
 
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
-    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > result._ptr
 
-    f(ptr1, nsize, axis_size, elem_size, child_size, ptr2, result_size)
+    return func(num_blocks, num_threads, ptr1, src_size, ret_shape, result_size, src_per_result, sequence_stride,
+                len(reduce_axis), & reduction_infos, & seq_infos, args)
+
+
+cdef _cusum(size_t max_grids, size_t num_threads,
+            VALUE_TYPE * src, size_t src_size,
+            object result_shape, size_t result_size,
+            size_t src_per_result,
+            size_t sequence_stride,
+            size_t num_axis,
+            reduce_shape_infos * reductions_infos,
+            reduce_shape_infos * seqs_infos,
+            object args):
+
+    result = renom.core.GPUValue(shape=result_shape)
+    cdef VALUE_TYPE * ptr = <VALUE_TYPE * > < uintptr_t > result._ptr
+
+    thrust_reduce_sum(max_grids, num_threads,
+                      src, src_size,
+                      ptr, result_size,
+                      src_per_result,
+                      sequence_stride,
+                      num_axis,
+                      reductions_infos,
+                      seqs_infos)
+
     return result
 
 
-def cusum(gpu_value1, axis=None):
-    return _reduce_array(gpu_value1, axis, thrust_reduce_sum)
+def cusum(gpu_value1, axis=None, keepdims=False, max_grids=65536, num_threads=512):
+    return _reduce_array(max_grids, num_threads, gpu_value1, axis, keepdims, _cusum, None)
 
 
-def cu_reduce_min(gpu_value1, axis=None):
-    return _reduce_array(gpu_value1, axis, thrust_reduce_min)
+cdef _cu_reduce_min(size_t max_grids, size_t num_threads,
+                    VALUE_TYPE * src, size_t src_size,
+                    object result_shape, size_t result_size,
+                    size_t src_per_result,
+                    size_t sequence_stride,
+                    size_t num_axis,
+                    reduce_shape_infos * reductions_infos,
+                    reduce_shape_infos * seqs_infos,
+                    object args):
+
+    result = renom.core.GPUValue(shape=result_shape)
+    cdef VALUE_TYPE * ptr = <VALUE_TYPE * > < uintptr_t > result._ptr
+
+    thrust_reduce_min(max_grids, num_threads,
+                      src, src_size,
+                      ptr, result_size,
+                      src_per_result,
+                      sequence_stride,
+                      num_axis,
+                      reductions_infos,
+                      seqs_infos)
+
+    return result
 
 
-def cu_reduce_max(gpu_value1, axis=None):
-    return _reduce_array(gpu_value1, axis, thrust_reduce_min)
+def cu_reduce_min(gpu_value1, axis=None, keepdims=False, max_grids=65536, num_threads=512):
+    return _reduce_array(max_grids, num_threads, gpu_value1, axis, keepdims, _cu_reduce_min, None)
+
+
+cdef _cu_reduce_max(size_t max_grids, size_t num_threads,
+                    VALUE_TYPE * src, size_t src_size,
+                    object result_shape, size_t result_size,
+                    size_t src_per_result,
+                    size_t sequence_stride,
+                    size_t num_axis,
+                    reduce_shape_infos * reductions_infos,
+                    reduce_shape_infos * seqs_infos,
+                    object args):
+
+    result = renom.core.GPUValue(shape=result_shape)
+    cdef VALUE_TYPE * ptr = <VALUE_TYPE * > < uintptr_t > result._ptr
+
+    thrust_reduce_max(max_grids, num_threads,
+                      src, src_size,
+                      ptr, result_size,
+                      src_per_result,
+                      sequence_stride,
+                      num_axis,
+                      reductions_infos,
+                      seqs_infos)
+
+    return result
+
+
+def cu_reduce_max(gpu_value1, axis=None, keepdims=False, max_grids=65536, num_threads=512):
+    return _reduce_array(max_grids, num_threads, gpu_value1, axis, keepdims, _cu_reduce_max, None)
+
+
+cdef _cu_reduce_argmin(size_t max_grids, size_t num_threads,
+                       VALUE_TYPE * src, size_t src_size,
+                       object result_shape, size_t result_size,
+                       size_t src_per_result,
+                       size_t sequence_stride,
+                       size_t num_axis,
+                       reduce_shape_infos * reductions_infos,
+                       reduce_shape_infos * seqs_infos,
+                       object args):
+
+    result = renom.core.GPUValue(shape=result_shape, dtype='int64')
+    cdef size_t * ptr = <size_t * > < uintptr_t > result._ptr
+
+    cdef size_t mod, div
+    mod, div = args
+
+    thrust_reduce_argmin(max_grids, num_threads,
+                         src, src_size,
+                         ptr, result_size,
+                         src_per_result,
+                         sequence_stride,
+                         num_axis,
+                         reductions_infos,
+                         seqs_infos,
+                         mod, div)
+
+    return result
+
+
+def cu_reduce_argmin(gpu_value1, axis=None, max_grids=65536, num_threads=512):
+    if axis is not None:
+        if not isinstance(axis, int) or axis >= len(gpu_value1.shape):
+            raise ValueError("Invalid axis")
+
+        mod = functools.reduce(operator.__mul__, gpu_value1.shape[axis:], 1)
+        div = functools.reduce(operator.__mul__, gpu_value1.shape[axis + 1:], 1)
+
+    else:
+        mod = functools.reduce(operator.__mul__, gpu_value1.shape, 1)
+        div = 1
+
+    keepdims = False
+    return _reduce_array(max_grids, num_threads, gpu_value1, axis, keepdims, _cu_reduce_argmin, (mod, div))
+
+
+cdef _cu_reduce_argmax(size_t max_grids, size_t num_threads,
+                       VALUE_TYPE * src, size_t src_size,
+                       object result_shape, size_t result_size,
+                       size_t src_per_result,
+                       size_t sequence_stride,
+                       size_t num_axis,
+                       reduce_shape_infos * reductions_infos,
+                       reduce_shape_infos * seqs_infos,
+                       object args):
+
+    result = renom.core.GPUValue(shape=result_shape, dtype='int64')
+    cdef size_t * ptr = <size_t * > < uintptr_t > result._ptr
+
+    cdef size_t mod, div
+    mod, div = args
+
+    thrust_reduce_argmax(max_grids, num_threads,
+                         src, src_size,
+                         ptr, result_size,
+                         src_per_result,
+                         sequence_stride,
+                         num_axis,
+                         reductions_infos,
+                         seqs_infos,
+                         mod, div)
+
+    return result
+
+
+def cu_reduce_argmax(gpu_value1, axis=None, max_grids=65536, num_threads=512):
+    if axis is not None:
+        if not isinstance(axis, int) or axis >= len(gpu_value1.shape):
+            raise ValueError("Invalid axis")
+
+        mod = functools.reduce(operator.__mul__, gpu_value1.shape[axis:], 1)
+        div = functools.reduce(operator.__mul__, gpu_value1.shape[axis + 1:], 1)
+
+    else:
+        mod = functools.reduce(operator.__mul__, gpu_value1.shape, 1)
+        div = 1
+
+    keepdims = False
+
+    return _reduce_array(max_grids, num_threads, gpu_value1, axis, keepdims, _cu_reduce_argmax, (mod, div))
 
 
 def cu_add_bias(bias, gpu_value):

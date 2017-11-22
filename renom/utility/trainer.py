@@ -153,14 +153,12 @@ class Trainer(object):
         if events:
             self._events = events.copy()
         else:
-            self._events = {}
+            self._events = DEFAULT_EVENTS
 
         self.events = _EventHandlers(self._events)
 
     def on_event(self, event):
-        if not self._events:
-            events = DEFAULT_EVENTS
-        else:
+        if self._events:
             events = self._events
 
         handler = events.get(event)
@@ -214,7 +212,7 @@ class Trainer(object):
                             d.to_gpu()
 
                 for gpu in range(1, self.num_gpu):
-                    models[gpu].copy_attr(models[0])
+                    models[gpu].copy_params(models[0])
 
                 for gpu in range(0, self.num_gpu):
                     models[gpu].set_models(inference=False)
@@ -274,7 +272,7 @@ class Trainer(object):
         Returns:
             ndarray
         """
-        bs = self.batch_size
+        bs = self.batch_size // self.num_gpu
         N = len(data) - 1 + bs
         self.model.set_models(inference=True)
         ret = np.vstack([self.model(data[bs * i:bs * (i + 1)]).as_ndarray()

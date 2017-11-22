@@ -2,7 +2,7 @@
 from __future__ import print_function, division
 
 import numpy as np
-from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value
+from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshape
 from renom.config import precision
 
 try:
@@ -16,7 +16,7 @@ except ImportError:
     pass
 
 
-class reshape(Node):
+def reshape(array, shape):
     """This function reshapes matrix shape.
 
     Args:
@@ -33,30 +33,7 @@ class reshape(Node):
         >>> y.shape
         (2, 3)
     """
-
-    @classmethod
-    def _oper_cpu(cls, array, shape):
-        return array.reshape(shape).copy()
-
-    @classmethod
-    def _oper_gpu(cls, array, shape):
-        return get_gpu(array).reshape(shape)
-
-    def __new__(cls, array, shape):
-        value = cls.calc_value(array, shape)
-        ret = super(reshape, cls).__new__(cls, value)
-        ret.attrs._array = array
-        ret.attrs._shape = array.shape
-        return ret
-
-    def _backward_cpu(self, context, dy, **kwargs):
-        if isinstance(self.attrs._array, Node):
-            self.attrs._array._update_diff(context, dy.reshape(self.attrs._shape), **kwargs)
-
-    def _backward_gpu(self, context, dy, **kwargs):
-        if isinstance(self.attrs._array, Node):
-            self.attrs._array._update_diff(context, get_gpu(
-                dy).reshape(self.attrs._shape), **kwargs)
+    return Reshape(array, shape)
 
 
 class sum(Node):

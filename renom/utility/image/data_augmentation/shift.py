@@ -158,7 +158,7 @@ class Shift(Image):
            # Returns:
                label(ndarray): label for a transformed image(2-dimensional array)
         """
-        num_block = label.shape[0] / block_len
+        num_block = label.shape[0] // block_len
         x_shift = int(self.shift[1] * random)
         y_shift = int(self.shift[0] * random)
         label_num = 0

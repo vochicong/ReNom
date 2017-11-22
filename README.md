@@ -5,9 +5,12 @@ Documents are available on the ReNom.jp web site.
 - http://renom.jp/index.html
 
 
-## ReNom version 2.2
+## ReNom version 2.3.1d
 
-Added TDA modules.
+- Fix save and load functions of model to save moving average of batch normalization.
+- Add auto-differentiation to transpose.
+- Add auto-differentiation to node object's reshape function.
+- Optimized back-propagation path.
 
 ## Requirements
 

@@ -32,10 +32,32 @@ class Grads:
               [ 2.,  2.,  2.]], dtype=float32)
     '''
 
-    def __init__(self):
+    def __init__(self, root=None):
         self.stroage = {}
         self.variables = {}
         self._auto_updates = []
+
+        if root is not None:
+            self._build_refcounts(root)
+
+    def _build_refcounts(self, root):
+        self._refcounts = collections.Counter()
+        self._backwards = collections.Counter()
+
+        q = collections.deque(root._args)
+
+        def walk():
+            while q:
+                t = q.pop()
+                if isinstance(t, Node):
+                    yield t
+                    if not getattr(t, '_no_backward', False):
+                        for c in t._args:
+                            q.append(c)
+
+        for n in walk():
+            nodeid = id(n)
+            self._refcounts[nodeid] += 1
 
     @contextlib.contextmanager
     def unlock_node(self, node):
@@ -54,22 +76,30 @@ class Grads:
         selfid = id(node)
         return self.stroage.get(selfid, default)
 
-    def add(self, node, dy):
+    def add(self, node, dy, caller=None):
         selfid = id(node)
         if selfid in self.variables:
-            node = self.variables[selfid]
-            with self.unlock_node(node):
+            v = self.variables[selfid]
+            with self.unlock_node(v):
                 if isinstance(dy, GPUValue):
-                    diff = node.get_gpu() + dy
-                    node.set_gpu(diff)
+                    diff = v.get_gpu() + dy
+                    v.set_gpu(diff)
                 else:
-                    node[...] += dy
+                    v[...] += dy
         else:
             if isinstance(dy, GPUValue):
                 dy = Variable(dy)
             self.variables[selfid] = dy
             if node._auto_update:
                 self._auto_updates.append(node)
+
+        if caller is not None:
+            caller_refs = self._refcounts[id(caller)] or 1
+        else:
+            caller_refs = 1
+        self._backwards[selfid] += caller_refs
+
+        return self._refcounts[selfid] <= self._backwards[selfid], GradsWithCaller(node, self)
 
     _omit = object()
 
@@ -130,7 +160,20 @@ class Grads:
                         self.update_node(node, opt)
 
 
+class GradsWithCaller(object):
+    def __init__(self, caller, grad):
+        self.grad__ = getattr(grad, 'grad__', grad)
+        self.caller = caller
+
+    def add(self, node, dy):
+        return self.grad__.add(node, dy, self.caller)
+
+    def __getattr__(self, name):
+        return getattr(self.grad__, name)
+
 # todo: move this method to Cython
+
+
 def calc_broadcast_shape(s1, s2):
     # silly, but works
     if all([isinstance(s, (np.ndarray, Number, GPUValue)) for s in (s1, s2)]):
@@ -143,16 +186,21 @@ def calc_broadcast_shape(s1, s2):
 class GPUValue(object):
     ACTIVE_GPU = None
 
-    def __init__(self, array=None, shape=None, ptr=None):
+    def __init__(self, array=None, shape=None, ptr=None, dtype=None):
         if shape is not None:
-            self.shape = shape
+            self.shape = tuple(shape)
         else:
             self.shape = getattr(array, "shape", None) or ()
 
-        self.dtype = precision
+        if not dtype:
+            self.dtype = precision
+        else:
+            self.dtype = np.dtype(dtype)
+
         self.itemsize = np.dtype(self.dtype).itemsize
-        self.size = np.prod(self.shape) if self.shape else 1
+        self.size = (np.prod(self.shape) if self.shape else 1) or 1
         self.nbytes = self.size * self.itemsize
+
         self._ptr = ptr
         if array is not None:
             self.to_gpu(array)
@@ -180,7 +228,7 @@ class GPUValue(object):
 
     def reshape(self, *shape):
         clone = self.copy()
-        a = np.empty(self.shape).reshape(*shape)
+        a = np.empty(self.shape, dtype=np.bool).reshape(*shape)
         clone.shape = a.shape
         return clone
 
@@ -430,6 +478,7 @@ class Node(np.ndarray):
     _model = None
     _auto_update = False
     _no_backward = False
+    _args = ()
 
     def __new__(cls, value):
         ret = cls._create_node(value)
@@ -468,6 +517,8 @@ class Node(np.ndarray):
 
     def __init__(self, *args, **kwargs):
         self.setflags(write=False)
+        self._args = [a for a in args if isinstance(a, Node)]
+        self._args.extend(a for a in kwargs.values() if isinstance(a, Node))
         self._reduce_graph()
         return
 
@@ -537,7 +588,6 @@ class Node(np.ndarray):
     def copy_from(self, other):
         assert self.shape == other.shape
         assert self.dtype == other.dtype
-
         if self._gpu:
             if other._gpu:
                 self._gpu.copy_from(other._gpu)
@@ -590,7 +640,7 @@ class Node(np.ndarray):
                 initial = Node(initial)
                 initial.to_gpu()
 
-        context = Grads()
+        context = Grads(self)
         self._update_diff(context, initial, **kwargs)
 
         if detach_graph:
@@ -598,8 +648,10 @@ class Node(np.ndarray):
         return context
 
     def _update_diff(self, context, dy, **kwargs):
-        context.add(self, dy)
-        self.backward(context, dy, **kwargs)
+        ready, context = context.add(self, dy)
+        if ready:
+            diff = context.get(self)
+            self.backward(context, diff, **kwargs)
 
     def _get_graph(self):
         if self.attrs:
@@ -622,7 +674,7 @@ class Node(np.ndarray):
             if not self._has_autoupdate():
                 self._no_backward = True
                 self.attrs.clear()
-
+                self._args = []
         return False
 
     def detach_graph(self):
@@ -633,6 +685,8 @@ class Node(np.ndarray):
                 v.detach_graph()
         if self.attrs:
             self.attrs.clear()
+
+        self._args = []
 
     def backward(self, context, dy, **kwargs):
         if self._no_backward:
@@ -901,16 +955,12 @@ class Node(np.ndarray):
 
     @property
     def T(self):
-        ret = Transpose(self)
-        #if is_cuda_active():
-        #    if self._gpu is None:
-        #        ret = Variable(super(Variable, self).T)
-        #        ret.get_gpu()
-        #    else:
-        #        ret = Variable(get_gpu(self).T)
-       # else:
-       #     ret = Variable(super(Node, self).T)
-        return ret
+        return Transpose(self)
+
+    def reshape(self, *shape):
+        if isinstance(shape[0], (list, tuple)):
+            shape = tuple(shape[0])
+        return Reshape(self, shape)
 
 
 class Variable(Node):
@@ -1723,6 +1773,53 @@ class GetIthBbox(Node):
         cu_get_ith_bbox(arg, i, ary)
         return ary
 
+class Reshape(Node):
+
+    @classmethod
+    def _oper_cpu(cls, array, shape):
+        return np.reshape(array, shape).copy()
+
+    @classmethod
+    def _oper_gpu(cls, array, shape):
+        return get_gpu(array).reshape(shape)
+
+    def __new__(cls, array, shape):
+        value = cls.calc_value(array, shape)
+        ret = super(Reshape, cls).__new__(cls, value)
+        ret.attrs._array = array
+        ret.attrs._shape = array.shape
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._array, Node):
+            self.attrs._array._update_diff(context, to_value(
+                dy).reshape(self.attrs._shape), **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._array, Node):
+            self.attrs._array._update_diff(context, get_gpu(
+                dy).reshape(self.attrs._shape), **kwargs)
+
+
+class Transpose(UnaryOp):
+    @classmethod
+    def _oper_cpu(cls, arg):
+        assert(len(arg.shape) < 3)
+        return to_value(arg).T
+
+    @classmethod
+    def _oper_gpu(cls, arg):
+        return get_gpu(arg).T
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            self.attrs._arg._update_diff(context, to_value(dy).T, **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            self.attrs._arg._update_diff(context, get_gpu(dy).T, **kwargs)
+
+
 def _plot_graph(objs):
     g = Digraph('G', filename='graphviz_output')
 
@@ -1738,14 +1835,13 @@ def _plot_graph(objs):
             nodeid = str(id(node))
             if not node.attrs:
                 return
-            for name in node.attrs.get_names():
-                val = getattr(node.attrs, name)
+            for val in node._args:
                 valid = str(id(val))
-
+                name = ''
                 g.node(valid, label=str(type(val)))
                 g.edge(valid, nodeid, label=name)
 
-            for o in node.attrs.get_attrs():
+            for o in node._args:
                 if id(o) not in s:
                     add_edge(o)
                     s.add(id(o))
@@ -1785,7 +1881,7 @@ def DEBUG_GET_ROOTS():
 
     forwards = collections.defaultdict(set)
     for o in Node.ACTIVE_NODE.values():
-        for ref in o.attrs.get_attrs():
+        for ref in o._args:
             forwards[id(ref)].add(id(o))
     rootids = set(Node.ACTIVE_NODE.keys()) - set(forwards.keys())
     roots = [Node.ACTIVE_NODE[o] for o in rootids]

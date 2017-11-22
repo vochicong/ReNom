@@ -43,7 +43,8 @@ class deconv2d(Node):
         z = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, x, z)
-            cu.cuadd(get_gpu(z), get_gpu(b), get_gpu(z))
+        if b is not None:
+            cu.cu_add_bias(get_gpu(b), z)
 
         ret = cls._create_node(z)
         ret.attrs._conv_desc = conv_desc

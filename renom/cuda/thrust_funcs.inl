@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <algorithm>
 #include "thrust_funcs.h"
-
-
 namespace renom{
 
 	/////////////// Basic operaion
@@ -158,179 +156,383 @@ namespace renom{
             cuda_copy_memory_stride <<<ceil(src_elems/256.0), 256>>> (dest, src, src_elems, size_stride, size_srcblock);
         }
 
+
+
         class Reduce_Add {
         public:
-            __device__ inline static VALUE_TYPE oper(const VALUE_TYPE &l, const VALUE_TYPE &r) {
-                return l + r;
+            typedef VALUE_TYPE REDUCE_VALUE;
+            typedef VALUE_TYPE SRC_VALUE;
+            typedef VALUE_TYPE RESULT_VALUE;
+
+            __device__ inline static void set(const size_t pos, const VALUE_TYPE &val, REDUCE_VALUE &ret) {
+                ret = val;
             }
+
+            __device__ inline static void reduce_src(const size_t pos, const VALUE_TYPE &val, REDUCE_VALUE &ret) {
+                ret += val;
+            }
+
+            __device__ inline static void reduce_share(const REDUCE_VALUE &v, REDUCE_VALUE &ret) {
+                ret += v;
+            }
+
+            __device__ inline static void set_result(const REDUCE_VALUE &v, RESULT_VALUE &ret, const Reduce_Add *) {
+                ret = v;
+            }
+
         };
+
+        struct ValueWithPos {
+            size_t pos;
+            VALUE_TYPE val;
+        };
+
+        #define MMIN(l, r) ((l < r) ? (l) : (r))
+        #define MMAX(l, r) ((l > r) ? (l) : (r))
 
         class Reduce_Min {
         public:
-            __device__ inline static VALUE_TYPE oper(const VALUE_TYPE &l, const VALUE_TYPE &r) {
-                return (l < r)?l:r;
+            typedef ValueWithPos REDUCE_VALUE;
+            typedef VALUE_TYPE SRC_VALUE;
+            typedef VALUE_TYPE RESULT_VALUE;
+
+            __device__ inline static void set(const size_t pos, const VALUE_TYPE &val, REDUCE_VALUE &ret) {
+                ret.pos = pos;
+                ret.val = val;
+            }
+
+            __device__ inline static void reduce_src(const size_t pos, const VALUE_TYPE &val, REDUCE_VALUE &ret) {
+                if (val < ret.val) {
+                    ret.val = val;
+                    ret.pos = pos;
+                }
+                else if (val == ret.val) {
+                    ret.pos = MMIN(pos, ret.pos);
+                }
+            }
+
+            __device__ inline static void reduce_share(const REDUCE_VALUE &v, REDUCE_VALUE &ret) {
+                if (v.val < ret.val) {
+                    ret.val = v.val;
+                    ret.pos = v.pos;
+                }
+                else if (v.val == ret.val) {
+                    ret.pos = MMIN(v.pos, ret.pos);
+                }
+            }
+
+            __device__ inline static void set_result(const REDUCE_VALUE &v, RESULT_VALUE &ret, Reduce_Min *) {
+                ret = v.val;
+            }
+        };
+
+
+        class Reduce_ArgMin: public Reduce_Min {
+        public:
+            typedef size_t RESULT_VALUE;
+
+            size_t mod, div;
+            Reduce_ArgMin(size_t n_mod, size_t n_div):mod(n_mod), div(n_div) {}
+
+            __device__ inline static void set_result(const REDUCE_VALUE &v, RESULT_VALUE &ret, Reduce_ArgMin*self) {
+                ret = (v.pos % self->mod) / self->div;
             }
         };
 
         class Reduce_Max{
         public:
-            __device__ inline static VALUE_TYPE oper(const VALUE_TYPE &l, const VALUE_TYPE &r) {
-                return (l > r)?l:r;
+            typedef ValueWithPos REDUCE_VALUE;
+            typedef VALUE_TYPE SRC_VALUE;
+            typedef VALUE_TYPE RESULT_VALUE;
+
+            __device__ inline static void set(const size_t pos, const VALUE_TYPE &val, REDUCE_VALUE &ret) {
+                ret.pos = pos;
+                ret.val = val;
+            }
+
+            __device__ inline static void reduce_src(const size_t pos, const VALUE_TYPE &val, REDUCE_VALUE &ret) {
+                if (val > ret.val) {
+                    ret.val = val;
+                    ret.pos = pos;
+                }
+                else if (val == ret.val) {
+                    ret.pos = MMIN(pos, ret.pos);
+                }
+            }
+
+            __device__ inline static void reduce_share(const REDUCE_VALUE &v, REDUCE_VALUE &ret) {
+                if (v.val > ret.val) {
+                    ret.val = v.val;
+                    ret.pos = v.pos;
+                }
+                else if (v.val == ret.val) {
+                    ret.pos = MMIN(v.pos, ret.pos);
+                }
+            }
+
+            __device__ inline static void set_result(const REDUCE_VALUE &v, RESULT_VALUE &ret, Reduce_Max *) {
+                ret = v.val;
             }
         };
 
+        class Reduce_ArgMax: public Reduce_Max {
+        public:
+            typedef size_t RESULT_VALUE;
+
+            size_t mod, div;
+            Reduce_ArgMax(size_t n_mod, size_t n_div):mod(n_mod), div(n_div) {}
+
+            __device__ inline static void set_result(const REDUCE_VALUE &v, RESULT_VALUE &ret, Reduce_ArgMax *self) {
+                ret = (v.pos % self->mod) / self->div;
+            }
+        };
+
+
+        #define CALC_INDEX_STEP(i) {\
+            size_t v = n; \
+            if (group_size[i]) { \
+                v = v % group_size[i]; \
+            } \
+            v = v / out_size[i]; \
+            ret += v * in_size[i]; \
+        }
+
+        template <int LEN>
+        __device__ inline size_t calc_index_loop(const size_t *out_size, const size_t *in_size, const size_t *group_size, size_t n) {
+
+            
+            size_t ret = 0;
+            for (int i=0; i < LEN; i++) {
+                CALC_INDEX_STEP(i);
+            }
+            return ret;
+        }
+
+        __device__ inline size_t calc_index(int len, const size_t *out_size, const size_t *in_size, const size_t *group_size, size_t sequence_stride, size_t n) {
+            size_t ret = 0;
+
+            if (sequence_stride) {
+                ret = n % sequence_stride;
+            }
+
+            if (len == 1) return ret + calc_index_loop<1>(out_size, in_size, group_size, n);
+            if (len == 2) return ret + calc_index_loop<2>(out_size, in_size, group_size, n);
+            if (len == 3) return ret + calc_index_loop<3>(out_size, in_size, group_size, n);
+            if (len == 4) return ret + calc_index_loop<4>(out_size, in_size, group_size, n);
+            if (len == 5) return ret + calc_index_loop<5>(out_size, in_size, group_size, n);
+            if (len == 6) return ret + calc_index_loop<6>(out_size, in_size, group_size, n);
+            if (len == 7) return ret + calc_index_loop<7>(out_size, in_size, group_size, n);
+            if (len == 8) return ret + calc_index_loop<8>(out_size, in_size, group_size, n);
+            if (len == 9) return ret + calc_index_loop<9>(out_size, in_size, group_size, n);
+            if (len == 10) return ret + calc_index_loop<10>(out_size, in_size, group_size, n);
+            if (len == 11) return ret + calc_index_loop<11>(out_size, in_size, group_size, n);
+            if (len == 12) return ret + calc_index_loop<12>(out_size, in_size, group_size, n);
+            if (len == 13) return ret + calc_index_loop<13>(out_size, in_size, group_size, n);
+            if (len == 14) return ret + calc_index_loop<14>(out_size, in_size, group_size, n);
+            if (len == 15) return ret + calc_index_loop<15>(out_size, in_size, group_size, n);
+            if (len == 16) return ret + calc_index_loop<16>(out_size, in_size, group_size, n);
+
+            assert(0);  // never reach here
+            return ret;
+        }
+
         template <typename T>
-        __global__ void cuda_reduce_array(VALUE_TYPE *a, const size_t nsize, const size_t axis_size, 
-                                         const size_t elem_size, const size_t child_size,
-                                         VALUE_TYPE *b, const size_t result_size) {
+        __global__ static void cuda_reduce_array(
+            size_t num_blocks, size_t num_threads,
+            typename T::SRC_VALUE *src, size_t src_size,
+            typename T::RESULT_VALUE *result, size_t result_size,
+            size_t src_per_result,
+            size_t sequence_stride,
+            int num_axis,
+            reduce_shape_infos reduction_infos,
+            reduce_shape_infos seq_infos,
+            T adapter) {
 
-            __shared__ VALUE_TYPE sharemem[1024];
+            __shared__ typename T::REDUCE_VALUE sharemem[1024];
 
-            size_t num_block_results = ((result_size - 1) / gridDim.x + 1);
+            size_t blockidx = blockIdx.x;
+            size_t threadid = threadIdx.x;
 
-            size_t block_result_from = blockIdx.x * num_block_results;
-            size_t block_result_to = (blockIdx.x + 1) * num_block_results;
-            if (block_result_to > result_size) {
-                block_result_to = result_size;
-            }
+            size_t max_threads_per_result = MMIN(src_per_result, num_threads);
+            size_t result_per_block = (result_size - 1) / num_blocks + 1;
+            size_t block_result_from =  result_per_block * blockidx;
+            size_t block_result_to = MMIN(result_per_block * (blockidx + 1), result_size);
+            size_t block_result_step = MMAX(num_threads / max_threads_per_result, 1);
 
-            size_t threads_per_result = blockDim.x / num_block_results;
-            if (threads_per_result == 0) {
-                threads_per_result = 1;
-            }
+            size_t threads_per_result = MMIN((num_threads-1) / block_result_step + 1, max_threads_per_result);
+            size_t src_per_thread = (src_per_result - 1) / threads_per_result + 1;
 
-            size_t block_result_step = blockDim.x / threads_per_result;
+            size_t *reduction_infos_out_size = &(reduction_infos.out_size[0]);
+            size_t *reduction_infos_in_size = &(reduction_infos.in_size[0]);
+            size_t *reduction_infos_group_size = &(reduction_infos.group_size[0]);
 
-            size_t src_per_thread = (axis_size - 1) / threads_per_result + 1;
-            size_t nth_thread = threadIdx.x % threads_per_result;
+            size_t *seq_infos_out_size = &(seq_infos.out_size[0]);
+            size_t *seq_infos_in_size = &(seq_infos.in_size[0]);
+            size_t *seq_infos_group_size = &(seq_infos.group_size[0]);
 
-if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
- printf("!!!!!!! result_size: %lu blockDim.x: %d elem_size: %lu child_size: %lu num_block_results: %lu block_result_from: %lu block_result_to: %lu threads_per_result: %lu block_result_step: %lu src_per_thread: %u \n", result_size, blockDim.x, elem_size, child_size, num_block_results, block_result_from, block_result_to, threads_per_result, block_result_step, src_per_thread, nth_thread);
-}
+            for (size_t idx_result_start=block_result_from; 
+                 idx_result_start < block_result_to; 
+                 idx_result_start += block_result_step ) {
 
-            for (size_t idx_result_start=block_result_from;
-                 idx_result_start < block_result_to;
-                 idx_result_start += block_result_step) {
+                size_t idx_result = idx_result_start + threadid / threads_per_result;
+                if (idx_result >= block_result_to) {
+                    continue;
+                }
 
-                size_t idx_result = idx_result_start + threadIdx.x / threads_per_result;
+                size_t nth_thread = threadid % threads_per_result;
+                size_t nth_in_seq = nth_thread * src_per_thread;
 
-                sharemem[threadIdx.x] = 0;
+                if (nth_in_seq >= src_per_result) {
+                    continue;
+                }
 
-                if (nth_thread * src_per_thread < axis_size) {
-                    if (idx_result < block_result_to) {
-                        size_t idx_src_from_base = (idx_result / child_size) * elem_size + idx_result % child_size;
-                        size_t idx_src_from = idx_src_from_base + nth_thread * src_per_thread * child_size;
+                size_t src_top_idx = calc_index(num_axis, reduction_infos_out_size, reduction_infos_in_size, reduction_infos_group_size, sequence_stride, idx_result);
+                size_t cur_idx = src_top_idx + calc_index(num_axis, seq_infos_out_size, seq_infos_in_size, seq_infos_group_size, 0, nth_in_seq);
 
-                        size_t idx_src_to = idx_src_from + src_per_thread * child_size;
-                        if (idx_src_to > (idx_src_from_base + elem_size)) {
-                            idx_src_to = idx_src_from_base + elem_size;
+                typename T::REDUCE_VALUE s;
+                T::set(cur_idx, src[cur_idx], s);
+
+                size_t sum_to = MMIN(nth_in_seq + src_per_thread, src_per_result);
+
+                for (size_t n=nth_in_seq+1; n < sum_to; n++) {
+
+
+
+                    size_t pos = calc_index(num_axis, seq_infos_out_size, seq_infos_in_size, seq_infos_group_size, 0, n);
+
+                    size_t p = src_top_idx + pos;
+                    T::reduce_src(p, src[p], s);
+//                    s = T::oper(s, src[src_top_idx + pos]);
+                }
+                
+
+                sharemem[threadid] = s;
+
+                __syncthreads();
+                if (nth_thread == 0) {
+//                    VALUE_TYPE s = sharemem[threadid];
+
+                    typename T::REDUCE_VALUE s = sharemem[threadid];
+
+                    for (size_t i=1; i < threads_per_result; i++) {
+                        size_t nth_in_seq = i * src_per_thread;
+                        if (nth_in_seq >= src_per_result) {
+                            break;
                         }
 
-if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
-   printf("====== result_size: %lu blockDim.x: %d num_block_results: %lu block_result_from: %lu block_result_to: %lu threads_per_result: %lu block_result_step: %lu src_per_thread: %lu \n", result_size, blockDim.x, num_block_results, block_result_from, block_result_to, threads_per_result, block_result_step, src_per_thread, nth_thread);
-
-
-    printf("[[[[[[[[[ nsize: %lu, src_per_thread: %lu, idx_result_start: %lu idx_src_from: %lu idx_src_to: %lu \n", 
-        nsize, src_per_thread, idx_result_start, idx_src_from, idx_src_to);
-    
-    printf("[[[[[[[[[ nsize: %lu, src_per_thread: %lu, idx_result_start: %lu idx_src_from: %lu idx_src_to: %lu \n", 
-        nsize, src_per_thread, idx_result_start, idx_src_from, idx_src_to);
-}
-
-                        if (idx_src_from < idx_src_to) {
-                            size_t idx_src = idx_src_from;
-                            VALUE_TYPE s = 0;
-                            s = a[idx_src];
-                            idx_src += child_size;
-                            for (; idx_src < idx_src_to; idx_src += child_size) {
-                                s = T::oper(s, a[idx_src]);
-    if (0 && threadIdx.x == 0 && blockIdx.x == 0) {
-     printf("!!!!!!! idx_src: %lu a[idx_src]: %f s:%f\n", idx_src, a[idx_src], s);
-    }
-                            }
-if (0 && blockIdx.x == 0) {
- printf("!!!!!!! threadIdx.x: %d s:%f idx_src_from: %ld idx_src_to: %ld nsize: %ld\n", threadIdx.x, s, idx_src_from, idx_src_to, nsize);
-}
-
-                            sharemem[threadIdx.x] = s;
+                        size_t n = threadid+i;
+                        if (n >= num_threads) {
+                            break;
                         }
 
-                        __syncthreads();
-
-                        if (nth_thread == 0) {
-                            VALUE_TYPE ret = 0;
-                            for (size_t i = 0; i < threads_per_result; i++) {
-                                size_t n = threadIdx.x + i;
-                                if (n < blockDim.x) {
-                                    ret = T::oper(ret, sharemem[n]);
-                                }
-                            }
-                            b[idx_result] = ret;
-                        }
+                        T::reduce_share(sharemem[n], s);
+//                        s = T::oper(s, sharemem[n]);
                     }
+//                    result[idx_result] = s;
+                    T::set_result(s, result[idx_result], &adapter);
                 }
             }
         }
 
 
         template <typename T>
-        void reduce_array(VALUE_TYPE *a, const size_t nsize,
-                                 const size_t axis_size, const size_t elem_size,
-                                 const size_t child_size, VALUE_TYPE *b,
-                                 const size_t result_size) {
+        void static reduce_array(
+            size_t num_blocks, size_t num_threads,
+            typename T::SRC_VALUE *src, size_t src_size,
+            typename T::RESULT_VALUE *result, size_t result_size,
+            size_t src_per_result,
+            size_t sequence_stride,
+            size_t num_axis,
+            reduce_shape_infos *reduction_infos,
+            reduce_shape_infos *seq_infos, const T &adapter) {
 
+            cuda_reduce_array<T><<<num_blocks, num_threads>>> (
+                num_blocks , num_threads, src, src_size, result, result_size, 
+                src_per_result,
+                sequence_stride, 
+                num_axis, *reduction_infos, *seq_infos, adapter);
 
-//            size_t num_threads = 1024;
-            size_t num_threads = 512;
-//            size_t num_blocks = 2147483648;
-            size_t num_blocks = 60000;
-
-            size_t max_threads_per_result = axis_size;
-            if (max_threads_per_result > num_threads) {
-                max_threads_per_result = num_threads;
-            }
-            size_t result_per_block = num_threads / max_threads_per_result;
-
-            size_t nblocks = ((result_size - 1) / result_per_block) + 1;
-            if (nblocks > num_blocks) {
-                nblocks = num_blocks;
-            }
-
-
-//printf("result_size: %lu max_threads_per_result: %lu result_per_block: %d nblocks: %lu\n", result_size, max_threads_per_result, result_per_block, nblocks);
-
-//printf("(result_size - 1): %lu ((result_size - 1) / result_per_block): %lu \n", (result_size - 1), ((result_size - 1) / result_per_block));
-
-            cuda_reduce_array<T><<<nblocks, num_threads>>> (a, nsize, axis_size, elem_size, child_size,
-                                        b, result_size);
-
+/*
+            cudaError_t cudaerr = cudaDeviceSynchronize();
+            if (cudaerr != cudaSuccess)
+                printf("kernel launch failed with error \"%s\".\n",
+                       cudaGetErrorString(cudaerr));
+           
+*/
         }
 
-        void thrust_reduce_sum(VALUE_TYPE *a, const size_t nsize,
-                                 const size_t axis_size, const size_t elem_size,
-                                 const size_t child_size, VALUE_TYPE *b,
-                                 const size_t result_size) {
-
-            reduce_array<Reduce_Add>(a, nsize, axis_size, elem_size, child_size,
-                                        b, result_size);
+        void thrust_reduce_sum(
+            size_t num_blocks, size_t num_threads,
+            VALUE_TYPE *src, size_t src_size,
+            VALUE_TYPE *result, size_t result_size,
+            size_t src_per_result,
+            size_t sequence_stride,
+            size_t num_axis,
+            reduce_shape_infos *reduction_infos,
+            reduce_shape_infos *seq_infos)
+        {
+            reduce_array<Reduce_Add>(num_blocks, num_threads, src, src_size, result, result_size,
+                src_per_result, sequence_stride, num_axis, reduction_infos, seq_infos, Reduce_Add());
         }
 
-        void thrust_reduce_min(VALUE_TYPE *a, const size_t nsize,
-                                 const size_t axis_size, const size_t elem_size,
-                                 const size_t child_size, VALUE_TYPE *b,
-                                 const size_t result_size) {
-
-            reduce_array<Reduce_Min>(a, nsize, axis_size, elem_size, child_size,
-                                        b, result_size);
+        void thrust_reduce_min(
+            size_t num_blocks, size_t num_threads,
+            VALUE_TYPE *src, const size_t src_size,
+            VALUE_TYPE *result, const size_t result_size,
+            size_t src_per_result,
+            size_t sequence_stride,
+            size_t num_axis,
+            reduce_shape_infos *reduction_infos,
+            reduce_shape_infos *seq_infos)
+        {
+            reduce_array<Reduce_Min>(num_blocks, num_threads, src, src_size, result, result_size,
+                src_per_result, sequence_stride, num_axis, reduction_infos, seq_infos, Reduce_Min());
         }
 
-        void thrust_reduce_max(VALUE_TYPE *a, const size_t nsize,
-                                 const size_t axis_size, const size_t elem_size,
-                                 const size_t child_size, VALUE_TYPE *b,
-                                 const size_t result_size) {
+        void thrust_reduce_argmin(
+            size_t num_blocks, size_t num_threads,
+            VALUE_TYPE *src, const size_t src_size,
+            size_t *result, const size_t result_size,
+            size_t src_per_result,
+            size_t sequence_stride,
+            size_t num_axis,
+            reduce_shape_infos *reduction_infos,
+            reduce_shape_infos *seq_infos,
+            size_t mod, size_t div)
+        {
+            reduce_array<Reduce_ArgMin>(num_blocks, num_threads, src, src_size, result, result_size,
+                src_per_result, sequence_stride, num_axis, reduction_infos, seq_infos, Reduce_ArgMin(mod, div));
+        }
 
-            reduce_array<Reduce_Max>(a, nsize, axis_size, elem_size, child_size,
-                                        b, result_size);
+        void thrust_reduce_max(
+            size_t num_blocks, size_t num_threads,
+            VALUE_TYPE *src, const size_t src_size,
+            VALUE_TYPE *result, const size_t result_size,
+            size_t src_per_result,
+            size_t sequence_stride,
+            size_t num_axis,
+            reduce_shape_infos *reduction_infos,
+            reduce_shape_infos *seq_infos)
+        {
+
+            reduce_array<Reduce_Max>(num_blocks, num_threads, src, src_size, result, result_size,
+                src_per_result, sequence_stride, num_axis, reduction_infos, seq_infos, Reduce_Max());
+        }
+
+        void thrust_reduce_argmax(
+            size_t num_blocks, size_t num_threads,
+            VALUE_TYPE *src, const size_t src_size,
+            size_t *result, const size_t result_size,
+            size_t src_per_result,
+            size_t sequence_stride,
+            size_t num_axis,
+            reduce_shape_infos *reduction_infos,
+            reduce_shape_infos *seq_infos,
+            size_t mod, size_t div)
+        {
+
+            reduce_array<Reduce_ArgMax>(num_blocks, num_threads, src, src_size, result, result_size,
+                src_per_result, sequence_stride, num_axis, reduction_infos, seq_infos, Reduce_ArgMax(mod, div));
         }
 
         __global__ void cuda_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len) {
@@ -888,7 +1090,7 @@ if (0 && blockIdx.x == 0) {
 	}
 	
 	__global__ void cuda_backward_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps, \
-			VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou, bool temporal)
+			VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou)
 	{
 		int idx = blockIdx.x * blockDim.x + threadIdx.x;
 		int size = N*M/4;
@@ -896,7 +1098,7 @@ if (0 && blockIdx.x == 0) {
 		
 		if(idx < size)
 		{
-			next_dou[idx] = e[idx]*u[index+M/4*3] * tanh_diff(s[idx]) + ((temporal)?pfg[index+M/4]*dou[idx]:0);
+			next_dou[idx] = e[idx]*u[index+M/4*3] * tanh_diff(s[idx]) + pfg[index+M/4]*dou[idx];
 			du[index+M/4] = next_dou[idx]*sigmoid_diff(u[index+M/4])*ps[idx];		// f
 			du[index+M/4*2] = next_dou[idx]*sigmoid_diff(u[index+M/4*2])*u[index];	// i
 			du[index+M/4*3] = e[idx]*s[idx]*sigmoid_diff(u[index+M/4*3]);			// o
@@ -909,9 +1111,9 @@ if (0 && blockIdx.x == 0) {
 	}
 	
 	void thrust_backward_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *du, VALUE_TYPE *s, VALUE_TYPE *ps,\
-			VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou, bool temporal)
+			VALUE_TYPE *e, VALUE_TYPE *pfg, VALUE_TYPE *dou, VALUE_TYPE *next_dou)
 	{
-		cuda_backward_lstm <<<ceil((N*M/4)/256.0), 256>>> (N, M, u, du, s, ps, e, pfg, dou, next_dou, temporal);
+		cuda_backward_lstm <<<ceil((N*M/4)/256.0), 256>>> (N, M, u, du, s, ps, e, pfg, dou, next_dou);
 	}
 
     // Peephole Lstm forward
@@ -975,8 +1177,8 @@ if (0 && blockIdx.x == 0) {
             VALUE_TYPE *dot, \
             VALUE_TYPE *dr, \  // in place 
             VALUE_TYPE *dou, \ // in place
-            VALUE_TYPE *dwc, \ // in place
-            bool temporal)
+            VALUE_TYPE *dwc // in place
+        )
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
         int size = N*M;
@@ -1002,18 +1204,14 @@ if (0 && blockIdx.x == 0) {
 
         dr[o4] = dy[idx] * tanh_s * sigmoid_diff(u[o4]);
         dou[idx] = dy[idx]*u[o4]*tanh_diff(tanh_s) + dr[o4]*wc[o3];
-        if(temporal){
-            dou[idx] += prefg[f4]*dot[idx];
-            dou[idx] += drt[f4]*wc[f3];
-            dou[idx] += drt[i4]*wc[i3];
+        dou[idx] += prefg[f4]*dot[idx];
+        dou[idx] += drt[f4]*wc[f3];
+        dou[idx] += drt[i4]*wc[i3];
 
-            dwc[f3+row3] = drt[f4]*state[idx];
-            dwc[i3+row3] = drt[i4]*state[idx];
-        }else{
-            dwc[f3+row3] = 0;
-            dwc[i3+row3] = 0;
-        }
+        dwc[f3+row3] = drt[f4]*state[idx];
+        dwc[i3+row3] = drt[i4]*state[idx];
         dwc[o3+row3] = dr[o4]*state[idx];
+
         dr[f4] = dou[idx] * sigmoid_diff(u[f4]) * prestate[idx];
         dr[i4] = dou[idx] * sigmoid_diff(u[i4]) * u[u4];
         dr[u4] = dou[idx] * tanh_diff(u[u4]) * u[i4];
@@ -1032,11 +1230,11 @@ if (0 && blockIdx.x == 0) {
             VALUE_TYPE *dot, \
             VALUE_TYPE *dr, \
             VALUE_TYPE *dou, \
-            VALUE_TYPE *dwc, \
-            bool temporal)
+            VALUE_TYPE *dwc
+        )
     {
         cuda_backward_peephole_lstm <<<ceil((N*M/4)/256.0), 256>>> \
-                (N, M/4, u, prestate, state, prefg, wc, dy, drt, dot, dr, dou, dwc, temporal);
+                (N, M/4, u, prestate, state, prefg, wc, dy, drt, dot, dr, dou, dwc);
     }
 
     // Binalize
