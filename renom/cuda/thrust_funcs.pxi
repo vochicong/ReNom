@@ -440,6 +440,9 @@ cdef _reduce_array(max_grids, num_threads, gpu_value1, axis, keepdims, REDUCE_FU
         result_shape = _del_items(src_shape, reduce_axis)
         result_size = functools.reduce(operator.__mul__, result_shape, 1)
 
+    if len(reduce_axis) >= 16:
+        raise ValueError('Invalid axis: %s' % (axis,))
+
     kept_shapes = src_shape[reduce_axis[-1] + 1:]
     kept_shapes_size = functools.reduce(operator.__mul__, kept_shapes, 1)
 
@@ -683,3 +686,36 @@ def cu_add_bias(bias, gpu_value):
     cdef int wh = <int > (gpu_value.shape[2] * gpu_value.shape[3])
     cdef int n = <int > gpu_value.shape[0]
     thrust_add_bias(size, n, wh, ptr1, ptr2)
+
+
+def cu_transpose(gpu_value1, axis):
+    strides = [np.prod(gpu_value1.shape[i+1:], dtype='int') for i in range(len(gpu_value1.shape))]
+
+    if not axis:
+        axis = tuple(reversed(range(len(gpu_value1.shape))))
+
+    if len(axis) >= 16:
+        raise ValueError('Invalid axis: %s' % (axis,))
+
+    new_shape = [gpu_value1.shape[i] for i in axis]
+
+    cdef size_t src_strides[16]
+    for i, s in enumerate(axis):
+        src_strides[i] = strides[s]
+
+    cdef size_t new_strides[16];
+    for i in range(len(new_shape)):
+        new_strides[i] = np.prod(new_shape[i+1:], dtype='int')
+
+    cdef VALUE_TYPE * ptr = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    size = np.prod(gpu_value1.shape)
+
+    result = renom.core.GPUValue(shape=new_shape)
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > result._ptr
+
+    thrust_transpose(size,
+                     len(new_shape),
+                     ptr, src_strides,
+                     ptr2, new_strides)
+
+    return result

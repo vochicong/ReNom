@@ -13,7 +13,7 @@ from renom.config import precision
 import renom as rm
 import test_utility
 from renom.layers.function.batch_normalize import BATCH_NORMALIZE_FEATUREMAP
-
+import itertools
 
 # if precision is not np.float32:
 #    pytestmark = pytest.mark.skip()
@@ -1216,3 +1216,18 @@ def test_cu_reduce_arg_max(a, axis):
         ret = renom.cuda.cu_reduce_argmax(g, axis)
         renom.cuda.cuDeviceSynchronize()
         close_shape(ret.new_array(), np.argmax(a, axis))
+
+
+@test_utility.skipgpu
+def test_transpose():
+    with use_cuda():
+        for n in range(0, 5):
+            shape = [2*(i+1) for i in range(n)]
+            a = np.arange(np.prod(shape)).reshape(shape).astype('float32')
+            b = renom.core.GPUValue(a)
+            for axis in itertools.permutations(range(len(shape))):
+                aa = np.transpose(a, axis)
+                bb = b.transpose(axis)
+
+                assert np.allclose(aa, bb.new_array())
+
