@@ -1,0 +1,223 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-08-17 12:41+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+
+#: ../../rsts/renom.rst:2
+msgid "renom"
+msgstr ""
+
+#: of renom.core.Grads:1
+msgid "Bases: :class:`object`"
+msgstr ""
+
+#: of renom.core.Grads:1
+msgid "This class contains gradients of each Node object."
+msgstr "逆伝播により得られた勾配を保持するクラス."
+
+#: of renom.core.Grads:3
+#, fuzzy
+msgid ""
+"When the function ``grad`` which is instance of Node class called, an "
+"instance of Grads is returned."
+msgstr "Nodeクラスのgrad関数の戻り値としてGradsクラスのオブジェクトが生成される."
+
+#: of renom.core.Grads:7 renom.core.Node:5 renom.core.Variable:13
+#: renom.operation.concat:12 renom.operation.dot:10 renom.operation.reshape:10
+#: renom.operation.sqrt:8 renom.operation.sum:12 renom.operation.where:12
+msgid "Example"
+msgstr ""
+
+#: of renom.core.Grads.get:1
+msgid "This function returns the gradient of the given node."
+msgstr "オブジェクトの勾配を取得するための関数."
+
+#: of renom.core.Grads.get:7
+msgid "This method returns gradient of passed node object."
+msgstr "引数に与えられたオブジェクトの勾配を返す."
+
+#: of renom.core.Grads.update:1
+msgid "Updates variables using earned gradients."
+msgstr "逆伝播によりられた勾配を用いて変数の値を更新する."
+
+#: of renom.core.Grads.update:3
+msgid ""
+"If an optimizer instance is passed, gradients are rescaled with regard to"
+" the optimization algorithm before updating."
+msgstr "Optimizerオブジェクト(勾配降下アルゴリズム)が与えられた場合、勾配はOptimizerによってリスケールされてから、変数値の更新に使われる."
+
+#: of renom.core.Grads.update:6
+msgid "Algorithm for rescaling gradients."
+msgstr "勾配をリスケーリングするための勾配降下アルゴリズム"
+
+#: of renom.core.Grads.update:8
+msgid ""
+"List of models to update variables. When specified, variables which does "
+"not belong to one of the models are not updated."
+msgstr "アップデート対象のモデルオブジェクト.この引数にモデルオブジェクトが与えられた場合、そのモデルオブジェクト以外に属する変数は更新されない."
+
+#: of renom.core.Node:1
+msgid "Bases: :class:`numpy.ndarray`"
+msgstr ""
+
+#: of renom.core.Node:1
+msgid ""
+"This is the base class of all operation function. Node class inherits "
+"numpy ndarray class."
+msgstr "すべての演算クラスの基底となるクラス.Numpyのndarrayを継承している."
+
+#: of renom.core.Node.to_cpu:1
+msgid "Send the data on GPU device to CPU."
+msgstr "GPUからCPUへデータを転送する."
+
+#: of renom.core.Node.to_gpu:1
+msgid "Send the data on CPU to GPU device."
+msgstr "CPUからGPUへデータおｗ転送する."
+
+#: of renom.core.Node.as_ndarray:1
+msgid "This method returns itself as ndarray object."
+msgstr "Nodeオブジェクトをndarrayオブジェクトに変換して返す."
+
+#: of renom.core.Node.release_gpu:1
+msgid "This method releases memory on GPU."
+msgstr "GPUメモリを開放する."
+
+#: of renom.core.Node.grad:1
+msgid ""
+"This method follows computational graph and returns the gradients of "
+"Variable object."
+msgstr "逆伝播を実行しGradsオブジェクトを返す."
+
+#: of renom.core.Node.grad:4
+msgid "Initial value of following the graph."
+msgstr "逆伝播開始時の初期値."
+
+#: of renom.core.Node.grad:6
+#, fuzzy
+msgid "If it's True, the computational graph will be destroyed."
+msgstr "Trueが与えられた場合、計算グラフはこの関数が呼ばれるたびに破棄される."
+
+#: of renom.core.Node.detach_graph:1
+msgid "This method destroys computational graph."
+msgstr "計算グラフを破棄する."
+
+#: of renom.core.Variable:1 renom.operation.reshape:1 renom.operation.sum:1
+#: renom.operation.where:1
+msgid "Bases: :class:`renom.core.Node`"
+msgstr ""
+
+#: of renom.core.Variable:1
+msgid "Variable class."
+msgstr ""
+
+#: of renom.core.Variable:3
+msgid ""
+"The gradient of this object will be calculated. Variable object is "
+"created from ndarray object or Number object."
+msgstr "勾配計算対象の行列クラス.ndarrayを引数に与えてインスタンス化する."
+
+#: of renom.core.Variable:6 renom.operation.concat:5 renom.operation.concat:7
+#: renom.operation.dot:3 renom.operation.dot:5 renom.operation.exp:3
+#: renom.operation.log:3 renom.operation.reshape:3 renom.operation.sqrt:3
+#: renom.operation.sum:5 renom.operation.where:5 renom.operation.where:7
+msgid "Input array."
+msgstr "入力データ"
+
+#: of renom.core.Variable:8
+#, fuzzy
+msgid "Auto update flag."
+msgstr "更新フラグ"
+
+#: of renom.operation.reshape:1
+#, fuzzy
+msgid "This function reshapes matrix shape."
+msgstr "行列の形を変更する."
+
+#: of renom.operation.reshape:5
+msgid "Shape."
+msgstr "返還後の行列の形"
+
+#: of renom.operation.sum:1
+msgid ""
+"This function sums up matrix elements. In the current version(2.0), "
+"summation along 1st axis and summation of all elements are supported."
+msgstr ""
+
+#: of renom.operation.sum:7
+msgid "Summing up along specified axis."
+msgstr ""
+
+#: of renom.operation.concat:1 renom.operation.dot:1
+msgid "Bases: :class:`renom.core.BinOp`"
+msgstr ""
+
+#: of renom.operation.dot:1
+#, fuzzy
+msgid "This function executes dot product of the two matrixes."
+msgstr "二つの行列の内積を返す。"
+
+#: of renom.operation.concat:1
+msgid ""
+"Join a sequence of arrays along an existing axis. In the current "
+"version(2.0), concatenation along 2nd axis is only supported."
+msgstr ""
+
+#: of renom.operation.where:1
+msgid "Return elements, either from a or b, depending on condition."
+msgstr ""
+
+#: of renom.operation.where:3
+msgid "Condition array."
+msgstr ""
+
+#: of renom.operation.exp:1 renom.operation.log:1 renom.operation.sqrt:1
+msgid "Bases: :class:`renom.core.UnaryOp`"
+msgstr ""
+
+#: of renom.operation.sqrt:1
+msgid "Square root operation."
+msgstr ""
+
+#: of renom.operation.log:1
+msgid "Log operation."
+msgstr ""
+
+#: of renom.operation.exp:1
+msgid "Exponential operation."
+msgstr ""
+
+#~ msgid "This function sums up matrix elements. See numpy.sum document."
+#~ msgstr "行列の要素の総和を返す."
+
+#~ msgid "Axis of sum up.."
+#~ msgstr "総和を取る軸"
+
+#~ msgid ""
+#~ msgstr "２つの行列を結合した行列を返す。現在、二番目の軸に対する結合のみに対応している。"
+
+#~ msgid "Log operation"
+#~ msgstr ""
+
+#~ msgid "Exponential operation"
+#~ msgstr ""
+
+#~ msgid "Mean operation"
+#~ msgstr ""
+
+#~ msgid "Max operation"
+#~ msgstr ""
+

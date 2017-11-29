@@ -1,0 +1,293 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-08-17 19:24+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+
+#: ../../rsts/changes.rst:2
+msgid "Change History"
+msgstr ""
+
+#: ../../rsts/changes.rst:6
+msgid "version 2.0.0 ⇒ version 2.0.1"
+msgstr ""
+
+#: ../../rsts/changes.rst:8
+msgid "Added Trainer class."
+msgstr "Trainerクラスを追加."
+
+#: ../../rsts/changes.rst:12
+msgid "version 1.2 ⇒ version 2.0.0"
+msgstr ""
+
+#: ../../rsts/changes.rst:14
+msgid "The changes of the version from 1.2 to 2.0 are below."
+msgstr "version 1.2 から2.0への変更点は以下のとおりです."
+
+#: ../../rsts/changes.rst:17
+msgid "Changes"
+msgstr ""
+
+#: ../../rsts/changes.rst:17
+msgid "version 1.2"
+msgstr ""
+
+#: ../../rsts/changes.rst:17
+msgid "version 2.0"
+msgstr ""
+
+#: ../../rsts/changes.rst:19
+msgid "1- Name of Model class"
+msgstr "1- Modelクラス名の変更"
+
+#: ../../rsts/changes.rst:19 ../../rsts/changes.rst:26
+msgid "Model"
+msgstr ""
+
+#: ../../rsts/changes.rst:19
+msgid "Sequential"
+msgstr ""
+
+#: ../../rsts/changes.rst:20
+msgid "2- Input layer has deleted"
+msgstr "2- Inputレイヤ削除"
+
+#: ../../rsts/changes.rst:20
+msgid "Need Input layer"
+msgstr "Inputレイヤが必要"
+
+#: ../../rsts/changes.rst:20
+msgid "Not need"
+msgstr "Inputレイヤが不必要"
+
+#: ../../rsts/changes.rst:21
+msgid "3- The timing of weight initialization"
+msgstr "3- 重みパラメータ初期化のタイミング"
+
+#: ../../rsts/changes.rst:21
+msgid "Model creation"
+msgstr "モデルのインスタンス化時"
+
+#: ../../rsts/changes.rst:21
+msgid "First forward propagation"
+msgstr "最初の順伝播時"
+
+#: ../../rsts/changes.rst:22
+msgid "4- Name of the attribute of weight parameter"
+msgstr "4- 重みパラメータの属性名"
+
+#: ../../rsts/changes.rst:22
+msgid "parameters"
+msgstr ""
+
+#: ../../rsts/changes.rst:22
+msgid "params"
+msgstr ""
+
+#: ../../rsts/changes.rst:23
+msgid "5- Need \"with block\" in train loop"
+msgstr "5- 学習ループ内における\"with block\"の必要性"
+
+#: ../../rsts/changes.rst:23
+msgid "Not needed"
+msgstr "必要なし"
+
+#: ../../rsts/changes.rst:23
+msgid "Need to manage computational graph"
+msgstr "必要"
+
+#: ../../rsts/changes.rst:24
+msgid "6- Let out loss functions from Model definition"
+msgstr "6- 誤差関数の定義場所を変更"
+
+#: ../../rsts/changes.rst:24
+msgid "Defined in model"
+msgstr "Modelの内部"
+
+#: ../../rsts/changes.rst:24
+msgid "Defined out of model"
+msgstr "Modelの外部"
+
+#: ../../rsts/changes.rst:25
+msgid "7- Name of back propagation method"
+msgstr "7- 誤差逆伝播を実行するメソッドの名前"
+
+#: ../../rsts/changes.rst:25
+msgid "backward"
+msgstr ""
+
+#: ../../rsts/changes.rst:25
+msgid "grad"
+msgstr ""
+
+#: ../../rsts/changes.rst:26
+msgid "8- Which class has update method"
+msgstr "8- updateメソッドを持っているクラス"
+
+#: ../../rsts/changes.rst:26
+msgid "Node"
+msgstr ""
+
+#: ../../rsts/changes.rst:27
+msgid "9- How to use of optimizer class"
+msgstr "9- Optimizerクラスの使い方"
+
+#: ../../rsts/changes.rst:27
+msgid "With model class"
+msgstr "Modelクラスをラップして使用"
+
+#: ../../rsts/changes.rst:27
+msgid "With update method"
+msgstr "updateメソッドと共に使用"
+
+#: ../../rsts/changes.rst:30
+msgid "**1- Name of Model class**"
+msgstr "**1- Modelクラス名の変更**"
+
+#: ../../rsts/changes.rst:32
+msgid ""
+"The name of Model class has changed. In version 1.2 for building a neural"
+" network, you are supposed to use Model class. In version 2.0, it renamed"
+" to Sequential."
+msgstr ""
+"Version 1.2においてニューラルネットワークを定義するために使用していたModelクラスは、version "
+"2.0においてSequentialという名前に変更されました."
+
+#: ../../rsts/changes.rst:36 ../../rsts/changes.rst:74
+#: ../../rsts/changes.rst:120 ../../rsts/changes.rst:152
+#: ../../rsts/changes.rst:181
+msgid "**Example**"
+msgstr ""
+
+#: ../../rsts/changes.rst:62
+msgid "**2- Input layer has deleated**"
+msgstr "**2-Inputレイヤ削除**"
+
+#: ../../rsts/changes.rst:64
+msgid ""
+"Showed in above example, the input layer class was removed in version 2.0"
+" ."
+msgstr "上の例で示しているようにversion 2.0ではInputレイヤが必要なくなりました."
+
+#: ../../rsts/changes.rst:66
+msgid "**3- The timing of weight initialization**"
+msgstr "**3- 重みパラメータの初期化タイミング**"
+
+#: ../../rsts/changes.rst:68
+msgid ""
+"Because of the input layer was removed, the timing of weight "
+"initialization was changed. In version 1.2, weight parameters are "
+"initialized when a model object is instantiated. In version 2.0, weight "
+"parameters are initialized at the first forward propagation, or if the "
+"argument input_size has been passed, weights are initialized same timing "
+"as version 2.0. See tutorial 0.2 for more detail of weight "
+"initialization."
+msgstr ""
+"Inputレイヤの削除に伴い、重みパラメータを初期化するタイミングが変更されました.version "
+"1.2では下の例で示すようにニューラルネットワークModelをインスタンス化するときに重みパラメータが初期化されていましたが、version "
+"2.0 では一回目の順伝播が実行されるときに重みの初期化が行われます."
+
+#: ../../rsts/changes.rst:102
+msgid "**4- Name of the weight parameter attribute**"
+msgstr "**4- 重みパラメータの属性名**"
+
+#: ../../rsts/changes.rst:104
+msgid "The attribute name has changed to params from parameters."
+msgstr "version 2.0では重みパラメータの属性名が parameters から params へ変更されました."
+
+#: ../../rsts/changes.rst:107
+msgid "**5- Need \"with block\" in train loop**"
+msgstr "**5- 学習ループ内における\"with block\"の必要性**"
+
+#: ../../rsts/changes.rst:109
+msgid ""
+"In version 2.0, because of the auto-differentiation was implemented, "
+"users has responsible for managing building computational graphs. "
+"Computational graphs will continue to extend accordance with the "
+"execution of each operations."
+msgstr ""
+"version 2.0 "
+"では自動微分が実装されたことから、計算グラフが必要以上に生成され続けることを避けるため、計算グラフを作成可能な範囲をwithブロックを用いて制御する必要があります."
+
+#: ../../rsts/changes.rst:114
+msgid ""
+"ReNom limits the extension of computational graphs only in **with train "
+"block**. You have to execute the operation in \"with train block\" if you"
+" want to build a computational graph. The operation which was done out "
+"side of the \"with block\" will not extend the computational graph. This "
+"means the operation which was done out side of the with block is not "
+"concerned at the calculation of the gradient."
+msgstr ""
+"ReNom version 2.0 では \"with train block\" "
+"のブロック内で実行された演算について計算グラフが作成され、逆伝播による勾配の計算が可能になります.withブロックの外で行われた計算は、計算グラフが作られないので勾配の計算には考慮されません."
+
+#: ../../rsts/changes.rst:136
+msgid "**6- Let out loss functions from Model definition**"
+msgstr "**6- 誤差関数の定義場所を変更**"
+
+#: ../../rsts/changes.rst:138
+msgid ""
+"Loss functions turned out to be set out side of model definition. As "
+"showed above, the loss function is used in out of model to evaluate the "
+"difference between output of the model and the target value."
+msgstr "誤差関数は上の例のようにニューラルネットワークモデルの外に定義するよう変更されました."
+
+#: ../../rsts/changes.rst:143
+msgid "**7- Name of backpropagation method**"
+msgstr "**7- 誤差逆伝播を実行するメソッドの名前**"
+
+#: ../../rsts/changes.rst:145
+msgid ""
+"The name of back propagation method has been changed. And also the object"
+" which has the method was changed. In version 1.2, model object has the "
+"back propagation method as a name of \"backward\". In version 2.0, node "
+"object has the back propagation method as a name of \"grad\"."
+msgstr ""
+"誤差逆伝播を実行するメソッド名が変更されました.さらに逆伝播メソッドを持つクラスも変更されました.version 1.2 "
+"では下の例のように、ニューラルネットワークModelクラスが順伝播、逆伝播、更新メソッドを持っています.version "
+"2.0ではNodeクラスが逆伝播、更新メソッドを持つように変更されました."
+
+#: ../../rsts/changes.rst:149
+msgid ""
+"Both methods executes back propagation, but the name and which object has"
+" the method are different."
+msgstr "バージョンの違いにより逆伝播計算の実行に使用するメソッド名とそのメソッドを持つクラスが変更されたことに注意してください."
+
+#: ../../rsts/changes.rst:171
+msgid "**8- Which object has update method**"
+msgstr "**8- updateメソッドを持っているクラス**"
+
+#: ../../rsts/changes.rst:173
+msgid "The method \"update\" has been moved to Node class same as above example."
+msgstr "上の例で示す通り、重みパラメータの更新に使用するupdateメソッドについてもメソッドの属するクラスが変更されました."
+
+#: ../../rsts/changes.rst:176
+msgid "**9- How to use of optimizer class**"
+msgstr "**9- Optimizerクラスの使い方**"
+
+#: ../../rsts/changes.rst:178
+msgid ""
+"In version 1.2, optimizer class, for instance Sgd class, is used with "
+"model object. In version 2.0, optimizer class is added to update method "
+"as an argument."
+msgstr ""
+"version "
+"1.2では勾配降下アルゴリズムを提供するoptimizerオブジェクトは以下の例の様にモデルオブジェクトをラップする様に使用していました.version"
+" 2.0では、optimizerオブジェクトは、updateメソッドの引数に与えて使用するよう変更されました."
+
+#~ msgid "version 1.2 ⇒ version 2.0"
+#~ msgstr ""
+

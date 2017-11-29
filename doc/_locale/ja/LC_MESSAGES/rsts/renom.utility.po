@@ -1,0 +1,270 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-08-18 13:27+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+
+#: ../../rsts/renom.utility.rst:2
+msgid "renom.utility"
+msgstr ""
+
+#: ../../rsts/renom.utility.rst:5
+msgid "renom.utility.initializer"
+msgstr ""
+
+#: of renom.utility.initializer.Initializer:1
+msgid "Base class of initializer."
+msgstr "Initializerクラスの基底となるクラス."
+
+#: of renom.utility.initializer.Initializer:3
+msgid ""
+"When the initialization of parameterized layer class, dense, conv2d, lstm"
+" ... , you can select the initialization method changing the initializer "
+"class as following example."
+msgstr "Dense, Conv2dオブジェクトの重みパラメータを初期化する方法を提供する."
+
+#: of renom.utility.initializer.Initializer:8
+#: renom.utility.searcher.Searcher:12 renom.utility.trainer.Trainer:24
+msgid "Example"
+msgstr ""
+
+#: of renom.utility.initializer.GlorotUniform:1
+msgid ""
+"Glorot uniform initializer [1]_ initializes parameters sampled by "
+"following uniform distribution \"U(max, min)\"."
+msgstr "Glorotの一様分布 \"U(max, min)\" に従って重みを初期化する."
+
+#: of renom.utility.initializer.GlorotNormal:1
+msgid ""
+"Glorot normal initializer [1]_ initializes parameters sampled by "
+"following normal distribution \"N(0, std)\"."
+msgstr "Glorotの正規分布 \"N(0, std)\" に従って重みを初期化する."
+
+#: of renom.utility.initializer.GlorotNormal:9
+msgid ""
+"Xavier Glorot, Yoshua Bengio. Understanding the difficulty of training "
+"deep feedforward neural networks."
+msgstr ""
+
+#: of renom.utility.initializer.Gaussian:1
+msgid ""
+"Gaussian initializer. Initialize parameters using samples drawn from "
+":math:`N(mean, std)`"
+msgstr "ガウス分布 :math:`N(mean, std)` に従って重みを初期化する."
+
+#: of renom.utility.initializer.Gaussian:4
+msgid "Mean value of normal distribution."
+msgstr "ガウス分布の平均値"
+
+#: of renom.utility.initializer.Gaussian:6
+msgid "Standard deviation value of normal distribution."
+msgstr "ガウス分布の標準偏差"
+
+#: of renom.utility.initializer.Uniform:1
+msgid ""
+"Uniform initializer. Initialize parameters using samples drawn from "
+":math:`U(min, max)`"
+msgstr "ガウス分布 :math:`U(min, max)` に従って重みを初期化する."
+
+#: of renom.utility.initializer.Uniform:4
+msgid "Minimum limit of uniform distribution."
+msgstr "一様分布の下限値"
+
+#: of renom.utility.initializer.Uniform:6
+msgid "Maximum limit of uniform distribution."
+msgstr "一様分布の上限値"
+
+#: ../../rsts/renom.utility.rst:11
+msgid "renom.utility.searcher"
+msgstr ""
+
+#: of renom.utility.searcher.Searcher:1
+msgid "Base class of searcher."
+msgstr "Searcherクラスの基底となるクラス"
+
+#: of renom.utility.searcher.Searcher:3
+msgid ""
+"Searcher classes searches the hyper parameter that yields the lowest "
+"value."
+msgstr "Searcherクラスは誤差が低くなるようなモデルのハイパーパラメータを探索する機能を提供するクラス."
+
+#: of renom.utility.searcher.BayesSearcher:6
+#: renom.utility.searcher.RandomSearcher:6 renom.utility.searcher.Searcher:6
+msgid ""
+"Dictionary which contains the parameter name as a key and each parameter "
+"space as a value."
+msgstr "パラメータ名をキーとし, パラメータ空間を値として持つ辞書"
+
+#: of renom.utility.searcher.Searcher.set_result:1
+msgid "Set the result of yielded hyper parameter to searcher object."
+msgstr "ハイパーパラメータ 'params' によって得られたモデルの評価値をSearcherオブジェクトにセットする."
+
+#: of renom.utility.searcher.Searcher.set_result:3
+msgid "The result of yielded hyper parameter."
+msgstr "ハイパーパラメータによって得られた結果"
+
+#: of renom.utility.searcher.Searcher.set_result:5
+msgid ""
+"The hyper parameter which used in model. If None has given, the result is"
+" considered as it caused by last yielded hyper parameter."
+msgstr ""
+"学習に使用したハイパーパラメータ. Noneが与えられた場合, 'result'を, "
+"searcherが最後に出力したハイパーパラメータに対する評価値として扱う."
+
+#: of renom.utility.searcher.Searcher.suggest:1
+msgid "This method yields next hyper parameter."
+msgstr "次に調べるべきハイパーパラメータを返す."
+
+#: of renom.utility.searcher.BayesSearcher.suggest:1
+#: renom.utility.searcher.Searcher.suggest:3
+msgid "Maximum iteration number of parameter search."
+msgstr "最大探索回数"
+
+#: of renom.utility.searcher.Searcher.suggest:7
+msgid "*dict* -- Dictionary of hyper parameter."
+msgstr "ハイパーパラメータを含む辞書"
+
+#: of renom.utility.searcher.Searcher.best:1
+msgid ""
+"Returns the best hyper parameters. By default, this method returns the "
+"top 3 hyper parameter as a result of searching."
+msgstr "最も低い評価値を得られたハイパーパラメータを返す.デフォルトでは低い順に三つのハイパーパラメータを返す."
+
+#: of renom.utility.searcher.Searcher.best:5
+msgid "The number of hyper parameters."
+msgstr "返すハイパーパラメータセットの数"
+
+#: of renom.utility.searcher.Searcher.best:9
+msgid "A list of dictionary of hyper parameters."
+msgstr "ハイパーパラメータを含む辞書のリスト"
+
+#: of renom.utility.searcher.GridSearcher:1
+msgid "Grid searcher class."
+msgstr ""
+
+#: of renom.utility.searcher.GridSearcher:3
+msgid ""
+"This class searches better hyper parameter in the parameter space with "
+"grid search."
+msgstr "グリッドサーチに基づいて, 誤差が低くなるようなハイパーパラメータを探索する."
+
+#: of renom.utility.searcher.GridSearcher:5
+msgid ""
+"Dictionary witch contains the parameter name as a key and each parameter "
+"space as a value."
+msgstr "パラメータ名をキーとし, パラメータ空間を値として持つ辞書"
+
+#: of renom.utility.searcher.RandomSearcher:1
+msgid "Random searcher class."
+msgstr ""
+
+#: of renom.utility.searcher.RandomSearcher:3
+msgid ""
+"This class randomly searches a parameter of the model which yields the "
+"lowest loss."
+msgstr "パラメータ空間をランダムに探索し, 誤差が低くなるようなハイパーパラメータを探索する."
+
+#: of renom.utility.searcher.BayesSearcher:1
+msgid "Bayes searcher class."
+msgstr ""
+
+#: of renom.utility.searcher.BayesSearcher:3
+msgid "This class performs hyper parameter search based on bayesian optimization."
+msgstr "ベイズ最適化に基づいて誤差が低くなるようなハイパーパラメータを探索する."
+
+#: of renom.utility.searcher.BayesSearcher:13
+msgid ""
+"This class requires the module GPy [1]_. You can install it using pip. "
+"``pip install gpy``"
+msgstr "このクラスはGPy [1]_ ライブラリを必要とします. GPyは ``pip install gpy`` で インストールが可能です."
+
+#: of renom.utility.searcher.BayesSearcher:16
+msgid "GPy - Gaussian Process framework http://sheffieldml.github.io/GPy/"
+msgstr ""
+
+#: of renom.utility.searcher.BayesSearcher.suggest:3
+msgid "Number of random search."
+msgstr "ランダム探索の回数."
+
+#: ../../rsts/renom.utility.rst:17
+msgid "renom.utility.trainer"
+msgstr ""
+
+#: of renom.utility.trainer.Trainer:1
+msgid "Trainer class."
+msgstr "Trainerクラス"
+
+#: of renom.utility.trainer.Trainer:3
+msgid ""
+"This class owns train loop. It executes forward propagation, back "
+"propagation and updating of weight parameters for the specified number of"
+" times."
+msgstr "このクラスは学習ループを提供します. 順伝播, 逆伝播, 重みパラメータの更新を指定されたepoch数分実行します."
+
+#: of renom.utility.trainer.Trainer:7
+msgid "Model to be trained."
+msgstr "学習対象のモデル"
+
+#: of renom.utility.trainer.Trainer:9
+msgid "Numer of iteration."
+msgstr "epoch数"
+
+#: of renom.utility.trainer.Trainer:11
+msgid "Loss function."
+msgstr "誤差関数"
+
+#: of renom.utility.trainer.Trainer:13
+msgid "Batch size."
+msgstr "バッチサイズ"
+
+#: of renom.utility.trainer.Trainer:15
+msgid "Gradient descent algorithm."
+msgstr "勾配降下アルゴリズム"
+
+#: of renom.utility.trainer.Trainer:17
+msgid "If it's true, mini batch is created randomly."
+msgstr "真の場合, ミニバッチを重複を許さずランダムに作成する"
+
+#: of renom.utility.trainer.Trainer:19
+msgid "Dictionary of function."
+msgstr "関数を要素に持つ辞書"
+
+#: of renom.utility.trainer.Trainer.train:1
+msgid ""
+"Train method. This method executes train loop. If test_distributor is "
+"given, validation loss will be calculated."
+msgstr "学習を実行するメソッド. test_distributorが与えられた場合、validationエラーを計算します."
+
+#: of renom.utility.trainer.Trainer.train:5
+msgid "Distributor for yielding train data."
+msgstr "学習データを与えるためのDistributorオブジェクト"
+
+#: of renom.utility.trainer.Trainer.train:7
+msgid "Distributor for yielding test data."
+msgstr "テストデータを与えるためのDistributorオブジェクト"
+
+#: of renom.utility.trainer.Trainer.test:1
+msgid "Test method. This method executes forward propagation for given data."
+msgstr "順伝播のみを実行するメソッド."
+
+#: of renom.utility.trainer.Trainer.test:4
+msgid "Input data."
+msgstr "入力データ"
+
+#: of renom.utility.trainer.Trainer.test:8
+msgid "ndarray"
+msgstr ""
+

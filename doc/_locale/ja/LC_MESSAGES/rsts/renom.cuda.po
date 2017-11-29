@@ -1,0 +1,89 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-07-26 17:07+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.3.4\n"
+
+#: ../../rsts/renom.cuda.rst:2
+msgid "renom.cuda"
+msgstr ""
+
+#: of renom.cuda.set_cuda_active:1
+msgid "If True is given, this method activate cuda."
+msgstr "引数にTrueが与えられた場合、cudaを有効化する."
+
+#: of renom.cuda.set_cuda_active:3
+msgid "Cuda activation flag."
+msgstr "フラグ"
+
+#: of renom.cuda.is_cuda_active:1
+msgid "Check the CUDA active."
+msgstr "cudaが有効化されているかを返す関数"
+
+#: of renom.cuda.is_cuda_active:3
+msgid "True if cuda is active."
+msgstr "cudaが有効であればTrueを返す"
+
+#: of renom.cuda.has_cuda:1
+msgid "This method checks cuda libraries are available."
+msgstr "cudaライブラリを使用可能か確認するための関数"
+
+#: of renom.cuda.has_cuda:3
+msgid "True if cuda is correctly set."
+msgstr "cudaライブラリが使用可能となっていればTrueを返す"
+
+#~ msgid "renom.cuda package"
+#~ msgstr ""
+
+#~ msgid "Submodules"
+#~ msgstr ""
+
+#~ msgid "renom.cuda.cublas module"
+#~ msgstr ""
+
+#~ msgid "renom.cuda.cuda module"
+#~ msgstr ""
+
+#~ msgid "renom.cuda.cuda_base module"
+#~ msgstr ""
+
+#~ msgid "Bases: :class:`object`"
+#~ msgstr ""
+
+#~ msgid "renom.cuda.cudnn module"
+#~ msgstr ""
+
+#~ msgid "renom.cuda.thrust module"
+#~ msgstr ""
+
+#~ msgid "renom.cuda.thrust_double module"
+#~ msgstr ""
+
+#~ msgid "renom.cuda.thrust_float module"
+#~ msgstr ""
+
+#~ msgid "Module contents"
+#~ msgstr ""
+
+#~ msgid "This method checks CUDA environment is set correctly."
+#~ msgstr ""
+
+#~ msgid "Check the CUDA can be used."
+#~ msgstr ""
+
+#~ msgid "This method activate CUDA."
+#~ msgstr ""
+
