@@ -9,10 +9,10 @@ ReNom version 2.0
 .. toctree::
     :maxdepth: 2
 
+    notebooks/catalog
     rsts/installation
     rsts/changes
     rsts/introduction
-    notebooks/tutorials
     rsts/api
-    old-versions/index
     rsts/license
+    old-versions/index
