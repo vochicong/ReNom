@@ -3,7 +3,7 @@
 
 from __future__ import division, print_function
 import numpy as np
-from renom.core import Node, Variable, to_value, get_gpu, precision
+from renom.core import Node, Variable, to_value, get_gpu, precision, GPUValue
 from renom.layers.function.parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
 from renom.cuda import cuda as cu
@@ -59,8 +59,8 @@ class batch_normalize(Node):
             axs = 0
 
         y, mean, sq_var = (get_gpu(g).empty_like_me() for g in (x, w, w))
-        mv_m = mov_m if mov_m is not None else get_gpu(w).zeros_like_me()
-        mv_v = mov_s if mov_s is not None else get_gpu(w).zeros_like_me()
+        mv_m = mov_m if isinstance(mov_m, GPUValue) else get_gpu(w).zeros_like_me()
+        mv_v = mov_s if isinstance(mov_s, GPUValue) else get_gpu(w).zeros_like_me()
 
         with cu.cudnn_handler() as handle:
             cu.cuBatchNormalizatoinForward(handle, x, mv_m, mv_v, w, b,
@@ -156,8 +156,9 @@ class BatchNormalize(Parametrized):
     SERIALIZED = ('_mov_mean', '_mov_std', '_epsilon', '_mode')
 
     def __init__(self, input_size=None, momentum=0.99, mode="activation", epsilon=1e-5, initializer=GlorotNormal()):
+        assert momentum > 0, "The value of momentum must be lager than 0."
         self._mov_mean = 0
-        self._mov_std = 0
+        self._mov_std = 1
         self._epsilon = epsilon
         self._momentum = momentum
         self._mode = mode_dict.get(mode, BATCH_NORMALIZE_ELEMENTWISE)
