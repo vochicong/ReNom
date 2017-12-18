@@ -304,7 +304,6 @@ class GPUValue(object):
     def copy_from(self, other):
         self._ptr.copy_from(other._ptr, self.nbytes)
 
-
     def transpose(self, axis):
         return cu_transpose(self, axis)
 
@@ -959,7 +958,17 @@ class Node(np.ndarray):
 
     @property
     def T(self):
-        return Transpose(self)
+        return Transpose2d(self)
+
+    def transpose(self, *axis):
+        ax = axis
+        if isinstance(ax[0], (tuple, list)):
+            ax = ax[0]
+        else:
+            ax = tuple(axis)
+
+        assert len(self.shape) == len(ax), "Axis must be same size to matrix dim size."
+        return Transpose(self, ax)
 
     def reshape(self, *shape):
         if isinstance(shape[0], (list, tuple)):
@@ -1670,7 +1679,7 @@ class Reshape(Node):
                 dy).reshape(self.attrs._shape), **kwargs)
 
 
-class Transpose(UnaryOp):
+class Transpose2d(UnaryOp):
     @classmethod
     def _oper_cpu(cls, arg):
         assert(len(arg.shape) < 3)
@@ -1687,6 +1696,37 @@ class Transpose(UnaryOp):
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, get_gpu(dy).T, **kwargs)
+
+
+class Transpose(Node):
+
+    @classmethod
+    def _oper_cpu(cls, arg, axis):
+        return np.transpose(to_value(arg), axis)
+
+    @classmethod
+    def _oper_gpu(cls, arg, axis):
+        return get_gpu(arg).transpose(axis)
+
+    def __new__(cls, arg, axis):
+        value = cls.calc_value(arg, axis)
+        ret = super(Transpose, cls).__new__(cls, value)
+        rev = [-1] * len(axis)
+        for i, a in enumerate(axis):
+            rev[a] = i
+        ret.attrs._arg = arg
+        ret.attrs._axis = rev
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            axis = self.attrs._axis
+            self.attrs._arg._update_diff(context, to_value(dy).transpose(axis), **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            axis = self.attrs._axis
+            self.attrs._arg._update_diff(context, get_gpu(dy).transpose(axis), **kwargs)
 
 
 def _plot_graph(objs):

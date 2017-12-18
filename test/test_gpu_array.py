@@ -1222,7 +1222,7 @@ def test_cu_reduce_arg_max(a, axis):
 def test_transpose():
     with use_cuda():
         for n in range(0, 5):
-            shape = [2*(i+1) for i in range(n)]
+            shape = [2 * (i + 1) for i in range(n)]
             a = np.arange(np.prod(shape)).reshape(shape).astype('float32')
             b = renom.core.GPUValue(a)
             for axis in itertools.permutations(range(len(shape))):
@@ -1230,4 +1230,3 @@ def test_transpose():
                 bb = b.transpose(axis)
 
                 assert np.allclose(aa, bb.new_array())
-

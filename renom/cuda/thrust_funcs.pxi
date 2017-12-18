@@ -689,7 +689,7 @@ def cu_add_bias(bias, gpu_value):
 
 
 def cu_transpose(gpu_value1, axis):
-    strides = [np.prod(gpu_value1.shape[i+1:], dtype='int') for i in range(len(gpu_value1.shape))]
+    strides = [np.prod(gpu_value1.shape[i + 1:], dtype='int') for i in range(len(gpu_value1.shape))]
 
     if not axis:
         axis = tuple(reversed(range(len(gpu_value1.shape))))
@@ -703,9 +703,9 @@ def cu_transpose(gpu_value1, axis):
     for i, s in enumerate(axis):
         src_strides[i] = strides[s]
 
-    cdef size_t new_strides[16];
+    cdef size_t new_strides[16]
     for i in range(len(new_shape)):
-        new_strides[i] = np.prod(new_shape[i+1:], dtype='int')
+        new_strides[i] = np.prod(new_shape[i + 1:], dtype='int')
 
     cdef VALUE_TYPE * ptr = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     size = np.prod(gpu_value1.shape)

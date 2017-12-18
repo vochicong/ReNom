@@ -807,3 +807,15 @@ def test_T(node, use_gpu):
     def func(node):
         return sum(node.T)
     compare(func, node, node)
+
+
+@pytest.mark.parametrize("node, axis", [
+    [Variable(rand((2, 2))), (1, 0)],
+])
+def test_transpose(node, axis, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(node.transpose(axis))
+    compare(func, node, node)
