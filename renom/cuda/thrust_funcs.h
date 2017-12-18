@@ -156,6 +156,15 @@ namespace renom{
             reduce_shape_infos *seqs_infos,
             size_t mod, size_t div);
 
+        __global__ void cuda_transpose(size_t size, size_t shapesize,
+            VALUE_TYPE *src, const size_t src_strides[16],
+            VALUE_TYPE *result, const size_t result_strides[16]);
+
+        void thrust_transpose(
+            size_t size, size_t shapesize,
+            VALUE_TYPE *src, const size_t src_strides[16],
+            VALUE_TYPE *result, const size_t result_strides[16]);
+
 
         __global__ void cuda_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);        
         void thrust_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);

@@ -82,6 +82,11 @@ cdef extern from * namespace "renom":
         reduce_shape_infos *seq_infos,
         size_t mod, size_t div);
 
+    cdef void thrust_transpose(
+        size_t size, size_t shapesize,
+        VALUE_TYPE *src, const size_t src_strides[16],
+        VALUE_TYPE *result, const size_t result_strides[16]);
+
     cdef void thrust_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len)
 
     cdef void thrust_leaky_relu_forward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);

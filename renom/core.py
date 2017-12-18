@@ -304,6 +304,10 @@ class GPUValue(object):
     def copy_from(self, other):
         self._ptr.copy_from(other._ptr, self.nbytes)
 
+
+    def transpose(self, axis):
+        return cu_transpose(self, axis)
+
     def __pos__(self):
         return self.copy()
 

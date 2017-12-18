@@ -535,6 +535,45 @@ namespace renom{
                 src_per_result, sequence_stride, num_axis, reduction_infos, seq_infos, Reduce_ArgMax(mod, div));
         }
 
+
+        struct STRIDE_ARRAY {
+            size_t strides[16];
+        };
+
+        __global__ void cuda_transpose(size_t size, size_t shapesize, 
+            VALUE_TYPE *src, STRIDE_ARRAY src_strides,
+            VALUE_TYPE *result, STRIDE_ARRAY result_strides) {
+
+            size_t pos = threadIdx.x + blockIdx.x * blockDim.x;
+            if (pos < size) {
+                size_t idx = 0;
+
+                size_t s = pos;
+                for (int i = 0; i < shapesize; i++) {
+                    size_t d = s / (result_strides.strides[i]);
+                    s = s % (result_strides.strides[i]);
+
+                    idx += (src_strides.strides[i] * d);
+                }
+                result[pos] = src[idx];
+            }
+        }
+
+        void thrust_transpose(
+            size_t size, size_t shapesize,
+            VALUE_TYPE *src, const size_t src_strides[16],
+            VALUE_TYPE *result, const size_t result_strides[16]) {
+
+
+            STRIDE_ARRAY s_src, s_result;
+            memcpy(s_src.strides, src_strides, sizeof(STRIDE_ARRAY));
+            memcpy(s_result.strides, result_strides, sizeof(STRIDE_ARRAY));
+
+            cuda_transpose <<<ceil((size)/256.0), 256>>> (size, shapesize, src, s_src, result, s_result);
+        }
+
+
+
         __global__ void cuda_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len) {
             size_t i = threadIdx.x + blockIdx.x * blockDim.x;
             size_t n_block = i / block_len;
