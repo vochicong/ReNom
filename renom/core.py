@@ -1746,7 +1746,6 @@ class Abase(Node):
             index = self.attrs._index
             dx = np.zeros(self.attrs._arg.shape, dtype=dy.dtype)
             if axis is None:
-                xx = self.attrs._arg.reshape(-1)
                 dxx = dx.reshape(-1)
                 dxx[index] = dy
             else:
@@ -1769,7 +1768,6 @@ class Abase(Node):
             dx = np.zeros(self.attrs._arg.shape, dy.dtype)
 
             if axis is None:
-                xx = self.attrs._arg.reshape(-1)
                 dxx = dx.reshape(-1)
                 dxx[index] = dy
             else:
