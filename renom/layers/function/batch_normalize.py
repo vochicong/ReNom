@@ -59,6 +59,8 @@ class batch_normalize(Node):
             axs = 0
 
         y, mean, sq_var = (get_gpu(g).empty_like_me() for g in (x, w, w))
+        mov_m = get_gpu(mov_m)
+        mov_s = get_gpu(mov_s)
         mv_m = mov_m if isinstance(mov_m, GPUValue) else get_gpu(w).zeros_like_me()
         mv_v = mov_s if isinstance(mov_s, GPUValue) else get_gpu(w).zeros_like_me()
 
@@ -158,7 +160,7 @@ class BatchNormalize(Parametrized):
     def __init__(self, input_size=None, momentum=0.99, mode="activation", epsilon=1e-5, initializer=GlorotNormal()):
         assert momentum > 0, "The value of momentum must be lager than 0."
         self._mov_mean = 0
-        self._mov_std = 1
+        self._mov_std = 0
         self._epsilon = epsilon
         self._momentum = momentum
         self._mode = mode_dict.get(mode, BATCH_NORMALIZE_ELEMENTWISE)

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division, print_function
+import tempfile
 import numpy as np
 import pytest
 import renom.cuda
@@ -866,24 +867,34 @@ def test_gpu_node_average_pooling(a):
 
 
 @test_utility.skipgpu
-@pytest.mark.parametrize("a", [
-    arange((4, 2)),
+@pytest.mark.parametrize("a, mode", [
+    [arange((4, 2)), 'activation'],
+    [arange((4, 2, 3, 3)), 'feature'],
+    [arange((4, 2, 3, 3)), 'activation'],
 ])
-def test_batch_normalize(a):
-    layer = rm.Sequential([rm.BatchNormalize(momentum=0.1)])
+def test_batch_normalize(a, mode):
+    layer = rm.Sequential([rm.BatchNormalize(momentum=0.5, mode=mode)])
 
     set_cuda_active(True)
 
     g1 = Variable(a)
     g2 = layer(g1)
     g3 = rm.sum(g2)
-    g = g3.grad()
+    g = g3.grad(detach_graph=False)
     g_g1 = g.get(g1)
     g_g2 = g.get(layer.l0.params["w"])
     g_g3 = g.get(layer.l0.params["b"])
 
     layer.set_models(inference=True)
     g4 = layer(g1)
+    layer.set_models(inference=False)
+
+    layer.save('temp.h5')
+    layer.l0._mov_mean = 0
+    layer.l0._mov_std = 0
+    layer.load('temp.h5')
+    layer.set_models(inference=True)
+    g5 = layer(g1)
     layer.set_models(inference=False)
 
     g2.to_cpu()
@@ -899,58 +910,37 @@ def test_batch_normalize(a):
 
     c2 = layer(g1)
     c3 = rm.sum(c2)
-    c = c3.grad()
+    c = c3.grad(detach_graph=False)
     c_g1 = c.get(g1)
-    c_g2 = g.get(layer.l0.params["w"])
-    c_g3 = g.get(layer.l0.params["b"])
+    c_g2 = c.get(layer.l0.params["w"])
+    c_g3 = c.get(layer.l0.params["b"])
 
     layer.set_models(inference=True)
     c4 = layer(g1)
+    layer.set_models(inference=False)
+
+    layer.save('temp.h5')
+    layer.l0._mov_mean = 0
+    layer.l0._mov_std = 0
+    layer.load('temp.h5')
+    layer.set_models(inference=True)
+    c5 = layer(g1)
     layer.set_models(inference=False)
 
     close(g2, c2)
     close(g3, c3)
     close(g4, c4)
+    close(g5, c5)
+    close(g4, g5)
+    close(c4, c5)
     close(c_g1, g_g1)
     close(c_g2, g_g2)
     close(c_g3, g_g3)
 
-
-@test_utility.skipgpu
-@pytest.mark.parametrize("a", [
-    arange((2, 2, 2, 2)),
-])
-def test_batch_normalize_featuremap(a):
-    layer = rm.BatchNormalize(mode=BATCH_NORMALIZE_FEATUREMAP, momentum=0.1)
-
-    set_cuda_active(True)
-
-    g1 = Variable(a)
-
-    for _ in range(10):
-        g3 = layer(g1)
-    g3.to_cpu()
-
-    layer.set_models(inference=True)
-    g4 = layer(g1)
-    layer.set_models(inference=False)
-
-    set_cuda_active(False)
-    layer._mov_mean = 0
-    layer._mov_std = 0
-    for _ in range(10):
-        c3 = layer(g1)
-
-    layer.set_models(inference=True)
-    c4 = layer(g1)
-    layer.set_models(inference=False)
-
-    close(g3, c3)
-    close(g4, c4)
-    close(g3.attrs._m.new_array(), c3.attrs._m)
-    close(g3.attrs._v.new_array(), c3.attrs._v)
-    close(g3.attrs._mov_m.new_array(), c3.attrs._mov_m)
-    close(g3.attrs._mov_v.new_array(), c3.attrs._mov_v)
+    close(g2.attrs._m.new_array(), c2.attrs._m)
+    close(g2.attrs._v.new_array(), c2.attrs._v)
+    close(g2.attrs._mov_m.new_array(), c2.attrs._mov_m)
+    close(g2.attrs._mov_v.new_array(), c2.attrs._mov_v)
 
 
 @test_utility.skipgpu
