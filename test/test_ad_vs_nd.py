@@ -733,6 +733,10 @@ def test_abs(node, use_gpu):
 @pytest.mark.parametrize("node, axis", [
     [Variable(rand((2, 2))), None],
     [Variable(rand((2, 2, 1, 1))), 2],
+    [Variable(rand((2, 3, 4, 5))), 0],
+    [Variable(rand((2, 3, 4, 5))), 1],
+    [Variable(rand((2, 3, 4, 5))), 2],
+    [Variable(rand((2, 3, 4, 5))), 3],
     [Variable(rand((1, 2))), 0],
     [Variable(rand((2, 1))), 1],
     [Variable(rand((1,))), 0],

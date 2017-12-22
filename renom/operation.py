@@ -74,13 +74,24 @@ class sum(Node):
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            dx = np.ones_like(self.attrs._arg) * dy
-            self.attrs._arg._update_diff(context, dx, **kwargs)
+            arg = self.attrs._arg
+            axis = self.attrs._axis
+            if axis is None or axis == 0:
+                dx = np.ones_like(arg) * dy
+            else:
+                dx = np.ones_like(arg) * np.expand_dims(dy, axis)
+            arg._update_diff(context, dx, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            dx = get_gpu(self.attrs._arg).ones_like_me() * get_gpu(dy)
-            self.attrs._arg._update_diff(context, dx, **kwargs)
+            arg = self.attrs._arg
+            axis = self.attrs._axis
+            if axis is None or axis == 0:
+                dx = get_gpu(arg).ones_like_me() * get_gpu(dy)
+            else:
+                dy = get_gpu(dy).new_array()
+                dx = np.ones(arg.shape, dtype=arg.dtype) * np.expand_dims(dy, axis=axis)
+            arg._update_diff(context, get_gpu(dx), **kwargs)
 
 
 class dot(BinOp):
