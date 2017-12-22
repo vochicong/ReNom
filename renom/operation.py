@@ -2,7 +2,7 @@
 from __future__ import print_function, division
 
 import numpy as np
-from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshape
+from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshape, Amin, Amax
 from renom.config import precision
 
 try:
@@ -66,7 +66,6 @@ class sum(Node):
 
     def __new__(cls, arg, axis=None):
         assert not hasattr(axis, "__getitem__"), "The argument axis only accepts integer."
-        assert (axis is None) or (axis < 1)
         value = cls.calc_value(arg, axis)
         ret = super(sum, cls).__new__(cls, value)
         ret.attrs._axis = axis
@@ -365,12 +364,13 @@ class exp(UnaryOp):
             self.attrs._arg._update_diff(context, dy * get_gpu(self), **kwargs)
 
 
-# Not implemented.
-class mean(Node):
+class amin(Amin):
+    """Min operation.
+    """
     pass
 
-# Not implemented.
 
-
-class max(Node):
+class amax(Amax):
+    """Max operation.
+    """
     pass

@@ -730,19 +730,19 @@ def test_abs(node, use_gpu):
     compare(func, node, node)
 
 
-@pytest.mark.parametrize("node", [
-    Variable(rand((2, 2))),
-    Variable(rand((2, 2, 1, 1))),
-    Variable(rand((1, 2))),
-    Variable(rand((2, 1))),
-    Variable(rand((1,))),
+@pytest.mark.parametrize("node, axis", [
+    [Variable(rand((2, 2))), None],
+    [Variable(rand((2, 2, 1, 1))), 2],
+    [Variable(rand((1, 2))), 0],
+    [Variable(rand((2, 1))), 1],
+    [Variable(rand((1,))), 0],
 ])
-def test_sum(node, use_gpu):
+def test_sum(node, axis, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
     def func(node):
-        return sum(sum(node, axis=0))
+        return sum(sum(node, axis=axis))
     compare(func, node, node)
 
 
@@ -818,4 +818,34 @@ def test_transpose(node, axis, use_gpu):
 
     def func(node):
         return sum(node.transpose(axis))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node, axis", [
+    [Variable(rand((2, 2))), None],
+    [Variable(rand((2, 2))), 0],
+    [Variable(rand((2, 2))), 1],
+    [Variable(rand((2, 2, 2))), 2],
+])
+def test_max(node, axis, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.amax(node, axis))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node, axis", [
+    [Variable(rand((2, 2))), None],
+    [Variable(rand((2, 2))), 0],
+    [Variable(rand((2, 2))), 1],
+    [Variable(rand((2, 2, 2))), 2],
+])
+def test_min(node, axis, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.amin(node, axis))
     compare(func, node, node)

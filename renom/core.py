@@ -1729,9 +1729,94 @@ class Transpose(Node):
             self.attrs._arg._update_diff(context, get_gpu(dy).transpose(axis), **kwargs)
 
 
+class Abase(Node):
+
+    def __new__(cls, arg, axis=None, keepdims=False):
+        assert isinstance(axis, (type(None), int)), 'This function only accepts int or None.'
+        value, index = cls.calc_value(arg, axis, keepdims)
+        ret = super(Abase, cls).__new__(cls, value)
+        ret.attrs._arg = arg
+        ret.attrs._axis = axis
+        ret.attrs._index = index
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            axis = self.attrs._axis
+            index = self.attrs._index
+            dx = np.zeros(self.attrs._arg.shape, dtype=dy.dtype)
+            if axis is None:
+                xx = self.attrs._arg.reshape(-1)
+                dxx = dx.reshape(-1)
+                dxx[index] = dy
+            else:
+                axis_list = list(range(len(dx.shape)))
+                axis_list.pop(axis)
+                axis_list.append(axis)
+                rev = [-1] * len(axis_list)
+                for i, a in enumerate(axis_list):
+                    rev[a] = i
+                dxx = np.transpose(dx, axis_list)
+                for i in np.ndindex(index.shape):
+                    dxx[i][index[i]] = dy[i]
+
+            self.attrs._arg._update_diff(context, dx, **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            axis = self.attrs._axis
+            index = self.attrs._index.new_array()
+            dx = np.zeros(self.attrs._arg.shape, dy.dtype)
+
+            if axis is None:
+                xx = self.attrs._arg.reshape(-1)
+                dxx = dx.reshape(-1)
+                dxx[index] = dy
+            else:
+                axis_list = list(range(len(dx.shape)))
+                axis_list.pop(axis)
+                axis_list.append(axis)
+                rev = [-1] * len(axis_list)
+                for i, a in enumerate(axis_list):
+                    rev[a] = i
+                dxx = np.transpose(dx, axis_list)
+                for i in np.ndindex(index.shape):
+                    dxx[i][index[i]] = dy[i]
+            self.attrs._arg._update_diff(context, get_gpu(dx), **kwargs)
+
+
+class Amax(Abase):
+
+    @classmethod
+    def _oper_cpu(cls, arg, axis, keepdims):
+        array = to_value(arg)
+        return np.amax(array, axis, keepdims=keepdims), np.argmax(array, axis)
+
+    @classmethod
+    def _oper_gpu(cls, arg, axis, keepdims):
+        array = get_gpu(arg)
+        value = cu_reduce_max(array, axis, keepdims)
+        index = cu_reduce_argmax(array, axis)
+        return value, index
+
+
+class Amin(Abase):
+
+    @classmethod
+    def _oper_cpu(cls, arg, axis, keepdims):
+        array = to_value(arg)
+        return np.amin(array, axis, keepdims=keepdims), np.argmin(array, axis)
+
+    @classmethod
+    def _oper_gpu(cls, arg, axis, keepdims):
+        array = get_gpu(arg)
+        value = cu_reduce_min(array, axis, keepdims)
+        index = cu_reduce_argmin(array, axis)
+        return value, index
+
+
 def _plot_graph(objs):
     g = Digraph('G', filename='graphviz_output')
-
     s = set()
     for n in objs:
         g.node(str(id(n)), str(type(n)))
