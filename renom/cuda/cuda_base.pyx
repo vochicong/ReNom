@@ -227,6 +227,9 @@ class GPUHeap(object):
                 finally:
                     free(buf)
 
+    def free(self):
+        with renom.cuda.use_device(self.device_id):
+            cuFree(self.ptr)
 
 class allocator(object):
 
@@ -274,8 +277,23 @@ class allocator(object):
 
         return pool
 
+    def release_pool(self, deviceID=None):
+
+        def release(pool_list):
+            available_pools = [p for p in pool_list if p[1].available]
+            for p in available_pools:
+                p[1].free()
+                pool_list.remove(p)
+
+        if deviceID is None:
+            for d_id, pools in self._pool_lists.items():
+                release(pools)
+        else:
+            release(self._pool_lists[deviceID])
+          
 
 gpu_allocator = allocator()
+release_mem_pool = gpu_allocator.release_pool
 
 
 def _cuSetLimit(limit, value):
