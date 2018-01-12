@@ -186,7 +186,7 @@ class concat(Node):
     @classmethod
     def _oper_gpu(cls, args):
         axis = 1
-        newshape = args[0].shape[:axis] +  (np.sum([a.shape[1] for a in args]), ) + args[0].shape[axis + 1:]
+        newshape = args[0].shape[:axis] + (np.sum([a.shape[1] for a in args]), ) + args[0].shape[axis + 1:]
 
         ret = GPUValue(shape=newshape)
         cuconcat([get_gpu(a) for a in args], ret, axis)
@@ -204,20 +204,20 @@ class concat(Node):
             index.append(tmp)
         ret.attrs._index = index
         for i, v in enumerate(args):
-            setattr(ret.attrs, "_arg%d"%i, args[i])
+            setattr(ret.attrs, "_arg%d" % i, args[i])
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
         args = np.hsplit(to_value(dy), self.attrs._index)
         for i in range(len(self.attrs._index) + 1):
-            arg = getattr(self.attrs, "_arg%d"%i)
+            arg = getattr(self.attrs, "_arg%d" % i)
             if isinstance(arg, Node):
                 arg._update_diff(context, args[i], **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         args = np.hsplit(get_gpu(dy).new_array(), self.attrs._index)
         for i in range(len(self.attrs._index) + 1):
-            arg = getattr(self.attrs, "_arg%d"%i)
+            arg = getattr(self.attrs, "_arg%d" % i)
             if isinstance(arg, Node):
                 arg._update_diff(context, args[i], **kwargs)
 

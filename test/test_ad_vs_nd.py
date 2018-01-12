@@ -699,7 +699,7 @@ def test_where(node, x, use_gpu):
     compare(func, node, node, x)
 
 
-@pytest.mark.parametrize("node",[
+@pytest.mark.parametrize("node", [
     [Variable(rand((2, 1))), Variable(rand((2, 1)))],
 ])
 def test_concat(node, use_gpu):
