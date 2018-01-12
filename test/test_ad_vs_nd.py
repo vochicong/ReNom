@@ -699,15 +699,11 @@ def test_where(node, x, use_gpu):
     compare(func, node, node, x)
 
 
-@pytest.mark.parametrize("node", [
-    [Variable(rand((2, 2))), rand((2, 2))],
-    [Variable(rand((2, 2))), rand((2, 1))],
-    [Variable(rand((2, 2))), rand((2, 3))],
+@pytest.mark.parametrize("node",[
+    [Variable(rand((2, 1))), Variable(rand((2, 1)))],
 ])
 def test_concat(node, use_gpu):
-    node = Variable(node)
     set_cuda_active(use_gpu)
-
     assert np.allclose(rm.concat(node), np.concatenate(node, 1))
 
     def func(node):

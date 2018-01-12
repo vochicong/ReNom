@@ -181,7 +181,7 @@ class concat(Node):
 
     @classmethod
     def _oper_cpu(cls, args):
-        return np.hstack(args)
+        return np.concatenate(args, axis=1).copy()
 
     @classmethod
     def _oper_gpu(cls, args):
@@ -208,12 +208,11 @@ class concat(Node):
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        ldy, rdy = np.hsplit(to_value(dy), self.attrs._index)
-        if isinstance(self.attrs._lhs, Node):
-            self.attrs._lhs._update_diff(context, ldy, **kwargs)
-
-        if isinstance(self.attrs._rhs, Node):
-            self.attrs._rhs._update_diff(context, rdy, **kwargs)
+        args = np.hsplit(to_value(dy), self.attrs._index)
+        for i in range(len(self.attrs._index) + 1):
+            arg = getattr(self.attrs, "_arg%d"%i)
+            if isinstance(arg, Node):
+                arg._update_diff(context, args[i], **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         args = np.hsplit(get_gpu(dy).new_array(), self.attrs._index)
