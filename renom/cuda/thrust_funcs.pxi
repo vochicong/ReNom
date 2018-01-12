@@ -342,34 +342,32 @@ def cuembedding_backward(gpu_index, gpu_dy, gpu_dx):
     thrust_embedding_backward(N, K, M, index_ptr, dy_ptr, dx_ptr)
 
 
-def cuconcat(gpu_value1, gpu_value2, gpu_value3, axis):
+def cuconcat(gpu_values, gpu_value2, axis):
+    for i in range(len(gpu_values[:-1])):
+        cuda_base.check_heap_device(gpu_values[i], gpu_values[i+1], gpu_value2)
 
-    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-
-    cdef size_t size = gpu_value1.nbytes + gpu_value2.nbytes
-    if gpu_value3.nbytes < size:
+    buffer_size = np.sum([val.nbytes for val in gpu_values])
+    if gpu_value2.nbytes < buffer_size:
         raise ValueError("Insufficient destination buffer size")
 
-    if (not gpu_value1.shape) or (not gpu_value2.shape):
-        raise ValueError("zero-dimensional arrays cannot be concatenated")
 
-    s1 = gpu_value1.shape[:axis] + gpu_value1.shape[axis + 1:]
-    s2 = gpu_value1.shape[:axis] + gpu_value1.shape[axis + 1:]
+    cdef size_t rec_size = 0
+    for gpu_value in gpu_values:
+        if (not gpu_value.shape):
+            raise ValueError("zero-dimensional arrays cannot be concatenated")
+        rec_size += functools.reduce(operator.__mul__, gpu_value.shape[axis:], 1)
 
-    if s1 != s2:
-        raise ValueError("all the input array dimensions except"
-                         " for the concatenation axis must match exactly")
 
-    cdef size_t size1 = functools.reduce(operator.__mul__, gpu_value1.shape[axis:], 1)
-    cdef size_t size2 = functools.reduce(operator.__mul__, gpu_value2.shape[axis:], 1)
-    cdef size_t rec_size = size1 + size2
-
-    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef size_t size = 0
+    cdef concated_size
+    cdef VALUE_TYPE * ptr1
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > gpu_value3._ptr
-
-    thrust_copy_memory_stride(ptr3, ptr1, gpu_value1.size, rec_size, size1)
-    thrust_copy_memory_stride(ptr3 + size1, ptr2, gpu_value2.size, rec_size, size2)
+    for gpu_value in gpu_values:
+        s1 = gpu_value.shape[:axis] + gpu_value.shape[axis + 1:]
+        concated_size = <int >functools.reduce(operator.__mul__, gpu_value.shape[axis:], 1)
+        ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value._ptr
+        thrust_copy_memory_stride(ptr2 + size, ptr1, gpu_value.size, rec_size, concated_size)
+        size += <int > concated_size
 
 
 ctypedef object(*REDUCE_FUNC)(
