@@ -8,6 +8,7 @@
 """
 import numpy as np
 from libc.stdint cimport uintptr_t
+from libc.stdio cimport printf
 from libcpp cimport bool
 import cuda_base
 import operator
@@ -440,8 +441,8 @@ cdef _reduce_array(max_grids, num_threads, gpu_value1, axis, keepdims, REDUCE_FU
         result_shape = _del_items(src_shape, reduce_axis)
         result_size = functools.reduce(operator.__mul__, result_shape, 1)
 
-    if len(reduce_axis) >= 16:
-        raise ValueError('Invalid axis: %s' % (axis,))
+    if len(reduce_axis) >= RENOM_CUDA_MAX_AXIS:
+        raise ValueError("Number of axis should be less than %d" % RENOM_CUDA_MAX_AXIS)
 
     kept_shapes = src_shape[reduce_axis[-1] + 1:]
     kept_shapes_size = functools.reduce(operator.__mul__, kept_shapes, 1)
@@ -719,3 +720,66 @@ def cu_transpose(gpu_value1, axis):
                      ptr2, new_strides)
 
     return result
+
+
+cdef _build_slice_infos(getitem_slice_infos * infos, slices):
+    if len(slices) >= RENOM_CUDA_MAX_AXIS:
+        raise ValueError("Number of axis should be less than %d" % RENOM_CUDA_MAX_AXIS)
+
+    infos.shape_len = len(slices)
+    for i, (start, stop, step, adv_indexes, stride, dest_stride) in enumerate(slices):
+        infos.slice_info[i].start = start
+        infos.slice_info[i].stop = stop
+        infos.slice_info[i].step = step
+        if adv_indexes:
+            infos.slice_info[i].adv_indexes_len = adv_indexes.size
+            infos.slice_info[i].adv_indexes = <long long * > < uintptr_t > adv_indexes._ptr
+        else:
+            infos.slice_info[i].adv_indexes_len = 0
+            infos.slice_info[i].adv_indexes = NULL
+
+        infos.slice_info[i].stride = stride
+        infos.slice_info[i].dest_stride = dest_stride
+
+
+def cu_get_item(gpu_value1, size, dest_size, slices):
+
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+
+    result = renom.core.GPUValue(shape=(dest_size,))
+    cdef VALUE_TYPE * ptr_result = <VALUE_TYPE * > < uintptr_t > result._ptr
+
+    cdef getitem_slice_infos infos
+    _build_slice_infos( & infos, slices)
+
+    cdef getitem_slice_info * info
+
+    thrust_getitem(ptr1, ptr_result, dest_size, & infos)
+
+    return result
+
+
+def cu_set_item(value, valuesize, gpu_value1, slices, strides, broadcasted_strides):
+    if not isinstance(value, renom.core.GPUValue):
+        if isinstance(value, renom.core.Node):
+            value = value.get_gpu()
+        elif isinstance(value, np.ndarray):
+            value = renom.core.GPUValue(array=value)
+        else:
+            value = renom.core.GPUValue(array=np.array(value))
+
+    if value.dtype.name != gpu_value1.dtype.name:
+        raise ValueError()
+
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > value._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+
+    cdef getitem_slice_infos infos
+    _build_slice_infos( & infos, slices)
+
+    infos.stride_size = len(strides)
+    for i, (s, b) in enumerate(zip(strides, broadcasted_strides)):
+        infos.strides[i] = s
+        infos.broadcasted_strides[i] = b
+
+    thrust_setitem(ptr1, valuesize, ptr2, & infos)

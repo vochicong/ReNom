@@ -1220,3 +1220,339 @@ def test_transpose():
                 bb = b.transpose(axis)
 
                 assert np.allclose(aa, bb.new_array())
+
+
+def comp_get(arr, f):
+    with use_cuda():
+        g = renom.core.GPUValue(arr)
+        v1 = f(g)
+
+    v2 = f(arr)
+    assert np.allclose(v2, v1.new_array())
+
+
+@test_utility.skipgpu
+def test_getitem():
+    s = np.arange(60).reshape(5, 3, 4)
+
+    comp_get(s, lambda s: s[:])
+
+    comp_get(s, lambda s: s[:, :, :])
+    comp_get(s, lambda s: s[:, ..., :])
+    comp_get(s, lambda s: s[..., :, :])
+
+    comp_get(s, lambda s: s[0])
+
+    comp_get(s, lambda s: s[0:1])
+    comp_get(s, lambda s: s[2:3])
+    comp_get(s, lambda s: s[2:3, 0, 1:3])
+    comp_get(s, lambda s: s[::2])
+    comp_get(s, lambda s: s[1:6:2, 0:1, 1:3])
+
+    comp_get(s, lambda s: s[6:1:-2, 1:0, 1:3])
+    comp_get(s, lambda s: s[6:1:-2, 1:0:-1, 1:3])
+    comp_get(s, lambda s: s[6:1:-2, 1:0:-1, 3:1:-2])
+
+    comp_get(s, lambda s: s[6:1:-2, 3:0:-1, 1:3])
+    comp_get(s, lambda s: s[6:1:-2, 1:0:-1, 1:3])
+    comp_get(s, lambda s: s[6:1:-2, 1:0:-1, 3:1:-2])
+    comp_get(s, lambda s: s[1:1:-2, 1:0:-1, 3:1:-2])
+    comp_get(s, lambda s: s[1:1:-2, 3:0:-2, 3:1:-2])
+    comp_get(s, lambda s: s[1:1:-2, 3:0:-10, 3:1:-2])
+
+    comp_get(s, lambda s: s[0, 3:0:-10, 3:1:-2])
+    comp_get(s, lambda s: s[1:1:-2, 1, 3:1:-2])
+    comp_get(s, lambda s: s[1:1:-2, 3:0:-10, 3])
+
+    comp_get(s, lambda s: s[0, :, 2])
+    comp_get(s, lambda s: s[0, :, None, 2])
+    comp_get(s, lambda s: s[0, :, None, None, 2])
+    comp_get(s, lambda s: s[None, 0, :, None, None, 2])
+
+    comp_get(s, lambda s: s[1, 1, 1])
+
+
+@test_utility.skipgpu
+def test_getitem_advanced():
+
+    s = np.arange(60).reshape(5, 3, 4)
+
+    comp_get(s, lambda s: s[[0]])
+    comp_get(s, lambda s: s[[0, 1]])
+    comp_get(s, lambda s: s[[4, 2, 1]])
+    comp_get(s, lambda s: s[[0, 1], :, [2, 1]])
+    comp_get(s, lambda s: s[[0, 1], 0::2, [2, 1]])
+    comp_get(s, lambda s: s[[0, 1], 0::-1, [2, 1]])
+    comp_get(s, lambda s: s[[0, 1], 0::-2, [2, 1]])
+    comp_get(s, lambda s: s[[[0, 1], [1, 0]], 0::-2, [[[2, 1], [1, 2]]]])
+    comp_get(s, lambda s: s[[[0, 1]], 0::-2, [2, 1]])
+
+    comp_get(s, lambda s: s[[0, 1], [2, 1]])
+    comp_get(s, lambda s: s[[4, 2, 1]])
+
+    comp_get(s, lambda s: s[:, [2, 1]])
+    comp_get(s, lambda s: s[1:3, [1, 2], :])
+    comp_get(s, lambda s: s[1:5:2, [1, 2]])
+    comp_get(s, lambda s: s[:, [1, 0], :])
+
+    comp_get(s, lambda s: s[[0], [2, 0]])
+    comp_get(s, lambda s: s[[2], [1], [0, 1]])
+
+
+@test_utility.skipgpu
+def test_getitem_bool():
+
+    s = np.arange(60).reshape(5, 3, 4)
+
+    comp_get(s, lambda s: s[[True, False, True, False, True]])
+    comp_get(s, lambda s: s[:, [True, False, True]])
+    comp_get(s, lambda s: s[[True, False, True, False, False], :, [True, False, True, False]])
+
+    ss = np.array([[1, 2], [3, 4]])
+
+    comp_get(ss, lambda s: s[True])
+    comp_get(ss, lambda s: s[False])
+    comp_get(ss, lambda s: s[[True, False]])
+    comp_get(ss, lambda s: s[[[True, False]]])
+    comp_get(ss, lambda s: s[[True, False], [True, False]])
+    comp_get(ss, lambda s: s[[[True, False], [True, False]]])
+    comp_get(ss, lambda s: s[[[[True, False], [True, False]]]])
+
+    s2 = np.array([[1, 1], [1, 1], [1, 1]])
+    comp_get(s2, lambda s: s[np.array([[False, True], [True, False],  [True, False]])])
+
+
+@test_utility.skipgpu
+def test_getitem_advanced2():
+    s = np.arange(60).reshape(5, 3, 4)
+
+    idx1 = np.array([[0, 1], [1, 0]])
+    idx2 = np.array([[2, 1], [1, 2]])
+    v1 = s[idx1, 0::-2, idx2]
+
+    g = renom.core.GPUValue(s)
+    v2 = g[idx1, 0::-2, idx2]
+
+    np.allclose(v1, v2.new_array())
+
+
+@test_utility.skipgpu
+def test_getitem_advanced3():
+    ss = np.array([[1, 2], [3, 4]])
+
+    idx = np.array([[1, 0], [1, 0]])
+    v1 = ss[idx]
+    g = renom.core.GPUValue(ss)
+    idx2 = renom.core.GPUValue(idx, dtype='int64')
+
+    v2 = g[idx2]
+    np.allclose(v1, v2.new_array())
+
+
+@test_utility.skipgpu
+def test_getitem_advanced4():
+    ss = np.array([[1, 2], [3, 4]])
+    g = renom.core.GPUValue(ss)
+
+    idx = np.array([[True, False], [True, False]])
+    v1 = ss[idx]
+    v2 = g[idx]
+    np.allclose(v1, v2.new_array())
+
+
+@test_utility.skipgpu
+def test_getitem_advanced5():
+    ss = np.array([[1, 2], [3, 4]])
+    g = renom.core.GPUValue(ss)
+
+    idx = np.array([[True, False], [True, False]])
+    v1 = ss[idx]
+
+    idx2 = renom.core.GPUValue(idx, dtype='bool')
+    v2 = g[idx2]
+    np.allclose(v1, v2.new_array())
+
+
+def comp_set(v):
+    def deco(f):
+        s = v.copy()
+        g = renom.core.GPUValue(v)
+
+        f(s)
+        f(g)
+        assert np.allclose(s, g.new_array())
+
+    return deco
+
+
+@test_utility.skipgpu
+def test_setitem():
+    s = np.arange(60).reshape(5, 3, 4)
+
+    @comp_set(s)
+    def test(s):
+        s[:] = np.zeros(60).reshape(5, 3, 4)
+
+    @comp_set(s)
+    def test(s):
+        s[:, :, ::2] = np.arange(30).reshape(5, 3, 2)
+
+    @comp_set(s)
+    def test(s):
+        s[:, :, 1::2] = np.arange(30).reshape(5, 3, 2)
+
+    @comp_set(s)
+    def test(s):
+        s[:, :, :2:2] = np.arange(15).reshape(5, 3, 1)
+    #
+
+    @comp_set(s)
+    def test(s):
+        s[:, :, ::-1] = np.arange(60).reshape(5, 3, 4)
+
+    @comp_set(s)
+    def test(s):
+        s[:, :, ::-2] = np.arange(30).reshape(5, 3, 2)
+
+    @comp_set(s)
+    def test(s):
+        s[1:3, :, ::-1] = np.arange(24).reshape(2, 3, 4)
+
+    @comp_set(s)
+    def test(s):
+        s[3:1:-1, :, ::-1] = np.arange(24).reshape(2, 3, 4)
+
+    @comp_set(s)
+    def test(s):
+        s[0, :, :] = np.arange(12).reshape(1, 3, 4)
+
+    @comp_set(s)
+    def test(s):
+        s[0, 1, :] = np.arange(4).reshape(1, 1, 4)
+
+    @comp_set(s)
+    def test(s):
+        s[0, 1, -1] = np.arange(1).reshape(1, 1, 1)
+
+    @comp_set(s)
+    def test(s):
+        s[:, :, :] = np.arange(1).reshape(1)
+
+    @comp_set(s)
+    def test(s):
+        s[[0, 1], :, [1, 0]] = np.array([999]).reshape(1, 1, 1, 1, 1)
+
+    @comp_set(s)
+    def test(s):
+        s[[0, 1], :, [1, 0]] = np.array([999] * 3)
+
+    @comp_set(s)
+    def test(s):
+        s[:] = np.array([999] * 4)
+
+    @comp_set(s)
+    def test(s):
+        s[:] = np.array([[999], [1000], [1001]])
+
+    @comp_set(s)
+    def test(s):
+        s[:] = np.array([
+            [[999]],
+            [[1000]],
+            [[1001]],
+            [[1002]],
+            [[1003]],
+        ])
+
+    @comp_set(s)
+    def test(s):
+        s[:] = np.array([
+            [[999, 1, 2, 3]],
+            [[1000, 2, 3, 4]],
+            [[1001, 4, 5, 6]],
+            [[1002, 6, 7, 8]],
+            [[1003, 8, 9, 9]],
+        ])
+
+    @comp_set(s)
+    def test(s):
+        s[:, :, [True, False, False, True]] = np.array([1, 2])
+
+    @comp_set(s)
+    def test(s):
+        s[:, :, [True, False, False, True]] = np.array([1])
+
+    @comp_set(s)
+    def test(s):
+        s[:] = np.array(1)
+
+    @comp_set(s)
+    def test(s):
+        s[[True, False, True, False, True]] = np.arange(36).reshape(3, 3, 4)
+
+    @comp_set(s)
+    def test(s):
+        s[[True, False, True, False, True]] = np.arange(4)
+
+    @comp_set(s)
+    def test(s):
+        s[[True, False, True, False, True]] = np.arange(1)
+
+    @comp_set(s)
+    def test(s):
+        s[:, [True, False, True]] = np.arange(40).reshape(5, 2, 4)
+
+    @comp_set(s)
+    def test(s):
+        s[:, [True, False, True]] = np.arange(4)
+
+    @comp_set(s)
+    def test(s):
+        s[:, [True, False, True]] = np.arange(1)
+
+    @comp_set(s)
+    def test(s):
+        s[[True, False, True, False, False], :, [
+            True, False, True, False]] = np.arange(6).reshape(2, 3)
+
+    ss = np.array([[1, 2], [3, 4]])
+
+    @comp_set(ss)
+    def test(s):
+        s[True] = np.arange(4).reshape(1, 2, 2)
+
+    @comp_set(ss)
+    def test(s):
+        s[True] = np.arange(1)
+
+    @comp_set(ss)
+    def test(s):
+        s[False] = np.arange(4).reshape(1, 2, 2)
+
+    @comp_set(ss)
+    def test(s):
+        s[[True, False]] = np.arange(2).reshape(1, 2)
+
+    @comp_set(ss)
+    def test(s):
+        s[[[True, False]]] = np.arange(2).reshape(1, 2)
+
+    @comp_set(ss)
+    def test(s):
+        s[[[True, False]]] = np.arange(2).reshape(1, 2)
+
+    @comp_set(ss)
+    def test(s):
+        s[[True, False], [True, False]] = np.arange(1)
+
+    @comp_set(ss)
+    def test(s):
+        s[[[True, False], [True, False]]] = np.arange(1)
+
+    @comp_set(ss)
+    def test(s):
+        s[[[[True, False], [True, False]]]] = np.arange(2)
+
+    @comp_set(np.array([[1, 1], [1, 1], [1, 1]]))
+    def test(s):
+        s[[[[False, True], [True, False], [True, False]]]] = np.arange(3)

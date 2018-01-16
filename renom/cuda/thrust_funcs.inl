@@ -185,6 +185,9 @@ namespace renom{
         struct ValueWithPos {
             size_t pos;
             VALUE_TYPE val;
+
+            // operator float() for debugging
+            __device__ inline operator VALUE_TYPE() {return val;}
         };
 
         #define MMIN(l, r) ((l < r) ? (l) : (r))
@@ -386,6 +389,7 @@ namespace renom{
                     continue;
                 }
 
+
                 size_t src_top_idx = calc_index(num_axis, reduction_infos_out_size, reduction_infos_in_size, reduction_infos_group_size, sequence_stride, idx_result);
                 size_t cur_idx = src_top_idx + calc_index(num_axis, seq_infos_out_size, seq_infos_in_size, seq_infos_group_size, 0, nth_in_seq);
 
@@ -402,7 +406,6 @@ namespace renom{
 
                     size_t p = src_top_idx + pos;
                     T::reduce_src(p, src[p], s);
-//                    s = T::oper(s, src[src_top_idx + pos]);
                 }
                 
 
@@ -410,7 +413,6 @@ namespace renom{
 
                 __syncthreads();
                 if (nth_thread == 0) {
-//                    VALUE_TYPE s = sharemem[threadid];
 
                     typename T::REDUCE_VALUE s = sharemem[threadid];
 
@@ -426,9 +428,7 @@ namespace renom{
                         }
 
                         T::reduce_share(sharemem[n], s);
-//                        s = T::oper(s, sharemem[n]);
                     }
-//                    result[idx_result] = s;
                     T::set_result(s, result[idx_result], &adapter);
                 }
             }
@@ -590,6 +590,182 @@ namespace renom{
             cuda_concat_blocks<<<ceil(nsize/256.0), 256>>> (a, nsize, b, block_len, copy_len);
         }
 
+/*
+        __device__ inline size_t calc_stride2(size_t idx, getitem_slice_infos &infos, bool &skip) {
+            size_t i = idx;
+            size_t ret = 0;
+            for (size_t s=0; s < infos.shape_len; s++) {
+                getitem_slice_info &info = infos.slice_info[s];
+
+                long long n = i / info.stride;
+                i = i % info.stride;
+
+                if (info.step >= 0) {
+
+                    if ((n < info.start) || info.stop <= n) {
+                        skip = true;
+                        return 0;
+                    }
+
+                    size_t p = (n - info.start) / info.step;
+                    size_t m = (n - info.start) % info.step;
+
+                    if (m != 0) {
+                        skip = true;
+                        return 0;
+                    }
+                    ret += p * info.dest_stride;
+                }
+                else {
+                    if ((n <= info.stop) || (info.start < n)) {
+                        skip = true;
+                        return 0;
+                    }
+
+                    size_t p = (info.start - n) / (-1*info.step);
+                    size_t m = (info.start - n) % (-1*info.step);
+
+                    if (m != 0) {
+                        skip = true;
+                        return 0;
+                    }
+                    ret += p * info.dest_stride;
+                }
+            }
+            skip = false;
+            return ret;
+        }
+
+*/
+/*
+        __device__ inline size_t calc_stride(size_t idx, getitem_slice_infos &infos) {
+            size_t idx_adv = (size_t)-1;
+            size_t ret = 0;
+            for (size_t s=0; s < infos.shape_len; s++) {
+                getitem_slice_info &info = infos.slice_info[s];
+                if (info.adv_indexes_len) {
+                    if (idx_adv == (size_t)-1) {
+                        idx_adv = idx;
+                    }
+
+                    long long n = idx_adv / info.dest_stride;
+                    idx = idx_adv % info.dest_stride;
+                    if (n >= info.adv_indexes_len) {
+                        n = 0;
+                    }
+                    ret += info.adv_indexes[n] * info.stride;
+                }
+                else {
+                    long long n = idx / info.dest_stride;
+                    idx = idx % info.dest_stride;
+                    size_t p = info.start + n * info.step;
+                    ret += p * info.stride;
+                }
+            }
+            return ret;
+        }
+*/
+
+        template <int LEN>
+        __device__ inline size_t calc_stride_loop(size_t idx, getitem_slice_infos &infos) {
+            size_t idx_adv = (size_t)-1;
+            size_t ret = 0;
+            for (size_t s=0; s < LEN; s++) {
+                getitem_slice_info &info = infos.slice_info[s];
+                if (info.adv_indexes_len) {
+                    if (idx_adv == (size_t)-1) {
+                        idx_adv = idx;
+                    }
+
+                    long long n = idx_adv / info.dest_stride;
+                    idx = idx_adv % info.dest_stride;
+                    if (n >= info.adv_indexes_len) {
+                        n = 0;
+                    }
+                    ret += info.adv_indexes[n] * info.stride;
+                }
+                else {
+                    long long n = idx / info.dest_stride;
+                    idx = idx % info.dest_stride;
+                    size_t p = info.start + n * info.step;
+                    ret += p * info.stride;
+                }
+            }
+            return ret;
+        }
+
+        
+        __device__ inline size_t calc_stride(size_t idx, getitem_slice_infos &infos) {
+
+            size_t len = infos.shape_len;
+
+            if (len == 1) return calc_stride_loop<1>(idx, infos);
+            if (len == 2) return calc_stride_loop<2>(idx, infos);
+            if (len == 3) return calc_stride_loop<3>(idx, infos);
+            if (len == 4) return calc_stride_loop<4>(idx, infos);
+            if (len == 5) return calc_stride_loop<5>(idx, infos);
+            if (len == 6) return calc_stride_loop<6>(idx, infos);
+            if (len == 7) return calc_stride_loop<7>(idx, infos);
+            if (len == 8) return calc_stride_loop<8>(idx, infos);
+            if (len == 9) return calc_stride_loop<9>(idx, infos);
+            if (len == 10) return calc_stride_loop<10>(idx, infos);
+            if (len == 11) return calc_stride_loop<11>(idx, infos);
+            if (len == 12) return calc_stride_loop<12>(idx, infos);
+            if (len == 13) return calc_stride_loop<13>(idx, infos);
+            if (len == 14) return calc_stride_loop<14>(idx, infos);
+            if (len == 15) return calc_stride_loop<15>(idx, infos);
+            if (len == 16) return calc_stride_loop<16>(idx, infos);
+
+            assert(0);  // never reach here
+            return 0;
+        }
+
+
+
+        __global__ void cuda_getitem(VALUE_TYPE *src, VALUE_TYPE *result, size_t result_size, getitem_slice_infos infos) {
+            size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
+            if (idx >= result_size) {
+                return;
+            }
+
+            size_t input = calc_stride(idx, infos);
+            result[idx] = src[input];
+        }
+
+        void thrust_getitem(
+            VALUE_TYPE *src,
+            VALUE_TYPE *result,
+            size_t result_size,
+            getitem_slice_infos *infos) {
+
+            cuda_getitem <<<ceil((result_size)/256.0), 256>>> (src, result, result_size, *infos);
+        }
+
+        __global__ void cuda_setitem(VALUE_TYPE *src, size_t src_size, VALUE_TYPE *dest, getitem_slice_infos infos) {
+            size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
+            if (idx >= src_size) {
+                return;
+            }
+
+            size_t pos = calc_stride(idx, infos);
+
+            size_t value_idx = 0;
+            for (size_t i=0; i < infos.stride_size; i++) {
+                size_t d = idx / infos.strides[i];
+                idx = idx % infos.strides[i];
+                value_idx += d * infos.broadcasted_strides[i];
+            }
+
+            dest[pos] = src[value_idx];
+        }
+
+        void thrust_setitem(
+            VALUE_TYPE *src, size_t src_size,
+            VALUE_TYPE *dest,
+            getitem_slice_infos *info) {
+
+            cuda_setitem <<<ceil((src_size)/256.0), 256>>> (src, src_size, dest, *info);
+        }
 
 	// Negate
 	void thrust_negate(VALUE_TYPE *first, VALUE_TYPE *last, VALUE_TYPE *output) {
