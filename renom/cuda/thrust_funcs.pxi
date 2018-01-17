@@ -252,7 +252,6 @@ def cumax(value, gpu_value1, gpu_value2=None):
 def curoi_pool2d_forward(rois, x, spatial_scale, channels, height,
                         width, outh, outw, z, augmax_data):
     cdef int N = rois.shape[0]
-
     cdef VALUE_TYPE * ptr_x = <VALUE_TYPE * > < uintptr_t> x._ptr
     cdef VALUE_TYPE * ptr_rois = <VALUE_TYPE  *> < uintptr_t> rois._ptr
     cdef VALUE_TYPE * ptr_z = <VALUE_TYPE * > < uintptr_t> z._ptr

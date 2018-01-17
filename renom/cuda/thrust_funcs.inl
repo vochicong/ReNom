@@ -899,8 +899,8 @@ namespace renom{
 		thrust::transform(dev_a, dev_a+size, dev_b, dev_b, max_function(v));
 	}
 
-    __global__ void cuda_forward_roi_pool2d(int N, VALUE_TYPE * x, float spatial_scale, int channels,
-            int height, int width, int outh, int outw, VALUE_TYPE * rois, VALUE_TYPE *z,
+    __global__ void cuda_forward_roi_pool2d(int N, VALUE_TYPE *x, float spatial_scale, int channels,
+            int height, int width, int outh, int outw, VALUE_TYPE *rois, VALUE_TYPE *z,
             VALUE_TYPE *argmax_data)
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -925,25 +925,31 @@ namespace renom{
         int wstart = static_cast<int>(floor(static_cast<float>(pw)*bin_size_w));
         int hend = static_cast<int>(ceil(static_cast<float>(ph+1)*bin_size_h));
         int wend = static_cast<int>(ceil(static_cast<float>(pw+1)*bin_size_w));
-        bool is_empty = (hend <= hstart) || (wend <= wstart);
-
-        float maxval = is_empty ? 0: -1E+37;
+        float maxval = -1E+37;
         int maxidx = -1;
-        int data_offset = (roi_batch_idx * channels + c) * height * width;
-        for (int h = hstart; h < hend; ++h)
-        {
-            for(int w = wstart; w< wend; ++w)
-            {
-                int bottom_idx = h*width + w;
-                if (x[data_offset + bottom_idx] > maxval)
-                {
-                    maxval = x[data_offset + bottom_idx];
-                    maxidx = bottom_idx;
-                }
+        hstart = min(max(hstart + roi_start_h, 0), height);
+        hend = min(max(hend + roi_start_h, 0), height);
+        wstart = min(max(wstart + roi_start_w, 0), width);
+        wend = min(max(wend + roi_start_w, 0), width);
 
+        if ((hend <= hstart) || (wend <= wstart)){
+            maxval = 0;
+        } else {
+            int data_offset = (roi_batch_idx * channels + c) * height * width;
+            for (int h = hstart; h < hend; ++h)
+            {
+                for(int w = wstart; w< wend; ++w)
+                {
+                    int bottom_idx = h*width + w;
+                    if (x[data_offset + bottom_idx] > maxval)
+                    {
+                        maxval = x[data_offset + bottom_idx];
+                        maxidx = bottom_idx;
+                    }
+
+                }
             }
         }
-
         z[idx] = maxval;
         argmax_data[idx] = maxidx;
     }

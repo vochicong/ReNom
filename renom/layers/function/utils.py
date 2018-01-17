@@ -9,7 +9,6 @@ def out_size(size, k, s, p):
 def transpose_out_size(size, k, s, p):
     return (np.array(s) * (np.array(size) - 1) + np.array(k) - 2 * np.array(p)).astype(np.int)
 
-
 def im2col(img, size, kernel, stride, padding, padwith=0.):
     N, channel, in_h, in_w = img.shape
     out_h, out_w = size

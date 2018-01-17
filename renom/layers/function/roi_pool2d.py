@@ -97,7 +97,7 @@ class roi_pool2d(Node):
         if isinstance(self.attrs._x, Node):
             ch, h, w = self.attrs._x.shape[1:]
             dx = GPUValue(shape=(self.attrs._x.shape))
-            cu.curoi_pool2d_backward(dy, self.attrs._index, self.attrs._rois, self.attrs._spatial_scale, ch, h, w, self.attrs._outh, self.attrs._outw, dx)
+            cu.curoi_pool2d_backward(get_gpu(dy), self.attrs._index, self.attrs._rois, self.attrs._spatial_scale, ch, h, w, self.attrs._outh, self.attrs._outw, dx)
         self.attrs._x._update_diff(context, dx, **kwargs)
 
 

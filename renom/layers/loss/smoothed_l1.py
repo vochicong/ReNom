@@ -53,12 +53,12 @@ class smoothed_l1(Node):
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._lhs, Node):
-            mask = abs(self.attrs._d < 0.5)
+            mask = abs(self.attrs._d) < 0.5
             dx = rm.where(mask, self.attrs._d, 0.5*np.sign(self.attrs._d))
             self.attrs._lhs._update_diff(context, dx * dy, **kwargs)
 
         if isinstance(self.attrs._rhs, Node):
-            mask = abs(self.attrs._d < 0.5)
+            mask = abs(self.attrs._d) < 0.5
             dx = rm.where(mask, self.attrs._d, 0.5*np.sign(self.attrs._d))
             self.attrs._rhs._update_diff(context, dx * dy, **kwargs)
 
