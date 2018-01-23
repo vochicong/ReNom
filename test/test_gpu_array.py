@@ -1220,3 +1220,25 @@ def test_transpose():
                 bb = b.transpose(axis)
 
                 assert np.allclose(aa, bb.new_array())
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a, b", [
+    [rand((1,)), rand((1,))],
+    [rand((2,)), rand((1,))],
+    [rand((1, 3, 1)), rand((1,))],
+    [rand((1, 3, 1)), rand((2,))],
+    [rand((3, 1, 1)), rand((3, 3, 3))],
+    [rand((2, 3, 1)), rand((3, 1,))],
+    [rand((1, 2, 3, 1)), rand((3, 2,))],
+    [rand((1, 2, 3, 1)), rand((2, 1, 3, 2,))],
+    [rand((1, 2, 3, 1)), rand((2, 2, 3, 2,))],
+    [rand((1, 1, 3)), rand((3, 3, 3,))],
+])
+def test_gpu_broadcast(a, b):
+    set_cuda_active(True)
+
+    g1 = Variable(a)
+    g2 = Variable(b)
+
+    assert np.allclose(a + b, (g1 + g2))

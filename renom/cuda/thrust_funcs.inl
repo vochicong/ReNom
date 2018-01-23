@@ -3,127 +3,6 @@
 #include "thrust_funcs.h"
 namespace renom{
 
-	/////////////// Basic operaion
-	__global__ void cuda_mul(VALUE_TYPE value, int a_step, VALUE_TYPE *a, int b_step, VALUE_TYPE *b, VALUE_TYPE *c, size_t size)
-	{
-		int idx = blockIdx.x * blockDim.x + threadIdx.x;
-		if(idx >= size)
-		{
-			return;
-		}
-		if(b != NULL)
-			c[idx] = a[(int)(idx%a_step)] * b[(int)(idx%b_step)];
-		else
-			c[idx] = a[(int)(idx%a_step)] * value;
-	}
-	
-	__global__ void cuda_add(VALUE_TYPE value, int a_step, VALUE_TYPE *a, int b_step, VALUE_TYPE *b, VALUE_TYPE *c, size_t size)
-	{
-		int idx = blockIdx.x * blockDim.x + threadIdx.x;
-		if(idx >= size)
-		{
-			return;
-		}
-		if(b != NULL)
-			c[idx] = a[(int)(idx%a_step)] + b[(int)(idx%b_step)];
-		else
-			c[idx] = a[(int)(idx%a_step)] + value;
-			
-	}
-	
-	__global__ void cuda_sub(VALUE_TYPE value, int a_step, VALUE_TYPE *a, int b_step, VALUE_TYPE *b, VALUE_TYPE *c, size_t size)
-	{
-		int idx = blockIdx.x * blockDim.x + threadIdx.x;
-		if(idx >= size)
-		{
-			return;
-		}
-		if(b != NULL)
-			c[idx] = a[(int)(idx%a_step)] - b[(int)(idx%b_step)];
-		else
-			c[idx] = a[(int)(idx%a_step)] - value;
-	}
-	
-	__global__ void cuda_div(VALUE_TYPE value, int a_step, VALUE_TYPE *a, int b_step, VALUE_TYPE *b, VALUE_TYPE *c, size_t size)
-	{
-		int idx = blockIdx.x * blockDim.x + threadIdx.x;
-		if(idx >= size)
-		{
-			return;
-		}
-		if(b != NULL)
-			c[idx] = a[(int)(idx%a_step)] / b[(int)(idx%b_step)];
-		else
-			c[idx] = a[(int)(idx%a_step)] / value;
-	}
-	
-	__global__ void cuda_rdiv(VALUE_TYPE value, int a_step, VALUE_TYPE *a, int b_step, VALUE_TYPE *b, VALUE_TYPE *c, size_t size)
-	{
-		int idx = blockIdx.x * blockDim.x + threadIdx.x;
-		if(idx >= size)
-		{
-			return;
-		}
-		if(b != NULL)
-			c[idx] = b[(int)(idx%b_step)] / a[(int)(idx%a_step)];
-		else
-			c[idx] = value / a[(int)(idx%a_step)];
-	}
-	
-	__global__ void cuda_pow(VALUE_TYPE value, int a_step, VALUE_TYPE *a, int b_step, VALUE_TYPE *b, VALUE_TYPE *c, size_t size)
-	{
-		int idx = blockIdx.x * blockDim.x + threadIdx.x;
-		if(idx >= size)
-		{
-			return;
-		}
-		if(b != NULL)
-			c[idx] = powf(a[(int)(idx%a_step)], b[(int)(idx%b_step)]);
-		else
-			c[idx] = powf(a[(int)(idx%a_step)], value);
-	}
-	
-	__global__ void cuda_rpow(VALUE_TYPE value, int a_step, VALUE_TYPE *a, int b_step, VALUE_TYPE *b, VALUE_TYPE *c, size_t size)
-	{
-		int idx = blockIdx.x * blockDim.x + threadIdx.x;
-		if(idx >= size)
-		{
-			return;
-		}
-		if(b != NULL)
-			c[idx] = powf(b[(int)(idx%b_step)], a[(int)(idx%a_step)]);
-		else
-			c[idx] = powf(value, a[(int)(idx%a_step)]);
-	}
-	
-	void thrust_operation(Operation op, VALUE_TYPE value, int elem_size_a, VALUE_TYPE *a, int elem_size_b, VALUE_TYPE *b, VALUE_TYPE *c){
-		size_t size = max(elem_size_a, elem_size_b);
-		switch(op)
-		{
-			case MUL:
-				cuda_mul <<<ceil((size)/256.0), 256>>> (value, elem_size_a, a, elem_size_b, b, c, size);
-				break;
-			case ADD:
-				cuda_add <<<ceil((size)/256.0), 256>>> (value, elem_size_a, a, elem_size_b, b, c, size);
-				break;
-			case SUB:
-				cuda_sub <<<ceil((size)/256.0), 256>>> (value, elem_size_a, a, elem_size_b, b, c, size);
-				break;
-			case DIV:
-				cuda_div <<<ceil((size)/256.0), 256>>> (value, elem_size_a, a, elem_size_b, b, c, size);
-				break;
-			case RDIV:
-				cuda_rdiv <<<ceil((size)/256.0), 256>>> (value, elem_size_a, a, elem_size_b, b, c, size);
-				break;
-			case POW:
-				cuda_pow <<<ceil((size)/256.0), 256>>> (value, elem_size_a, a, elem_size_b, b, c, size);
-				break;
-			case RPOW:
-				cuda_rpow <<<ceil((size)/256.0), 256>>> (value, elem_size_a, a, elem_size_b, b, c, size);
-				break;
-		}
-	}
-
     void thrust_add_bias(int size, int n, int wh, VALUE_TYPE *bias, VALUE_TYPE *a)
     {
         cuda_add_bias <<<ceil((size)/256.0), 256>>> (size, n, wh, bias, a); 
@@ -137,6 +16,107 @@ namespace renom{
         a[idx] += bias[(int)(idx%(size/n)/wh)];
     }
 
+
+    class BinOP_Add {
+    public:
+        __device__ inline  static
+        VALUE_TYPE op(const VALUE_TYPE &lhs, const VALUE_TYPE &rhs) {
+            return lhs + rhs;
+        }
+    };
+
+    class BinOP_Mul {
+    public:
+        __device__ inline  static
+        VALUE_TYPE op(const VALUE_TYPE &lhs, const VALUE_TYPE &rhs) {
+            return lhs * rhs;
+        }
+    };
+
+    class BinOP_Sub {
+    public:
+        __device__ inline  static
+        VALUE_TYPE op(const VALUE_TYPE &lhs, const VALUE_TYPE &rhs) {
+            return lhs - rhs;
+        }
+    };
+
+    class BinOP_Div {
+    public:
+        __device__ inline  static
+        VALUE_TYPE op(const VALUE_TYPE &lhs, const VALUE_TYPE &rhs) {
+            return lhs / rhs;
+        }
+    };
+
+    class BinOP_Rdiv {
+    public:
+        __device__ inline  static
+        VALUE_TYPE op(const VALUE_TYPE &lhs, const VALUE_TYPE &rhs) {
+            return rhs / lhs;
+        }
+    };
+
+    class BinOP_Pow {
+    public:
+        __device__ inline  static
+        VALUE_TYPE op(const VALUE_TYPE &lhs, const VALUE_TYPE &rhs) {
+            return powf(lhs, rhs);
+        }
+    };
+
+    class BinOP_Rpow {
+    public:
+        __device__ inline  static
+        VALUE_TYPE op(const VALUE_TYPE &lhs, const VALUE_TYPE &rhs) {
+            return powf(rhs, lhs);
+        }
+    };
+
+
+    template <typename T>
+    __global__ static void cuda_binop(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides strides) {
+        size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if(idx >= size) {
+            return;
+        }
+        size_t src_idx, idx_lhs, idx_rhs;
+
+        src_idx = idx;
+        idx_lhs = idx_rhs = 0;
+        for (size_t i=0; i < strides.size; i++) {
+            size_t n = src_idx / strides.result_strides[i];
+            src_idx = src_idx % strides.result_strides[i];
+
+            idx_lhs += n * strides.lhs_strides[i];
+            idx_rhs += n * strides.rhs_strides[i];
+
+        }
+        c[idx] = T::op(a[idx_lhs], b[idx_rhs]);
+    }
+
+
+    void thrust_add(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
+        cuda_binop<BinOP_Add> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+    }
+    void thrust_mul(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
+        cuda_binop<BinOP_Mul> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+    }
+    void thrust_sub(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
+        cuda_binop<BinOP_Sub> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+    }
+    void thrust_div(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
+        cuda_binop<BinOP_Div> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+    }
+    void thrust_rdiv(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
+        cuda_binop<BinOP_Rdiv> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+    }
+    void thrust_pow(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
+        cuda_binop<BinOP_Pow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+    }
+    void thrust_rpow(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
+        cuda_binop<BinOP_Rpow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+    }
 
 
         __global__ void cuda_copy_memory_stride(VALUE_TYPE *dest, VALUE_TYPE *src, const size_t src_elems,
@@ -812,21 +792,6 @@ namespace renom{
 		thrust::transform(dev_a, dev_a+size, dev_b, dev_c, cross_entropy_function());
 	}
 	
-	///////////////Broad cast
-	__global__ void cuda_broad_cast(int elem_size_a, VALUE_TYPE *a, int elem_size_b, VALUE_TYPE *b)
-	{
-		int idx = blockIdx.x * blockDim.x + threadIdx.x;
-		if(idx < elem_size_b)
-		{
-			for(int i = 0; i < (int)(elem_size_a/elem_size_b);i++)
-				b[idx] += a[(int)(idx + elem_size_b*i)];
-		}
-	}
-	
-	void thrust_broad_cast(int elem_size_a, VALUE_TYPE *a, int elem_size_b, VALUE_TYPE *b)
-	{
-		cuda_broad_cast <<<ceil((elem_size_b)/256.0), 256>>> (elem_size_a, a, elem_size_b, b);
-	}
 	
 	// abs
 	struct abs_forward_function

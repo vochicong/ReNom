@@ -1,14 +1,11 @@
 from libcpp cimport bool
 
 cdef extern from * namespace "renom":
-    ctypedef enum Operation:
-        MUL, ADD, DIV, RDIV, SUB, POW, RPOW
     cdef void thrust_negate(VALUE_TYPE* first, VALUE_TYPE *last, VALUE_TYPE *output)
     cdef void thrust_relu_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
     cdef void thrust_relu_backward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
     cdef void thrust_sigmoid(VALUE_TYPE *a, VALUE_TYPE *b, int size)
     cdef void thrust_tanh(VALUE_TYPE *a, VALUE_TYPE *b, int size)
-    cdef void thrust_operation(Operation op, VALUE_TYPE value, int elem_size_a, VALUE_TYPE *a, int elem_size_b, VALUE_TYPE *b, VALUE_TYPE *c)
     cdef void thrust_copy_memory_stride(VALUE_TYPE *dest, VALUE_TYPE *src, const size_t src_elems,
                              const size_t size_stride, const size_t size_srcblock)
     cdef void thrust_fill(VALUE_TYPE value, VALUE_TYPE *a, int size)
@@ -16,7 +13,6 @@ cdef extern from * namespace "renom":
     cdef void thrust_exp(VALUE_TYPE *a, VALUE_TYPE *b, int size)
     cdef void thrust_sqrt(VALUE_TYPE *a, VALUE_TYPE *b, int size)
     cdef void thrust_cross_entropy(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, int size)
-    cdef void thrust_broad_cast(int elem_size_a, VALUE_TYPE *a, int elem_size_b, VALUE_TYPE *b)
     cdef void thrust_abs_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
     cdef void thrust_abs_backward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
     cdef VALUE_TYPE thrust_all_reduce(VALUE_TYPE* a, int size)
@@ -24,6 +20,20 @@ cdef extern from * namespace "renom":
     cdef void thrust_create_mask(VALUE_TYPE *a, int size)
     cdef void thrust_min(VALUE_TYPE v, VALUE_TYPE *a, VALUE_TYPE *b, int size);
     cdef void thrust_max(VALUE_TYPE v, VALUE_TYPE *a, VALUE_TYPE *b, int size);
+
+    cdef struct binop_strides:
+        size_t size
+        size_t result_strides[16]
+        size_t lhs_strides[16]
+        size_t rhs_strides[16]
+
+    void thrust_add(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides);
+    void thrust_mul(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides);
+    void thrust_sub(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides);
+    void thrust_div(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides);
+    void thrust_rdiv(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides);
+    void thrust_pow(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides);
+    void thrust_rpow(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides);
 
     cdef struct reduce_shape_infos:
         size_t out_size[16]

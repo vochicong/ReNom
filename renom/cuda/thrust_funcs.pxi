@@ -49,7 +49,7 @@ def culeaky_leru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def culeaky_leru_backward(s, gpu_value1, gpu_value2):
@@ -58,7 +58,7 @@ def culeaky_leru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_forward(s, gpu_value1, gpu_value2):
@@ -67,7 +67,7 @@ def cueru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_backward(s, gpu_value1, gpu_value2):
@@ -76,7 +76,7 @@ def cueru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cusigmoid(gpu_value1, gpu_value2):
@@ -97,58 +97,88 @@ def cutanh(gpu_value1, gpu_value2):
     thrust_tanh(ptr1, ptr2, size)
 
 
-cdef basic_operation(Operation op, gpu_value1, gpu_value2, gpu_value3):
-    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
+ctypedef void(*BINOP_FUNC)(
+    VALUE_TYPE * a, VALUE_TYPE * b, VALUE_TYPE * c,
+    size_t size, binop_strides * strides)
 
-    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
-    cdef VALUE_TYPE * ptr2
-    cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > gpu_value3._ptr
-    cdef int elem_size_a = gpu_value1.size
-    cdef int elem_size_b
-    if hasattr(gpu_value2, "_ptr"):
-        ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-        value = 0
-        elem_size_b = gpu_value2.size
+
+cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
+    cuda_base.check_heap_device(lhs, rhs, ret)
+
+    if not isinstance(rhs, renom.core.GPUValue):
+        rhs = renom.core.GPUValue(np.array(rhs))
+
+    cdef binop_strides strides
+
+    if lhs.shape == rhs.shape == ret.shape:
+        strides.size = 1
+        strides.result_strides[0] = 1
+        strides.lhs_strides[0] = 1
+        strides.rhs_strides[0] = 1
     else:
-        ptr2 = <VALUE_TYPE * >0
-        value = gpu_value2
-        elem_size_b = 1
-    thrust_operation(op, < VALUE_TYPE > value, elem_size_a, ptr1, elem_size_b, ptr2, ptr3)
+        ret_strides = [np.prod(ret.shape[i + 1:], dtype='int') for i in range(len(ret.shape))]
+
+        lhs_strides = [np.prod(lhs.shape[i + 1:], dtype='int') for i in range(len(lhs.shape))]
+        lhs_strides = [0] * (len(ret.shape) - len(lhs.shape)) + lhs_strides
+
+        for i, (arg, dest) in enumerate(zip(reversed(lhs.shape), reversed(ret.shape)), 1):
+            if arg != dest:
+                lhs_strides[i * -1] = 0
+
+        rhs_strides = [np.prod(rhs.shape[i + 1:], dtype='int') for i in range(len(rhs.shape))]
+        rhs_strides = [0] * (len(ret.shape) - len(rhs.shape)) + rhs_strides
+
+        for i, (arg, dest) in enumerate(zip(reversed(rhs.shape), reversed(ret.shape)), 1):
+            if arg != dest:
+                rhs_strides[i * -1] = 0
+
+        strides.size = len(ret_strides)
+        for i in range(strides.size):
+            strides.result_strides[i] = ret_strides[i]
+            strides.lhs_strides[i] = lhs_strides[i]
+            strides.rhs_strides[i] = rhs_strides[i]
+
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > rhs._ptr
+    cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > ret._ptr
+    size = np.prod(ret.shape, dtype='int')
+
+    func(ptr1, ptr2, ptr3, size, & strides)
 
 
 def cumul(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    basic_operation(Operation.MUL, gpu_value1, gpu_value2, gpu_value3)
+    bin_operation(thrust_mul, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cuadd(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    basic_operation(Operation.ADD, gpu_value1, gpu_value2, gpu_value3)
+    bin_operation(thrust_add, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cusub(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    basic_operation(Operation.SUB, gpu_value1, gpu_value2, gpu_value3)
+    bin_operation(thrust_sub, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cudiv(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    basic_operation(Operation.DIV, gpu_value1, gpu_value2, gpu_value3)
+    bin_operation(thrust_div, gpu_value1, gpu_value2, gpu_value3)
 
 
 def curdiv(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    basic_operation(Operation.RDIV, gpu_value1, gpu_value2, gpu_value3)
+    bin_operation(thrust_rdiv, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cupow(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    basic_operation(Operation.POW, gpu_value1, gpu_value2, gpu_value3)
+    bin_operation(thrust_pow, gpu_value1, gpu_value2, gpu_value3)
 
 
 def curpow(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    basic_operation(Operation.RPOW, gpu_value1, gpu_value2, gpu_value3)
+    bin_operation(thrust_rpow, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cufill(value, gpu_value):
@@ -193,16 +223,6 @@ def cucross_entropy(gpu_value1, gpu_value2, gpu_value3):
 
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
     thrust_cross_entropy(ptr1, ptr2, ptr3, size)
-
-
-def cubroadcast(gpu_value1, gpu_value2):
-    cdef int size_1 = <int > gpu_value1.size
-    cdef int size_2 = <int > gpu_value2.size
-    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
-    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-
-    cuda_base.check_heap_device(gpu_value1, gpu_value2)
-    thrust_broad_cast(size_1, ptr1, size_2, ptr2)
 
 
 def cuabs_forward(gpu_value1, gpu_value2):

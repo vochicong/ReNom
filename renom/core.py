@@ -1117,6 +1117,23 @@ def broad_cast(hs, dy):
     return dy
 
 
+def cu_broad_cast(hs, dy):
+    if isinstance(hs, GPUValue):
+        shape = list(hs.shape)
+        if hs.shape != dy.shape:
+            axis = []
+            while len(shape) != len(dy.shape):
+                if len(shape) < len(dy.shape):
+                    shape.insert(0, 1)
+            for i, s in enumerate(shape):
+                if s == 1:
+                    axis.append(i)
+            if axis:
+                dy = cusum(dy, axis=tuple(axis))
+        dy = dy.reshape(hs.shape)
+    return dy
+
+
 def get_gpu(array):
     if isinstance(array, Number) or isinstance(array, GPUValue):
         return array
@@ -1154,21 +1171,24 @@ class Add(BinOp):
         gdy = get_gpu(dy)
 
         if isinstance(self.attrs._rhs, Node):
-            grhs = get_gpu(self.attrs._rhs)
-            if grhs.shape == gdy.shape:
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            if rhs.shape == gdy.shape:
                 new_r_dx = gdy.copy()
             else:
-                new_r_dx = grhs.zeros_like_me()
-                cubroadcast(gdy, new_r_dx)
+                new_r_dx = cu_broad_cast(rhs, gdy)
+
             self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
 
         if isinstance(self.attrs._lhs, Node):
-            glhs = get_gpu(self.attrs._lhs)
-            if glhs.shape == gdy.shape:
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            if lhs.shape == gdy.shape:
                 new_l_dx = gdy.copy()
             else:
-                new_l_dx = glhs.zeros_like_me()
-                cubroadcast(gdy, new_l_dx)
+                new_l_dx = cu_broad_cast(lhs, gdy)
             self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
 
 
@@ -1204,15 +1224,18 @@ class Sub(BinOp):
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._lhs, Node):
-            new_l_dx = get_gpu(self.attrs._lhs).zeros_like_me()
-            dxl = get_gpu(dy)
-            cubroadcast(dxl, new_l_dx)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            new_l_dx = cu_broad_cast(lhs, get_gpu(dy))
             self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
 
         if isinstance(self.attrs._rhs, Node):
-            new_r_dx = get_gpu(self.attrs._rhs).zeros_like_me()
-            dxr = -get_gpu(dy)
-            cubroadcast(dxr, new_r_dx)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            new_r_dx = cu_broad_cast(rhs, -1 * get_gpu(dy))
+
             self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
 
 
@@ -1238,6 +1261,7 @@ class Mul(BinOp):
         return get_gpu(lhs) * get_gpu(rhs)
 
     def _backward_cpu(self, context, dy, **kwargs):
+
         lhs = to_value(self.attrs._lhs)
         rhs = to_value(self.attrs._rhs)
 
@@ -1250,19 +1274,19 @@ class Mul(BinOp):
             self.attrs._lhs._update_diff(context, l_dx, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
-
         if isinstance(self.attrs._rhs, Node):
-            new_r_dx = get_gpu(self.attrs._rhs).zeros_like_me()
-            dxr = get_gpu(dy) * get_gpu(self.attrs._lhs)
-            cubroadcast(dxr, new_r_dx)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+            dxr = cu_broad_cast(rhs, lhs * get_gpu(dy))
 
-            self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
+            self.attrs._rhs._update_diff(context, dxr, **kwargs)
 
         if isinstance(self.attrs._lhs, Node):
-            new_l_dx = get_gpu(self.attrs._lhs).zeros_like_me()
-            dxl = get_gpu(dy) * get_gpu(self.attrs._rhs)
-            cubroadcast(dxl, new_l_dx)
-            self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+            dxl = cu_broad_cast(lhs, rhs * get_gpu(dy))
+
+            self.attrs._lhs._update_diff(context, dxl, **kwargs)
 
 
 class RMul(Mul):
@@ -1303,17 +1327,19 @@ class Div(BinOp):
     def _backward_gpu(self, context, dy, **kwargs):
 
         if isinstance(self.attrs._lhs, Node):
-            new_l_dx = get_gpu(self.attrs._lhs).zeros_like_me()
-            dxl = get_gpu(dy) / get_gpu(self.attrs._rhs)
-            cubroadcast(dxl, new_l_dx)
-            self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            dxl = cu_broad_cast(lhs, get_gpu(dy) / rhs)
+            self.attrs._lhs._update_diff(context, dxl, **kwargs)
 
         if isinstance(self.attrs._rhs, Node):
-            new_r_dx = get_gpu(self.attrs._rhs).zeros_like_me()
-            dxr = (get_gpu(self.attrs._rhs) ** (-2.0)) * - \
-                1.0 * get_gpu(self.attrs._lhs) * get_gpu(dy)
-            cubroadcast(dxr, new_r_dx)
-            self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            v = rhs ** (-2.0) * -1.0 * lhs * get_gpu(dy)
+            dxr = cu_broad_cast(rhs, v)
+            self.attrs._rhs._update_diff(context, dxr, **kwargs)
 
 
 class RDiv(Div):
@@ -1426,11 +1452,14 @@ class Pow(BinOp):
     def _backward_gpu(self, context, dy, **kwargs):
 
         if isinstance(self.attrs._lhs, Node):
+            lhs = get_gpu(self.attrs._lhs)
             rhs = get_gpu(self.attrs._rhs)
-            new_l_dx = get_gpu(self.attrs._lhs).zeros_like_me()
-            dxl = get_gpu(dy) * rhs * (GPUValue.__pow__(get_gpu(self.attrs._lhs), rhs - 1))
-            cubroadcast(dxl, new_l_dx)
-            self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
+
+            new_l_dx = lhs.zeros_like_me()
+            v = get_gpu(dy) * rhs * (GPUValue.__pow__(lhs, rhs - 1))
+
+            dxl = cu_broad_cast(lhs, v)
+            self.attrs._lhs._update_diff(context, dxl, **kwargs)
 
         if isinstance(self.attrs._rhs, Node):
             lhs = get_gpu(self.attrs._lhs).empty_like_me()
