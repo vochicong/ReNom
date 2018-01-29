@@ -154,7 +154,7 @@ class dot(BinOp):
             self.attrs._rhs._update_diff(context, rdx, **kwargs)
 
 
-class concat(BinOp):
+class concat(Node):
     """
     Join a sequence of arrays along an existing axis.
     In the current version(2.0), concatenation along 2nd axis is
@@ -180,38 +180,46 @@ class concat(BinOp):
     """
 
     @classmethod
-    def _oper_cpu(cls, lhs, rhs):
-        return np.hstack((lhs, rhs))
+    def _oper_cpu(cls, args):
+        return np.concatenate(args, axis=1).copy()
 
     @classmethod
-    def _oper_gpu(cls, lhs, rhs):
+    def _oper_gpu(cls, args):
         axis = 1
-        newshape = lhs.shape[:axis] + (lhs.shape[axis] + rhs.shape[axis],) + lhs.shape[axis + 1:]
+        newshape = args[0].shape[:axis] + (np.sum([a.shape[1] for a in args]), ) + args[0].shape[axis + 1:]
 
         ret = GPUValue(shape=newshape)
-        cuconcat(get_gpu(lhs), get_gpu(rhs), ret, axis)
+        cuconcat([get_gpu(a) for a in args], ret, axis)
         return ret
 
-    def __new__(cls, lhs, rhs):
-        ret = super(concat, cls).__new__(cls, lhs, rhs)
-        ret.attrs._index = lhs.shape[1]
+    def __new__(cls, *args):
+        if isinstance(args[0], (tuple, list)):
+            args = args[0]
+        val = cls.calc_value(args)
+        ret = super(concat, cls).__new__(cls, val)
+        tmp = 0
+        index = []
+        for a in args[:-1]:
+            tmp += a.shape[1]
+            index.append(tmp)
+        ret.attrs._index = index
+        for i, v in enumerate(args):
+            setattr(ret.attrs, "_arg%d" % i, args[i])
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        ldy, rdy = np.hsplit(to_value(dy), [self.attrs._index])
-        if isinstance(self.attrs._lhs, Node):
-            self.attrs._lhs._update_diff(context, ldy, **kwargs)
-
-        if isinstance(self.attrs._rhs, Node):
-            self.attrs._rhs._update_diff(context, rdy, **kwargs)
+        args = np.hsplit(to_value(dy), self.attrs._index)
+        for i in range(len(self.attrs._index) + 1):
+            arg = getattr(self.attrs, "_arg%d" % i)
+            if isinstance(arg, Node):
+                arg._update_diff(context, args[i], **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
-        ldy, rdy = np.hsplit(get_gpu(dy).new_array(), [self.attrs._index])
-        if isinstance(self.attrs._lhs, Node):
-            self.attrs._lhs._update_diff(context, GPUValue(ldy), **kwargs)
-
-        if isinstance(self.attrs._rhs, Node):
-            self.attrs._rhs._update_diff(context, GPUValue(rdy), **kwargs)
+        args = np.hsplit(get_gpu(dy).new_array(), self.attrs._index)
+        for i in range(len(self.attrs._index) + 1):
+            arg = getattr(self.attrs, "_arg%d" % i)
+            if isinstance(arg, Node):
+                arg._update_diff(context, args[i], **kwargs)
 
 
 class where(Node):
