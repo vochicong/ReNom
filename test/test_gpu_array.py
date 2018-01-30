@@ -1243,6 +1243,7 @@ def test_gpu_broadcast(a, b):
 
     assert np.allclose(a + b, (g1 + g2))
 
+
 def comp_get(arr, f):
     with use_cuda():
         g = renom.core.GPUValue(arr)

@@ -365,12 +365,11 @@ def cuembedding_backward(gpu_index, gpu_dy, gpu_dx):
 
 def cuconcat(gpu_values, gpu_value2, axis):
     for i in range(len(gpu_values[:-1])):
-        cuda_base.check_heap_device(gpu_values[i], gpu_values[i+1], gpu_value2)
+        cuda_base.check_heap_device(gpu_values[i], gpu_values[i + 1], gpu_value2)
 
     buffer_size = np.sum([val.nbytes for val in gpu_values])
     if gpu_value2.nbytes < buffer_size:
         raise ValueError("Insufficient destination buffer size")
-
 
     cdef size_t rec_size = 0
     for gpu_value in gpu_values:
@@ -378,14 +377,13 @@ def cuconcat(gpu_values, gpu_value2, axis):
             raise ValueError("zero-dimensional arrays cannot be concatenated")
         rec_size += functools.reduce(operator.__mul__, gpu_value.shape[axis:], 1)
 
-
     cdef size_t size = 0
     cdef concated_size
     cdef VALUE_TYPE * ptr1
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
     for gpu_value in gpu_values:
         s1 = gpu_value.shape[:axis] + gpu_value.shape[axis + 1:]
-        concated_size = <int >functools.reduce(operator.__mul__, gpu_value.shape[axis:], 1)
+        concated_size = <int > functools.reduce(operator.__mul__, gpu_value.shape[axis:], 1)
         ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value._ptr
         thrust_copy_memory_stride(ptr2 + size, ptr1, gpu_value.size, rec_size, concated_size)
         size += <int > concated_size

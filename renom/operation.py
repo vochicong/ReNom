@@ -186,7 +186,8 @@ class concat(Node):
     @classmethod
     def _oper_gpu(cls, args):
         axis = 1
-        newshape = args[0].shape[:axis] + (np.sum([a.shape[1] for a in args]), ) + args[0].shape[axis + 1:]
+        newshape = args[0].shape[:axis] + \
+            (np.sum([a.shape[1] for a in args]), ) + args[0].shape[axis + 1:]
 
         ret = GPUValue(shape=newshape)
         cuconcat([get_gpu(a) for a in args], ret, axis)
