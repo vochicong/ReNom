@@ -158,8 +158,8 @@ class BatchNormalize(Parametrized):
                          [-0.00887055, -0.01459344],
                          [ 0.05934474,  0.00987731]], dtype=float32)
 
-    .. [1] Sergey Ioffe, Christian Szegedy.(2015).Batch Normalization:
-        Accelerating Deep Network Training by Reducing Internal Covariate Shift
+    .. [1] Sergey Ioffe, Christian Szegedy. Batch Normalization:
+        Accelerating Deep Network Training by Reducing Internal Covariate Shift(2015)
 
     """
 

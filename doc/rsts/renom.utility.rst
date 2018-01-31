@@ -19,6 +19,11 @@ renom.utility.trainer
 .. automodule:: renom.utility.trainer
     :members:
 
+renom.utility.completion.bayesian_ridge_regression
+---------------------
+ 
+.. automodule:: renom.utility.completion.bayesian_ridge_regression
+    :members:
 
 renom.utility.distributor.distributor
 -------------------------------------

@@ -374,3 +374,8 @@ class exp(UnaryOp):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, dy * get_gpu(self), **kwargs)
 
+class amin(Amin):
+    pass
+
+class amax(Amax):
+    pass

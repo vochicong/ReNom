@@ -142,19 +142,6 @@ class NdarrayDistributor(Distributor):
 
 class TimeSeriesDistributor(NdarrayDistributor):
 
-    '''
-    時系列データを扱うDistributorクラス。
-    時系列データは以下のフォーマットで与えられる必要がある。
-
-    N: データ数
-    T: 時系列長
-    D: データ次元
-    (N, T, D)
-
-    :param ndarray x: 入力データ
-    :param ndarray y: 教師データ
-    '''
-
     def __init__(self, x, y, **kwargs):
         super(TimeSeriesDistributor, self).__init__(x=x, y=y,
                                                     data_table=kwargs.get("data_table"))
