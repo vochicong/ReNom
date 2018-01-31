@@ -157,12 +157,11 @@ class dot(BinOp):
 class concat(Node):
     """
     Join a sequence of arrays along an existing axis.
-    In the current version(2.0), concatenation along 2nd axis is
+    In the current version(2.4), concatenation along 2nd axis is
     only supported.
 
     Args:
-        lhs (Variable,ndarray): Input array.
-        rhs (Variable,ndarray): Input array.
+        args (*Variable, tuple): Input arrays or tuple of input arrays.
 
     Example:
         >>> import numpy as np
