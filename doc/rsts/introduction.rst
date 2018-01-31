@@ -1,16 +1,16 @@
 
-Introduction of version 2.0
+Introduction of version 2
 ===========================
 
-In ReNom version 2.0, automatic differentiation feature have been added to 
+In ReNom version 2, automatic differentiation feature have been added to 
 version 1.0. Users are able to build neural network model with a lot of flexibility.
 
-Concept of version 2.0
+Concept of version 2
 ----------------------
 
-ReNom 2.0 is focusing on its usability first, as the same as previous version.
+ReNom 2 is focusing on its usability first, as the same as previous version.
  
-The syntax of ReNom version 2.0 is aligned to NumPy, so that users can compute
+The syntax of ReNom version 2 is aligned to NumPy, so that users can compute
 differential value adding a tiny script change to the formula written in NumPy style.
 
 By reducing user interfaces, ReNom became a NumPy user friendly library package while
@@ -87,7 +87,7 @@ Sequential model can be instantiated by providing a layer object list.
 Functional Model
 ----------------
 
-In ReNom 2.0, some layers previously regarded as objects such as Activation function layer,
+In ReNom 2, some layers previously regarded as objects such as Activation function layer,
 fully connected layer are able to be handled functionally. 
 
    .. code-block:: python
