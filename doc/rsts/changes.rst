@@ -4,7 +4,7 @@ Changes 2.3.1 => 2.4.1
 Modified
 ^^^^^^^^
 
-1. GPU accelerated __getitem__, __setitem__ is available.
+**#1.** GPU accelerated __getitem__, __setitem__ is available.
 
     The performance become better.
 
@@ -18,25 +18,76 @@ Modified
         "n[0]", 0.52871, 0.08351
         "n[:, :]", 1.50995, 0.16364
 
-2. renom.concat() accepts variable arguments.
 
-    The following code become available.
+**#2.** renom.concat() accepts variable length argument list.
 
-    >> import renom
+    The following code became available.
 
-3. renom.sum() accepts 'axis' argument.
+        >>> import renom
+        >>> import renom as rm
+        >>> import numpy as np
+        >>>
+        >>> a = np.random.rand(2, 1)
+        >>> b = np.random.rand(2, 2)
+        >>> c = np.random.rand(2, 3)
+        >>>
+        >>> out = rm.concat(a, b, c) # Variable length argument can be passed.
+        >>> out.shape
+        (2, 6) 
 
-4. Auto differentiation is enabled in functions 'T', 'transpose' and 'reshape' that are implemented in Node object.
 
-5. In the Yolo class, redundant argument 'image_size' of the function '__init__' is removed.
+**#3.** renom.sum() accepts 'axis' argument.
+
+    The following code became available.
+
+        >>> import renom as rm
+        >>> import numpy as np
+        >>>
+        >>> a = np.random.rand(2, 1)
+        >>> out = rm.sum(a)
+        >>> out.shape
+        ()
+        >>> out = rm.sum(a, axis=0)
+        >>> out.shape
+        (1,)
+        >>> out = rm.sum(a, axis=1)
+        >>> out.shape
+        (2,)
+
+
+**#4.** Auto differentiation is enabled in functions 'T', 'transpose' and 'reshape' that are implemented in Node object.
+
+    The following code became available.
+
+        >>> import renom as rm
+        >>> import numpy as np
+        >>>
+        >>> a = np.random.rand(2, 1)   
+        >>> va = rm.Variable(a)
+        >>>
+        >>> print(rm.sum(va.T).grad().get(va)) # Auto differentiation of 'T'.
+        [[ 1.]
+         [ 1.]]
+        >>> print(rm.sum(va.transpose(1, 0)).grad().get(va)) # AD of 'transpose'.
+        [[ 1.]
+         [ 1.]]
+        >>> print(rm.sum(va.reshape(1, 1, 2)).grad().get(va) # AD of 'reshape'.
+        [[ 1.]
+         [ 1.]]
+
+
+**#5.** In the Yolo class, redundant argument 'image_size' of the function '__init__' is removed.
+
+    When you instantiate Yolo class, be careful not to give the argument 'image_size'.
+    See API reference of :ref:`Yolo`.
 
 
 New features
 ^^^^^^^^^^^^
 
-1. New auto differentiation available operation: renom.amax, renom.amin.
+**#1.** New auto differentiation available operation: renom.amax, renom.amin.
 
-2. New method for releasing gpu memory pool: renom.cuda.release_mem_pool.
+**#2.** New method for releasing gpu memory pool: renom.cuda.release_mem_pool.
 
 Removed modules
 ^^^^^^^^^^^^^^
@@ -51,7 +102,7 @@ Bug fix
     In the previous version, broadcasted calculations, as exampled bellow, with gpu are
     not correctly calculated.
 
-    Example:
+    Bug example:
         >>> import renom as rm
         >>> import numpy as np
         >>> from renom.cuda import set_cuda_active
@@ -87,20 +138,21 @@ Bug fix
     If only sequential models have been used, this bug have not affected.
 
 
-2. Batch normalization inference calculation.
+**#2.** Batch normalization inference calculation.
 
     In the previous version, inference calculation of batch normalization were stopped by
     CUDNN_STATUS_BAD_PARAM error.
 
-    >>> import renom as rm
-    >>> import numpy as np
-    >>> from renom.cuda import set_cuda_active
-    >>>
-    >>> layer = rm.BatchNormalize()
-    >>> layer.set_models(inference=True) # Setting the layer as inference mode.
-    >>> a = rm.Variable(np.arange(2).reshape(2, 1))
-    >>> c = layer(a).as_ndarray()
-    Exception: b'CUDNN_STATUS_BAD_PARAM'
+    Bug example:
+        >>> import renom as rm
+        >>> import numpy as np
+        >>> from renom.cuda import set_cuda_active
+        >>>
+        >>> layer = rm.BatchNormalize()
+        >>> layer.set_models(inference=True) # Setting the layer as inference mode.
+        >>> a = rm.Variable(np.arange(2).reshape(2, 1))
+        >>> c = layer(a).as_ndarray()
+        Exception: b'CUDNN_STATUS_BAD_PARAM'
 
     This bug have been happened when following conditions were satisfied.
 
