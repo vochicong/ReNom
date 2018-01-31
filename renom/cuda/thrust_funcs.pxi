@@ -8,6 +8,7 @@
 """
 import numpy as np
 from libc.stdint cimport uintptr_t
+from libc.stdio cimport printf
 from libcpp cimport bool
 import cuda_base
 import operator
@@ -362,34 +363,30 @@ def cuembedding_backward(gpu_index, gpu_dy, gpu_dx):
     thrust_embedding_backward(N, K, M, index_ptr, dy_ptr, dx_ptr)
 
 
-def cuconcat(gpu_value1, gpu_value2, gpu_value3, axis):
+def cuconcat(gpu_values, gpu_value2, axis):
+    for i in range(len(gpu_values[:-1])):
+        cuda_base.check_heap_device(gpu_values[i], gpu_values[i + 1], gpu_value2)
 
-    cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-
-    cdef size_t size = gpu_value1.nbytes + gpu_value2.nbytes
-    if gpu_value3.nbytes < size:
+    buffer_size = np.sum([val.nbytes for val in gpu_values])
+    if gpu_value2.nbytes < buffer_size:
         raise ValueError("Insufficient destination buffer size")
 
-    if (not gpu_value1.shape) or (not gpu_value2.shape):
-        raise ValueError("zero-dimensional arrays cannot be concatenated")
+    cdef size_t rec_size = 0
+    for gpu_value in gpu_values:
+        if (not gpu_value.shape):
+            raise ValueError("zero-dimensional arrays cannot be concatenated")
+        rec_size += functools.reduce(operator.__mul__, gpu_value.shape[axis:], 1)
 
-    s1 = gpu_value1.shape[:axis] + gpu_value1.shape[axis + 1:]
-    s2 = gpu_value1.shape[:axis] + gpu_value1.shape[axis + 1:]
-
-    if s1 != s2:
-        raise ValueError("all the input array dimensions except"
-                         " for the concatenation axis must match exactly")
-
-    cdef size_t size1 = functools.reduce(operator.__mul__, gpu_value1.shape[axis:], 1)
-    cdef size_t size2 = functools.reduce(operator.__mul__, gpu_value2.shape[axis:], 1)
-    cdef size_t rec_size = size1 + size2
-
-    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef size_t size = 0
+    cdef concated_size
+    cdef VALUE_TYPE * ptr1
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > gpu_value3._ptr
-
-    thrust_copy_memory_stride(ptr3, ptr1, gpu_value1.size, rec_size, size1)
-    thrust_copy_memory_stride(ptr3 + size1, ptr2, gpu_value2.size, rec_size, size2)
+    for gpu_value in gpu_values:
+        s1 = gpu_value.shape[:axis] + gpu_value.shape[axis + 1:]
+        concated_size = <int > functools.reduce(operator.__mul__, gpu_value.shape[axis:], 1)
+        ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value._ptr
+        thrust_copy_memory_stride(ptr2 + size, ptr1, gpu_value.size, rec_size, concated_size)
+        size += <int > concated_size
 
 
 ctypedef object(*REDUCE_FUNC)(
@@ -460,8 +457,8 @@ cdef _reduce_array(max_grids, num_threads, gpu_value1, axis, keepdims, REDUCE_FU
         result_shape = _del_items(src_shape, reduce_axis)
         result_size = functools.reduce(operator.__mul__, result_shape, 1)
 
-    if len(reduce_axis) >= 16:
-        raise ValueError('Invalid axis: %s' % (axis,))
+    if len(reduce_axis) >= RENOM_CUDA_MAX_AXIS:
+        raise ValueError("Number of axis should be less than %d" % RENOM_CUDA_MAX_AXIS)
 
     kept_shapes = src_shape[reduce_axis[-1] + 1:]
     kept_shapes_size = functools.reduce(operator.__mul__, kept_shapes, 1)
@@ -739,3 +736,66 @@ def cu_transpose(gpu_value1, axis):
                      ptr2, new_strides)
 
     return result
+
+
+cdef _build_slice_infos(getitem_slice_infos * infos, slices):
+    if len(slices) >= RENOM_CUDA_MAX_AXIS:
+        raise ValueError("Number of axis should be less than %d" % RENOM_CUDA_MAX_AXIS)
+
+    infos.shape_len = len(slices)
+    for i, (start, stop, step, adv_indexes, stride, dest_stride) in enumerate(slices):
+        infos.slice_info[i].start = start
+        infos.slice_info[i].stop = stop
+        infos.slice_info[i].step = step
+        if adv_indexes:
+            infos.slice_info[i].adv_indexes_len = adv_indexes.size
+            infos.slice_info[i].adv_indexes = <long long * > < uintptr_t > adv_indexes._ptr
+        else:
+            infos.slice_info[i].adv_indexes_len = 0
+            infos.slice_info[i].adv_indexes = NULL
+
+        infos.slice_info[i].stride = stride
+        infos.slice_info[i].dest_stride = dest_stride
+
+
+def cu_get_item(gpu_value1, size, dest_size, slices):
+
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+
+    result = renom.core.GPUValue(shape=(dest_size,))
+    cdef VALUE_TYPE * ptr_result = <VALUE_TYPE * > < uintptr_t > result._ptr
+
+    cdef getitem_slice_infos infos
+    _build_slice_infos( & infos, slices)
+
+    cdef getitem_slice_info * info
+
+    thrust_getitem(ptr1, ptr_result, dest_size, & infos)
+
+    return result
+
+
+def cu_set_item(value, valuesize, gpu_value1, slices, strides, broadcasted_strides):
+    if not isinstance(value, renom.core.GPUValue):
+        if isinstance(value, renom.core.Node):
+            value = value.get_gpu()
+        elif isinstance(value, np.ndarray):
+            value = renom.core.GPUValue(array=value)
+        else:
+            value = renom.core.GPUValue(array=np.array(value))
+
+    if value.dtype.name != gpu_value1.dtype.name:
+        raise ValueError()
+
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > value._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+
+    cdef getitem_slice_infos infos
+    _build_slice_infos( & infos, slices)
+
+    infos.stride_size = len(strides)
+    for i, (s, b) in enumerate(zip(strides, broadcasted_strides)):
+        infos.strides[i] = s
+        infos.broadcasted_strides[i] = b
+
+    thrust_setitem(ptr1, valuesize, ptr2, & infos)

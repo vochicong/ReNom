@@ -180,13 +180,328 @@ class GradsWithCaller(object):
 # todo: move this method to Cython
 
 
-def calc_broadcast_shape(s1, s2):
+def calc_broadcast_shape(*args):
     # silly, but works
-    if all([isinstance(s, (np.ndarray, Number, GPUValue)) for s in (s1, s2)]):
-        return np.broadcast(np.empty(getattr(s1, "shape", 1), dtype=np.bool),
-                            np.empty(getattr(s2, "shape", 1), dtype=np.bool)).shape
+    if all([isinstance(s, (np.ndarray, Number, GPUValue)) for s in args]):
+        arrays = [np.empty(getattr(s, 'shape', 1), dtype=np.bool) for s in args]
+        return np.broadcast(*arrays).shape
     else:
         raise Exception("Not supported data type.")
+
+
+class _AdvIndex:
+    def __init__(self, index):
+        if isinstance(index, (list, tuple)):
+            index = np.array(index)
+
+        isbool = index.dtype.name == 'bool'
+        if isbool:
+            if isinstance(index, GPUValue):
+                index = index.new_array()
+
+            elems = []
+            for j, v in enumerate(index.reshape(-1)):
+                if v:
+                    elems.append(j)
+
+            index = np.array(elems, dtype='int64')
+        elif isinstance(index, np.ndarray):
+            index = index.astype('int64')
+
+        self.org_index = index
+        if not isinstance(index, GPUValue):
+            index = index.reshape(-1)
+            index = GPUValue(index.astype('int64'), dtype='int64')
+
+        if index.dtype.type is not np.int64:
+            raise IndexError("Invalid index type: %r" % index.dtype)
+
+        self.shape = index.shape
+        self.index = index
+
+
+def _parse_index(arr, indexes):
+    if not isinstance(indexes, tuple):
+        indexes = [indexes]
+    else:
+        indexes = list(indexes)
+
+    ellipsis = None
+    num_values = 0
+
+    # calc number of slice or int
+    for i, s in enumerate(indexes):
+        if s is None:
+            continue
+
+        elif s is Ellipsis:
+            if ellipsis is not None:
+                assert 0
+            ellipsis = i
+            continue
+
+        num_values += 1
+
+    # expand Ellipsis or append slices at tail
+    if num_values != len(arr.shape):
+        if ellipsis is None:
+            ellipsis = len(indexes)
+
+        f, b = indexes[:ellipsis], indexes[ellipsis + 1:]
+        rest = len(arr.shape) - num_values
+        mid = list(slice(0, arr.shape[i + ellipsis], 1) for i in range(rest))
+        indexes = f + mid + b
+
+    if len([i for i in indexes if i is not None]) != len(arr.shape):
+        raise IndexError()
+
+    # build slices
+    slices = []
+    dest_shapes = []
+    result_shapes = []
+
+    for i, index in enumerate(indexes):
+        shape = arr.shape[len(slices)]
+
+        if isinstance(index, slice):
+            start, stop, step = index.indices(shape)
+            slices.append((start, stop, step))
+
+            dest_shape = 0
+            if step < 0:
+                if stop < start:
+                    dest_shape = (start - stop - 1) // (-step) + 1
+            else:
+                if start < stop:
+                    dest_shape = (stop - start - 1) // step + 1
+
+            dest_shapes.append(dest_shape)
+            result_shapes.append(dest_shape)
+
+        elif isinstance(index, int):
+            if index < 0:
+                index = index + shape
+
+            if not (0 <= index < shape):
+                raise IndexError()
+
+            slices.append((index, index + 1, 1))
+            dest_shapes.append(1)
+
+        else:
+            # None(newaxis)
+            result_shapes.append(1)
+
+    strides = [np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
+    dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+
+    return slices, strides, dest_strides, result_shapes, dest_shapes
+
+
+def build_shapes(arr, indexes):
+    strides = [np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
+
+    # make indexes a list
+    if isinstance(indexes, bool):
+        slices = [[0, s, 1, None, st, st] for s, st in zip(arr.shape, strides)]
+        return slices, [1 if indexes else 0] + list(arr.shape), list(arr.shape)
+
+    elif isinstance(indexes, list):
+        # if indexes is in form of `[[1]]`, then unwrap the outer list.
+        for elem in indexes:
+            if isinstance(elem, (list, tuple, np.ndarray, GPUValue)):
+                indexes = indexes[:]
+                break
+        else:
+            indexes = [indexes]
+    elif isinstance(indexes, tuple):
+        indexes = list(indexes)
+    else:
+        indexes = [indexes]
+
+    # check if boolean index with same shape
+    if len(indexes) == 1:
+        elem = indexes[0]
+        if isinstance(elem, (list, tuple, np.ndarray, GPUValue)):
+            if not isinstance(elem, (np.ndarray, GPUValue)):
+                elem = np.array(elem)
+            if elem.dtype.name == 'bool':
+                if elem.shape == arr.shape:
+                    idxes = _AdvIndex(elem).index
+                    slices = [[0, 0, 0, idxes, 1, 1]]
+                    return slices, [idxes.size], [idxes.size]
+
+    ellipsis = None
+    num_values = 0
+    is_advanced = False
+
+    # calc number of slice or index
+    for i, s in enumerate(indexes):
+        # check if advanced index or not
+        if isinstance(s, (list, tuple, np.ndarray, GPUValue)):
+            is_advanced = True
+
+        elif s is None:
+            continue
+
+        elif s is Ellipsis:
+            if ellipsis is not None:
+                assert 0
+            ellipsis = i
+            continue
+
+        num_values += 1
+
+    # expand Ellipsis or append slices at tail
+    if num_values != len(arr.shape):
+        if ellipsis is None:
+            ellipsis = len(indexes)
+
+        f, b = indexes[:ellipsis], indexes[ellipsis + 1:]
+        rest = len(arr.shape) - num_values
+        mid = list(slice(0, arr.shape[i + ellipsis], 1) for i in range(rest))
+        indexes = f + mid + b
+
+    if len([i for i in indexes if i is not None]) != len(arr.shape):
+        raise IndexError()
+
+    src_shape = arr.shape
+    adv_shape = []
+    if is_advanced:
+        # convert int index to the advanced index
+        # note that 1 in the [1, []] is an advanced index
+        for i, elem in enumerate(indexes[:]):
+            if isinstance(elem, int):
+                indexes[i] = _AdvIndex([elem])
+            elif isinstance(elem, (list, tuple, np.ndarray, GPUValue)):
+                indexes[i] = _AdvIndex(elem)
+
+        # collect advanced indexes
+        advs = []
+        stds = []
+        num_advs = 0
+        all = zip(indexes, strides, src_shape)
+        for k, g in itertools.groupby(all, key=lambda e: isinstance(e[0], _AdvIndex)):
+            if k:
+                num_advs += 1
+                advs.extend(g)
+            else:
+                stds.extend(g)
+
+        # check if The advanced indexes are all next to each other.
+        is_split_adv = (num_advs >= 2)
+
+        if is_split_adv:
+            # move adv indexes at topmost
+            indexes = ([ind for ind, stride, shape in advs] +
+                       [ind for ind, stride, shape in stds])
+            strides = ([stride for ind, stride, shape in advs] +
+                       [stride for ind, stride, shape in stds])
+            src_shape = ([shape for ind, stride, shape in advs] +
+                         [shape for ind, stride, shape in stds])
+
+        adv_shape = calc_broadcast_shape(*(adv.org_index for adv, stride, shape in advs))
+
+    # build slices
+    # (start, stop, step, adv_indexes, stride, dest_stride)
+    slices = []
+    result_shapes = []
+    dest_shapes = []
+    adv_result_shapes = adv_shape[:]
+    adv_ldxsize = np.prod(adv_shape, dtype='int')
+    adv_positions = []
+
+    n_idx = 0
+    for index in indexes:
+        shape = src_shape[n_idx]
+        stride = strides[n_idx]
+
+        if isinstance(index, slice):
+            start, stop, step = index.indices(shape)
+
+            dest_shape = 0
+            if step < 0:
+                if stop < start:
+                    dest_shape = (start - stop - 1) // (-step) + 1
+            else:
+                if start < stop:
+                    dest_shape = (stop - start - 1) // step + 1
+
+            slices.append([start, stop, step, None, stride])
+            dest_shapes.append(dest_shape)
+            result_shapes.append(dest_shape)
+            n_idx += 1
+
+        elif isinstance(index, int):
+            if index < 0:
+                index = index + shape
+
+            if not (0 <= index < shape):
+                raise IndexError()
+
+            slices.append([index, index + 1, 1, None, stride])
+            dest_shapes.append(1)
+            n_idx += 1
+
+        elif index is None:
+            # None(newaxis)
+            result_shapes.append(1)
+
+        else:  # should be sequence
+            adv_positions.append(len(slices))
+            maxidx = cu_reduce_max(index.index)
+            if maxidx.new_array() >= shape:
+                raise IndexError()
+
+            assert index.index
+            slices.append([0, 0, 0, index.index, stride])
+            if adv_result_shapes:
+                dest_shapes.append(adv_ldxsize)
+                result_shapes.extend(adv_result_shapes)
+                adv_result_shapes = None
+
+            n_idx += 1
+
+    dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+    adv_dest_stride = dest_strides[adv_positions[0]] if adv_positions else None
+
+    j = 0
+    # set dest_stride
+    for i in range(len(slices)):
+        s = slices[i]
+        if s[3] is None:
+            # slice
+            s.append(dest_strides[j])
+            j += 1
+        else:
+            # adv index
+            s.append(adv_dest_stride)
+            j = adv_positions[0] + 1
+
+    return slices, result_shapes, dest_shapes
+
+
+def _build_broadcast_mask(left, right):
+    if len(right) > len(left):
+        reminds = right[:-1 * len(left)]
+        for r in reminds:
+            if r != 1:
+                raise ValueError("could not broadcast")
+        right = right[-1 * len(left):]
+    elif len(right) < len(left):
+        right = (1,) * (len(left) - len(right)) + right
+
+    mask = []
+    for l, r in zip(left, right):
+        if l != r:
+            if r != 1:
+                raise ValueError("could not broadcast")
+
+            mask.append(0)
+        else:
+            mask.append(1)
+
+    return mask, right
 
 
 class GPUValue(object):
@@ -199,7 +514,7 @@ class GPUValue(object):
             self.shape = getattr(array, "shape", None) or ()
 
         if not dtype:
-            self.dtype = precision
+            self.dtype = np.dtype(precision)
         else:
             self.dtype = np.dtype(dtype)
 
@@ -407,19 +722,56 @@ class GPUValue(object):
             curpow(self, other, ret)
             return ret
 
-    def __getitem__(self, index):
+    def __getitem__(self, indexes):
         with use_device(self.device_id):
-            arry = self.new_array()
-            arry = arry[index]
-            ret = GPUValue(arry)
+            slices, result_shapes, dest_shapes = build_shapes(self, indexes)
+
+            dest_size = np.prod(dest_shapes, dtype='int64')
+
+            ret = cu_get_item(self, self.size, dest_size, slices)
+
+            ret.shape = result_shapes
             return ret
 
-    def __setitem__(self, index, value):
+    def __setitem__(self, indexes, value):
         with use_device(self.device_id):
-            arry = self.new_array()
-            arry[index] = get_gpu(value).new_array()
-            self.free()
-            self.to_gpu(arry)
+            #            if isinstance(indexes, (tuple, list, np.ndarray)):
+            #                arry = self.new_array()
+            #                arry[indexes] = get_gpu(value).new_array()
+            #                self.free()
+            #                self.to_gpu(arry)
+            #                return
+
+            value = get_gpu(value)
+            slices, result_shapes, dest_shapes = build_shapes(self, indexes)
+            if np.prod(result_shapes, dtype='int') == 0:
+                return
+
+            dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int')
+                            for i in range(len(dest_shapes))]
+            mask, broadcasted = _build_broadcast_mask(dest_shapes, value.shape)
+            broadcasted_strides = [np.prod(broadcasted[i + 1:], dtype='int')
+                                   for i in range(len(broadcasted))]
+            broadcasted_strides = [m * b for m, b in zip(mask, broadcasted_strides)]
+
+            valuesize = np.prod(dest_shapes, dtype='int')
+
+            cu_set_item(value, valuesize, self, slices, dest_strides, broadcasted_strides)
+
+
+#    def __getitem__(self, index):
+#        with use_device(self.device_id):
+#            arry = self.new_array()
+#            arry = arry[index]
+#            ret = GPUValue(arry)
+#            return ret
+#
+#    def __setitem__(self, index, value):
+#        with use_device(self.device_id):
+#            arry = self.new_array()
+#            arry[index] = get_gpu(value).new_array()
+#            self.free()
+#            self.to_gpu(arry)
 
     @property
     def T(self):

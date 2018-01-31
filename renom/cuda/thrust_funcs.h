@@ -98,10 +98,12 @@ namespace renom{
 	struct max_function;
 	void thrust_max(VALUE_TYPE v, VALUE_TYPE *a, VALUE_TYPE *b, int size);
 
+        const unsigned int RENOM_CUDA_MAX_AXIS= 16;
+
         struct reduce_shape_infos {
-            size_t out_size[16];
-            size_t in_size[16];
-            size_t group_size[16];
+            size_t out_size[RENOM_CUDA_MAX_AXIS];
+            size_t in_size[RENOM_CUDA_MAX_AXIS];
+            size_t group_size[RENOM_CUDA_MAX_AXIS];
         };
 
 
@@ -166,6 +168,35 @@ namespace renom{
             VALUE_TYPE *src, const size_t src_strides[16],
             VALUE_TYPE *result, const size_t result_strides[16]);
 
+
+
+        struct getitem_slice_info {
+            long long start, stop;
+            long long step;
+
+            long long adv_indexes_len;
+            long long *adv_indexes;
+            
+            size_t stride, dest_stride;
+        };
+
+        struct getitem_slice_infos {
+            size_t shape_len;
+            getitem_slice_info slice_info[16];
+            size_t stride_size;
+            size_t strides[16];
+            size_t broadcasted_strides[16];
+        };
+
+        void thrust_getitem(
+            VALUE_TYPE *src,
+            VALUE_TYPE *result, size_t result_size,
+            getitem_slice_infos *info);
+
+        void thrust_setitem(
+            VALUE_TYPE *src, size_t src_size,
+            VALUE_TYPE *dest,
+            getitem_slice_infos *info);
 
         __global__ void cuda_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);        
         void thrust_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);
