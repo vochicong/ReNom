@@ -18,11 +18,10 @@ _cuda_is_disabled = False
 
 
 def set_cuda_active(activate=True):
-    '''If True is given, this method activate cuda.
+    '''If True is given, cuda will be activated.
 
     Args:
-        activate (bool): Cuda activation flag.
-
+        activate (bool): Activation flag.
     '''
     global _cuda_is_active
     if not has_cuda():
@@ -31,7 +30,7 @@ def set_cuda_active(activate=True):
 
 
 def is_cuda_active():
-    """Check the CUDA active.
+    """Checks whether CUDA is activated.
 
     Returns:
         True if cuda is active.
@@ -101,3 +100,10 @@ def curand_generator(seed=None):
     ret = CuRandGen(seed)
     _CuRandGens[deviceid] = ret
     return ret
+
+
+def release_mem_pool():
+    """This function releases GPU memory pool.
+    """
+    if gpu_allocator:
+        gpu_allocator.release_pool

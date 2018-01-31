@@ -97,7 +97,7 @@ class conv2d(Node):
 
 
 class Conv2d(Parametrized):
-    """2d convolution function.
+    """2d convolution layer.
 
     This class creates a convolution filter to be convolved with
     the input tensor.
@@ -105,12 +105,17 @@ class Conv2d(Parametrized):
 
     At instantiation, in the case of int input, filter, padding, and stride, the shape will be symmetric.
 
+    If the argument `input_size` is passed, this layers' weight is initialized
+    in the __init__ function.
+    Otherwise, the weight is initialized in its first forward calculation.
+
     Args:
         channel (int): The dimensionality of the output.
         filter (tuple,int): Filter size of the convolution kernel.
         padding (tuple,int): Size of the zero-padding around the image.
         stride (tuple,int): Stride-size of the convolution.
         input_size (tuple): Input unit size. This must be a tuple like (Channel, Height, Width).
+        initializer (Initializer): Initializer object for weight initialization.
 
     Example:
         >>> import numpy as np

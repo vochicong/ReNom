@@ -7,3 +7,4 @@ APIs
    renom.layers
    renom.optimizer
    renom.utility
+   renom.algorithm

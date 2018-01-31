@@ -18,3 +18,33 @@ renom.utility.trainer
  
 .. automodule:: renom.utility.trainer
     :members:
+
+
+renom.utility.distributor.distributor
+-------------------------------------
+
+.. automodule:: renom.utility.distributor.distributor
+    :members:
+
+renom.utility.distributor.imageloader
+-------------------------------------
+
+.. automodule:: renom.utility.distributor.imageloader
+    :members:
+
+renom.utility.distributor.threadingdistributor
+----------------------------------------------
+
+.. automodule:: renom.utility.distributor.threadingdistributor
+    :members:
+
+
+renom.utility.image.data_augmentation.augmentation
+---------------------------------------------------------
+
+.. automodule:: renom.utility.image.data_augmentation.augmentation
+    :members:
+
+.. toctree::
+    renom.utility.image
+

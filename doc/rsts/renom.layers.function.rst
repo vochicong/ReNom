@@ -16,6 +16,9 @@ renom.layers.function
 .. automodule:: renom.layers.function.dropout
     :members:
 
+.. automodule:: renom.layers.function.embedding
+    :members:
+
 .. automodule:: renom.layers.function.flatten
     :members:
 

@@ -12,10 +12,13 @@ from renom.cuda import *
 
 
 class Grads:
-    '''This class contains gradients of each Node object.
+    '''Grads class. This class contains gradients of each Node object.
 
-    When the function ``grad`` which is instance of Node class called,
-    an instance of Grads is returned.
+    When the function ``grad`` which is instance of Node class is called,
+    an instance of Grads class will be returned.
+
+    For getting the gradient with respect to a Variable object 'x' which is on a
+    computational graph, call the 'get' function of Grads object (An example is bellow).
 
     Example:
         >>> import numpy as np
@@ -104,13 +107,15 @@ class Grads:
     _omit = object()
 
     def get(self, node, default=_omit):
-        '''This function returns the gradient of the given node.
+        '''This function returns the gradient with respect to the given node.
+        In the case of there are not any gradient of the given node, this function
+        returns 'None'.
 
         Args:
-            node (Node):
+            node (Node): Returns a gradient with respect to this argument.
 
         Return:
-            ndarray,Node,None: This method returns gradient of passed node object.
+            ndarray, Node, None: Gradient of given node object.
         '''
         if default is self._omit:
             return self.variables[id(node)]
@@ -138,7 +143,8 @@ class Grads:
             node.detach_graph()
 
     def update(self, opt=None, models=()):
-        '''Updates variables using earned gradients.
+        '''This function updates variable objects on the computational graph
+        using obtained gradients.
 
         If an optimizer instance is passed, gradients are rescaled
         with regard to the optimization algorithm before updating.
@@ -1813,6 +1819,38 @@ class Abase(Node):
 
 
 class Amax(Abase):
+    """This function performs max calculation.
+        
+    Args:
+        arg (Variable, ndarray): Input matrix.
+        axis (int): Perform calculation along this argument.
+        keepdims (bool): If `Ture` is passed, reduced dimentions remain.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> # Forward Calculation
+        >>> a = np.arange(4).reshape(2, 2)
+        >>> a
+        [[0 1]
+         [2 3]]
+        >>> rm.amax(a, axis=1)
+        [ 1.  3.]
+        >>> 
+        >>> rm.amax(a, axis=0)
+        [ 2.  3.]
+        >>> rm.amax(a, axis=0, keepdims=True)
+        [[ 2.  3.]]
+        >>>
+        >>> # Calculation of differentiation
+        >>> va = rm.Variable(a)
+        >>> out = rm.amax(va)
+        >>> grad = out.grad()
+        >>> grad.get(va) # Getting the gradient of 'va'.
+        [[ 0.,  0.],
+         [ 0.,  1.]]
+    """
+
 
     @classmethod
     def _oper_cpu(cls, arg, axis, keepdims):
@@ -1828,6 +1866,37 @@ class Amax(Abase):
 
 
 class Amin(Abase):
+    """This function performs min calculation.
+        
+    Args:
+        arg (Variable, ndarray): Input matrix.
+        axis (int): Perform calculation along this argument.
+        keepdims (bool): If `Ture` is passed, reduced dimentions remain.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> # Forward Calculation
+        >>> a = np.arange(4).reshape(2, 2)
+        >>> a
+        [[0 1]
+         [2 3]]
+        >>> rm.amin(a, axis=1)
+        [ 0.  2.]
+        >>> 
+        >>> rm.amin(a, axis=0)
+        [ 0.  1.]
+        >>> rm.amin(a, axis=0, keepdims=True)
+        [[ 0.  1.]]
+        >>>
+        >>> # Calculation of differentiation
+        >>> va = rm.Variable(a)
+        >>> out = rm.amin(va)
+        >>> grad = out.grad()
+        >>> grad.get(va) # Getting the gradient of 'va'.
+        [[ 1.,  0.],
+         [ 0.,  0.]]
+    """
 
     @classmethod
     def _oper_cpu(cls, arg, axis, keepdims):

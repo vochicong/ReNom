@@ -141,7 +141,6 @@ class MaxPool2d(PoolBase):
         >>> z = layer(x)
         >>> z.shape
         (3, 3, 30, 30)
-
         >>> z = rm.max_pool2d(x, filter=(3, 3), stride=(1, 1), padding=(0,0))
         >>> z.shape
         (3, 3, 30, 30)
@@ -170,7 +169,6 @@ class AveragePool2d(PoolBase):
         >>> z = layer(x)
         >>> z.shape
         (3, 3, 30, 30)
-
         >>> z = rm.average_pool2d(x, filter=(3, 3), stride=(1, 1), padding=(0,0))
         >>> z.shape
         (3, 3, 30, 30)

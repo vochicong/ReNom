@@ -15,8 +15,9 @@ class cross_entropy(Node):
 
     @classmethod
     def _oper_cpu(cls, lhs, rhs):
+        N = len(lhs)
         log_lhs = np.log(lhs + 1e-8)
-        ret = cls._create_node(-np.sum(rhs * log_lhs))
+        ret = cls._create_node(-np.sum(rhs * log_lhs)/N)
         ret.attrs._log_lhs = log_lhs
         ret.attrs._rhs = rhs
         ret.attrs._lhs = lhs
@@ -24,26 +25,29 @@ class cross_entropy(Node):
 
     @classmethod
     def _oper_gpu(cls, lhs, rhs):
+        N = len(lhs)
         log_lhs = log(lhs + 1e-8)
-        ret = cls._create_node(-cu.cusum(get_gpu(log_lhs * rhs)))
+        ret = cls._create_node(-cu.cusum(get_gpu(log_lhs * rhs))/N)
         ret.attrs._log_lhs = log_lhs
         ret.attrs._rhs = rhs
         ret.attrs._lhs = lhs
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
+        N = len(dy)
         if isinstance(self.attrs._rhs, Node):
-            self.attrs._rhs._update_diff(context, -dy * self.attrs._log_lhs, **kwargs)
+            self.attrs._rhs._update_diff(context, -dy * self.attrs._log_lhs / N, **kwargs)
 
         if isinstance(self.attrs._lhs, Node):
-            self.attrs._lhs._update_diff(context, -dy * self.attrs._rhs / self.attrs._lhs, **kwargs)
+            self.attrs._lhs._update_diff(context, -dy * self.attrs._rhs / self.attrs._lhs / N, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
+        N = len(dy)
         if isinstance(self.attrs._rhs, Node):
-            self.attrs._rhs._update_diff(context, -dy * self.attrs._log_lhs, **kwargs)
+            self.attrs._rhs._update_diff(context, -dy * self.attrs._log_lhs / N, **kwargs)
 
         if isinstance(self.attrs._lhs, Node):
-            self.attrs._lhs._update_diff(context, -dy * self.attrs._rhs / self.attrs._lhs, **kwargs)
+            self.attrs._lhs._update_diff(context, -dy * self.attrs._rhs / self.attrs._lhs / N, **kwargs)
 
 
 class CrossEntropy:
@@ -52,7 +56,7 @@ class CrossEntropy:
     between the target ``y`` and the input ``x``.
 
     .. math::
-        E(x) = \sum_{n}^{N}\sum_{k}^{K}(-y*ln(x+\epsilon))
+        E(x) = \\frac{1}{N}\sum_{n}^{N}\sum_{k}^{K}(-y*ln(x+\epsilon))
 
     :math:`N` is batch size.
     :math:`\epsilon` is small number for avoiding division by zero.

@@ -293,8 +293,6 @@ class allocator(object):
           
 
 gpu_allocator = allocator()
-release_mem_pool = gpu_allocator.release_pool
-
 
 def _cuSetLimit(limit, value):
     cdef size_t c_value=999;

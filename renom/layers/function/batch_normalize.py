@@ -127,16 +127,24 @@ class BatchNormalize(Parametrized):
 
     When the forward propagation, if the argument ``inference`` is set to False this layer
     calculates moving average of mean and variance.
-    Other wise the ``inference`` is set to True, this layer uses the moving average for
-    forward propagation.
+    Other wise the ``inference`` is set to True, this layer uses the moving average which
+    calculated in the above mode.
 
-    If the argument mode is set to 'feature', normalize prior-layer features per patch.
+    If the argument mode is set to 'activation', this layer normalizes prior-layer features per unit.
+    Otherwise the argument mode is set to 'feature', this layer normalizes prior-layer features per channel.
+
+    The 'feature' mode is only effective for 4D tensor input.
+
+    If the argument `input_size` is passed, this layers' weight is initialized
+    in the __init__ function.
+    Otherwise, the weight is initialized in its first forward calculation.
 
     Args:
         input_size (int): Input unit size.
         momentum (float): Momentum coefficient for the moving average.
-        mode (str): 'activation'  or 'feature'
-        epsilon (float): Small number added to avoid division by zero
+        mode (str): 'activation'  or 'feature'.
+        epsilon (float): Small number added to avoid division by zero.
+        initializer (Initializer): Initializer object for weight initialization.
 
     Example:
         >>> import numpy as np

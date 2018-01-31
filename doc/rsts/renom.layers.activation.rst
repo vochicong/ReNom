@@ -16,5 +16,8 @@ renom.layers.activation
 .. automodule:: renom.layers.activation.sigmoid
     :members:
 
+.. automodule:: renom.layers.activation.softmax
+    :members:
+
 .. automodule:: renom.layers.activation.tanh
     :members:
