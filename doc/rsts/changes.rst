@@ -81,6 +81,11 @@ Modified
     When you instantiate Yolo class, be careful not to give the argument 'image_size'.
     See API reference of :ref:`Yolo`.
 
+**#6.** Users can save attributes when saving model's weight parameters.
+
+    In the previous version, save and load function of Model object only dealt with weight parameters.
+    In v2.4.1, you can save any attributes with save and load function.
+    See the API reference of Model object.
 
 New features
 ^^^^^^^^^^^^

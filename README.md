@@ -4,13 +4,9 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
-## ReNom version 2.3.1
+## ReNom version 2.4.1
 
-- Fix save and load functions of model to save moving average of batch normalization.
-- Add auto-differentiation to transpose.
-- Add auto-differentiation to node object's reshape function.
-- Add an argument 'iou_thresh' to the function 'apply_nms'.
-- Optimized back-propagation path.
+- http://renom.jp/rsts/changes.html
 
 ## Requirements
 
