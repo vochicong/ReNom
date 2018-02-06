@@ -1580,34 +1580,36 @@ def test_setitem():
         s[[[[False, True], [True, False], [True, False]]]] = np.arange(3)
 
 
-
 def comp_splitted(nd, gpu):
     for n, g in zip(nd, gpu):
         g = g.new_array()
         close(n, g)
 
+
 @test_utility.skipgpu
 def test_split():
-    v = np.arange(0, 24).reshape(2,3,4)
+    v = np.arange(0, 24).reshape(2, 3, 4)
     g = renom.core.GPUValue(v)
 
     comp_splitted(np.split(v, 2, 0), g.split(2, 0))
     comp_splitted(np.split(v, 2, 2), g.split(2, 2))
-    comp_splitted(np.split(v, [1,1], 2), g.split([1,1], 2))
-    comp_splitted(np.split(v, [1,2], 2), g.split([1,2], 2))
-    comp_splitted(np.split(v, [1,3], 2), g.split([1,3], 2))
-    comp_splitted(np.split(v, [1,4], 2), g.split([1,4], 2))
+    comp_splitted(np.split(v, [1, 1], 2), g.split([1, 1], 2))
+    comp_splitted(np.split(v, [1, 2], 2), g.split([1, 2], 2))
+    comp_splitted(np.split(v, [1, 3], 2), g.split([1, 3], 2))
+    comp_splitted(np.split(v, [1, 4], 2), g.split([1, 4], 2))
+
 
 @test_utility.skipgpu
 def test_hplit():
-    v = np.arange(0, 24).reshape(2,3,4)
+    v = np.arange(0, 24).reshape(2, 3, 4)
     g = renom.core.GPUValue(v)
 
-    comp_splitted(np.hsplit(v, [0,2]), g.hsplit([0,2]))
+    comp_splitted(np.hsplit(v, [0, 2]), g.hsplit([0, 2]))
+
 
 @test_utility.skipgpu
 def test_split_err():
-    v = np.arange(0, 24).reshape(2,3,4)
+    v = np.arange(0, 24).reshape(2, 3, 4)
     g = renom.core.GPUValue(v)
 
     with pytest.raises(ValueError):

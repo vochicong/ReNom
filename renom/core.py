@@ -629,7 +629,7 @@ class GPUValue(object):
         return cu_transpose(self, axis)
 
     def split(self,  indices_or_sections, axis=0):
-        N = self.shape[axis] # Raises IndexError if axis is invalid
+        N = self.shape[axis]  # Raises IndexError if axis is invalid
 
         try:
             len(indices_or_sections)
@@ -2207,7 +2207,7 @@ class Abase(Node):
 
 class Amax(Abase):
     """This function performs max calculation.
-        
+
     Args:
         arg (Variable, ndarray): Input matrix.
         axis (int): Perform calculation along this argument.
@@ -2238,7 +2238,6 @@ class Amax(Abase):
          [ 0.,  1.]]
     """
 
-
     @classmethod
     def _oper_cpu(cls, arg, axis, keepdims):
         array = to_value(arg)
@@ -2254,7 +2253,7 @@ class Amax(Abase):
 
 class Amin(Abase):
     """This function performs min calculation.
-        
+
     Args:
         arg (Variable, ndarray): Input matrix.
         axis (int): Perform calculation along this argument.

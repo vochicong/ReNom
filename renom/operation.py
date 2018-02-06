@@ -194,10 +194,10 @@ class concat(Node):
         if isinstance(args[0], (tuple, list)):
             args = args[0]
         assert all([len(args[0].shape) == len(args[i].shape) for i in range(1, len(args))]), \
-          "All arguments must have same number of dimension."
+            "All arguments must have same number of dimension."
         assert np.sum(np.sum(np.array([list(map(lambda x, y: x != y,
-          args[0].shape, args[i].shape)) for i in range(1, len(args))]), axis=0).astype(np.bool)) < 2, \
-          "All dimensions must have same size except specified axis."
+                                                args[0].shape, args[i].shape)) for i in range(1, len(args))]), axis=0).astype(np.bool)) < 2, \
+            "All dimensions must have same size except specified axis."
 
         val = cls.calc_value(args, axis)
         ret = super(concat, cls).__new__(cls, val)
@@ -389,8 +389,10 @@ class exp(UnaryOp):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, dy * get_gpu(self), **kwargs)
 
+
 class amin(Amin):
     pass
+
 
 class amax(Amax):
     pass
