@@ -156,12 +156,11 @@ class dot(BinOp):
 
 class concat(Node):
     """
-    Join a sequence of arrays along an existing axis.
-    In the current version(2.4), concatenation along 2nd axis is
-    only supported.
+    Join a sequence of arrays along specified axis.
 
     Args:
         args (*Variable, tuple): Input arrays or tuple of input arrays.
+        axis (int): Concatenation will be performed along this axis.
 
     Example:
         >>> import numpy as np
@@ -179,43 +178,51 @@ class concat(Node):
     """
 
     @classmethod
-    def _oper_cpu(cls, args):
-        return np.concatenate(args, axis=1).copy()
+    def _oper_cpu(cls, args, axis):
+        return np.concatenate(args, axis=axis).copy()
 
     @classmethod
-    def _oper_gpu(cls, args):
-        axis = 1
+    def _oper_gpu(cls, args, axis):
         newshape = args[0].shape[:axis] + \
-            (np.sum([a.shape[1] for a in args]), ) + args[0].shape[axis + 1:]
+            (np.sum([a.shape[axis] for a in args]), ) + args[0].shape[axis + 1:]
 
         ret = GPUValue(shape=newshape)
         cuconcat([get_gpu(a) for a in args], ret, axis)
         return ret
 
-    def __new__(cls, *args):
+    def __new__(cls, *args, axis=1):
         if isinstance(args[0], (tuple, list)):
             args = args[0]
-        val = cls.calc_value(args)
+        assert all([len(args[0].shape) == len(args[i].shape) for i in range(1, len(args))]), \
+          "All arguments must have same number of dimension."
+        assert np.sum(np.sum(np.array([list(map(lambda x, y: x != y,
+          args[0].shape, args[i].shape)) for i in range(1, len(args))]), axis=0).astype(np.bool)) < 2, \
+          "All dimensions must have same size except specified axis."
+
+        val = cls.calc_value(args, axis)
         ret = super(concat, cls).__new__(cls, val)
         tmp = 0
         index = []
         for a in args[:-1]:
-            tmp += a.shape[1]
+            tmp += a.shape[axis]
             index.append(tmp)
         ret.attrs._index = index
+        ret.attrs._axis = axis
         for i, v in enumerate(args):
             setattr(ret.attrs, "_arg%d" % i, args[i])
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        args = np.hsplit(to_value(dy), self.attrs._index)
+        axis = self.attrs._axis
+        args = np.split(to_value(dy), self.attrs._index, axis=axis)
         for i in range(len(self.attrs._index) + 1):
             arg = getattr(self.attrs, "_arg%d" % i)
             if isinstance(arg, Node):
                 arg._update_diff(context, args[i], **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
-        args = np.hsplit(get_gpu(dy).new_array(), self.attrs._index)
+        axis = self.attrs._axis
+        args = get_gpu(dy).split(self.attrs._index, axis=axis)
         for i in range(len(self.attrs._index) + 1):
             arg = getattr(self.attrs, "_arg%d" % i)
             if isinstance(arg, Node):

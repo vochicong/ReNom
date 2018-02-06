@@ -101,9 +101,9 @@ def cuFree(uintptr_t ptr):
 
 # cuda runtime check
 def runtime_check(error):
-    if error != 0:
+    if error != cudaSuccess:
         error_msg = cudaGetErrorString(error)
-        raise Exception(error_msg)
+        raise Exception("CUDA Error: {}".format(error_msg))
     return
 
 # cuda runtime check
