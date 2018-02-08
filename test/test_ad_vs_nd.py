@@ -699,15 +699,18 @@ def test_where(node, x, use_gpu):
     compare(func, node, node, x)
 
 
-@pytest.mark.parametrize("node", [
-    [Variable(rand((2, 1))), Variable(rand((2, 1)))],
+@pytest.mark.parametrize("node, axis", [
+    [[Variable(rand((2, 1))), Variable(rand((2, 1)))], 0],
+    [[Variable(rand((2, 1))), Variable(rand((2, 1)))], 1],
+    [[Variable(rand((2, 1))), Variable(rand((2, 2)))], 1],
+    [[Variable(rand((2, 1))), Variable(rand((2, 2))), Variable(rand((2, 2)))], 1],
+    [[Variable(rand((2, 2, 2))), Variable(rand((2, 2, 1))), Variable(rand((2, 2, 3)))], 2],
 ])
-def test_concat(node, use_gpu):
+def test_concat(node, axis, use_gpu):
     set_cuda_active(use_gpu)
-    assert np.allclose(rm.concat(node), np.concatenate(node, 1))
 
     def func(node):
-        return sum(rm.concat(node))
+        return sum(rm.concat(node, axis=axis))
     compare(func, node[0], node)
 
 

@@ -628,6 +628,41 @@ class GPUValue(object):
     def transpose(self, axis):
         return cu_transpose(self, axis)
 
+    def split(self,  indices_or_sections, axis=0):
+        N = self.shape[axis]  # Raises IndexError if axis is invalid
+
+        try:
+            len(indices_or_sections)
+        except TypeError:
+            sections = indices_or_sections
+            size, mod = divmod(N, indices_or_sections)
+            if N % indices_or_sections:
+                raise ValueError(
+                    'array split does not result in an equal division')
+            indices_or_sections = range(size, N, size)
+
+        slices = []
+        for s in self.shape:
+            slices.append(slice(0, s, 1))
+
+        ret = []
+        pos = 0
+        for to in indices_or_sections:
+            slices[axis] = slice(pos, to, 1)
+            v = self[tuple(slices)]
+            ret.append(v)
+            pos = to
+
+        if to < N:
+            slices[axis] = slice(to, N, 1)
+            v = self[tuple(slices)]
+            ret.append(v)
+
+        return ret
+
+    def hsplit(self,  indices_or_sections):
+        return self.split(indices_or_sections, 1)
+
     def __pos__(self):
         return self.copy()
 
