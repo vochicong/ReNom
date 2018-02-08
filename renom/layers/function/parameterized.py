@@ -268,7 +268,6 @@ class Model(with_metaclass(ABCMeta, object)):
 
     def save(self, filename):
         """Save model attributes.
-        You can also save attributes of Model object.
         For save attributes, please register attributes to the dictionary
         which is named as 'SERIALIZED'.
 

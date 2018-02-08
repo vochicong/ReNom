@@ -9,28 +9,30 @@ def crop(x, left_top=(0, 0), size=(0, 0), labels=None, num_class=0, random=False
     if x is a Batch, apply Crop transform to Batch.
     if arguments include labels, apply label transformation.
 
-    :param ndarray x: 3 or 4(batch) dimensional images
-    :param tuple left_top: x and y of top left (y, x)
-    :param tuple size: width and height of crop image (Height, Width)
-    :param ndarray labels: rectangle labels(2-dimensional array)
+    Args:
+        x (ndarray): 3 or 4(batch) dimensional images
+        left_top (tuple): x and y of top left (y, x)
+        size (tuple): width and height of crop image (Height, Width)
+        labels (ndarray): rectangle labels(2-dimensional array)
                            ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
-    :param int num_class: number of class of datasets (for rectangle transformation)
-    :param bool random: If True, apply random cropping. left_top is randomly decided.
-    :return: Images(4 dimension) of crop transformed. If including labels, return with transformed labels
-    :rtype: ndarray
+        num_class (int): number of class of datasets (for rectangle transformation)
+        random (bool): If True, apply random cropping. left_top is randomly decided.
 
-    :Example:
-    >>> from renom.utility.image.data_augmentation.crop import crop
-    >>> from PIL import Image as im
-    >>> import matplotlib.pyplot as plt
-    >>> import numpy as np
-    >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
-    >>> image = np.array(image).astype(np.float32)
-    >>> crop_image = crop(image, left_top=(10, 10), size=(100, 100))
-    >>> fig, axes = plt.subplots(2, 1)
-    >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
-    >>> axes[1].imshow(crop_image[0] / 255); axes[1].set_title("Crop One Image")
-    >>> plt.show()
+    Returns:
+        (ndarray): Images(4 dimension) of crop transformed. If including labels, return with transformed labels
+
+    Example:
+        >>> from renom.utility.image.data_augmentation.crop import crop
+        >>> from PIL import Image as im
+        >>> import matplotlib.pyplot as plt
+        >>> import numpy as np
+        >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
+        >>> image = np.array(image).astype(np.float32)
+        >>> crop_image = crop(image, left_top=(10, 10), size=(100, 100))
+        >>> fig, axes = plt.subplots(2, 1)
+        >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
+        >>> axes[1].imshow(crop_image[0] / 255); axes[1].set_title("Crop One Image")
+        >>> plt.show()
 
     """
     crop = Crop(left_top=left_top, size=size)
@@ -42,8 +44,9 @@ def crop(x, left_top=(0, 0), size=(0, 0), labels=None, num_class=0, random=False
 class Crop(Image):
     """Apply crop transformation to the input x and labels.
 
-    :param tuple left_top: x and y of top left (y, x)
-    :param tuple size: width and height of crop image (Height, Width)
+    Args:
+        left_top (tuple): x and y of top left (y, x)
+        size (tuple): width and height of crop image (Height, Width)
     """
 
     def __init__(self, left_top=(0, 0), size=(0, 0)):
@@ -55,27 +58,29 @@ class Crop(Image):
         if x is a Batch, apply Crop transform to Batch
         if arguments include labels, apply label transformation
 
-        :param ndarray x: 3 or 4(batch) dimensional images
-        :param random (bool): If True, apply random cropping. left_top is randomly desided.
-        :param ndarray labels: rectangle labels(2-dimensional array)
+        Args:
+            x (ndarray): 3 or 4(batch) dimensional images
+            random (bool): If True, apply random cropping. left_top is randomly desided.
+            labels (ndarray): rectangle labels(2-dimensional array)
                                ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
-        :param int num_class: number of class of datasets (for rectangle transformation)
-        :return: Images(4 dimension) of crop transformed. If including labels, return with transformed labels
-        :rtype: ndarray
+            num_class (int): number of class of datasets (for rectangle transformation)
 
-        :Example:
-        >>> from renom.utility.image.data_augmentation.crop import Crop
-        >>> from PIL import Image as im
-        >>> import matplotlib.pyplot as plt
-        >>> import numpy as np
-        >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
-        >>> image = np.array(image).astype(np.float32)
-        >>> cr = Crop(left_top=(10, 10), size=(100, 100))
-        >>> crop_image = cr.transform(image)
-        >>> fig, axes = plt.subplots(2, 1)
-        >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
-        >>> axes[1].imshow(crop_image[0] / 255); axes[1].set_title("Crop One Image")
-        >>> plt.show()
+        Returns:
+            (ndarray): Images(4 dimension) of crop transformed. If including labels, return with transformed labels
+
+        Example:
+            >>> from renom.utility.image.data_augmentation.crop import Crop
+            >>> from PIL import Image as im
+            >>> import matplotlib.pyplot as plt
+            >>> import numpy as np
+            >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
+            >>> image = np.array(image).astype(np.float32)
+            >>> cr = Crop(left_top=(10, 10), size=(100, 100))
+            >>> crop_image = cr.transform(image)
+            >>> fig, axes = plt.subplots(2, 1)
+            >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
+            >>> axes[1].imshow(crop_image[0] / 255); axes[1].set_title("Crop One Image")
+            >>> plt.show()
 
         """
 

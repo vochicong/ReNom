@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ReNom 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-18 13:27+0900\n"
+"POT-Creation-Date: 2018-02-07 08:05+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.4.0\n"
+"Generated-By: Babel 2.5.1\n"
 
 #: ../../rsts/renom.utility.rst:2
 msgid "renom.utility"
@@ -36,8 +36,11 @@ msgid ""
 "class as following example."
 msgstr "Dense, Conv2dオブジェクトの重みパラメータを初期化する方法を提供する."
 
-#: of renom.utility.initializer.Initializer:8
-#: renom.utility.searcher.Searcher:12 renom.utility.trainer.Trainer:24
+#: of renom.utility.distributor.imageloader.ImageLoader:12
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:19
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:18
+#: renom.utility.initializer.Initializer:8 renom.utility.searcher.Searcher:12
+#: renom.utility.trainer.Trainer:24
 msgid "Example"
 msgstr ""
 
@@ -260,11 +263,260 @@ msgstr "テストデータを与えるためのDistributorオブジェクト"
 msgid "Test method. This method executes forward propagation for given data."
 msgstr "順伝播のみを実行するメソッド."
 
-#: of renom.utility.trainer.Trainer.test:4
+#: of renom.utility.distributor.distributor.Distributor:4
+#: renom.utility.distributor.distributor.NdarrayDistributor:3
+#: renom.utility.trainer.Trainer.test:4
 msgid "Input data."
 msgstr "入力データ"
 
 #: of renom.utility.trainer.Trainer.test:8
 msgid "ndarray"
 msgstr ""
+
+#: ../../rsts/renom.utility.rst:23
+msgid "renom.utility.distributor.distributor"
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor:1
+msgid "Distributor class This is the base class of a data distributor."
+msgstr "Distributorベースクラス. "
+
+#: of renom.utility.distributor.distributor.Distributor:6
+#: renom.utility.distributor.distributor.NdarrayDistributor:5
+msgid "Target data."
+msgstr "教師データ"
+
+#: of renom.utility.distributor.distributor.Distributor:8
+msgid "Path to data."
+msgstr "入力データへのパス"
+
+#: of renom.utility.distributor.distributor.Distributor.batch:1
+msgid "This function returns `minibatch`."
+msgstr "与えられたサイズのミニバッチを返す."
+
+#: of renom.utility.distributor.distributor.Distributor.batch:3
+msgid "Size of batch."
+msgstr "バッチサイズ"
+
+#: of renom.utility.distributor.distributor.Distributor.batch:5
+msgid "If True is passed, data will be selected randomly."
+msgstr "Trueが与えられた場合, バッチは重複を許さずランダムに選択されたデータから作られる."
+
+#: of renom.utility.distributor.distributor.Distributor.split:1
+msgid ""
+"This method splits its own data and generates 2 distributors using the "
+"split data."
+msgstr "このメソッドはDistributor自身が持つデータを2分割し, それらを元に新たなDistributorを二つ作成する."
+
+#: of renom.utility.distributor.distributor.Distributor.split:3
+msgid "Ratio for dividing data."
+msgstr "データを分割する比率"
+
+#: of renom.utility.distributor.distributor.Distributor.split:5
+msgid "If True, the data is shuffled before dividing."
+msgstr "Trueが与えられた場合, データは分割する前にシャッフルされる."
+
+#: of renom.utility.distributor.distributor.NdarrayDistributor:1
+msgid "Derived class of Distributor which manages ndarray data."
+msgstr "ndarray形式のデータを扱うためのDistributorの派生クラス."
+
+#: ../../rsts/renom.utility.rst:29
+msgid "renom.utility.distributor.imageloader"
+msgstr ""
+
+#: of renom.utility.distributor.imageloader.ImageLoader:1
+msgid ""
+"ImageLoader is a generator that yields images in batches. By inputting "
+"list of image path, ImageLoader load images and yields according to "
+"number of batch size."
+msgstr ""
+"ImageLoaderは画像データをバッチで扱うためのジェネレータを提供する.ImageLoaderに対し, 画像へのパスをリストで与えることで,"
+" 指定されたバッチサイズ分のデータを生成する."
+
+#: of renom.utility.distributor.imageloader.ImageLoader:5
+#: renom.utility.distributor.threadingdistributor.ImageDistributor:6
+msgid "List of image path."
+msgstr "画像へのパスのリスト"
+
+#: of renom.utility.distributor.imageloader.ImageLoader:7
+msgid "Color Space of Input Image."
+msgstr "画像のカラーフォーマット"
+
+#: ../../rsts/renom.utility.rst:35
+msgid "renom.utility.distributor.threadingdistributor"
+msgstr ""
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:1
+msgid ""
+"Base class for image distribution. Use subclasses "
+"ImageClassificationDistributor, ImageDetectionDistributor, "
+"ImageSegmentationDistributor depending on the image task. Or sublass it "
+"for original image tasks."
+msgstr ""
+"画像ファイルを扱うDistributorクラスの基底クラス.学習の目的ごとに, "
+"派生クラスであるImageDetectionDistributor, ImageClassificationDistributorを使用する."
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:8
+msgid "List of labels (bbox and class) for every image (2 dimensional array)."
+msgstr "画像それぞれに対する教師データのリスト."
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:10
+msgid "List of classes name for this dataset."
+msgstr "データセットに含まれるクラス名のリスト."
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:9
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:11
+#: renom.utility.distributor.threadingdistributor.ImageDistributor:12
+msgid "If True, apply datasets shuffle per epoch"
+msgstr "真の場合, epochごとにデータはシャッフルされる."
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:14
+msgid "Resize input image for converting batch ndarray."
+msgstr "画像を指定されたサイズにリサイズする."
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:16
+msgid "Color of Input Image. [\"RGB\", \"GRAY\"]"
+msgstr "入力画像のカラーフォーマト."
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:18
+msgid "Augmentater for input Image."
+msgstr "データオーギュメンテーション設定."
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:1
+msgid ""
+"Distributor class for tasks of image detection. Labels are expected to be"
+" Bounding boxes and Classes. ex:) np.array([[center x, center y, "
+"x_top_left, height, 0, 0, 0, 1, 0]])"
+msgstr ""
+"オブジェクト検出モデルを作成するためのDistributorを提供するクラス.教師データは "
+"バウンディングボックスとクラスラベルからなる.np.array([[center x, center y, x_top_left, height,"
+" 0, 0, 0, 1, 0]])"
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:3
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:5
+msgid "list of image path"
+msgstr "画像ファイルへのパスリスト"
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:5
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:7
+msgid "list of labels (bbox and class) for every image"
+msgstr "それぞれの画像に対する教師データのリスト."
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:7
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:9
+msgid "list of classes name for this dataset"
+msgstr "データセットに含まれるクラス名のリスト."
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:11
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:13
+msgid "resize input image for converting batch ndarray"
+msgstr "引数に指定されたサイズに画像がリサイズされる."
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:13
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:15
+msgid "color of Input Image. [\"RGB\", \"GRAY\"]"
+msgstr "入力画像のカラーフォーマット."
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:17
+msgid "augmentater for Input Image"
+msgstr "オーギュメンテーションの設定"
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch:1
+msgid "Returns generator of batch images."
+msgstr "バッチを返すgeneratorオブジェクト"
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor.batch:1
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch:3
+msgid "size of a batch."
+msgstr "バッチサイズ"
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch:6
+msgid ""
+"Images(4 dimension) of input data for Network. If including labels, "
+"return with transformed labels"
+msgstr "4次元テンソルで表された入力画像データ. 同時に教師ラベルが与えられた場合,オーギュメンテーションに対応して教師データは変形される."
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:1
+msgid "Distributor class for tasks of image classification."
+msgstr "クラスタリングのためのDistributorクラス."
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:15
+msgid "(function) augmentater for Input Image"
+msgstr "オーギュメンテーションの設定"
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor.batch:4
+msgid ""
+"Images(4 dimension) of input data for Network. If including labels, "
+"return with original labels"
+msgstr "4次元テンソルで表された入力画像データ."
+
+#: ../../rsts/renom.utility.rst:42
+msgid "renom.utility.image.data_augmentation.augmentation"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.augmentation.DataAugmentation:1
+msgid ""
+"Apply transformation to the input x and labels. You could choose "
+"transform function from below. [\"Flip\", \"Resize\", \"Crop\", "
+"\"Color_jitter\", \"Rescale\", \"Rotate\", \"Shift\"]."
+msgstr ""
+"画像データx, 教師データyともに, オーギュメンテーションを行う. 以下のオーギュメンテーションオプションを指定できる.[\"Flip\", "
+"\"Resize\", \"Crop\", \"Color_jitter\", \"Rescale\", \"Rotate\", "
+"\"Shift\"]. \"Rotate\" transform can't apply label transformation. So "
+"when you want to use \"Rotate\", Please use only image transformation."
+
+#: of renom.utility.image.data_augmentation.augmentation.DataAugmentation:5
+msgid "list of instance for converter."
+msgstr "Resize, Flipなどのコンバーターインスタンスのリスト."
+
+#: of renom.utility.image.data_augmentation.augmentation.DataAugmentation:7
+msgid "apply random transformation or not"
+msgstr "Trueが与えられた場合ランダムに画像変形を適用する."
+
+#: of
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:1
+msgid ""
+"Performs a DataAugmentation of a Numpy images. if x is a Batch, apply "
+"DataAugmentation to Batch. if arguments include labels, apply label "
+"transformation."
+msgstr ""
+"画像に対しオーギュメンテーションを適用する.入力xが4次元テンソルである場合, "
+"第一軸はバッチ数として認識され,バッチ内の各画像に対しオーギュメンテーションが適用される.教師データが同時に与えられていた場合, "
+"教師データに対しても変形が行われる."
+
+#: of
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:5
+msgid "3 or 4(batch) dimensional images. dtype is float32. value=[0.0, 255.0]."
+msgstr "3, 4(第一軸はバッチ数)次元テンソルデータ. "
+
+#: of
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:7
+msgid "labels for classification, detection and segmentation. 2-dimensional array"
+msgstr "教師データ."
+
+#: of
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:9
+msgid "number of class of datasets"
+msgstr "データセットに含まれるクラス数."
+
+#: of
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:13
+msgid ""
+"Images(4 dimension) of augment transformed. If including labels, return "
+"with transformed labels"
+msgstr "4次元テンソルで表された入力画像データ. 同時に教師ラベルが与えられた場合,オーギュメンテーションに対応して教師データは変形される."
 

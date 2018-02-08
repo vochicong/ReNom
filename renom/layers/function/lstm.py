@@ -188,7 +188,7 @@ class lstm(Node):
 
 class Lstm(Parametrized):
     '''Long short time memory[4]_ .
-    Lstm object has 12 weights and 4 biases parameters to learn.
+    Lstm object has 8 weights and 4 biases parameters to learn.
 
     Weights applied to the input of the input gate, forget gate and output gate.
     :math:`W_{ij}, Wgi_{ij}, Wgf_{ij}, Wgo_{ij}`

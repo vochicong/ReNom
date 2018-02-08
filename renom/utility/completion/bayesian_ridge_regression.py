@@ -21,25 +21,14 @@ from numpy.random import multivariate_normal
 class BayesianRidgeRegression(object):
     """
     Bayesian Ridge Regression
+
+    Args:
+        lambda_reg (float): Ridge regularization parameter.
+        add_ones (bool): Whether to add a constant column of ones.
+        normalize_lambda (bool): This variant multiplies lambda_reg by np.linalg.norm(np.dot(X.T,X))
     """
 
     def __init__(self, lambda_reg=0.001, add_ones=False, normalize_lambda=True):
-        """
-        Parameters
-        ----------
-        lambda_reg : float
-            Ridge regularization parameter.
-            Default is 0.001.
-
-        add_ones : boolean
-            Whether to add a constant column of ones.
-            Default is False.
-
-        normalize_lambda : boolean
-            Default is True.
-            This variant multiplies lambda_reg by
-            np.linalg.norm(np.dot(X.T,X))
-        """
         self.lambda_reg = lambda_reg
         self.add_ones = add_ones
         self.normalize_lambda = normalize_lambda
@@ -104,6 +93,9 @@ class BayesianRidgeRegression(object):
         For reference, see:
         https://www.cs.utah.edu/~fletcher/cs6957/lectures/BayesianLinearRegression.pdf
 
+        Args:
+            num_draws (int): Number of samples.
+
         Note that the pros use something different:
         https://github.com/stefvanbuuren/mice/blob/master/R/mice.impute.norm.r
         """
@@ -111,13 +103,18 @@ class BayesianRidgeRegression(object):
 
     def predict_dist(self, X, eps=0.00001):
         """
-        Returns the mean and variance of the posterior predictive distribution
+        Returns the mean and variance of the posterior predictive distribution.
         For reference, see page #2 of:
         https://www.cs.utah.edu/~fletcher/cs6957/lectures/BayesianLinearRegression.pdf
 
         The parameter `eps` prevents collapse of the variances to 0 by
         clamping them to this minimum value.
+
+        Args:
+            X (ndarray): Input matrix.
+            eps (float): Small number.
         """
+
         if self.add_ones:
             X_ones = self.add_column_of_ones(X)
         else:

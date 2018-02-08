@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ReNom 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-17 12:41+0900\n"
+"POT-Creation-Date: 2018-02-01 01:37+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.4.0\n"
+"Generated-By: Babel 2.5.1\n"
 
 #: ../../rsts/renom.rst:2
 msgid "renom"
@@ -26,45 +26,63 @@ msgid "Bases: :class:`object`"
 msgstr ""
 
 #: of renom.core.Grads:1
-msgid "This class contains gradients of each Node object."
+msgid "Grads class. This class contains gradients of each Node object."
 msgstr "逆伝播により得られた勾配を保持するクラス."
 
 #: of renom.core.Grads:3
-#, fuzzy
 msgid ""
-"When the function ``grad`` which is instance of Node class called, an "
-"instance of Grads is returned."
-msgstr "Nodeクラスのgrad関数の戻り値としてGradsクラスのオブジェクトが生成される."
+"When the function ``grad`` which is instance of Node class is called, an "
+"instance of Grads class will be returned."
+msgstr "Nodeクラスがもつgradメソッドの戻り値としてGradsクラスのオブジェクトが生成される."
 
-#: of renom.core.Grads:7 renom.core.Node:5 renom.core.Variable:13
-#: renom.operation.concat:12 renom.operation.dot:10 renom.operation.reshape:10
-#: renom.operation.sqrt:8 renom.operation.sum:12 renom.operation.where:12
+#: of renom.core.Grads:6
+msgid ""
+"For getting the gradient with respect to a Variable object 'x' which is "
+"on a computational graph, call the 'get' function of Grads object (An "
+"example is bellow)."
+msgstr "変数 'x'に関する勾配を取得したい場合は Gradsオブジェクトの持つ'get'メソッドを使用する.以下に例を示す."
+
+#: of renom.core.Amax:12 renom.core.Amin:12 renom.core.Grads:10
+#: renom.core.Node:5 renom.core.Variable:13 renom.operation.concat:10
+#: renom.operation.dot:10 renom.operation.reshape:10 renom.operation.sqrt:8
+#: renom.operation.sum:12 renom.operation.where:12
 msgid "Example"
 msgstr ""
 
 #: of renom.core.Grads.get:1
-msgid "This function returns the gradient of the given node."
-msgstr "オブジェクトの勾配を取得するための関数."
+msgid ""
+"This function returns the gradient with respect to the given node. In the"
+" case of there are not any gradient of the given node, this function "
+"returns 'None'."
+msgstr ""
+"このメソッドは与えられたNodeオブジェクトに関する勾配を返す.Gradsオブジェクトが, "
+"与えられたNodeオブジェクトに関する勾配を保持していない場合, Noneが返される."
 
-#: of renom.core.Grads.get:7
-msgid "This method returns gradient of passed node object."
+#: of renom.core.Grads.get:5
+msgid "Returns a gradient with respect to this argument."
+msgstr "この引数に与えられたNodeオブジェクトに関する勾配を返す."
+
+#: of renom.core.Grads.get:9
+msgid "Gradient of given node object."
 msgstr "引数に与えられたオブジェクトの勾配を返す."
 
 #: of renom.core.Grads.update:1
-msgid "Updates variables using earned gradients."
-msgstr "逆伝播によりられた勾配を用いて変数の値を更新する."
+msgid ""
+"This function updates variable objects on the computational graph using "
+"obtained gradients."
+msgstr "このメソッドは計算グラフ上のVariableオブジェクトを, 得られた勾配を用いて更新する."
 
-#: of renom.core.Grads.update:3
+#: of renom.core.Grads.update:4
 msgid ""
 "If an optimizer instance is passed, gradients are rescaled with regard to"
 " the optimization algorithm before updating."
 msgstr "Optimizerオブジェクト(勾配降下アルゴリズム)が与えられた場合、勾配はOptimizerによってリスケールされてから、変数値の更新に使われる."
 
-#: of renom.core.Grads.update:6
+#: of renom.core.Grads.update:7
 msgid "Algorithm for rescaling gradients."
 msgstr "勾配をリスケーリングするための勾配降下アルゴリズム"
 
-#: of renom.core.Grads.update:8
+#: of renom.core.Grads.update:9
 msgid ""
 "List of models to update variables. When specified, variables which does "
 "not belong to one of the models are not updated."
@@ -107,7 +125,6 @@ msgid "Initial value of following the graph."
 msgstr "逆伝播開始時の初期値."
 
 #: of renom.core.Node.grad:6
-#, fuzzy
 msgid "If it's True, the computational graph will be destroyed."
 msgstr "Trueが与えられた場合、計算グラフはこの関数が呼ばれるたびに破棄される."
 
@@ -115,14 +132,14 @@ msgstr "Trueが与えられた場合、計算グラフはこの関数が呼ば�
 msgid "This method destroys computational graph."
 msgstr "計算グラフを破棄する."
 
-#: of renom.core.Variable:1 renom.operation.reshape:1 renom.operation.sum:1
+#: of renom.core.Variable:1 renom.operation.concat:1 renom.operation.sum:1
 #: renom.operation.where:1
 msgid "Bases: :class:`renom.core.Node`"
 msgstr ""
 
 #: of renom.core.Variable:1
 msgid "Variable class."
-msgstr ""
+msgstr "Variableクラス."
 
 #: of renom.core.Variable:3
 msgid ""
@@ -130,20 +147,42 @@ msgid ""
 "created from ndarray object or Number object."
 msgstr "勾配計算対象の行列クラス.ndarrayを引数に与えてインスタンス化する."
 
-#: of renom.core.Variable:6 renom.operation.concat:5 renom.operation.concat:7
-#: renom.operation.dot:3 renom.operation.dot:5 renom.operation.exp:3
-#: renom.operation.log:3 renom.operation.reshape:3 renom.operation.sqrt:3
-#: renom.operation.sum:5 renom.operation.where:5 renom.operation.where:7
+#: of renom.core.Variable:6 renom.operation.dot:3 renom.operation.dot:5
+#: renom.operation.exp:3 renom.operation.log:3 renom.operation.reshape:3
+#: renom.operation.sqrt:3 renom.operation.sum:5 renom.operation.where:5
+#: renom.operation.where:7
 msgid "Input array."
 msgstr "入力データ"
 
 #: of renom.core.Variable:8
-#, fuzzy
 msgid "Auto update flag."
 msgstr "更新フラグ"
 
+#: of renom.core.Amax:1 renom.core.Amin:1
+msgid "Bases: :class:`renom.core.Abase`"
+msgstr ""
+
+#: of renom.core.Amax:1
+msgid "This function performs max calculation."
+msgstr "行列の形を変更する."
+
+#: of renom.core.Amax:3 renom.core.Amin:3
+msgid "Input matrix."
+msgstr "入力データ"
+
+#: of renom.core.Amax:5 renom.core.Amin:5
+msgid "Perform calculation along this argument."
+msgstr "この引数に指定された軸に沿って計算が実行される."
+
+#: of renom.core.Amax:7 renom.core.Amin:7
+msgid "If `Ture` is passed, reduced dimentions remain."
+msgstr "`True`が与えられた場合, 次元が削除されない."
+
+#: of renom.core.Amin:1
+msgid "This function performs min calculation."
+msgstr "行列内における最も小さい値を返す."
+
 #: of renom.operation.reshape:1
-#, fuzzy
 msgid "This function reshapes matrix shape."
 msgstr "行列の形を変更する."
 
@@ -153,36 +192,41 @@ msgstr "返還後の行列の形"
 
 #: of renom.operation.sum:1
 msgid ""
-"This function sums up matrix elements. In the current version(2.0), "
-"summation along 1st axis and summation of all elements are supported."
-msgstr ""
+"This function sums up matrix elements. If the argument 'axis' is passed, "
+"this function performs sum along specified axis."
+msgstr "行列の要素を足し合わせた結果を返す. 引数`axis`が指定された場合, "
+"その軸に沿って演算が実行される."
 
 #: of renom.operation.sum:7
-msgid "Summing up along specified axis."
-msgstr ""
+msgid "Summing up along this axis."
+msgstr "この軸に沿って足しあわせが実行される."
 
-#: of renom.operation.concat:1 renom.operation.dot:1
+#: of renom.operation.dot:1
 msgid "Bases: :class:`renom.core.BinOp`"
 msgstr ""
 
 #: of renom.operation.dot:1
-#, fuzzy
 msgid "This function executes dot product of the two matrixes."
 msgstr "二つの行列の内積を返す。"
 
 #: of renom.operation.concat:1
 msgid ""
 "Join a sequence of arrays along an existing axis. In the current "
-"version(2.0), concatenation along 2nd axis is only supported."
-msgstr ""
+"version(2.4), concatenation along 2nd axis is only supported."
+msgstr "複数の行列を結合し、ひとつの行列として返す.現在のバージョン(v2.4)では, "
+"行列の第二軸について結合が行われる."
+
+#: of renom.operation.concat:5
+msgid "Input arrays or tuple of input arrays."
+msgstr "入力データ,　もしくは入力データのリスト."
 
 #: of renom.operation.where:1
 msgid "Return elements, either from a or b, depending on condition."
-msgstr ""
+msgstr "条件によって行列aもしくはbの要素を持つ行列を返す."
 
 #: of renom.operation.where:3
 msgid "Condition array."
-msgstr ""
+msgstr "条件を表す行列"
 
 #: of renom.operation.exp:1 renom.operation.log:1 renom.operation.sqrt:1
 msgid "Bases: :class:`renom.core.UnaryOp`"
@@ -190,34 +234,13 @@ msgstr ""
 
 #: of renom.operation.sqrt:1
 msgid "Square root operation."
-msgstr ""
+msgstr "与えられた行列が持つ各要素の平方根を計算する."
 
 #: of renom.operation.log:1
 msgid "Log operation."
-msgstr ""
+msgstr "与えられた行列が持つ各要素の自然対数を計算する."
 
 #: of renom.operation.exp:1
 msgid "Exponential operation."
-msgstr ""
-
-#~ msgid "This function sums up matrix elements. See numpy.sum document."
-#~ msgstr "行列の要素の総和を返す."
-
-#~ msgid "Axis of sum up.."
-#~ msgstr "総和を取る軸"
-
-#~ msgid ""
-#~ msgstr "２つの行列を結合した行列を返す。現在、二番目の軸に対する結合のみに対応している。"
-
-#~ msgid "Log operation"
-#~ msgstr ""
-
-#~ msgid "Exponential operation"
-#~ msgstr ""
-
-#~ msgid "Mean operation"
-#~ msgstr ""
-
-#~ msgid "Max operation"
-#~ msgstr ""
+msgstr "ネイピア数に対し、与えられた行列が持つ各要素数でべき乗した結果を返す."
 

@@ -39,12 +39,12 @@ def reshape(array, shape):
 class sum(Node):
     '''
     This function sums up matrix elements.
-    In the current version(2.0), summation along 1st axis and
-    summation of all elements are supported.
+    If the argument 'axis' is passed, this function performs
+    sum along specified axis.
 
     Args:
         array (Variable): Input array.
-        axis (int): Summing up along specified axis.
+        axis (int): Summing up along this axis.
 
     Example:
         >>> import numpy as np
@@ -382,8 +382,10 @@ class exp(UnaryOp):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, dy * get_gpu(self), **kwargs)
 
+
 class amin(Amin):
     pass
+
 
 class amax(Amax):
     pass

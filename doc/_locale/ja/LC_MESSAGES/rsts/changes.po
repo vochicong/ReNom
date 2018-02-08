@@ -8,286 +8,213 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ReNom 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-17 19:24+0900\n"
+"POT-Creation-Date: 2018-02-01 00:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.4.0\n"
+"Generated-By: Babel 2.5.1\n"
 
 #: ../../rsts/changes.rst:2
-msgid "Change History"
+msgid "Changes 2.3.1 => 2.4.1"
 msgstr ""
 
-#: ../../rsts/changes.rst:6
-msgid "version 2.0.0 ⇒ version 2.0.1"
+#: ../../rsts/changes.rst:5
+msgid "Modified"
 msgstr ""
 
-#: ../../rsts/changes.rst:8
-msgid "Added Trainer class."
-msgstr "Trainerクラスを追加."
+#: ../../rsts/changes.rst:7
+msgid "**#1.** GPU accelerated __getitem__, __setitem__ is available."
+msgstr "**#1.** GPUメモリ上で__getitem__, __setitem__を実行するよう変更."
 
-#: ../../rsts/changes.rst:12
-msgid "version 1.2 ⇒ version 2.0.0"
+#: ../../rsts/changes.rst:9
+msgid "The performance become better."
+msgstr "パフォーマンスが向上"
+
+#: ../../rsts/changes.rst:11
+msgid ""
+"Result of executing getitem on matrix 'n' for 1000 times. The shape of "
+"'n' is (1000, 1000)."
+msgstr "(1000, 1000)の行列'n'に対して__getitem__を1000回実行した結果."
+
+#: ../../rsts/changes.rst:1
+msgid "getitem"
 msgstr ""
 
-#: ../../rsts/changes.rst:14
-msgid "The changes of the version from 1.2 to 2.0 are below."
-msgstr "version 1.2 から2.0への変更点は以下のとおりです."
-
-#: ../../rsts/changes.rst:17
-msgid "Changes"
+#: ../../rsts/changes.rst:1
+msgid "v2.3.1[sec]"
 msgstr ""
 
-#: ../../rsts/changes.rst:17
-msgid "version 1.2"
+#: ../../rsts/changes.rst:1
+msgid "v2.4.1[sec]"
 msgstr ""
 
-#: ../../rsts/changes.rst:17
-msgid "version 2.0"
+#: ../../rsts/changes.rst:1
+msgid "n[0, 0]"
 msgstr ""
 
-#: ../../rsts/changes.rst:19
-msgid "1- Name of Model class"
-msgstr "1- Modelクラス名の変更"
-
-#: ../../rsts/changes.rst:19 ../../rsts/changes.rst:26
-msgid "Model"
+#: ../../rsts/changes.rst:1
+msgid "0.51686"
 msgstr ""
 
-#: ../../rsts/changes.rst:19
-msgid "Sequential"
+#: ../../rsts/changes.rst:1
+msgid "0.08107"
 msgstr ""
 
-#: ../../rsts/changes.rst:20
-msgid "2- Input layer has deleted"
-msgstr "2- Inputレイヤ削除"
+#: ../../rsts/changes.rst:1
+msgid "n[0]"
+msgstr ""
 
-#: ../../rsts/changes.rst:20
-msgid "Need Input layer"
-msgstr "Inputレイヤが必要"
+#: ../../rsts/changes.rst:1
+msgid "0.52871"
+msgstr ""
 
-#: ../../rsts/changes.rst:20
-msgid "Not need"
-msgstr "Inputレイヤが不必要"
+#: ../../rsts/changes.rst:1
+msgid "0.08351"
+msgstr ""
 
-#: ../../rsts/changes.rst:21
-msgid "3- The timing of weight initialization"
-msgstr "3- 重みパラメータ初期化のタイミング"
+#: ../../rsts/changes.rst:1
+msgid "n[:, :]"
+msgstr ""
 
-#: ../../rsts/changes.rst:21
-msgid "Model creation"
-msgstr "モデルのインスタンス化時"
+#: ../../rsts/changes.rst:1
+msgid "1.50995"
+msgstr ""
 
-#: ../../rsts/changes.rst:21
-msgid "First forward propagation"
-msgstr "最初の順伝播時"
-
-#: ../../rsts/changes.rst:22
-msgid "4- Name of the attribute of weight parameter"
-msgstr "4- 重みパラメータの属性名"
-
-#: ../../rsts/changes.rst:22
-msgid "parameters"
+#: ../../rsts/changes.rst:1
+msgid "0.16364"
 msgstr ""
 
 #: ../../rsts/changes.rst:22
-msgid "params"
-msgstr ""
+msgid "**#2.** renom.concat() accepts variable length argument list."
+msgstr "**#2.** renom.concat() が可変引数に対応."
 
-#: ../../rsts/changes.rst:23
-msgid "5- Need \"with block\" in train loop"
-msgstr "5- 学習ループ内における\"with block\"の必要性"
+#: ../../rsts/changes.rst:24 ../../rsts/changes.rst:41
+#: ../../rsts/changes.rst:60
+msgid "The following code became available."
+msgstr "下記のようなコードが実行可能となった."
 
-#: ../../rsts/changes.rst:23
-msgid "Not needed"
-msgstr "必要なし"
+#: ../../rsts/changes.rst:39
+msgid "**#3.** renom.sum() accepts 'axis' argument."
+msgstr "**#3.** renom.sum() に対し引数'axis'を指定可能."
 
-#: ../../rsts/changes.rst:23
-msgid "Need to manage computational graph"
-msgstr "必要"
-
-#: ../../rsts/changes.rst:24
-msgid "6- Let out loss functions from Model definition"
-msgstr "6- 誤差関数の定義場所を変更"
-
-#: ../../rsts/changes.rst:24
-msgid "Defined in model"
-msgstr "Modelの内部"
-
-#: ../../rsts/changes.rst:24
-msgid "Defined out of model"
-msgstr "Modelの外部"
-
-#: ../../rsts/changes.rst:25
-msgid "7- Name of back propagation method"
-msgstr "7- 誤差逆伝播を実行するメソッドの名前"
-
-#: ../../rsts/changes.rst:25
-msgid "backward"
-msgstr ""
-
-#: ../../rsts/changes.rst:25
-msgid "grad"
-msgstr ""
-
-#: ../../rsts/changes.rst:26
-msgid "8- Which class has update method"
-msgstr "8- updateメソッドを持っているクラス"
-
-#: ../../rsts/changes.rst:26
-msgid "Node"
-msgstr ""
-
-#: ../../rsts/changes.rst:27
-msgid "9- How to use of optimizer class"
-msgstr "9- Optimizerクラスの使い方"
-
-#: ../../rsts/changes.rst:27
-msgid "With model class"
-msgstr "Modelクラスをラップして使用"
-
-#: ../../rsts/changes.rst:27
-msgid "With update method"
-msgstr "updateメソッドと共に使用"
-
-#: ../../rsts/changes.rst:30
-msgid "**1- Name of Model class**"
-msgstr "**1- Modelクラス名の変更**"
-
-#: ../../rsts/changes.rst:32
+#: ../../rsts/changes.rst:58
 msgid ""
-"The name of Model class has changed. In version 1.2 for building a neural"
-" network, you are supposed to use Model class. In version 2.0, it renamed"
-" to Sequential."
-msgstr ""
-"Version 1.2においてニューラルネットワークを定義するために使用していたModelクラスは、version "
-"2.0においてSequentialという名前に変更されました."
+"**#4.** Auto differentiation is enabled in functions 'T', 'transpose' and"
+" 'reshape' that are implemented in Node object."
+msgstr "**#4.** Nodeオブジェクトが持つメソッド 'T', 'transpose', 'reshape'が自動微分に対応."
 
-#: ../../rsts/changes.rst:36 ../../rsts/changes.rst:74
-#: ../../rsts/changes.rst:120 ../../rsts/changes.rst:152
-#: ../../rsts/changes.rst:181
-msgid "**Example**"
-msgstr ""
-
-#: ../../rsts/changes.rst:62
-msgid "**2- Input layer has deleated**"
-msgstr "**2-Inputレイヤ削除**"
-
-#: ../../rsts/changes.rst:64
+#: ../../rsts/changes.rst:79
 msgid ""
-"Showed in above example, the input layer class was removed in version 2.0"
-" ."
-msgstr "上の例で示しているようにversion 2.0ではInputレイヤが必要なくなりました."
+"**#5.** In the Yolo class, redundant argument 'image_size' of the "
+"function '__init__' is removed."
+msgstr "**#5.** Yoloクラスの__init__メソッドにおける, 使用されなくなった引数'image_size'を削除."
 
-#: ../../rsts/changes.rst:66
-msgid "**3- The timing of weight initialization**"
-msgstr "**3- 重みパラメータの初期化タイミング**"
-
-#: ../../rsts/changes.rst:68
+#: ../../rsts/changes.rst:81
 msgid ""
-"Because of the input layer was removed, the timing of weight "
-"initialization was changed. In version 1.2, weight parameters are "
-"initialized when a model object is instantiated. In version 2.0, weight "
-"parameters are initialized at the first forward propagation, or if the "
-"argument input_size has been passed, weights are initialized same timing "
-"as version 2.0. See tutorial 0.2 for more detail of weight "
-"initialization."
+"When you instantiate Yolo class, be careful not to give the argument "
+"'image_size'. See API reference of :ref:`Yolo`."
+msgstr "Yoloクラスのインスタンス化時には 'image_size'引数を与えないよう注意. "
+"YoloクラスのAPIリファレンスを参照."
+
+#: ../../rsts/changes.rst:84
+msgid "**#6.** Users can save attributes when saving model's weight parameters."
+msgstr "**#6.** Modelクラスのsaveメソッドを用いた重みパラメータ保存において"
+"重みパラメータ以外にもオブジェクトの属性を保存可能."
+
+#: ../../rsts/changes.rst:86
+msgid ""
+"In the previous version, save and load function of Model object only "
+"dealt with weight parameters. In v2.4.1, you can save any attributes with"
+" save and load function. See the API reference of Model object."
+msgstr "ModelクラスのAPIリファレンスを参照."
+
+#: ../../rsts/changes.rst:91
+msgid "New features"
 msgstr ""
-"Inputレイヤの削除に伴い、重みパラメータを初期化するタイミングが変更されました.version "
-"1.2では下の例で示すようにニューラルネットワークModelをインスタンス化するときに重みパラメータが初期化されていましたが、version "
-"2.0 では一回目の順伝播が実行されるときに重みの初期化が行われます."
 
-#: ../../rsts/changes.rst:102
-msgid "**4- Name of the weight parameter attribute**"
-msgstr "**4- 重みパラメータの属性名**"
+#: ../../rsts/changes.rst:93
+msgid ""
+"**#1.** New auto differentiation available operation: renom.amax, "
+"renom.amin."
+msgstr "**#1.** 自動微分に対応したrenom.amax, renom.aminを追加. APIリファレンスを参照."
 
-#: ../../rsts/changes.rst:104
-msgid "The attribute name has changed to params from parameters."
-msgstr "version 2.0では重みパラメータの属性名が parameters から params へ変更されました."
+#: ../../rsts/changes.rst:95
+msgid ""
+"**#2.** New method for releasing gpu memory pool: "
+"renom.cuda.release_mem_pool."
+msgstr "GPUメモリプールを開放するための関数'renom.cuda.release_mem_pool'を実装."
+
+#: ../../rsts/changes.rst:98
+msgid "Removed modules"
+msgstr ""
+
+#: ../../rsts/changes.rst:100
+msgid "Nothing"
+msgstr ""
+
+#: ../../rsts/changes.rst:103
+msgid "Bug fix"
+msgstr ""
+
+#: ../../rsts/changes.rst:105
+msgid "**#1.** Broadcasting matrix arithmetic operations."
+msgstr "GPU上における, ブロードキャストが実行される行列の四則演算を修正."
 
 #: ../../rsts/changes.rst:107
-msgid "**5- Need \"with block\" in train loop**"
-msgstr "**5- 学習ループ内における\"with block\"の必要性**"
-
-#: ../../rsts/changes.rst:109
 msgid ""
-"In version 2.0, because of the auto-differentiation was implemented, "
-"users has responsible for managing building computational graphs. "
-"Computational graphs will continue to extend accordance with the "
-"execution of each operations."
-msgstr ""
-"version 2.0 "
-"では自動微分が実装されたことから、計算グラフが必要以上に生成され続けることを避けるため、計算グラフを作成可能な範囲をwithブロックを用いて制御する必要があります."
+"In the previous version, broadcasted calculations, as exampled bellow, "
+"with gpu are not correctly calculated."
+msgstr "v2.3.1では、下記の様なブロードキャストが行われる演算において"
+"正しい結果が返らないバグが見られた."
 
-#: ../../rsts/changes.rst:114
-msgid ""
-"ReNom limits the extension of computational graphs only in **with train "
-"block**. You have to execute the operation in \"with train block\" if you"
-" want to build a computational graph. The operation which was done out "
-"side of the \"with block\" will not extend the computational graph. This "
-"means the operation which was done out side of the with block is not "
-"concerned at the calculation of the gradient."
+#: ../../rsts/changes.rst:134 ../../rsts/changes.rst:160
+msgid "Bug example:"
 msgstr ""
-"ReNom version 2.0 では \"with train block\" "
-"のブロック内で実行された演算について計算グラフが作成され、逆伝播による勾配の計算が可能になります.withブロックの外で行われた計算は、計算グラフが作られないので勾配の計算には考慮されません."
 
-#: ../../rsts/changes.rst:136
-msgid "**6- Let out loss functions from Model definition**"
-msgstr "**6- 誤差関数の定義場所を変更**"
+#: ../../rsts/changes.rst:136 ../../rsts/changes.rst:162
+msgid "This bug have been happened when following conditions were satisfied."
+msgstr "このバグは以下の条件をすべて満たした場合に発生する."
 
 #: ../../rsts/changes.rst:138
 msgid ""
-"Loss functions turned out to be set out side of model definition. As "
-"showed above, the loss function is used in out of model to evaluate the "
-"difference between output of the model and the target value."
-msgstr "誤差関数は上の例のようにニューラルネットワークモデルの外に定義するよう変更されました."
+"Calculation on your own define computational graph using Variable "
+"object's arithmetic operations."
+msgstr "Sequentialモデルを使わず, Variableの四則演算を用いて計算グラフを作成."
+
+#: ../../rsts/changes.rst:139 ../../rsts/changes.rst:164
+msgid "Calculation with GPU."
+msgstr "GPUを用いて計算を実行."
+
+#: ../../rsts/changes.rst:140
+msgid "Broadcasting(ex: multiplying different shaped matrix)."
+msgstr "ブロードキャストが行われる(サイズが異なる行列同士の演算)."
+
+#: ../../rsts/changes.rst:141
+msgid ""
+"Either matrix's last dimension size is 1 and another matrix's last "
+"dimension size is not 1."
+msgstr "片方の行列の最後の次元が1かつ, もう片方の行列の最後の次元が1でない."
 
 #: ../../rsts/changes.rst:143
-msgid "**7- Name of backpropagation method**"
-msgstr "**7- 誤差逆伝播を実行するメソッドの名前**"
+msgid "If only sequential models have been used, this bug have not affected."
+msgstr "Sequentialモデルを用いてニューラルネットワークを構築していた場合, "
+"このバグは影響しない."
 
-#: ../../rsts/changes.rst:145
+#: ../../rsts/changes.rst:146
+msgid "**#2.** Batch normalization inference calculation."
+msgstr "**#2.** 推論時におけるバッチ正規化層のエラー."
+
+#: ../../rsts/changes.rst:148
 msgid ""
-"The name of back propagation method has been changed. And also the object"
-" which has the method was changed. In version 1.2, model object has the "
-"back propagation method as a name of \"backward\". In version 2.0, node "
-"object has the back propagation method as a name of \"grad\"."
-msgstr ""
-"誤差逆伝播を実行するメソッド名が変更されました.さらに逆伝播メソッドを持つクラスも変更されました.version 1.2 "
-"では下の例のように、ニューラルネットワークModelクラスが順伝播、逆伝播、更新メソッドを持っています.version "
-"2.0ではNodeクラスが逆伝播、更新メソッドを持つように変更されました."
+"In the previous version, inference calculation of batch normalization "
+"were stopped by CUDNN_STATUS_BAD_PARAM error."
+msgstr "v2.3.1では推論計算時, バッチ正規化層においてCUDNN_STATUS_BAD_PARAMエラーが"
+"発生し, 計算が停止するbugがあった."
 
-#: ../../rsts/changes.rst:149
-msgid ""
-"Both methods executes back propagation, but the name and which object has"
-" the method are different."
-msgstr "バージョンの違いにより逆伝播計算の実行に使用するメソッド名とそのメソッドを持つクラスが変更されたことに注意してください."
-
-#: ../../rsts/changes.rst:171
-msgid "**8- Which object has update method**"
-msgstr "**8- updateメソッドを持っているクラス**"
-
-#: ../../rsts/changes.rst:173
-msgid "The method \"update\" has been moved to Node class same as above example."
-msgstr "上の例で示す通り、重みパラメータの更新に使用するupdateメソッドについてもメソッドの属するクラスが変更されました."
-
-#: ../../rsts/changes.rst:176
-msgid "**9- How to use of optimizer class**"
-msgstr "**9- Optimizerクラスの使い方**"
-
-#: ../../rsts/changes.rst:178
-msgid ""
-"In version 1.2, optimizer class, for instance Sgd class, is used with "
-"model object. In version 2.0, optimizer class is added to update method "
-"as an argument."
-msgstr ""
-"version "
-"1.2では勾配降下アルゴリズムを提供するoptimizerオブジェクトは以下の例の様にモデルオブジェクトをラップする様に使用していました.version"
-" 2.0では、optimizerオブジェクトは、updateメソッドの引数に与えて使用するよう変更されました."
-
-#~ msgid "version 1.2 ⇒ version 2.0"
-#~ msgstr ""
+#: ../../rsts/changes.rst:165
+msgid "Executes the inference mode without executing the training mode even once."
+msgstr "学習計算を一度も実行せずに推論計算を実行."
 

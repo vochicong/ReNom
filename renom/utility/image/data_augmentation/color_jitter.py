@@ -14,34 +14,32 @@ def color_jitter(x, h=None, s=None, v=None, random=False, labels=None, **kwargs)
     if x is a Batch, apply jitter transform to Batch.
     if arguments include labels, apply label transformation.
 
-    :param ndarray x: 3 or 4(batch) dimensional RGB images
-    :param h: multiple value to h channel of HSV color space.
+    Args:
+        x (ndarray): 3 or 4(batch) dimensional RGB images
+        h (tuple): multiple value to h channel of HSV color space.
                     when you apply random transformation, please use tuple (min h, max h)
-    :type h: float or tuple
-    :param s: multiple value to s channel of HSV color space.
+        s (tuple): multiple value to s channel of HSV color space.
                     when you apply random transformation, please use tuple (min s, max s)
-    :type s: float or tuple
-    :param float v: multiple value to v channel of HSV color space.
+        v (tuple): multiple value to v channel of HSV color space.
                     when you apply random transformation, please use tuple (min v, max v)
-    :type v: float or tuple
-    :param bool random: If True, apply random jitter transform
-    :param ndarray labels: rectangle labels(2-dimensional array)
+        random (bool): If True, apply random jitter transform
+        labels (ndarray): rectangle labels(2-dimensional array)
                            ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
-    :return: Images(4 dimension) of jitter transformed. If including labels, return with transformed labels
-    :rtype: ndarray
+    Returns:
+        (ndarray): Images(4 dimension) of jitter transformed. If including labels, return with transformed labels
 
-    :Example:
-    >>> from renom.utility.image.data_augmentation.color_jitter import color_jitter
-    >>> from PIL import Image as im
-    >>> import matplotlib.pyplot as plt
-    >>> import numpy as np
-    >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
-    >>> image = np.array(image).astype(np.float32)
-    >>> jitter_image = color_jitter(image, v=2)
-    >>> fig, axes = plt.subplots(2, 1)
-    >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
-    >>> axes[1].imshow(jitter_image[0] / 255); axes[1].set_title("Jitter One Image")
-    >>> plt.show()
+    Example:
+        >>> from renom.utility.image.data_augmentation.color_jitter import color_jitter
+        >>> from PIL import Image as im
+        >>> import matplotlib.pyplot as plt
+        >>> import numpy as np
+        >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
+        >>> image = np.array(image).astype(np.float32)
+        >>> jitter_image = color_jitter(image, v=2)
+        >>> fig, axes = plt.subplots(2, 1)
+        >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
+        >>> axes[1].imshow(jitter_image[0] / 255); axes[1].set_title("Jitter One Image")
+        >>> plt.show()
 
     """
     cj = ColorJitter(h=h, s=s, v=v)
@@ -53,15 +51,13 @@ def color_jitter(x, h=None, s=None, v=None, random=False, labels=None, **kwargs)
 class ColorJitter(Image):
     """Apply color jitter transformation to the input x and labels.
 
-    :param h: multiple value to h channel of HSV color space.
+    Args:
+        h (tuple): multiple value to h channel of HSV color space.
                     when you apply random transformation, please use tuple (min h, max h)
-    :type h: float or tuple
-    :param s: multiple value to s channel of HSV color space.
+        s (tuple): multiple value to s channel of HSV color space.
                     when you apply random transformation, please use tuple (min s, max s)
-    :type s: float or tuple
-    :param float v: multiple value to v channel of HSV color space.
+        v (tuple): multiple value to v channel of HSV color space.
                     when you apply random transformation, please use tuple (min v, max v)
-    :type v: float or tuple
     """
 
     def __init__(self, h=None, s=None, v=None):
@@ -75,26 +71,27 @@ class ColorJitter(Image):
         if x is a Batch, apply jitter transform to Batch
         if arguments include labels, apply label transformation
 
-        :param ndarray x: 3 or 4(batch) dimensional RGB images
-        :param bool random: apply random jitter or not
-        :param ndarray labels: rectangle labels(2-dimensional array)
+        Args:
+            x (ndarray): 3 or 4(batch) dimensional RGB images
+            random (bool): apply random jitter or not
+            labels (ndarray): rectangle labels(2-dimensional array)
                                ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
-        :return: Images(4 dimension) of jitter transformed. If including labels, return with transformed labels
-        :rtype: ndarray
+        Returns:
+            (ndarray): Images(4 dimension) of jitter transformed. If including labels, return with transformed labels
 
-        :Example:
-        >>> from renom.utility.image.data_augmentation.color_jitter import ColorJitter
-        >>> from PIL import Image as im
-        >>> import matplotlib.pyplot as plt
-        >>> import numpy as np
-        >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
-        >>> image = np.array(image).astype(np.float32)
-        >>> cj = ColorJitter(v=2)
-        >>> jitter_image = cj.transform(image)
-        >>> fig, axes = plt.subplots(2, 1)
-        >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
-        >>> axes[1].imshow(jitter_image[0] / 255); axes[1].set_title("Jitter One Image")
-        >>> plt.show()
+        Example:
+            >>> from renom.utility.image.data_augmentation.color_jitter import ColorJitter
+            >>> from PIL import Image as im
+            >>> import matplotlib.pyplot as plt
+            >>> import numpy as np
+            >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
+            >>> image = np.array(image).astype(np.float32)
+            >>> cj = ColorJitter(v=2)
+            >>> jitter_image = cj.transform(image)
+            >>> fig, axes = plt.subplots(2, 1)
+            >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
+            >>> axes[1].imshow(jitter_image[0] / 255); axes[1].set_title("Jitter One Image")
+            >>> plt.show()
 
         """
         jittered_images, batch_size, original_size = self.check_x_dim(x.copy())
@@ -108,11 +105,6 @@ class ColorJitter(Image):
         return jittered_images
 
     def _color_jitter(self, x, random=False):
-        """Performs a jitter transform to a image
-           First, convert RGB image to HSV.
-           Second, from the arguments, apply jitter transform to HSV images
-           Third, reconvert HSV image to RGB
-        """
         if with_cv2:
             hsv = cv2.cvtColor(x, cv2.COLOR_RGB2HSV)
         else:

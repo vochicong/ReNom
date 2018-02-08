@@ -9,30 +9,31 @@ def shift(x, shift, fill_mode="constant", fill_val=0, random=False, labels=None,
     if x is a Batch, apply shifts transform to Batch.
     if arguments include labels, apply label transformation.
 
-    :param ndarray x: 3 or 4(batch) dimensional images
-    :param tuple shift: values of x and y shifts (y, x)
-    :param str fill_mode: method of interpolation after rotate transform
-    :param float fill_val: the interpolation value if fill_mode is 'constant'
-    :param bool random: random shift or not
-    :param ndarray labels: rectangle labels(2-dimensional array)
-        ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
-    :param int num_class: number of class of datasets
-    :return: Images(4 dimension) of shift transformed. If including labels, return with transformed labels
-    :rtype: ndarray
+    Args:
+        x (ndarray): 3 or 4(batch) dimensional images
+        shift (tuple): values of x and y shifts (y, x)
+        fill_mode (str): method of interpolation after rotate transform
+        fill_val (float): the interpolation value if fill_mode is 'constant'
+        random (bool): random shift or not
+        labels (ndarray): rectangle labels(2-dimensional array)
+            ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
+        num_class (int): number of class of datasets
 
-    :Example:
-    >>> from renom.utility.image.data_augmentation.shift import shift
-    >>> from PIL import Image as im
-    >>> import matplotlib.pyplot as plt
-    >>> import numpy as np
-    >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
-    >>> image = np.array(image).astype(np.float32)
-    >>> shift_image = shift(image, shift=(50, 50))
-    >>> fig, axes = plt.subplots(2, 1)
-    >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
-    >>> axes[1].imshow(shift_image[0] / 255); axes[1].set_title("Shift One Image")
-    >>> plt.show()
+    Returns:
+        (ndarray): Images(4 dimension) of shift transformed. If including labels, return with transformed labels
 
+    Example:
+        >>> from renom.utility.image.data_augmentation.shift import shift
+        >>> from PIL import Image as im
+        >>> import matplotlib.pyplot as plt
+        >>> import numpy as np
+        >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
+        >>> image = np.array(image).astype(np.float32)
+        >>> shift_image = shift(image, shift=(50, 50))
+        >>> fig, axes = plt.subplots(2, 1)
+        >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
+        >>> axes[1].imshow(shift_image[0] / 255); axes[1].set_title("Shift One Image")
+        >>> plt.show()
     """
     shifts = Shift(shift, fill_mode=fill_mode, fill_val=fill_val)
     if isinstance(labels, np.ndarray):
@@ -43,9 +44,10 @@ def shift(x, shift, fill_mode="constant", fill_val=0, random=False, labels=None,
 class Shift(Image):
     """Apply shift transformation to the input x and labels
 
-    :param tuple shift: values of x and y shifts (y, x)
-    :param str fill_mode: method of interpolation after rotate transform
-    :param float fill_val: the interpolation value if fill_mode is 'constant'
+    Args:
+        shift (tuple): values of x and y shifts (y, x)
+        fill_mode (str): method of interpolation after rotate transform
+        fill_val (float): the interpolation value if fill_mode is 'constant'
     """
 
     def __init__(self, shift, fill_mode="constant", fill_val=0):
@@ -59,27 +61,29 @@ class Shift(Image):
         if x is a Batch, apply shifts transform to Batch.
         if arguments include labels, apply label transformation.
 
-        :param ndarray x: 3 or 4(batch) dimensional images
-        :param bool random: random shift or not
-        :param ndarray labels: rectangle labels(2-dimensional array)
+        Args:
+            x (ndarray): 3 or 4(batch) dimensional images
+            random (bool): random shift or not
+            labels (ndarray): rectangle labels(2-dimensional array)
                                ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
-        :param int num_class: number of class of datasets
-        :return: Images(4 dimension) of shift transformed. If including labels, return with transformed labels
-        :rtype: ndarray
+            num_class (int): number of class of datasets
 
-        :Example:
-        >>> from renom.utility.image.data_augmentation.shift import Shift
-        >>> from PIL import Image as im
-        >>> import matplotlib.pyplot as plt
-        >>> import numpy as np
-        >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
-        >>> image = np.array(image).astype(np.float32)
-        >>> sh = Shift(shift=(50, 50))
-        >>> shift_image = sh.transform(image)
-        >>> fig, axes = plt.subplots(2, 1)
-        >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
-        >>> axes[1].imshow(shift_image[0] / 255); axes[1].set_title("Shift One Image")
-        >>> plt.show()
+        Returns:
+            (ndarray): Images(4 dimension) of shift transformed. If including labels, return with transformed labels
+
+        Example:
+            >>> from renom.utility.image.data_augmentation.shift import Shift
+            >>> from PIL import Image as im
+            >>> import matplotlib.pyplot as plt
+            >>> import numpy as np
+            >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
+            >>> image = np.array(image).astype(np.float32)
+            >>> sh = Shift(shift=(50, 50))
+            >>> shift_image = sh.transform(image)
+            >>> fig, axes = plt.subplots(2, 1)
+            >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
+            >>> axes[1].imshow(shift_image[0] / 255); axes[1].set_title("Shift One Image")
+            >>> plt.show()
 
         """
         if self.shift == (0, 0):
@@ -108,15 +112,6 @@ class Shift(Image):
         return shift_images
 
     def _get_shifted_image(self, x, channel_axis, random=1.):
-        """Perform a shift transformation to a image
-           # Args:
-               x(ndarray)   : a RGB image(3-dimensional array)
-               channel_axis(int): axis of color axis
-               random(float)    : rate of multiple value to the self.shift
-
-           # Returns:
-               x(ndarray)   : a transformed image(3-dimensional array)
-        """
         transform_matrix = np.array([
             [1, 0, int(-self.shift[0] * random)],
             [0, 1, int(-self.shift[1] * random)],
@@ -136,11 +131,6 @@ class Shift(Image):
         return x
 
     def _labels_transform(self, labels, num_class, shift_values, img_shape):
-        """Perform labels transformation for rectangle
-           # Args:
-               shift_values(ndarray): a random value of shift
-        """
-        transform_labels = labels.copy()
         block_len = 4 + num_class
         for index, random, label in zip(np.arange(shift_values.shape[0]), shift_values, transform_labels):
             label = self._label_transform(label, block_len, random, img_shape)
@@ -148,16 +138,6 @@ class Shift(Image):
         return transform_labels
 
     def _label_transform(self, label, block_len, random, img_shape):
-        """Perform a label transformation
-           # Args:
-               label(ndarray): label for a image(2-dimensional array)
-               block_len(int): length of a rectangle label
-               random(float) : rate for shift
-               img_shape(int): shape of image (height, width)
-
-           # Returns:
-               label(ndarray): label for a transformed image(2-dimensional array)
-        """
         num_block = label.shape[0] // block_len
         x_shift = int(self.shift[1] * random)
         y_shift = int(self.shift[0] * random)

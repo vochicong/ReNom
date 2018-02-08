@@ -19,13 +19,6 @@ renom.utility.image.data_augmentation.flip
     :members:
     
 
-renom.utility.image.data_augmentation.image
---------------------------------------------------
-
-.. automodule:: renom.utility.image.data_augmentation.image
-    :members:
-
-
 renom.utility.image.data_augmentation.rescale
 ----------------------------------------------------
 

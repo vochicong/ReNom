@@ -8,24 +8,26 @@ def rotate(x, degree, fill_mode="constant", fill_val=0, random=False, labels=Non
     """Performs a rotation of a Numpy images.
     if x is a Batch, apply rotation transform to Batch.
 
-    :param ndarray x: 3 or 4(batch) dimensional images
-    :param int degree: rotation degree [-180 : 180]
-    :param str fill_mode: method of interpolation after rotate transform
-                          you can use ['constant', 'nearest']
-    :param float fill_val: the interpolation value if fill_mode is 'constant'
-    :param bool random: random rotation. degree is [-degree, +degree]
-    :param ndarray labels: you can use only when degree=90
-    :return: Images(4 dimension) of rotate transformed.
-        If including labels, return with transformed labels
-    :rtype: ndarray
+    Args:
+        x (ndarray): 3 or 4(batch) dimensional images
+        degree (int): rotation degree [-180 : 180]
+        fill_mode (str): method of interpolation after rotate transform
+            you can use ['constant', 'nearest']
+        fill_val (float): the interpolation value if fill_mode is 'constant'
+        random (bool): random rotation. degree is [-degree, +degree]
+        labels (ndarray): you can use only when degree=90
 
-    :Example:
-    >>> from renom.utility.image.data_augmentation.rotate import rotate
-    >>> from PIL import Image as im
-    >>> import numpy as np
-    >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
-    >>> image = np.array(image).astype(np.float32)
-    >>> rotate_image = rotate(image, degree=10)
+    Returns:
+        (ndarray): Images(4 dimension) of rotate transformed.
+            If including labels, return with transformed labels
+
+    Example:
+        >>> from renom.utility.image.data_augmentation.rotate import rotate
+        >>> from PIL import Image as im
+        >>> import numpy as np
+        >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
+        >>> image = np.array(image).astype(np.float32)
+        >>> rotate_image = rotate(image, degree=10)
     """
     rotate = Rotate(degree, fill_mode=fill_mode, fill_val=fill_val)
     return rotate.transform(x, random=random, labels=labels)
@@ -34,19 +36,21 @@ def rotate(x, degree, fill_mode="constant", fill_val=0, random=False, labels=Non
 class Rotate(Image):
     """Apply rotate transformation to the input x
 
-    :param ndarray x: 3 or 4(batch) dimensional images
-    :param int degree: rotation degree [-180 : 180]
-    :param str fill_mode: method of interpolation after rotate transform
+    Args:
+        x (ndarray): 3 or 4(batch) dimensional images
+        degree (int): rotation degree [-180 : 180]
+        fill_mode (str): method of interpolation after rotate transform
                           you can use ['constant', 'nearest']
-    :param float fill_val: the interpolation value if fill_mode is 'constant'
+        fill_val (float): the interpolation value if fill_mode is 'constant'
 
-    >>> from rotate import rotate
-    >>> from PIL import Image as im
-    >>> import numpy as np
-    >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
-    >>> image = np.array(image).astype(np.float32)
-    >>> rt = Rotate(degree=10)
-    >>> rotate_image = rt.transform(image)
+    Example:
+        >>> from rotate import rotate
+        >>> from PIL import Image as im
+        >>> import numpy as np
+        >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
+        >>> image = np.array(image).astype(np.float32)
+        >>> rt = Rotate(degree=10)
+        >>> rotate_image = rt.transform(image)
     """
 
     def __init__(self, degree, fill_mode="constant", fill_val=0):
@@ -59,12 +63,14 @@ class Rotate(Image):
         """Performs a rotation of a Numpy images.
         if x is a Batch, apply rotation transform to Batch
 
-        :param ndarray x: 3 or 4(batch) dimensional images
-        :param bool random: random rotation. degree is [-degree, +degree]
-        :param ndarray labels: you can use only when degree=90
-        :return: Images(4 dimension) of rotate transformed.
-            If including labels, return with transformed labels
-        :rtype: ndarray
+        Args:
+            x (ndarray): 3 or 4(batch) dimensional images
+            random (bool): random rotation. degree is [-degree, +degree]
+            labels (ndarray): you can use only when degree=90
+
+        Retuens:
+            (ndarray): Images(4 dimension) of rotate transformed.
+              If including labels, return with transformed labels
         """
 
         rotate_images, batch_size, original_size = self.check_x_dim(x.copy())
