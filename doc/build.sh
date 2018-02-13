@@ -13,8 +13,8 @@ else
     rm ${ZIP_NAME}
 fi
 
+sphinx-versioning build -w doc_v2.4.1 -W nothing -r doc_v2.4.1 doc _build/html -- -D language='en'
 sphinx-versioning build -w doc_v2.4.1 -W nothing -r doc_v2.4.1 doc _build/html/ja -- -D language='ja'
-sphinx-versioning build -w doc_v2.4.1 -W nothing -r doc_v2.4.1 doc _build/html/en -- -D language='en'
 
 # mv _build/html/en/* _build/html/
 # rmdir _build/html/en
