@@ -82,7 +82,7 @@ release = u'2.4'
 # Usually you set "language" from the command line for these cases.
 locale_dirs = ["_locale"]
 gettext_compact = False
-language = None
+language = 'en'
 autodoc_member_order = "bysource"
 # There are two options for replacing |today|: either, you set today to some
 # non-false value, then it is used:
@@ -136,7 +136,6 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
-html_context = {"language": language}
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
