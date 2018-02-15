@@ -30,7 +30,7 @@ First clone the ReNom repository.
 
 	git clone https://github.com/ReNom-dev-team/ReNom.git
 
-Then move to the ReNomAd folder, install the module using pip.
+Then move to the ReNom folder, install the module using pip.
 
 	cd ReNom
 	pip install -e .
