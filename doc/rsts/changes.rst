@@ -87,6 +87,12 @@ Modified
     In v2.4.1, you can save any attributes with save and load function.
     See the API reference of Model object.
 
+**#7.** TDA modules are moved to ReNomTDA repository.
+
+    You can install ReNomTDA from following URL.  
+    ReNomTDA: https://github.com/ReNom-dev-team/ReNomTDA
+
+
 New features
 ^^^^^^^^^^^^
 

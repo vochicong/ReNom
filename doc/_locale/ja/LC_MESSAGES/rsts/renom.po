@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ReNom 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-01 01:37+0000\n"
+"POT-Creation-Date: 2018-02-15 09:43+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -194,8 +194,7 @@ msgstr "返還後の行列の形"
 msgid ""
 "This function sums up matrix elements. If the argument 'axis' is passed, "
 "this function performs sum along specified axis."
-msgstr "行列の要素を足し合わせた結果を返す. 引数`axis`が指定された場合, "
-"その軸に沿って演算が実行される."
+msgstr "行列の要素を足し合わせた結果を返す. 引数`axis`が指定された場合, その軸に沿って演算が実行される."
 
 #: of renom.operation.sum:7
 msgid "Summing up along this axis."
@@ -210,15 +209,16 @@ msgid "This function executes dot product of the two matrixes."
 msgstr "二つの行列の内積を返す。"
 
 #: of renom.operation.concat:1
-msgid ""
-"Join a sequence of arrays along an existing axis. In the current "
-"version(2.4), concatenation along 2nd axis is only supported."
-msgstr "複数の行列を結合し、ひとつの行列として返す.現在のバージョン(v2.4)では, "
-"行列の第二軸について結合が行われる."
+msgid "Join a sequence of arrays along specified axis."
+msgstr "複数の行列を指定された軸に沿って結合し、ひとつの行列として返す."
 
-#: of renom.operation.concat:5
+#: of renom.operation.concat:3
 msgid "Input arrays or tuple of input arrays."
 msgstr "入力データ,　もしくは入力データのリスト."
+
+#: of renom.operation.concat:5
+msgid "Concatenation will be performed along this axis."
+msgstr "結合はこの引数に指定された軸に沿って実行される."
 
 #: of renom.operation.where:1
 msgid "Return elements, either from a or b, depending on condition."

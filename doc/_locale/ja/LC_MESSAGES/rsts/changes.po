@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ReNom 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-01 00:33+0000\n"
+"POT-Creation-Date: 2018-02-15 09:43+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -116,13 +116,11 @@ msgstr "**#5.** Yoloクラスの__init__メソッドにおける, 使用され�
 msgid ""
 "When you instantiate Yolo class, be careful not to give the argument "
 "'image_size'. See API reference of :ref:`Yolo`."
-msgstr "Yoloクラスのインスタンス化時には 'image_size'引数を与えないよう注意. "
-"YoloクラスのAPIリファレンスを参照."
+msgstr "Yoloクラスのインスタンス化時には 'image_size'引数を与えないよう注意. YoloクラスのAPIリファレンスを参照."
 
 #: ../../rsts/changes.rst:84
 msgid "**#6.** Users can save attributes when saving model's weight parameters."
-msgstr "**#6.** Modelクラスのsaveメソッドを用いた重みパラメータ保存において"
-"重みパラメータ以外にもオブジェクトの属性を保存可能."
+msgstr "**#6.** Modelクラスのsaveメソッドを用いた重みパラメータ保存において重みパラメータ以外にもオブジェクトの属性を保存可能."
 
 #: ../../rsts/changes.rst:86
 msgid ""
@@ -131,90 +129,98 @@ msgid ""
 " save and load function. See the API reference of Model object."
 msgstr "ModelクラスのAPIリファレンスを参照."
 
-#: ../../rsts/changes.rst:91
+#: ../../rsts/changes.rst:90
+msgid "**#7.** TDA modules are moved to ReNomTDA repository."
+msgstr "TDAモジュールはReNomTDAレポジトリへ移動されました."
+
+#: ../../rsts/changes.rst:92
+msgid ""
+"You can install ReNomTDA from following URL. ReNomTDA: https://github.com"
+"/ReNom-dev-team/ReNomTDA"
+msgstr "ReNomTDAモジュールは以下のURLからダウンロードすることができます."
+"/ReNom-dev-team/ReNomTDA"
+
+#: ../../rsts/changes.rst:97
 msgid "New features"
 msgstr ""
 
-#: ../../rsts/changes.rst:93
+#: ../../rsts/changes.rst:99
 msgid ""
 "**#1.** New auto differentiation available operation: renom.amax, "
 "renom.amin."
 msgstr "**#1.** 自動微分に対応したrenom.amax, renom.aminを追加. APIリファレンスを参照."
 
-#: ../../rsts/changes.rst:95
+#: ../../rsts/changes.rst:101
 msgid ""
 "**#2.** New method for releasing gpu memory pool: "
 "renom.cuda.release_mem_pool."
 msgstr "GPUメモリプールを開放するための関数'renom.cuda.release_mem_pool'を実装."
 
-#: ../../rsts/changes.rst:98
+#: ../../rsts/changes.rst:104
 msgid "Removed modules"
 msgstr ""
 
-#: ../../rsts/changes.rst:100
+#: ../../rsts/changes.rst:106
 msgid "Nothing"
 msgstr ""
 
-#: ../../rsts/changes.rst:103
+#: ../../rsts/changes.rst:109
 msgid "Bug fix"
 msgstr ""
 
-#: ../../rsts/changes.rst:105
+#: ../../rsts/changes.rst:111
 msgid "**#1.** Broadcasting matrix arithmetic operations."
 msgstr "GPU上における, ブロードキャストが実行される行列の四則演算を修正."
 
-#: ../../rsts/changes.rst:107
+#: ../../rsts/changes.rst:113
 msgid ""
 "In the previous version, broadcasted calculations, as exampled bellow, "
 "with gpu are not correctly calculated."
-msgstr "v2.3.1では、下記の様なブロードキャストが行われる演算において"
-"正しい結果が返らないバグが見られた."
+msgstr "v2.3.1では、下記の様なブロードキャストが行われる演算において正しい結果が返らないバグが見られた."
 
-#: ../../rsts/changes.rst:134 ../../rsts/changes.rst:160
+#: ../../rsts/changes.rst:140 ../../rsts/changes.rst:166
 msgid "Bug example:"
 msgstr ""
 
-#: ../../rsts/changes.rst:136 ../../rsts/changes.rst:162
+#: ../../rsts/changes.rst:142 ../../rsts/changes.rst:168
 msgid "This bug have been happened when following conditions were satisfied."
 msgstr "このバグは以下の条件をすべて満たした場合に発生する."
 
-#: ../../rsts/changes.rst:138
+#: ../../rsts/changes.rst:144
 msgid ""
 "Calculation on your own define computational graph using Variable "
 "object's arithmetic operations."
 msgstr "Sequentialモデルを使わず, Variableの四則演算を用いて計算グラフを作成."
 
-#: ../../rsts/changes.rst:139 ../../rsts/changes.rst:164
+#: ../../rsts/changes.rst:145 ../../rsts/changes.rst:170
 msgid "Calculation with GPU."
 msgstr "GPUを用いて計算を実行."
 
-#: ../../rsts/changes.rst:140
+#: ../../rsts/changes.rst:146
 msgid "Broadcasting(ex: multiplying different shaped matrix)."
 msgstr "ブロードキャストが行われる(サイズが異なる行列同士の演算)."
 
-#: ../../rsts/changes.rst:141
+#: ../../rsts/changes.rst:147
 msgid ""
 "Either matrix's last dimension size is 1 and another matrix's last "
 "dimension size is not 1."
 msgstr "片方の行列の最後の次元が1かつ, もう片方の行列の最後の次元が1でない."
 
-#: ../../rsts/changes.rst:143
+#: ../../rsts/changes.rst:149
 msgid "If only sequential models have been used, this bug have not affected."
-msgstr "Sequentialモデルを用いてニューラルネットワークを構築していた場合, "
-"このバグは影響しない."
+msgstr "Sequentialモデルを用いてニューラルネットワークを構築していた場合, このバグは影響しない."
 
-#: ../../rsts/changes.rst:146
+#: ../../rsts/changes.rst:152
 msgid "**#2.** Batch normalization inference calculation."
 msgstr "**#2.** 推論時におけるバッチ正規化層のエラー."
 
-#: ../../rsts/changes.rst:148
+#: ../../rsts/changes.rst:154
 msgid ""
 "In the previous version, inference calculation of batch normalization "
 "were stopped by CUDNN_STATUS_BAD_PARAM error."
-msgstr "v2.3.1では推論計算時, バッチ正規化層においてCUDNN_STATUS_BAD_PARAMエラーが"
-"発生し, 計算が停止するbugがあった."
+msgstr "v2.3.1では推論計算時, バッチ正規化層においてCUDNN_STATUS_BAD_PARAMエラーが発生し, 計算が停止するbugがあった."
 
-#: ../../rsts/changes.rst:165
+#: ../../rsts/changes.rst:171
 msgid "Executes the inference mode without executing the training mode even once."
 msgstr "学習計算を一度も実行せずに推論計算を実行."
 
