@@ -14,4 +14,12 @@ else
 fi
 
 sphinx-versioning build -W 'v2.4.1' -w nothing -r v2.4.1 doc _build/html -- -D language='en'
-sphinx-versioning build -W 'v2.4.1' -w nothing -r v2.4.1 doc _build/html/ja -- -D language='ja'
+python rewrite_tutorial.py en
+mv _build/html _build/en
+
+sphinx-versioning build -W 'v2.4.1' -w nothing -r v2.4.1 doc _build/html -- -D language='ja'
+python rewrite_tutorial.py ja
+mv _build/html _build/ja
+
+mv _build/en _build/html
+mv _build/ja _build/html/ja
