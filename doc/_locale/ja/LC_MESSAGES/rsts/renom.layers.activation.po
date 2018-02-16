@@ -121,7 +121,6 @@ msgid ":math:`f(x) = 1/(1 + \\exp(-x))`"
 msgstr ""
 
 #: of renom.layers.activation.softmax.Softmax:1
-#, fuzzy
 msgid "Soft max activation function is described by the following formula:"
 msgstr "sigmoid [2]_ 活性化関数を定義したクラス."
 

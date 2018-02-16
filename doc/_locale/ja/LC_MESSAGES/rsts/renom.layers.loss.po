@@ -22,7 +22,6 @@ msgid "renom.layers.loss"
 msgstr ""
 
 #: of renom.layers.loss.mean_squared_error.MeanSquaredError:1
-#, fuzzy
 msgid ""
 "This function evaluates the loss between the target ``y`` and the input "
 "``x`` using mean squared error."
@@ -84,7 +83,6 @@ msgid "Clipping threshold."
 msgstr "クリッピングに用いる閾値"
 
 #: of renom.layers.loss.cross_entropy.CrossEntropy:1
-#, fuzzy
 msgid ""
 "This function evaluates the cross entropy loss between the target ``y`` "
 "and the input ``x``."

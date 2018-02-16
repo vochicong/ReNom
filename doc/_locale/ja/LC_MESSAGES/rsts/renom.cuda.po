@@ -22,17 +22,14 @@ msgid "renom.cuda"
 msgstr ""
 
 #: of renom.cuda.set_cuda_active:1
-#, fuzzy
 msgid "If True is given, cuda will be activated."
 msgstr "引数にTrueが与えられた場合、cudaを有効化する."
 
 #: of renom.cuda.set_cuda_active:3
-#, fuzzy
 msgid "Activation flag."
 msgstr "フラグ"
 
 #: of renom.cuda.is_cuda_active:1
-#, fuzzy
 msgid "Checks whether CUDA is activated."
 msgstr "cudaが有効化されているかを返す関数"
 
