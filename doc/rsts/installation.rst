@@ -16,7 +16,7 @@ URL: https://github.com/ReNom-dev-team/ReNom
 Requirements
 ------------
 
-ReNom version 2.0 requires following libraries.
+ReNom version 2.4 requires following libraries.
 
 - Linux / Ubuntu
 - Python 2.7, 3.4

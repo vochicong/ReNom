@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ReNom 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-07 08:05+0000\n"
+"POT-Creation-Date: 2018-02-19 01:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.5.3\n"
 
 #: ../../rsts/renom.utility.rst:2
 msgid "renom.utility"
@@ -36,11 +36,12 @@ msgid ""
 "class as following example."
 msgstr "Dense, Conv2dオブジェクトの重みパラメータを初期化する方法を提供する."
 
-#: of renom.utility.distributor.imageloader.ImageLoader:12
-#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:19
-#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:18
-#: renom.utility.initializer.Initializer:8 renom.utility.searcher.Searcher:12
-#: renom.utility.trainer.Trainer:24
+#: of renom.utility.distributor.imageloader.ImageLoader:11
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:18
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:16
+#: renom.utility.initializer.Initializer:8 renom.utility.searcher.Searcher:11
+#: renom.utility.trainer.Trainer:23
 msgid "Example"
 msgstr ""
 
@@ -67,6 +68,29 @@ msgid ""
 "Gaussian initializer. Initialize parameters using samples drawn from "
 ":math:`N(mean, std)`"
 msgstr "ガウス分布 :math:`N(mean, std)` に従って重みを初期化する."
+
+#: of renom.utility.distributor.distributor.Distributor
+#: renom.utility.distributor.distributor.Distributor.batch
+#: renom.utility.distributor.distributor.Distributor.split
+#: renom.utility.distributor.distributor.NdarrayDistributor
+#: renom.utility.distributor.imageloader.ImageLoader
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor.batch
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch
+#: renom.utility.distributor.threadingdistributor.ImageDistributor
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create
+#: renom.utility.initializer.Gaussian renom.utility.initializer.Uniform
+#: renom.utility.searcher.BayesSearcher
+#: renom.utility.searcher.BayesSearcher.suggest
+#: renom.utility.searcher.GridSearcher renom.utility.searcher.RandomSearcher
+#: renom.utility.searcher.Searcher renom.utility.searcher.Searcher.best
+#: renom.utility.searcher.Searcher.set_result
+#: renom.utility.searcher.Searcher.suggest renom.utility.trainer.Trainer
+#: renom.utility.trainer.Trainer.test renom.utility.trainer.Trainer.train
+msgid "Parameters"
+msgstr ""
 
 #: of renom.utility.initializer.Gaussian:4
 msgid "Mean value of normal distribution."
@@ -136,7 +160,11 @@ msgstr "次に調べるべきハイパーパラメータを返す."
 msgid "Maximum iteration number of parameter search."
 msgstr "最大探索回数"
 
-#: of renom.utility.searcher.Searcher.suggest:7
+#: of renom.utility.searcher.Searcher.suggest
+msgid "Yields"
+msgstr ""
+
+#: of renom.utility.searcher.Searcher.suggest:6
 msgid "*dict* -- Dictionary of hyper parameter."
 msgstr "ハイパーパラメータを含む辞書"
 
@@ -150,9 +178,25 @@ msgstr "最も低い評価値を得られたハイパーパラメータを返す
 msgid "The number of hyper parameters."
 msgstr "返すハイパーパラメータセットの数"
 
-#: of renom.utility.searcher.Searcher.best:9
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor.batch
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create
+#: renom.utility.searcher.Searcher.best renom.utility.trainer.Trainer.test
+msgid "Returns"
+msgstr ""
+
+#: of renom.utility.searcher.Searcher.best:8
 msgid "A list of dictionary of hyper parameters."
 msgstr "ハイパーパラメータを含む辞書のリスト"
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor.batch
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create
+#: renom.utility.searcher.Searcher.best
+msgid "Return type"
+msgstr ""
 
 #: of renom.utility.searcher.GridSearcher:1
 msgid "Grid searcher class."
@@ -188,13 +232,13 @@ msgstr ""
 msgid "This class performs hyper parameter search based on bayesian optimization."
 msgstr "ベイズ最適化に基づいて誤差が低くなるようなハイパーパラメータを探索する."
 
-#: of renom.utility.searcher.BayesSearcher:13
+#: of renom.utility.searcher.BayesSearcher:12
 msgid ""
 "This class requires the module GPy [1]_. You can install it using pip. "
 "``pip install gpy``"
 msgstr "このクラスはGPy [1]_ ライブラリを必要とします. GPyは ``pip install gpy`` で インストールが可能です."
 
-#: of renom.utility.searcher.BayesSearcher:16
+#: of renom.utility.searcher.BayesSearcher:15
 msgid "GPy - Gaussian Process framework http://sheffieldml.github.io/GPy/"
 msgstr ""
 
@@ -269,7 +313,7 @@ msgstr "順伝播のみを実行するメソッド."
 msgid "Input data."
 msgstr "入力データ"
 
-#: of renom.utility.trainer.Trainer.test:8
+#: of renom.utility.trainer.Trainer.test:7
 msgid "ndarray"
 msgstr ""
 
@@ -514,7 +558,7 @@ msgid "number of class of datasets"
 msgstr "データセットに含まれるクラス数."
 
 #: of
-#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:13
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:12
 msgid ""
 "Images(4 dimension) of augment transformed. If including labels, return "
 "with transformed labels"
