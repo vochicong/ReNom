@@ -160,7 +160,7 @@ class concat(Node):
 
     Args:
         args (*Variable, tuple): Input arrays or tuple of input arrays.
-        axis (int): Concatenation will be performed along this axis.
+        axis (int): Concatenation will be performed along this axis. Default value is 1.
 
     Example:
         >>> import numpy as np
@@ -179,6 +179,8 @@ class concat(Node):
 
     @classmethod
     def _oper_cpu(cls, args, axis):
+        print(axis)
+        print([a.shape for a in args])
         return np.concatenate(args, axis=axis).copy()
 
     @classmethod
@@ -190,9 +192,10 @@ class concat(Node):
         cuconcat([get_gpu(a) for a in args], ret, axis)
         return ret
 
-    def __new__(cls, *args, axis=1):
+    def __new__(cls, *args, **kwargs):
         if isinstance(args[0], (tuple, list)):
             args = args[0]
+        axis = kwargs.get('axis', 1)
         assert all([len(args[0].shape) == len(args[i].shape) for i in range(1, len(args))]), \
             "All arguments must have same number of dimension."
         assert np.sum(np.sum(np.array([list(map(lambda x, y: x != y,
