@@ -23,7 +23,7 @@ def set_cuda_active(activate=True):
         activate (bool): Activation flag.
     '''
     global _cuda_is_active
-    if not has_cuda():
+    if not has_cuda() and activate:
         warnings.warn("Couldn't find cuda modules.")
     _cuda_is_active = activate
 

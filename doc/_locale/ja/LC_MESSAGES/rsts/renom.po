@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ReNom 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-15 09:43+0900\n"
+"POT-Creation-Date: 2018-02-19 01:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.5.3\n"
 
 #: ../../rsts/renom.rst:2
 msgid "renom"
@@ -42,10 +42,10 @@ msgid ""
 "example is bellow)."
 msgstr "変数 'x'に関する勾配を取得したい場合は Gradsオブジェクトの持つ'get'メソッドを使用する.以下に例を示す."
 
-#: of renom.core.Amax:12 renom.core.Amin:12 renom.core.Grads:10
-#: renom.core.Node:5 renom.core.Variable:13 renom.operation.concat:10
-#: renom.operation.dot:10 renom.operation.reshape:10 renom.operation.sqrt:8
-#: renom.operation.sum:12 renom.operation.where:12
+#: of renom.core.Amax:11 renom.core.Amin:11 renom.core.Grads:10
+#: renom.core.Node:5 renom.core.Variable:12 renom.operation.concat:9
+#: renom.operation.dot:9 renom.operation.reshape:9 renom.operation.sqrt:7
+#: renom.operation.sum:11 renom.operation.where:11
 msgid "Example"
 msgstr ""
 
@@ -58,13 +58,29 @@ msgstr ""
 "このメソッドは与えられたNodeオブジェクトに関する勾配を返す.Gradsオブジェクトが, "
 "与えられたNodeオブジェクトに関する勾配を保持していない場合, Noneが返される."
 
+#: of renom.core.Amax renom.core.Amin renom.core.Grads.get
+#: renom.core.Grads.update renom.core.Node.grad renom.core.Variable
+#: renom.operation.concat renom.operation.dot renom.operation.exp
+#: renom.operation.log renom.operation.reshape renom.operation.sqrt
+#: renom.operation.sum renom.operation.where
+msgid "Parameters"
+msgstr ""
+
 #: of renom.core.Grads.get:5
 msgid "Returns a gradient with respect to this argument."
 msgstr "この引数に与えられたNodeオブジェクトに関する勾配を返す."
 
-#: of renom.core.Grads.get:9
+#: of renom.core.Grads.get
+msgid "Returns"
+msgstr ""
+
+#: of renom.core.Grads.get:8
 msgid "Gradient of given node object."
 msgstr "引数に与えられたオブジェクトの勾配を返す."
+
+#: of renom.core.Grads.get
+msgid "Return type"
+msgstr ""
 
 #: of renom.core.Grads.update:1
 msgid ""

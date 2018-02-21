@@ -3,7 +3,8 @@ from bs4 import BeautifulSoup
 import glob2
 from collections import OrderedDict
 
-import sys, os
+import sys
+import os
 import re
 
 from tutorial_dir_title_conf import dir_title_config

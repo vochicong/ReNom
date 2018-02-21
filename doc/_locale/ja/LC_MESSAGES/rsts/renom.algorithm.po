@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ReNom 2.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-08 01:08+0000\n"
+"POT-Creation-Date: 2018-02-19 01:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.5.3\n"
 
 #: ../../rsts/renom.algorithm.rst:2
 msgid "renom.algorithm"
@@ -75,6 +75,13 @@ msgid ""
 " for suppression is IOU > 0.4"
 msgstr "Yolo関数の出力に対しNMS(Non Maximum Suppression)を適用する."
 
+#: of renom.algorithm.image.detection.yolo.Yolo
+#: renom.algorithm.image.detection.yolo.apply_nms
+#: renom.algorithm.reinforcement.dqn.DQN
+#: renom.algorithm.reinforcement.dqn.DQN.train
+msgid "Parameters"
+msgstr ""
+
 #: of renom.algorithm.image.detection.yolo.apply_nms:5
 msgid "Cell size."
 msgstr "セル数"
@@ -101,11 +108,25 @@ msgstr "有効なバウンディングボックスを決めるしきい値."
 msgid "A threshold for bounding box suppression."
 msgstr "IOUに対するしきい値."
 
-#: of renom.algorithm.image.detection.yolo.apply_nms:19
+#: of renom.algorithm.image.detection.yolo.apply_nms
+#: renom.algorithm.reinforcement.dqn.DQN.action
+#: renom.algorithm.reinforcement.dqn.DQN.train
+msgid "Returns"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.apply_nms:18
 msgid ""
-"List of dict object is returned. The dict includes keys ``class``, "
+"List of dict object is returned. The dict includes keys ``class``,     "
 "``box``, ``score``."
 msgstr "辞書のリスト. 辞書は 'class', 'box', 'score'といったキーをもつ"
+
+#: of renom.algorithm.image.detection.yolo.apply_nms:20
+msgid "List of dict object is returned. The dict includes keys ``class``,"
+msgstr "辞書のリスト. 辞書は 'class', 'box', 'score'といったキーをもつ"
+
+#: of renom.algorithm.image.detection.yolo.apply_nms:21
+msgid "``box``, ``score``."
+msgstr ""
 
 #: of renom.algorithm.image.detection.yolo.Yolo:1
 msgid ""
@@ -163,11 +184,16 @@ msgstr "Experience Reply Bufferのサイズ"
 #: of renom.algorithm.reinforcement.dqn.DQN.action:1
 msgid ""
 "This method returns an action according to the given state. :param state:"
-" A state of an environment."
+" A state of an environment. :type state: ndarray"
 msgstr "与えられた状態に対し, 行動を返す."
 
-#: of renom.algorithm.reinforcement.dqn.DQN.action:6
+#: of renom.algorithm.reinforcement.dqn.DQN.action:5
 msgid "Action."
+msgstr ""
+
+#: of renom.algorithm.reinforcement.dqn.DQN.action
+#: renom.algorithm.reinforcement.dqn.DQN.train
+msgid "Return type"
 msgstr ""
 
 #: of renom.algorithm.reinforcement.dqn.DQN.update:1
@@ -208,8 +234,9 @@ msgstr "学習ループの前に蓄積させる経験の数."
 
 #: of renom.algorithm.reinforcement.dqn.DQN.train:17
 msgid "Number of step of one epoch."
-msgstr "1epoch中に実行する行動ステップ数.ステップ数とは, ある環境において行動を実行し, "
-"環境が次の状態に遷移し, 次の行動を実行するまでを一単位とする."
+msgstr ""
+"1epoch中に実行する行動ステップ数.ステップ数とは, ある環境において行動を実行し, 環境が次の状態に遷移し, "
+"次の行動を実行するまでを一単位とする."
 
 #: of renom.algorithm.reinforcement.dqn.DQN.train:19
 msgid "Number of test step."
@@ -241,15 +268,13 @@ msgstr "e-greedy法における"
 
 #: of renom.algorithm.reinforcement.dqn.DQN.train:33
 msgid "For the learning step, training is done at this cycle"
-msgstr "誤差逆伝播法によりQネットワークの学習を実行する間隔."
-"デフォルトでは4ステップに一回学習が行われる."
+msgstr "誤差逆伝播法によりQネットワークの学習を実行する間隔.デフォルトでは4ステップに一回学習が行われる."
 
-#: of renom.algorithm.reinforcement.dqn.DQN.train:37
+#: of renom.algorithm.reinforcement.dqn.DQN.train:36
 msgid "A dictionary which includes reward list of training and loss list."
-msgstr "各epochにおいて獲得した報酬のリスト, テスト時に獲得した報酬のリスト, "
-"学習誤差の平均値のリストが含まれる辞書."
+msgstr "各epochにおいて獲得した報酬のリスト, テスト時に獲得した報酬のリスト, 学習誤差の平均値のリストが含まれる辞書."
 
-#: of renom.algorithm.reinforcement.dqn.DQN.train:42
+#: of renom.algorithm.reinforcement.dqn.DQN.train:40
 msgid "Example"
 msgstr ""
 

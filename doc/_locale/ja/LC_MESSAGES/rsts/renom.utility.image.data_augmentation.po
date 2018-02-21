@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ReNom 2.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-07 14:11+0000\n"
+"POT-Creation-Date: 2018-02-19 01:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.5.3\n"
 
 #: ../../rsts/renom.utility.image.data_augmentation.rst:2
 msgid "renom.utility.image.data_augmentation.color_jitter"
@@ -29,6 +29,33 @@ msgid ""
 msgstr ""
 "入力されたRGB画像に対し, HSV空間におけるjitter処理を適用する.入力xが4次元テンソルで与えられた場合, "
 "第一軸をバッチサイズとしバッチ内のすべての画像に対しjitter処理を適用する."
+
+#: of renom.utility.image.data_augmentation.color_jitter.ColorJitter
+#: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter
+#: renom.utility.image.data_augmentation.crop.Crop
+#: renom.utility.image.data_augmentation.crop.Crop.transform
+#: renom.utility.image.data_augmentation.crop.crop
+#: renom.utility.image.data_augmentation.flip.Flip
+#: renom.utility.image.data_augmentation.flip.Flip.transform
+#: renom.utility.image.data_augmentation.flip.flip
+#: renom.utility.image.data_augmentation.rescale.Rescale
+#: renom.utility.image.data_augmentation.rescale.Rescale.transform
+#: renom.utility.image.data_augmentation.rescale.rescale
+#: renom.utility.image.data_augmentation.resize.Resize
+#: renom.utility.image.data_augmentation.resize.Resize.transform
+#: renom.utility.image.data_augmentation.resize.resize
+#: renom.utility.image.data_augmentation.rotate.Rotate
+#: renom.utility.image.data_augmentation.rotate.Rotate.transform
+#: renom.utility.image.data_augmentation.rotate.rotate
+#: renom.utility.image.data_augmentation.shift.Shift
+#: renom.utility.image.data_augmentation.shift.Shift.transform
+#: renom.utility.image.data_augmentation.shift.shift
+#: renom.utility.image.data_augmentation.zoom.Zoom
+#: renom.utility.image.data_augmentation.zoom.Zoom.transform
+#: renom.utility.image.data_augmentation.zoom.zoom
+msgid "Parameters"
+msgstr ""
 
 #: of
 #: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform:5
@@ -80,6 +107,24 @@ msgstr ""
 "教師データ(2次元行列) ex:) np.array([[center x, center y, x_top_left, height, 0, "
 "0, 0, 1, 0]])"
 
+#: of renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter
+#: renom.utility.image.data_augmentation.crop.Crop.transform
+#: renom.utility.image.data_augmentation.crop.crop
+#: renom.utility.image.data_augmentation.flip.Flip.transform
+#: renom.utility.image.data_augmentation.flip.flip
+#: renom.utility.image.data_augmentation.rescale.Rescale.transform
+#: renom.utility.image.data_augmentation.rescale.rescale
+#: renom.utility.image.data_augmentation.resize.Resize.transform
+#: renom.utility.image.data_augmentation.resize.resize
+#: renom.utility.image.data_augmentation.rotate.rotate
+#: renom.utility.image.data_augmentation.shift.Shift.transform
+#: renom.utility.image.data_augmentation.shift.shift
+#: renom.utility.image.data_augmentation.zoom.Zoom.transform
+#: renom.utility.image.data_augmentation.zoom.zoom
+msgid "Returns"
+msgstr ""
+
 #: of
 #: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform:13
 #: renom.utility.image.data_augmentation.color_jitter.color_jitter:22
@@ -88,18 +133,40 @@ msgid ""
 "with transformed labels"
 msgstr "Jitter処理が施された画像(４次元テンソル). インスタンス化時に教師データが与えられていた場合変形が教師データ施された教師データも返される."
 
+#: of renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter
+#: renom.utility.image.data_augmentation.crop.Crop.transform
+#: renom.utility.image.data_augmentation.crop.crop
+#: renom.utility.image.data_augmentation.flip.Flip.transform
+#: renom.utility.image.data_augmentation.flip.flip
+#: renom.utility.image.data_augmentation.rescale.Rescale.transform
+#: renom.utility.image.data_augmentation.rescale.rescale
+#: renom.utility.image.data_augmentation.resize.Resize.transform
+#: renom.utility.image.data_augmentation.resize.resize
+#: renom.utility.image.data_augmentation.rotate.rotate
+#: renom.utility.image.data_augmentation.shift.Shift.transform
+#: renom.utility.image.data_augmentation.shift.shift
+#: renom.utility.image.data_augmentation.zoom.Zoom.transform
+#: renom.utility.image.data_augmentation.zoom.zoom
+msgid "Return type"
+msgstr ""
+
 #: of
-#: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform:18
-#: renom.utility.image.data_augmentation.color_jitter.color_jitter:27
-#: renom.utility.image.data_augmentation.crop.Crop.transform:21
-#: renom.utility.image.data_augmentation.crop.crop:25
-#: renom.utility.image.data_augmentation.flip.flip:26
-#: renom.utility.image.data_augmentation.rotate.Rotate:15
+#: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform:17
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter:26
+#: renom.utility.image.data_augmentation.crop.Crop.transform:19
+#: renom.utility.image.data_augmentation.crop.crop:23
+#: renom.utility.image.data_augmentation.flip.Flip.transform
+#: renom.utility.image.data_augmentation.flip.flip:24
+#: renom.utility.image.data_augmentation.rescale.rescale
+#: renom.utility.image.data_augmentation.resize.Resize.transform
+#: renom.utility.image.data_augmentation.resize.resize
+#: renom.utility.image.data_augmentation.rotate.Rotate:14
 #: renom.utility.image.data_augmentation.rotate.rotate:25
-#: renom.utility.image.data_augmentation.shift.Shift.transform:21
-#: renom.utility.image.data_augmentation.shift.shift:27
-#: renom.utility.image.data_augmentation.zoom.Zoom.transform:22
-#: renom.utility.image.data_augmentation.zoom.zoom:26
+#: renom.utility.image.data_augmentation.shift.Shift.transform:19
+#: renom.utility.image.data_augmentation.shift.shift:25
+#: renom.utility.image.data_augmentation.zoom.Zoom.transform:20
+#: renom.utility.image.data_augmentation.zoom.zoom:24
 msgid "Example"
 msgstr ""
 
@@ -170,8 +237,8 @@ msgstr "データセット内に含まれるクラス数"
 msgid "If True, apply random cropping. left_top is randomly decided."
 msgstr "Trueが与えられていた場合, ランダムに切り抜きが行われる."
 
-#: of renom.utility.image.data_augmentation.crop.Crop.transform:16
-#: renom.utility.image.data_augmentation.crop.crop:20
+#: of renom.utility.image.data_augmentation.crop.Crop.transform:15
+#: renom.utility.image.data_augmentation.crop.crop:19
 msgid ""
 "Images(4 dimension) of crop transformed. If including labels, return with"
 " transformed labels"
@@ -215,8 +282,8 @@ msgstr "1が与えられた場合, 左右反転が適用される.2が与えら�
 msgid "apply random flip or not"
 msgstr "Trueが与えられた場合, フリッピングがランダムに適用される."
 
-#: of renom.utility.image.data_augmentation.flip.Flip.transform:16
-#: renom.utility.image.data_augmentation.flip.flip:21
+#: of renom.utility.image.data_augmentation.flip.Flip.transform:15
+#: renom.utility.image.data_augmentation.flip.flip:20
 msgid ""
 "Images(4 dimension) of flip transformed. If including labels, return with"
 " transformed labels"
@@ -379,11 +446,20 @@ msgstr "Trueが与えられた場合, 指定された範囲内のランダムな
 msgid "you can use only when degree=90"
 msgstr "教師データ. 教師データを与える場合は, degree=90とする必要がある."
 
-#: of renom.utility.image.data_augmentation.rotate.rotate:19
+#: of renom.utility.image.data_augmentation.rotate.rotate:18
 msgid ""
-"Images(4 dimension) of rotate transformed. If including labels, return "
-"with transformed labels"
+"Images(4 dimension) of rotate transformed.     If including labels, "
+"return with transformed labels"
 msgstr "Jitter処理が施された画像(４次元テンソル). インスタンス化時に教師データが与えられていた場合変形が教師データ施された教師データも返される."
+
+#: of renom.utility.image.data_augmentation.rotate.rotate:20
+msgid "Images(4 dimension) of rotate transformed."
+msgstr "3, 4(第一軸はバッチ数)次元画像データ"
+
+#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:13
+#: renom.utility.image.data_augmentation.rotate.rotate:21
+msgid "If including labels, return with transformed labels"
+msgstr "教師データが与えられていた場合,変換された教師データも同時に返される."
 
 #: of renom.utility.image.data_augmentation.rotate.Rotate:1
 msgid "Apply rotate transformation to the input x"
@@ -395,17 +471,13 @@ msgid ""
 "transform to Batch"
 msgstr "画像に対し回転処理を適用する.入力xが四次元テンソルで与えられた場合, 第一軸はバッチサイズとして処理され,バッチ内の各画像に対し処理が適用される."
 
-#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:13
+#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:12
 msgid "Retuens:"
 msgstr ""
 
-#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:13
+#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:12
 msgid "(ndarray): Images(4 dimension) of rotate transformed."
 msgstr "3, 4(第一軸はバッチ数)次元画像データ"
-
-#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:14
-msgid "If including labels, return with transformed labels"
-msgstr "教師データが与えられていた場合,変換された教師データも同時に返される."
 
 #: ../../rsts/renom.utility.image.data_augmentation.rst:46
 msgid "renom.utility.image.data_augmentation.shift"
@@ -434,8 +506,8 @@ msgstr "回転処理が施された後の画素補正方法"
 msgid "random shift or not"
 msgstr "Trueが与えられた場合, シフトはランダムに行われる."
 
-#: of renom.utility.image.data_augmentation.shift.Shift.transform:16
-#: renom.utility.image.data_augmentation.shift.shift:22
+#: of renom.utility.image.data_augmentation.shift.Shift.transform:15
+#: renom.utility.image.data_augmentation.shift.shift:21
 msgid ""
 "Images(4 dimension) of shift transformed. If including labels, return "
 "with transformed labels"
@@ -477,8 +549,8 @@ msgstr "拡大比. zoom_ratio=(min, max)のように下限と上限を指定で�
 msgid "If True, apply random transformation."
 msgstr "Trueが与えられた場合, 指定されたパラメータの範囲内で,ランダムに変形が行われる."
 
-#: of renom.utility.image.data_augmentation.zoom.Zoom.transform:17
-#: renom.utility.image.data_augmentation.zoom.zoom:21
+#: of renom.utility.image.data_augmentation.zoom.Zoom.transform:16
+#: renom.utility.image.data_augmentation.zoom.zoom:20
 msgid ""
 "Images(4 dimension) of zoom transformed. If including labels, return with"
 " transformed labels"
