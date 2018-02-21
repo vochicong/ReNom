@@ -45,8 +45,9 @@ jsmath_path = 'jsMath-3.6e/easy/load.js'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates', '**.ipynb_checkpoints']
-
 nbsphinx_execute = "never"
+
+scv_whitelist_tags = ('v2.4.1')
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
