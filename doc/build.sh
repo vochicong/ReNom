@@ -25,3 +25,5 @@ mv _build/html _build/ja
 
 mv _build/en _build/html
 mv _build/ja _build/html/ja
+
+python rewrite_nb_img.py
