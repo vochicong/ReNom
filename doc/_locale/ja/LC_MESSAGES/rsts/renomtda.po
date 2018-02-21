@@ -1,0 +1,294 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.4.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-02-21 13:06+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.0\n"
+
+#: ../../rsts/renomtda.rst:3
+msgid "ReNom TDA"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:5
+msgid "In ReNom version 2.2, TDA modules has been added."
+msgstr "ReNom 2.2では、TDAモジュールが追加されました。"
+
+#: ../../rsts/renomtda.rst:8
+msgid "Introduction to ReNom TDA"
+msgstr "ReNom TDAとは"
+
+#: ../../rsts/renomtda.rst:10
+msgid ""
+"In machine learning and deep learning, we model data with various "
+"algorithms. At that time, think about how to understand the complex data "
+"structure and model it. Because learning may not proceed well unless a "
+"correct approach is taken."
+msgstr "機械学習、深層学習を行うにあたり、様々なアルゴリズムで訓練データをモデリングします。その際に、複雑なデータの構造をどのように把握し、モデリングしたら良いかを考えます。なぜなら、正しいアプローチを行わないと、学習が上手く進まない場合があるからです。"
+
+#: ../../rsts/renomtda.rst:14
+msgid ""
+"The data generated on IoT every day has a very complicated structure, "
+"which is different from the data set whose results are guaranteed in "
+"papers."
+msgstr "IoTで日々生み出されるデータは、非常に複雑な構造をしており、論文などであらかじめ結果が保証されているデータセットとは異なります。"
+
+#: ../../rsts/renomtda.rst:17
+msgid ""
+"That means that engineers who develop and analyze must proceed with "
+"searching for clues by themselves and the that is really difficult."
+msgstr "それは開発や分析を行うエンジニアが、手掛かりを自分自身の手で探しながら進めていかなければならないことを意味しており、難易度が全く異なります。"
+
+#: ../../rsts/renomtda.rst:20
+msgid ""
+"When we analysis data, modeling without understanding the complex "
+"multidimensional data structure and modeling by understanding the data "
+"structure can't achieve the same accuracy and results."
+msgstr "我々は、データ分析を行う際に、複雑な多次元データの構造を理解しないでモデリングをするのと、データ構造をある程度理解してモデリングをするのでは、得られる精度や結果が異なると考えています。"
+
+#: ../../rsts/renomtda.rst:23
+msgid ""
+"And we think that the time required to derive them is overwhelmingly "
+"different. So, we thought about a method to solve it."
+msgstr "また、それらを導き出す為に要する時間が圧倒的に異なると考えており、それを解決する為の方法を考えました。"
+
+#: ../../rsts/renomtda.rst:26
+msgid ""
+"ReNom TDA is a module for mapping and visualizing and analyzing high "
+"dimensional data in topological space. By understanding the shape of the "
+"data and understanding the relationship between the variables, it helps "
+"engineers who analyze the data."
+msgstr ""
+"ReNom "
+"TDAは、高次元データを位相空間にマッピングし、可視化・分析するためのモジュールです。データの形状を把握することや、変数同士の関係性を直感的に把握することで、データを解析するエンジニアのモデリングを助けます。"
+
+#: ../../rsts/renomtda.rst:30
+msgid ""
+"And ReNom TDA can be used not only as preprocessing of data or "
+"understanding of data structure as an advanced profiling tool."
+msgstr "また、ReNom TDAは、データの前処理や、データ構造の把握に限らず、高度なプロファイリングツールとして活用する事ができます。"
+
+#: ../../rsts/renomtda.rst:33
+msgid ""
+"For example, by visualizing the connection between complicated data, it "
+"becomes possible to profile various data such as customer data, machine "
+"data, financial data, unauthorized access, cyber security, etc."
+msgstr "例えば、複雑なデータ間のつながりを可視化する事で、顧客データの分析や、マシンデータの解析、金融や不正アクセス、サイバーセキュリティの解析など、アイディア次第で様々なデータをプロファイリングすることが可能になります。"
+
+#: ../../rsts/renomtda.rst:36
+msgid ""
+"We aim to provide new discoveries and applications that create new "
+"business through various algorithms. Please try out various ideas by all "
+"means."
+msgstr "我々は、様々なアルゴリズムを通じて、新しい発見や、新しいビジネスが生まれるようなアプリケーションの提供を目指しています。ぜひ様々なアイディアを試してみてください。"
+
+#: ../../rsts/renomtda.rst:40
+msgid "**What is TDA?**"
+msgstr "**TDAとは？**"
+
+#: ../../rsts/renomtda.rst:42
+msgid ""
+"Topological data analysis (TDA) is a new data analysis method using "
+"Topology, which makes it possible to visualize the shape of data in "
+"topological space and extract the meanings of the data."
+msgstr "トポロジカルデータアナリシス(TDA)は位相幾何学(Topology)を用いた新しいデータ分析の手法で、位相空間でデータの形状を可視化し、データが持つ意味を抽出することができます。"
+
+#: ../../rsts/renomtda.rst:45
+msgid ""
+"Topology is a field of mathematics that considers connections in "
+"topological space, focusing on properties that are retained even when "
+"continuously deformed without cutting and pasting."
+msgstr "位相幾何学とは、切り貼りせず連続的に変形しても保たれる性質（輪っかや、空洞を特徴として考える）に注目し、位相空間（集合に位相の情報を付加した空間距離のない空間）で、繋がりを考える数学の分野になります。"
+
+#: ../../rsts/renomtda.rst:48
+msgid ""
+"By visualizing the data in the topological space, it becomes possible to "
+"visualize the data without losing the features that were lost when reduce"
+" dimension of the data in the old method."
+msgstr "位相空間でデータを可視化する事により、従来の方法ではデータを低次元化する際に失われていた特徴を失う事なく、データを可視化する事が可能になります。"
+
+#: ../../rsts/renomtda.rst:51
+msgid "There are 2 ways to analyze by TDA."
+msgstr "TDAによる分析は2種類の方法があります。"
+
+#: ../../rsts/renomtda.rst:53
+msgid ""
+"The first one is clustering. In ReNom TDA, one node contains data with "
+"similar characteristics. Therefore, by looking at the data contained in "
+"the node, you can find the feature of data."
+msgstr ""
+"１つ目はクラスタリングで、データの分類に用います。ReNom "
+"TDAでは1つのノードに特徴の似ているデータが複数含まれています。そのため、トポロジーのノードに含まれるデータに注目することで、特徴を見つけることができます。"
+
+#: ../../rsts/renomtda.rst:57
+msgid ""
+"Second is comparing colors. you can find variables with high correlation "
+"with the target variables by comparing colors."
+msgstr "２つ目は色の比較を行うことで、目的変数と相関の高い変数を見つけることができます。"
+
+#: ../../rsts/renomtda.rst:60
+msgid ""
+"We colorize the topology with various variables and look for a variable "
+"that shows the same color distribution as the target variable. By doing "
+"this, you can intuitively find variables with high correlation with "
+"target variables."
+msgstr "様々な変数でトポロジーを色付けし、目的変数と同様な色の分布を示す変数を探します。こうする事で、直感的に目的変数と相関の高い変数を見つけることができます。"
+
+#: ../../rsts/renomtda.rst:65
+msgid "**About Topology**"
+msgstr "**Topologyについて**"
+
+#: ../../rsts/renomtda.rst:67
+msgid ""
+"We use metrics and lenses to project high dimensional data into a low "
+"dimensional space called a point cloud."
+msgstr "ReNom TDAでは、メトリックとレンズを用いて高次元データをポイントクラウドと言われる低次元空間に投影します。"
+
+#: ../../rsts/renomtda.rst:69
+msgid ""
+"Data is mapped to topological space by dividing the point cloud and "
+"clustering the data in the partition. We create a topology, by connecting"
+" nodes that have common data to each other."
+msgstr "そして、ポイントクラウドを分割し、分割内のデータを再度クラスタリングすることで、位相空間にデータをマッピングします。次に、共通のデータを持つノード同士を連結し、トポロジーを作ります。"
+
+#: ../../rsts/renomtda.rst:72
+msgid "At ReNom TDA, we finally colorize the topology and visualize it."
+msgstr "ReNom TDAでは、最後にトポロジーに色をつけ、可視化していきます"
+
+#: ../../rsts/renomtda.rst:74
+msgid ""
+"Metric is a measure of the distance, for example, Euclidean distance, "
+"cosine distance, Hamming distance etc."
+msgstr "メトリックとは、距離を測る尺度を表しており、例えば、ユークリッド距離、コサイン距離、ハミング距離などがあります。"
+
+#: ../../rsts/renomtda.rst:76
+msgid ""
+"The lens represents the axis of projection and you can use algorithms not"
+" only PCA, T-SNE but auto encoder as a dimension reduction method."
+msgstr "レンズとは、投影の軸を表しており、次元削減の手法として、PCA、T-SNEだけでなく、オートエンコーダーなどのディープラーニングのアルゴリズムをサポートしています。"
+
+#: ../../rsts/renomtda.rst:79
+msgid ""
+"When mapping to topological space, you can decide the number of divisions"
+" by resolution and width of overlap, and the cluster is divided according"
+" to that parameter."
+msgstr "位相空間にマッピングする際には、ユーザーはハイパーパラメータとして、resolutionで分割の数を、overlapで分割の重なり幅を決定する事が可能になり、そのパラメータに従ってクラスタを分割します。"
+
+#: ../../rsts/renomtda.rst:82
+msgid ""
+"In Python APIs, you can combine multiple lenses to create a point cloud. "
+"In the future expansion, users can add various algorithms themselves."
+msgstr ""
+"またPython　"
+"APIsでは、複数のレンズを組み合わせてポイントクラウドを作ることもできます。また、今後の拡張では、ユーザー自身が様々なアルゴリズムを追加できるようにしていきます。"
+
+#: ../../rsts/renomtda.rst:87
+msgid "**ReNom TDA GUI**"
+msgstr "**ReNom TDA GUIとは**"
+
+#: ../../rsts/renomtda.rst:89
+msgid ""
+"You can visualize topology in web application with ReNom TDA. And you can"
+" launch the application with one command, and you can visualize the shape"
+" of the data without programming."
+msgstr ""
+"ReNom "
+"TDAは、webアプリケーションでトポロジーを可視化することができます。コマンド一つでアプリケーションを立ち上げることができ、プログラムを書かずにデータの形状を可視化することができます。"
+
+#: ../../rsts/renomtda.rst:92
+msgid ""
+"It is possible to easily visualize and analyze complex data simply by "
+"importing data from CSV and specifying an algorithm and executing it."
+msgstr "データをCSVから取り込んでアルゴリズムを指定して実行するだけで、複雑なデータを簡単に可視化・分析する事が可能になります。"
+
+#: ../../rsts/renomtda.rst:95
+msgid ""
+"Regarding how to handle data and how to operate it, please see it there "
+"as it is published in the ReNom catalog."
+msgstr "データの扱い方や操作方法については、ReNomカタログで公開していますので、そちらをご覧ください。"
+
+#: ../../rsts/renomtda.rst:97
+msgid ""
+"In the next version, we can extract data sets obtained from ReNom TDA be "
+"learned by deep learning and other machine learning algorithms, and "
+"visualize arranging multiple target variables side by side."
+msgstr ""
+"また、次期バージョンでは、このReNom "
+"TDAの解析結果で得られた結果を使って、ディープラーニングやその他の機械学習のアルゴリズムに学習させるデータセットを切り出す機能や、複数の目的変数を並べて可視化できるような、"
+
+#: ../../rsts/renomtda.rst:100
+msgid ""
+"So, we will promote the development of easy-to-use functions for data "
+"analysts."
+msgstr "データ分析者に使いやすい機能の開発を進めていきます。"
+
+#: ../../rsts/renomtda.rst:103
+msgid "Installation"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:105
+msgid ""
+"First, you have to install the python. There are many web pages that "
+"explain how to intall the python. And, you can download ReNom TDA from "
+"following link."
+msgstr ""
+
+#: ../../rsts/renomtda.rst:109
+msgid "URL: https://github.com/ReNom-dev-team/ReNomTDA"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:117
+msgid "**Requirements**"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:119
+msgid "ReNom requires following libraries."
+msgstr ""
+
+#: ../../rsts/renomtda.rst:121
+msgid "Python 2.7, 3.4"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:122
+msgid "Numpy 1.13.0, 1.12.1 http://www.numpy.org/"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:123
+msgid "bottle 0.12.13 https://bottlepy.org/docs/dev/"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:124
+msgid "matplotlib 2.0.2"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:125
+msgid "networkx 1.11"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:126
+msgid "pandas 0.20.3"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:127
+msgid "scikit\\-learn 0.18.2"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:128
+msgid "scipy 0.19.0"
+msgstr ""
+
+#: ../../rsts/renomtda.rst:129
+msgid "pytest 3.0.7"
+msgstr ""
+
