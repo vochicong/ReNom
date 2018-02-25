@@ -8,17 +8,22 @@ from renom.core import Node, to_value, get_gpu
 def build_truth(y, total_w, total_h, cells, classes):
     u"""Use to transform a list of objects per image into a image*cells*cells*(5+classes) matrix.
     Each cell in image can only be labeled for 1 object.
+
     "5" represents: objectness (0 or 1) and X Y W H
+
     ex:
     Input: 2 objects in first image, 5 classes
+
     y[0] = X Y W H 0 1 0 0 0 X Y W H 0 0 0 1 0
           |---1st object----||---2nd object---|
 
     Output: 7 * 7 cells * 10 per image
-    truth[0,0,0] = 1 X Y W H 0 1 0 0
-    (cell 0,0 has first object)
-    truth[0,0,1] = 0 0 0 0 0 0 0 0 0
-    (cell 0,1 has no object)
+
+    | truth[0,0,0] = 1 X Y W H 0 1 0 0
+    | (cell 0,0 has first object)
+
+    | truth[0,0,1] = 0 0 0 0 0 0 0 0 0
+    | (cell 0,1 has no object)
     """
     truth = np.zeros((y.shape[0], cells, cells, 5 + classes))
     for im in range(y.shape[0]):
@@ -71,12 +76,23 @@ def make_box(box):
     return [x1, y1, x2, y2]
 
 
-def apply_nms(x, cells, bbox, classes, image_size, thresh=0.2):
+def apply_nms(x, cells, bbox, classes, image_size, thresh=0.2, iou_thresh=0.3):
     u"""Apply to X predicted out of yolo_detector layer to get list of detected objects.
     Default threshold for detection is prob < 0.2.
     Default threshold for suppression is IOU > 0.4
+
+    Args: 
+        cells (int): Cell size.
+        bbox (int): Number of bbox.
+        classes (int): Number of class.
+        image_size (tuple): Image size.
+        thresh (float): A threshold for effective bounding box.
+        iou_thresh (float): A threshold for bounding box suppression.
+
+    Returns:
+        List of dict object is returned. The dict includes keys ``class``,
+            ``box``, ``score``.
     """
-    iou_thresh = 0.5
     probs = np.zeros((cells, cells, bbox, classes))
     boxes = np.zeros((cells, cells, bbox, 4))  # 4 is x y w h
     for b in range(bbox):
@@ -135,21 +151,12 @@ def apply_nms(x, cells, bbox, classes, image_size, thresh=0.2):
 
 
 class yolo(Node):
-    u"""Loss function for Yolo detection.
-    Last layer of the network needs to be following size:
-    cells*cells*(bbox*5+classes)
-    5 is because every bounding box gets 1 score and 4 locations (x, y, w, h)
-    Ex:
-    Prediction: 2 bbox per cell, 7*7 cells per image, 5 classes
-    X[0,0,0] = S  X  Y  W  H  S  X  Y  W  H  0 0 0 1 0
-              |---1st bbox--||---2nd bbox--||-classes-|
-    """
 
-    def __new__(cls, x, y, cells, bbox, classes, image_size):
-        return cls.calc_value(x, y, cells, bbox, classes, image_size)
+    def __new__(cls, x, y, cells, bbox, classes):
+        return cls.calc_value(x, y, cells, bbox, classes)
 
     @classmethod
-    def _oper_cpu(cls, x, y, cells, bbox, classes, image_size):
+    def _oper_cpu(cls, x, y, cells, bbox, classes):
         x.to_cpu()
         noobj_scale = 0.5
         obj_scale = 5
@@ -202,8 +209,8 @@ class yolo(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, y, cells, bbox, classes, image_size):
-        return cls._oper_cpu(x, y, cells, bbox, classes, image_size)
+    def _oper_gpu(cls, x, y, cells, bbox, classes):
+        return cls._oper_cpu(x, y, cells, bbox, classes)
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
@@ -215,12 +222,26 @@ class yolo(Node):
 
 
 class Yolo(object):
+    u"""Loss function for Yolo detection.
+    Last layer of the network needs to be following size:
+    cells*cells*(bbox*5+classes)
+    5 is because every bounding box gets 1 score and 4 locations (x, y, w, h)
 
-    def __init__(self, cells=7, bbox=2, classes=10, image_size=(448, 448)):
+    Ex:
+    Prediction: 2 bbox per cell, 7*7 cells per image, 5 classes
+    X[0,0,0] = S  X  Y  W  H  S  X  Y  W  H  0 0 0 1 0
+              |---1st bbox--||---2nd bbox--||-classes-|
+
+    Args: 
+        cells (int): Number of grid cells.
+        bbox (int): Number of bbox.
+        classes (int): Number of class.
+    """
+
+    def __init__(self, cells=7, bbox=2, classes=10):
         self._cells = cells
         self._bbox = bbox
         self._classes = classes
-        self._image_size = image_size
 
     def __call__(self, x, y):
-        return yolo(x, y, self._cells, self._bbox, self._classes, self._image_size)
+        return yolo(x, y, self._cells, self._bbox, self._classes)

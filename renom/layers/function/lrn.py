@@ -72,9 +72,9 @@ class Lrn:
     '''Local response normalization function [3]_ .
 
     .. math::
-        y_{c_{out},j,i}= x_{c_{in},i,j}/(k + a{\sum_{c=max(0, i-n/2)}^{min(N-1, i+n/2)} (x_{c,i,j})})^b
+        y_{c_{out},j,i}= \\frac{x_{c_{in},i,j}}{(k + a{\sum_{c=max(0, i-n/2)}^{min(N-1, i+n/2)} (x_{c,i,j})})^b}
 
-    :math:`x_{c,i,j}` represents the c th conv. filter’s output at the position of (i, j) in the feature map.
+    :math:`x_{c,i,j}` represents the c th conv filter’s output at the position of (i, j) in the feature map.
     :math:`y_{c_{out},j,i}` represents the output of local response normalization.
     :math:`N` is the number of the feature maps.
     :math:`n` is the adjacent feature map number.

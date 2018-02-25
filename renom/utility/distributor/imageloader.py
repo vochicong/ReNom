@@ -26,16 +26,18 @@ class _ImageThread(threading.Thread):
 
 class ImageLoader(object):
     """ImageLoader is a generator that yields images in batches.
-    By inputting list of image path, ImageLoader load images and yields according to number of batch size.
+    By inputting list of image path, ImageLoader load images and 
+    yields according to number of batch size.
 
-    :param list batches: List of image list of a batch
-    :param str color: Color Space of Input Image
+    Args:
+        batches (list): List of image path.
+        color (str): Color Space of Input Image.
 
-    :Example:
-    >>> batches = [[('/data/file1.jpg', '/data/file2.jpg')], [('/data/file3.jpg', '/data/file4.jpg')] ]
-    >>> loader = ImageLoader(batches)
-    >>> for i, (x) in enumerate(dist.batch(2)):
-    ...    print 'Batch', i
+    Example:
+        >>> batches = [[('/data/file1.jpg', '/data/file2.jpg')], [('/data/file3.jpg', '/data/file4.jpg')] ]
+        >>> loader = ImageLoader(batches)
+        >>> for i, (x) in enumerate(dist.batch(2)):
+        ...    print 'Batch', i
     """
 
     NUMTHREADS = 8  # Number of image reader thread
@@ -48,8 +50,6 @@ class ImageLoader(object):
         self._color = color
 
     def wait_images(self):
-        """yeild images from batches which is list of image.
-        """
         for imgs in self._imageloader(self._batches):
             yield imgs
 

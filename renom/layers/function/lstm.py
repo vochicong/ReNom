@@ -188,7 +188,7 @@ class lstm(Node):
 
 class Lstm(Parametrized):
     '''Long short time memory[4]_ .
-    Lstm object has 12 weights and 4 biases parameters to learn.
+    Lstm object has 8 weights and 4 biases parameters to learn.
 
     Weights applied to the input of the input gate, forget gate and output gate.
     :math:`W_{ij}, Wgi_{ij}, Wgf_{ij}, Wgo_{ij}`
@@ -208,8 +208,14 @@ class Lstm(Parametrized):
         s^t_i &= sigmoid(gi^t_{i})tanh(u^t_{i}) + s^{t-1}_isigmoid(gf^t_{i}) \\\\
         y^t_{i} &= go^t_{i}tanh(s^t_{i})
 
+    If the argument ``input_size`` is passed, this layers' weight is initialized
+    in the __init__ function.
+    Otherwise, the weight is initialized in its first forward calculation.
+
     Args:
-        output_size (int):
+        output_size (int): Output unit size.
+        input_size (int): Input unit size.
+        initializer (Initializer): Initializer object for weight initialization.
 
     Example:
         >>> import numpy as np
@@ -231,9 +237,10 @@ class Lstm(Parametrized):
     .. [4] Learning Precise Timing with LSTM Recurrent Networks
     '''
 
-    def __init__(self, output_size, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size=None, initializer=GlorotNormal()):
         self._size_o = output_size
         self._initializer = initializer
+        super(Lstm, self).__init__(input_size)
 
     def weight_initiallize(self, size_i):
         size_i = size_i[0]

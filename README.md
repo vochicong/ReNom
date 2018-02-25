@@ -4,13 +4,9 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
+## ReNom version 2.4.1
 
-## ReNom version 2.3.1d
-
-- Fix save and load functions of model to save moving average of batch normalization.
-- Add auto-differentiation to transpose.
-- Add auto-differentiation to node object's reshape function.
-- Optimized back-propagation path.
+- http://renom.jp/rsts/changes.html
 
 ## Requirements
 
@@ -19,13 +15,14 @@ Documents are available on the ReNom.jp web site.
 - pytest 3.0.7
 - cython 0.24
 - cuda-toolkit 8.0
-- cudnn 5.1
+- cudnn 5.1, 6.0
 - bottle 0.12.13
 - matplotlib 2.0.2
 - networkx 1.11
 - pandas 0.20.3
 - scikit-learn 0.18.2
 - scipy 0.19.0
+- tqdm 4.19.4
 
 ## Installation
 

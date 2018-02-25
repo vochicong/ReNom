@@ -7,25 +7,26 @@ def rescale(x, option="", labels=None, **kwargs):
     """Performs a rescale transform of a Numpy images.
     if x is a Batch, apply rescale transform to Batch.
 
-    :param ndarray x: 4(batch) dimensional images
-    :param str option: option of rescale.
-                       "zero": rescale images to [-0.5, 0.5].
-                       "vgg" : substract averate values of vgg datasets.
-                       other : rescale [0.0, 1.0].
-    :param ndarray labels: rectangle labels(2-dimensional array).
-                           ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
-    :return: Images(4 dimension) of rescale transformed. If including labels, return with transformed labels
-    :rtype: ndarray
+    Args:
+        x (ndarray): 4(batch) dimensional images
+        option (str): option of rescale.
+            "zero": rescale images to [-0.5, 0.5].
+            "vgg" : substract averate values of vgg datasets.
+            other : rescale [0.0, 1.0].
+        labels (ndarray): rectangle labels(2-dimensional array).
+            ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
+    Returns:
+        (ndarray): Images(4 dimension) of rescale transformed. If including labels, return with transformed labels
 
     :Example:
-    >>> from rescale import rescale
-    >>> from PIL import Image as im
-    >>> import numpy as np
-    >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
-    >>> image = np.array(image).astype(np.float32)
-    >>> rescale_image = rescale(image, option="zero")
-    >>> print(rescale_image.min(), rescale_image.max())
-    (-0.5, 0.5)
+        >>> from rescale import rescale
+        >>> from PIL import Image as im
+        >>> import numpy as np
+        >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
+        >>> image = np.array(image).astype(np.float32)
+        >>> rescale_image = rescale(image, option="zero")
+        >>> print(rescale_image.min(), rescale_image.max())
+        (-0.5, 0.5)
     """
     rescale = Rescale(option=option)
     if isinstance(labels, np.ndarray):
@@ -36,7 +37,8 @@ def rescale(x, option="", labels=None, **kwargs):
 class Rescale(Image):
     """Apply rescale transformation to the input x
 
-    :param str option: option of rescale.
+    Args:
+        option (str): option of rescale.
                        "zero": rescale images to [-0.5, 0.5].
                        "vgg" : substract averate values of vgg datasets.
                        other : rescale [0.0, 1.0].
@@ -50,11 +52,12 @@ class Rescale(Image):
         """Performs a rescale transform of a Numpy images.
         if x is a Batch, apply rescale transform to Batch
 
-        :param ndarray x: 3 or 4(batch) dimensional images
-        :param ndarray labels: rectangle labels(2-dimensional array)
+        Args:
+            x (ndarray): 3 or 4(batch) dimensional images
+            labels (ndarray): rectangle labels(2-dimensional array)
                                ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
-        :return: Images(4 dimension) of rescale transformed. If including labels, return with transformed labels
-        :rtype: ndarray
+        Returns:
+            (ndarray): Images(4 dimension) of rescale transformed. If including labels, return with transformed labels
 
         >>> from renom.utility.image.data_augmentation.rescale import Rescale
         >>> from PIL import Image as im

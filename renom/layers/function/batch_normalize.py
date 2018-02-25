@@ -3,7 +3,7 @@
 
 from __future__ import division, print_function
 import numpy as np
-from renom.core import Node, Variable, to_value, get_gpu, precision
+from renom.core import Node, Variable, to_value, get_gpu, precision, GPUValue
 from renom.layers.function.parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
 from renom.cuda import cuda as cu
@@ -59,8 +59,10 @@ class batch_normalize(Node):
             axs = 0
 
         y, mean, sq_var = (get_gpu(g).empty_like_me() for g in (x, w, w))
-        mv_m = mov_m or get_gpu(w).zeros_like_me()
-        mv_v = mov_s or get_gpu(w).zeros_like_me()
+        mov_m = get_gpu(mov_m)
+        mov_s = get_gpu(mov_s)
+        mv_m = mov_m if isinstance(mov_m, GPUValue) else get_gpu(w).zeros_like_me()
+        mv_v = mov_s if isinstance(mov_s, GPUValue) else get_gpu(w).zeros_like_me()
 
         with cu.cudnn_handler() as handle:
             cu.cuBatchNormalizatoinForward(handle, x, mv_m, mv_v, w, b,
@@ -125,16 +127,24 @@ class BatchNormalize(Parametrized):
 
     When the forward propagation, if the argument ``inference`` is set to False this layer
     calculates moving average of mean and variance.
-    Other wise the ``inference`` is set to True, this layer uses the moving average for
-    forward propagation.
+    Other wise the ``inference`` is set to True, this layer uses the moving average which
+    calculated in the above mode.
 
-    If the argument mode is set to 'feature', normalize prior-layer features per patch.
+    If the argument mode is set to 'activation', this layer normalizes prior-layer features per unit.
+    Otherwise the argument mode is set to 'feature', this layer normalizes prior-layer features per channel.
+
+    The 'feature' mode is only effective for 4D tensor input.
+
+    If the argument `input_size` is passed, this layers' weight is initialized
+    in the __init__ function.
+    Otherwise, the weight is initialized in its first forward calculation.
 
     Args:
         input_size (int): Input unit size.
         momentum (float): Momentum coefficient for the moving average.
-        mode (str): 'activation'  or 'feature'
-        epsilon (float): Small number added to avoid division by zero
+        mode (str): 'activation'  or 'feature'.
+        epsilon (float): Small number added to avoid division by zero.
+        initializer (Initializer): Initializer object for weight initialization.
 
     Example:
         >>> import numpy as np
@@ -148,14 +158,15 @@ class BatchNormalize(Parametrized):
                          [-0.00887055, -0.01459344],
                          [ 0.05934474,  0.00987731]], dtype=float32)
 
-    .. [1] Sergey Ioffe, Christian Szegedy.(2015).Batch Normalization:
-        Accelerating Deep Network Training by Reducing Internal Covariate Shift
+    .. [1] Sergey Ioffe, Christian Szegedy. Batch Normalization:
+        Accelerating Deep Network Training by Reducing Internal Covariate Shift(2015)
 
     """
 
     SERIALIZED = ('_mov_mean', '_mov_std', '_epsilon', '_mode')
 
     def __init__(self, input_size=None, momentum=0.99, mode="activation", epsilon=1e-5, initializer=GlorotNormal()):
+        assert momentum > 0, "The value of momentum must be lager than 0."
         self._mov_mean = 0
         self._mov_std = 0
         self._epsilon = epsilon

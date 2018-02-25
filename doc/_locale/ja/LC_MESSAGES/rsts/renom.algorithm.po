@@ -1,0 +1,255 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-02-08 01:08+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../rsts/renom.algorithm.rst:2
+msgid "renom.algorithm"
+msgstr ""
+
+#: ../../rsts/renom.algorithm.rst:5
+msgid "renom.algorithm.image"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.build_truth:1
+msgid ""
+"Use to transform a list of objects per image into a "
+"image*cells*cells*(5+classes) matrix. Each cell in image can only be "
+"labeled for 1 object."
+msgstr "オブジェクトの位置とクラスのリストからYOLOに用いる行列フォーマットへ変換する."
+
+#: of renom.algorithm.image.detection.yolo.build_truth:4
+msgid "\"5\" represents: objectness (0 or 1) and X Y W H"
+msgstr "上式における'5'は 各セルにおける [X Y W H オブジェクトの有無]を表す."
+
+#: of renom.algorithm.image.detection.yolo.build_truth:6
+msgid "ex: Input: 2 objects in first image, 5 classes"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.build_truth:10
+msgid "y[0] = X Y W H 0 1 0 0 0 X Y W H 0 0 0 1 0"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.build_truth:10
+msgid "|---1st object----||---2nd object---|"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.build_truth:12
+msgid "Output: 7 * 7 cells * 10 per image"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.build_truth:14
+msgid "truth[0,0,0] = 1 X Y W H 0 1 0 0"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.build_truth:15
+msgid "(cell 0,0 has first object)"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.build_truth:17
+msgid "truth[0,0,1] = 0 0 0 0 0 0 0 0 0"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.build_truth:18
+msgid "(cell 0,1 has no object)"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.apply_nms:1
+msgid ""
+"Apply to X predicted out of yolo_detector layer to get list of detected "
+"objects. Default threshold for detection is prob < 0.2. Default threshold"
+" for suppression is IOU > 0.4"
+msgstr "Yolo関数の出力に対しNMS(Non Maximum Suppression)を適用する."
+
+#: of renom.algorithm.image.detection.yolo.apply_nms:5
+msgid "Cell size."
+msgstr "セル数"
+
+#: of renom.algorithm.image.detection.yolo.Yolo:13
+#: renom.algorithm.image.detection.yolo.apply_nms:7
+msgid "Number of bbox."
+msgstr "ボックスの数"
+
+#: of renom.algorithm.image.detection.yolo.Yolo:15
+#: renom.algorithm.image.detection.yolo.apply_nms:9
+msgid "Number of class."
+msgstr "クラス数"
+
+#: of renom.algorithm.image.detection.yolo.apply_nms:11
+msgid "Image size."
+msgstr "画像のサイズ"
+
+#: of renom.algorithm.image.detection.yolo.apply_nms:13
+msgid "A threshold for effective bounding box."
+msgstr "有効なバウンディングボックスを決めるしきい値."
+
+#: of renom.algorithm.image.detection.yolo.apply_nms:15
+msgid "A threshold for bounding box suppression."
+msgstr "IOUに対するしきい値."
+
+#: of renom.algorithm.image.detection.yolo.apply_nms:19
+msgid ""
+"List of dict object is returned. The dict includes keys ``class``, "
+"``box``, ``score``."
+msgstr "辞書のリスト. 辞書は 'class', 'box', 'score'といったキーをもつ"
+
+#: of renom.algorithm.image.detection.yolo.Yolo:1
+msgid ""
+"Loss function for Yolo detection. Last layer of the network needs to be "
+"following size: cells*cells*(bbox*5+classes) 5 is because every bounding "
+"box gets 1 score and 4 locations (x, y, w, h)"
+msgstr ""
+"Yoloによる物体検出器を学習させる際に用いる誤差関数.ニューラルネットワークの出力は cells*cells*(bbox*5+classes) "
+"とする必要がある."
+
+#: of renom.algorithm.image.detection.yolo.Yolo:6
+msgid ""
+"Ex: Prediction: 2 bbox per cell, 7*7 cells per image, 5 classes X[0,0,0] "
+"= S  X  Y  W  H  S  X  Y  W  H  0 0 0 1 0"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.Yolo:9
+msgid "|---1st bbox--||---2nd bbox--||-classes-|"
+msgstr ""
+
+#: of renom.algorithm.image.detection.yolo.Yolo:11
+msgid "Number of grid cells."
+msgstr "セル数"
+
+#: ../../rsts/renom.algorithm.rst:16
+msgid "renom.algorithm.reinforcement"
+msgstr ""
+
+#: of renom.algorithm.reinforcement.dqn.DQN:1
+msgid ""
+"DQN class This class provides a reinforcement learning agent including "
+"training method."
+msgstr "DQN(Deep Q network)クラス."
+
+#: of renom.algorithm.reinforcement.dqn.DQN:4
+msgid "Q-Network."
+msgstr ""
+
+#: of renom.algorithm.reinforcement.dqn.DQN:6
+msgid "The size of state."
+msgstr "状態のサイズ"
+
+#: of renom.algorithm.reinforcement.dqn.DQN:8
+msgid "The number of action pattern."
+msgstr "行動のパターン数"
+
+#: of renom.algorithm.reinforcement.dqn.DQN:10
+msgid "Discount rate."
+msgstr "割引率"
+
+#: of renom.algorithm.reinforcement.dqn.DQN:12
+msgid "The size of replay buffer."
+msgstr "Experience Reply Bufferのサイズ"
+
+#: of renom.algorithm.reinforcement.dqn.DQN.action:1
+msgid ""
+"This method returns an action according to the given state. :param state:"
+" A state of an environment."
+msgstr "与えられた状態に対し, 行動を返す."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.action:6
+msgid "Action."
+msgstr ""
+
+#: of renom.algorithm.reinforcement.dqn.DQN.update:1
+msgid "This function updates target network."
+msgstr "ターゲットネットワークを更新する."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:1
+msgid ""
+"This method executes training of a q-network. Training will be done with "
+"epsilon-greedy method."
+msgstr "Qネットワークの学習ループを実行する."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:4
+msgid ""
+"A function which accepts action as an argument and returns prestate, "
+"state,  reward and terminal."
+msgstr "Actionを受け取り, Prestate, State, Reward, Terminalを出力する関数オブジェクト."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:7
+msgid "Loss function for training q-network."
+msgstr "Qネットワークを学習させるための誤差関数."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:9
+msgid "Optimizer object for training q-network."
+msgstr "Qネットワークを学習させるための勾配降下アルゴリズム"
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:11
+msgid "Number of epoch for training."
+msgstr "epoch数"
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:13
+msgid "Batch size."
+msgstr "バッチサイズ"
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:15
+msgid "Number of random step which will be executed before training."
+msgstr "学習ループの前に蓄積させる経験の数."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:17
+msgid "Number of step of one epoch."
+msgstr "1epoch中に実行する行動ステップ数.ステップ数とは, ある環境において行動を実行し, "
+"環境が次の状態に遷移し, 次の行動を実行するまでを一単位とする."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:19
+msgid "Number of test step."
+msgstr "テストを実行するステップ数."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:21
+msgid "A environment function for test."
+msgstr "テストに用いる環境を与える関数オブジェクト."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:23
+msgid "Period of updating target network."
+msgstr "ターゲットネットワークを更新する感覚."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:25
+msgid "Number of step"
+msgstr "min_greedyからmax_greedyまで, greedy_step数で線形に探索レートが増加する."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:27
+msgid "Minimum greedy value"
+msgstr "e-greedy法における最小探索レート"
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:29
+msgid "Maximum greedy value"
+msgstr "e-greedy法における最大探索レート"
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:31
+msgid "Greedy threshold"
+msgstr "e-greedy法における"
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:33
+msgid "For the learning step, training is done at this cycle"
+msgstr "誤差逆伝播法によりQネットワークの学習を実行する間隔."
+"デフォルトでは4ステップに一回学習が行われる."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:37
+msgid "A dictionary which includes reward list of training and loss list."
+msgstr "各epochにおいて獲得した報酬のリスト, テスト時に獲得した報酬のリスト, "
+"学習誤差の平均値のリストが含まれる辞書."
+
+#: of renom.algorithm.reinforcement.dqn.DQN.train:42
+msgid "Example"
+msgstr ""
+

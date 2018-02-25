@@ -36,9 +36,10 @@ class smoothed_l1(Node):
     @classmethod
     def _oper_gpu(cls, lhs, rhs):
         assert rhs.ndim > 1, "Input arrays must have no less than 2 dimension."
+        N = lhs.shape[0]
         d = lhs - rhs
         flag = abs(d) < 1
-        loss = np.sum(flag*0.5*(d**2)+(1-flag)*(abs(d)-0.5))
+        loss = get_gpu(flag*0.5*(d**2)+(1-flag)*(abs(d)-0.5))/ N
         ret = cls._create_node(loss)
         ret.attrs._lhs = lhs
         ret.attrs._rhs = rhs
@@ -52,15 +53,16 @@ class smoothed_l1(Node):
             self.attrs._lhs._update_diff(context, dx * dy, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
+        N = dy.shape[0]
         if isinstance(self.attrs._lhs, Node):
-            mask = abs(self.attrs._d) < 0.5
+            mask = abs(self.attrs._d) <= 1.0
             dx = rm.where(mask, self.attrs._d, 0.5*np.sign(self.attrs._d))
-            self.attrs._lhs._update_diff(context, dx * dy, **kwargs)
+            self.attrs._lhs._update_diff(context, dx * dy / N, **kwargs)
 
         if isinstance(self.attrs._rhs, Node):
-            mask = abs(self.attrs._d) < 0.5
+            mask = abs(self.attrs._d) <= 1.0
             dx = rm.where(mask, self.attrs._d, 0.5*np.sign(self.attrs._d))
-            self.attrs._rhs._update_diff(context, dx * dy, **kwargs)
+            self.attrs._rhs._update_diff(context, -dx * dy / N, **kwargs)
 
 
 class SmoothedL1(object):
