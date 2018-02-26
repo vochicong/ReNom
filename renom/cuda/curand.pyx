@@ -55,7 +55,7 @@ class CuRandGen(object):
     def set_seed(self, seed):
         gen = getattr(self, "gen", None) 
         if gen:
-            destroyCurandGenerator(gen)
+            destroyCurandGenerator(self.gen)
         gen = createCurandGenerator(self.r_type)
         cdef curandGenerator_t generator = <curandGenerator_t><uintptr_t>gen
         curand_check(curandSetPseudoRandomGeneratorSeed(generator, <unsigned long long>seed))
@@ -63,5 +63,9 @@ class CuRandGen(object):
         return
 
     def __del__(self):
-        destroyCurandGenerator(self.gen)
+        if self.gen:
+            try:
+                destroyCurandGenerator(self.gen)
+            except:
+                pass
         return

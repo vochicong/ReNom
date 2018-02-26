@@ -21,6 +21,4 @@ msgstr ""
 msgid "ReNom version 2.0"
 msgstr ""
 
-#~ msgid "ReNom version2.0"
-#~ msgstr ""
 

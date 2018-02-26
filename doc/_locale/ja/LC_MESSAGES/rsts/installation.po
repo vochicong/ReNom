@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ReNom 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-08-09 14:52+0900\n"
+"POT-Creation-Date: 2018-02-19 01:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.4.0\n"
+"Generated-By: Babel 2.5.3\n"
 
 #: ../../rsts/installation.rst:3
 msgid "Installation"
@@ -34,8 +34,8 @@ msgid "Requirements"
 msgstr ""
 
 #: ../../rsts/installation.rst:19
-msgid "ReNom version 2.0 requires following libraries."
-msgstr "ReNom version 2.0では以下のライブラリが必要です。"
+msgid "ReNom version 2.4 requires following libraries."
+msgstr "ReNom version 2.4では以下のライブラリが必要です。"
 
 #: ../../rsts/installation.rst:21
 msgid "Linux / Ubuntu"

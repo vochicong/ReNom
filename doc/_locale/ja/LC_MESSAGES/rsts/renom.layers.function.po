@@ -8,14 +8,14 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ReNom 2.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-02-06 07:09+0000\n"
+"POT-Creation-Date: 2018-02-19 01:26+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.5.3\n"
 
 #: ../../rsts/renom.layers.function.rst:2
 msgid "renom.layers.function"
@@ -63,6 +63,20 @@ msgstr ""
 "'input_size'が与えられた場合, このレイヤが持つ重みパラメータはレイヤのインスタン化時に初期化される.そうでない場合, "
 "重みパラメータは順伝播計算が初めて実行された際にインスタンス化される."
 
+#: of renom.layers.function.batch_normalize.BatchNormalize
+#: renom.layers.function.conv2d.Conv2d renom.layers.function.deconv2d.Deconv2d
+#: renom.layers.function.dense.Dense renom.layers.function.dropout.Dropout
+#: renom.layers.function.dropout.SpatialDropout
+#: renom.layers.function.embedding.Embedding renom.layers.function.lrn.Lrn
+#: renom.layers.function.lstm.Lstm
+#: renom.layers.function.parameterized.Model.load
+#: renom.layers.function.parameterized.Model.save
+#: renom.layers.function.parameterized.Sequential
+#: renom.layers.function.pool2d.AveragePool2d
+#: renom.layers.function.pool2d.MaxPool2d
+msgid "Parameters"
+msgstr ""
+
 #: of renom.layers.function.batch_normalize.BatchNormalize:19
 #: renom.layers.function.dense.Dense:12 renom.layers.function.lstm.Lstm:28
 msgid "Input unit size."
@@ -89,26 +103,26 @@ msgstr "Zero division エラーを避けるために用いる微小な定数"
 msgid "Initializer object for weight initialization."
 msgstr "重みパラメータの初期値を与えるInitializerオブジェクト."
 
-#: of renom.layers.function.batch_normalize.BatchNormalize:32
-#: renom.layers.function.conv2d.Conv2d:28
-#: renom.layers.function.deconv2d.Deconv2d:28
-#: renom.layers.function.dense.Dense:19
-#: renom.layers.function.dropout.Dropout:12
-#: renom.layers.function.dropout.SpatialDropout:12
-#: renom.layers.function.embedding.Embedding:22
-#: renom.layers.function.flatten.Flatten:5 renom.layers.function.lrn.Lrn:23
-#: renom.layers.function.lstm.Lstm:35
-#: renom.layers.function.parameterized.Model.load:8
+#: of renom.layers.function.batch_normalize.BatchNormalize:31
+#: renom.layers.function.conv2d.Conv2d:27
+#: renom.layers.function.deconv2d.Deconv2d:27
+#: renom.layers.function.dense.Dense:18
+#: renom.layers.function.dropout.Dropout:11
+#: renom.layers.function.dropout.SpatialDropout:10
+#: renom.layers.function.embedding.Embedding:21
+#: renom.layers.function.flatten.Flatten:5 renom.layers.function.lrn.Lrn:22
+#: renom.layers.function.lstm.Lstm:34
+#: renom.layers.function.parameterized.Model.load:7
 #: renom.layers.function.parameterized.Model.save:8
 #: renom.layers.function.parameterized.Model.train:5
 #: renom.layers.function.parameterized.Model.values:8
-#: renom.layers.function.parameterized.Sequential:8
-#: renom.layers.function.pool2d.AveragePool2d:13
-#: renom.layers.function.pool2d.MaxPool2d:13
+#: renom.layers.function.parameterized.Sequential:7
+#: renom.layers.function.pool2d.AveragePool2d:12
+#: renom.layers.function.pool2d.MaxPool2d:12
 msgid "Example"
 msgstr ""
 
-#: of renom.layers.function.batch_normalize.BatchNormalize:44
+#: of renom.layers.function.batch_normalize.BatchNormalize:43
 msgid ""
 "Sergey Ioffe, Christian Szegedy. Batch Normalization: Accelerating Deep "
 "Network Training by Reducing Internal Covariate Shift(2015)"
@@ -161,7 +175,7 @@ msgstr "ストライドサイズ"
 msgid "Input unit size. This must be a tuple like (Channel, Height, Width)."
 msgstr "入力データサイズ. (channel, height, width)形式のtupleに対応."
 
-#: of renom.layers.function.conv2d.Conv2d:40
+#: of renom.layers.function.conv2d.Conv2d:39
 msgid "Tensor data format is **NCHW**."
 msgstr "テンソルデータのフォーマットは **NCHW**　の並び順となっている."
 
@@ -209,7 +223,7 @@ msgstr ""
 msgid "Dropout ratio."
 msgstr "ドロップアウト率"
 
-#: of renom.layers.function.dropout.Dropout:34
+#: of renom.layers.function.dropout.Dropout:33
 msgid ""
 "Hinton, Geoffrey E.; Srivastava, Nitish; Krizhevsky, Alex; Sutskever, "
 "Ilya; Salakhutdinov, Ruslan R. (2012). Improving neural networks by "
@@ -222,13 +236,17 @@ msgid ""
 "randomly."
 msgstr "チャンネルごとにドロップアウトを適用する."
 
-#: of renom.layers.function.dropout.SpatialDropout:8
+#: of renom.layers.function.dropout.SpatialDropout
+msgid "raises"
+msgstr ""
+
+#: of renom.layers.function.dropout.SpatialDropout:7
 msgid ""
 ":exc:`AssertionError` -- An assertion error will be raised if the input "
 "tensor dimension is not 4."
 msgstr ""
 
-#: of renom.layers.function.dropout.SpatialDropout:37
+#: of renom.layers.function.dropout.SpatialDropout:35
 msgid "SpatialDropout only accepts 4d tensor data."
 msgstr "SpatialDropoutは４次元テンソルのみを入力とする."
 
@@ -267,13 +285,13 @@ msgstr ""
 msgid "Input unit size. This is same as number of embedding characters."
 msgstr "入力ユニットサイズ. ここで与えられる数はEmbeddingを行う説明変数の数と等しい必要がある."
 
-#: of renom.layers.function.embedding.Embedding:32
+#: of renom.layers.function.embedding.Embedding:31
 msgid ""
 "This layer only accepts matrix which shape is (N, 1) and has integer "
 "value. *N is batch size."
 msgstr "この層はサイズ(N, 1)の行列のみを入力として受け取る. *Nはバッチサイズ."
 
-#: of renom.layers.function.embedding.Embedding:33
+#: of renom.layers.function.embedding.Embedding:32
 msgid "Both ``output_size`` and ``input_size`` must be specified."
 msgstr "``output_size``と``input_size``の両方が指定されている必要がある."
 
@@ -313,7 +331,7 @@ msgstr "係数"
 msgid "Exponential factor."
 msgstr "係数"
 
-#: of renom.layers.function.lrn.Lrn:32
+#: of renom.layers.function.lrn.Lrn:31
 msgid ""
 "Alex Krizhevsky Krizhevsky, , Ilya IlyaSutskever Sutskever, Geoff. "
 "ImageNet Classification with Deep Convolutional Neural Networks"
@@ -346,7 +364,7 @@ msgstr ""
 "'input_size'が与えられた場合, このレイヤが持つ重みパラメータはレイヤのインスタン化時に初期化される.そうでない場合, "
 "重みパラメータは順伝播計算が初めて実行された際にインスタンス化される."
 
-#: of renom.layers.function.lstm.Lstm:52
+#: of renom.layers.function.lstm.Lstm:51
 msgid "Learning Precise Timing with LSTM Recurrent Networks"
 msgstr ""
 
@@ -383,19 +401,17 @@ msgid ""
 "Merge gradients of other models. Others is a list of tuple of (model, "
 "grads) to be merged. Models listed in the others should have same "
 "structure with self."
-msgstr "引数gradに与えられたGradsオブジェクトが持つ勾配データに対し,"
-"引数others(Model, Gradsオブジェクトのタプル)が持つ勾配データを"
-"足し合わせる."
-"引数に与えられるすべてのModelオブジェクトは等しい構造を持つ必要がある."
+msgstr ""
+"引数gradに与えられたGradsオブジェクトが持つ勾配データに対し,引数others(Model, "
+"Gradsオブジェクトのタプル)が持つ勾配データを足し合わせる.引数に与えられるすべてのModelオブジェクトは等しい構造を持つ必要がある."
 
 #: of renom.layers.function.parameterized.Model.save:1
 msgid ""
 "Save model attributes. For save attributes, please register attributes to"
 " the dictionary which is named as 'SERIALIZED'."
-msgstr "Modelオブジェクトが持つ属性を保存する. 保存したい属性名を'SERIALIZED'という"
-"名前のタプルに登録することで, saveメソッドによる保存対象に含むことができる."
-"Modelオブジェクトが持つ重みパラメータはSERIALIZEDに登録せずとも"
-"保存される."
+msgstr ""
+"Modelオブジェクトが持つ属性を保存する. 保存したい属性名を'SERIALIZED'という名前のタプルに登録することで, "
+"saveメソッドによる保存対象に含むことができる.Modelオブジェクトが持つ重みパラメータはSERIALIZEDに登録せずとも保存される."
 
 #: of renom.layers.function.parameterized.Model.save:5
 msgid "Following example shows how to do it."

@@ -131,7 +131,7 @@ msgstr "ModelクラスのAPIリファレンスを参照."
 
 #: ../../rsts/changes.rst:90
 msgid "**#7.** TDA modules are moved to ReNomTDA repository."
-msgstr "TDAモジュールはReNomTDAレポジトリへ移動されました."
+msgstr "**#7.**TDAモジュールはReNomTDAレポジトリへ移動されました."
 
 #: ../../rsts/changes.rst:92
 msgid ""

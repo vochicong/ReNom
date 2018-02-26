@@ -131,6 +131,7 @@ class Shift(Image):
         return x
 
     def _labels_transform(self, labels, num_class, shift_values, img_shape):
+        transform_labels = labels.copy()
         block_len = 4 + num_class
         for index, random, label in zip(np.arange(shift_values.shape[0]), shift_values, transform_labels):
             label = self._label_transform(label, block_len, random, img_shape)

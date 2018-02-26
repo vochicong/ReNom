@@ -3,16 +3,18 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-ReNom version 2.0
+ReNom version 2.4.1
 =================
 
 .. toctree::
     :maxdepth: 2
 
     notebooks/catalog
-    rsts/installation
+    rsts/renomdl
+    rsts/renomtda
+    rsts/renomtag
+    rsts/renomimg
     rsts/changes
-    rsts/introduction
-    rsts/api
     rsts/license
     old-versions/index
+

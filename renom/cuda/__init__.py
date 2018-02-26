@@ -9,7 +9,6 @@ try:
     from renom.cuda.curand import *
     _has_cuda = True
 except ImportError as e:
-    warnings.warn("Couldn't find cuda modules. %s" % e)
     curand_generator = None
     _has_cuda = False
 
@@ -24,7 +23,7 @@ def set_cuda_active(activate=True):
         activate (bool): Activation flag.
     '''
     global _cuda_is_active
-    if not has_cuda():
+    if not has_cuda() and activate:
         warnings.warn("Couldn't find cuda modules.")
     _cuda_is_active = activate
 
@@ -92,11 +91,14 @@ _CuRandGens = {}
 
 def curand_generator(seed=None):
     deviceid = cuGetDevice()
-    if deviceid in _CuRandGens:
-        return _CuRandGens[deviceid]
-
     if seed is None:
-        seed = np.random.randint(0, int(1e5))
+        seed = seed if seed else np.random.randint(4294967295, size=1)
+
+    if deviceid in _CuRandGens:
+        gen = _CuRandGens[deviceid]
+        gen.set_seed(seed)
+        return gen
+
     ret = CuRandGen(seed)
     _CuRandGens[deviceid] = ret
     return ret

@@ -16,9 +16,7 @@ Documents are available on the ReNom.jp web site.
 - cython 0.24
 - cuda-toolkit 8.0
 - cudnn 5.1, 6.0
-- bottle 0.12.13
 - matplotlib 2.0.2
-- networkx 1.11
 - pandas 0.20.3
 - scikit-learn 0.18.2
 - scipy 0.19.0
@@ -30,7 +28,7 @@ First clone the ReNom repository.
 
 	git clone https://github.com/ReNom-dev-team/ReNom.git
 
-Then move to the ReNomAd folder, install the module using pip.
+Then move to the ReNom folder, install the module using pip.
 
 	cd ReNom
 	pip install -e .
