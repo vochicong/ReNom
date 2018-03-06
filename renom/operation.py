@@ -179,8 +179,6 @@ class concat(Node):
 
     @classmethod
     def _oper_cpu(cls, args, axis):
-        print(axis)
-        print([a.shape for a in args])
         return np.concatenate(args, axis=axis).copy()
 
     @classmethod
