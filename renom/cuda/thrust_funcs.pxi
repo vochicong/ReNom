@@ -148,7 +148,7 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
     cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > ret._ptr
     size = np.prod(ret.shape, dtype='int')
 
-    assert strides.size > 0 and strides.size < 6
+    assert strides.size < 6, "Binary operation error. Only tensors that has less than 6dims are accepted. Actual is {} dim tensor.".format(strides.size)
     func(ptr1, ptr2, ptr3, size, & strides)
 
 

@@ -74,6 +74,14 @@ namespace renom{
         }
     };
 
+    template <typename T>
+    __global__ static void cuda_binop0(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides strides) {
+        size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if(idx >= size) {
+            return;
+        }
+        c[idx] = T::op(a[0], b[0]);
+    }
 
     template <typename T>
     __global__ static void cuda_binop1(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides strides) {
@@ -81,12 +89,12 @@ namespace renom{
         if(idx >= size) {
             return;
         }
-        size_t src_idx, idx_lhs, idx_rhs;
+        size_t src_idx, idx_lhs, idx_rhs, n;
 
         src_idx = idx;
         idx_lhs = idx_rhs = 0;
 
-        int n = src_idx / strides.result_strides[0];
+        n = src_idx / strides.result_strides[0];
         idx_lhs += n * strides.lhs_strides[0];
         idx_rhs += n * strides.rhs_strides[0];
 
@@ -99,13 +107,13 @@ namespace renom{
         if(idx >= size) {
             return;
         }
-        size_t src_idx, idx_lhs, idx_rhs;
-        int n;
+        size_t src_idx, idx_lhs, idx_rhs, n;
 
         src_idx = idx;
         idx_lhs = idx_rhs = 0;
 
-        src_idx = remquof(src_idx, strides.result_strides[0], &n);
+        n = src_idx / strides.result_strides[0];
+        src_idx = src_idx%strides.result_strides[0];
         idx_lhs += n * strides.lhs_strides[0];
         idx_rhs += n * strides.rhs_strides[0];
 
@@ -122,17 +130,18 @@ namespace renom{
         if(idx >= size) {
             return;
         }
-        size_t src_idx, idx_lhs, idx_rhs;
-        int n;
+        size_t src_idx, idx_lhs, idx_rhs, n;
 
         src_idx = idx;
         idx_lhs = idx_rhs = 0;
 
-        src_idx = remquof(src_idx, strides.result_strides[0], &n);
+        n = src_idx / strides.result_strides[0];
+        src_idx = src_idx%strides.result_strides[0];
         idx_lhs += n * strides.lhs_strides[0];
         idx_rhs += n * strides.rhs_strides[0];
 
-        src_idx = remquof(src_idx, strides.result_strides[1], &n);
+        n = src_idx / strides.result_strides[1];
+        src_idx = src_idx%strides.result_strides[1];
         idx_lhs += n * strides.lhs_strides[1];
         idx_rhs += n * strides.rhs_strides[1];
 
@@ -149,21 +158,23 @@ namespace renom{
         if(idx >= size) {
             return;
         }
-        size_t src_idx, idx_lhs, idx_rhs;
-        int n;
+        size_t src_idx, idx_lhs, idx_rhs, n;
 
         src_idx = idx;
         idx_lhs = idx_rhs = 0;
 
-        src_idx = remquof(src_idx, strides.result_strides[0], &n);
+        n = src_idx / strides.result_strides[0];
+        src_idx = src_idx%strides.result_strides[0];
         idx_lhs += n * strides.lhs_strides[0];
         idx_rhs += n * strides.rhs_strides[0];
 
-        src_idx = remquof(src_idx, strides.result_strides[1], &n);
+        n = src_idx / strides.result_strides[1];
+        src_idx = src_idx%strides.result_strides[1];
         idx_lhs += n * strides.lhs_strides[1];
         idx_rhs += n * strides.rhs_strides[1];
 
-        src_idx = remquof(src_idx, strides.result_strides[2], &n);
+        n = src_idx / strides.result_strides[2];
+        src_idx = src_idx%strides.result_strides[2];
         idx_lhs += n * strides.lhs_strides[2];
         idx_rhs += n * strides.rhs_strides[2];
 
@@ -180,25 +191,28 @@ namespace renom{
         if(idx >= size) {
             return;
         }
-        size_t src_idx, idx_lhs, idx_rhs;
-        int n;
+        size_t src_idx, idx_lhs, idx_rhs, n;
 
         src_idx = idx;
         idx_lhs = idx_rhs = 0;
 
-        src_idx = remquof(src_idx, strides.result_strides[0], &n);
+        n = src_idx / strides.result_strides[0];
+        src_idx = src_idx%strides.result_strides[0];
         idx_lhs += n * strides.lhs_strides[0];
         idx_rhs += n * strides.rhs_strides[0];
 
-        src_idx = remquof(src_idx, strides.result_strides[1], &n);
+        n = src_idx / strides.result_strides[1];
+        src_idx = src_idx%strides.result_strides[1];
         idx_lhs += n * strides.lhs_strides[1];
         idx_rhs += n * strides.rhs_strides[1];
 
-        src_idx = remquof(src_idx, strides.result_strides[2], &n);
+        n = src_idx / strides.result_strides[2];
+        src_idx = src_idx%strides.result_strides[2];
         idx_lhs += n * strides.lhs_strides[2];
         idx_rhs += n * strides.rhs_strides[2];
 
-        src_idx = remquof(src_idx, strides.result_strides[3], &n);
+        n = src_idx / strides.result_strides[3];
+        src_idx = src_idx%strides.result_strides[3];
         idx_lhs += n * strides.lhs_strides[3];
         idx_rhs += n * strides.rhs_strides[3];
 
@@ -210,7 +224,8 @@ namespace renom{
     }
 
     void thrust_add(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
-        if(strides->size == 1)cuda_binop1<BinOP_Add> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        if(strides->size == 0)cuda_binop0<BinOP_Add> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        else if(strides->size == 1)cuda_binop1<BinOP_Add> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 2)cuda_binop2<BinOP_Add> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 3)cuda_binop3<BinOP_Add> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 4)cuda_binop4<BinOP_Add> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
@@ -218,7 +233,8 @@ namespace renom{
         else assert(0);  // never reach here
     }
     void thrust_mul(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
-        if(strides->size == 1)cuda_binop1<BinOP_Mul> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        if(strides->size == 0)cuda_binop0<BinOP_Mul> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        else if(strides->size == 1)cuda_binop1<BinOP_Mul> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 2)cuda_binop2<BinOP_Mul> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 3)cuda_binop3<BinOP_Mul> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 4)cuda_binop4<BinOP_Mul> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
@@ -226,7 +242,8 @@ namespace renom{
         else assert(0);  // never reach here
     }
     void thrust_sub(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
-        if(strides->size == 1)cuda_binop1<BinOP_Sub> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        if(strides->size == 0)cuda_binop0<BinOP_Sub> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        else if(strides->size == 1)cuda_binop1<BinOP_Sub> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 2)cuda_binop2<BinOP_Sub> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 3)cuda_binop3<BinOP_Sub> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 4)cuda_binop4<BinOP_Sub> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
@@ -234,7 +251,8 @@ namespace renom{
         else assert(0);  // never reach here
     }
     void thrust_div(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
-        if(strides->size == 1)cuda_binop1<BinOP_Div> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        if(strides->size == 0)cuda_binop0<BinOP_Div> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        else if(strides->size == 1)cuda_binop1<BinOP_Div> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 2)cuda_binop2<BinOP_Div> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 3)cuda_binop3<BinOP_Div> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 4)cuda_binop4<BinOP_Div> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
@@ -242,7 +260,8 @@ namespace renom{
         else assert(0);  // never reach here
     }
     void thrust_rdiv(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
-        if(strides->size == 1)cuda_binop1<BinOP_Rdiv> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        if(strides->size == 0)cuda_binop0<BinOP_Rdiv> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        else if(strides->size == 1)cuda_binop1<BinOP_Rdiv> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 2)cuda_binop2<BinOP_Rdiv> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 3)cuda_binop3<BinOP_Rdiv> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 4)cuda_binop4<BinOP_Rdiv> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
@@ -250,7 +269,8 @@ namespace renom{
         else assert(0);  // never reach here
     }
     void thrust_pow(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
-        if(strides->size == 1)cuda_binop1<BinOP_Pow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        if(strides->size == 0)cuda_binop0<BinOP_Pow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        else if(strides->size == 1)cuda_binop1<BinOP_Pow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 2)cuda_binop2<BinOP_Pow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 3)cuda_binop3<BinOP_Pow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 4)cuda_binop4<BinOP_Pow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
@@ -258,7 +278,8 @@ namespace renom{
         else assert(0);  // never reach here
     }
     void thrust_rpow(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides) {
-        if(strides->size == 1)cuda_binop1<BinOP_Rpow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        if(strides->size == 0)cuda_binop0<BinOP_Rpow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
+        else if(strides->size == 1)cuda_binop1<BinOP_Rpow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 2)cuda_binop2<BinOP_Rpow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 3)cuda_binop3<BinOP_Rpow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
         else if(strides->size == 4)cuda_binop4<BinOP_Rpow> <<<ceil((size)/256.0), 256>>> (a, b, c, size, *strides);
