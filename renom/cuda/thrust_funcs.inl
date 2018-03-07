@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include <algorithm>
 #include "thrust_funcs.h"
 namespace renom{
@@ -82,9 +83,10 @@ namespace renom{
         }
         size_t src_idx, idx_lhs, idx_rhs;
 
+        clock_t start_time = clock();
         src_idx = idx;
         idx_lhs = idx_rhs = 0;
-        for (size_t i=0; i < strides.size; i++) {
+        for (size_t i=0; i < 0; i++) {
             size_t n = src_idx / strides.result_strides[i];
             src_idx = src_idx % strides.result_strides[i];
 
@@ -92,6 +94,8 @@ namespace renom{
             idx_rhs += n * strides.rhs_strides[i];
 
         }
+        if (idx < 2)
+            printf("took time on gpu, %f\n", (double)(clock() - start_time)/CLOCKS_PER_SEC);
         c[idx] = T::op(a[idx_lhs], b[idx_rhs]);
     }
 

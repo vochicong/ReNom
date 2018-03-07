@@ -16,6 +16,9 @@ import functools
 import renom.core
 import renom.cuda
 
+# For debug
+import time
+
 
 def cunegate(input, result):
     cuda_base.check_heap_device(input, result)
@@ -111,6 +114,7 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
 
     cdef binop_strides strides
 
+    start_t = time.time()
     if lhs.shape == rhs.shape == ret.shape:
         strides.size = 1
         strides.result_strides[0] = 1
@@ -138,6 +142,7 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
             strides.result_strides[i] = ret_strides[i]
             strides.lhs_strides[i] = lhs_strides[i]
             strides.rhs_strides[i] = rhs_strides[i]
+    print('  stride time: {}'.format(time.time() - start_t))
 
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > rhs._ptr
