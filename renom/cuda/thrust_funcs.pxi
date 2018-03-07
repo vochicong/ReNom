@@ -142,13 +142,13 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
             strides.result_strides[i] = ret_strides[i]
             strides.lhs_strides[i] = lhs_strides[i]
             strides.rhs_strides[i] = rhs_strides[i]
-    print('  stride time: {}'.format(time.time() - start_t))
 
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > rhs._ptr
     cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > ret._ptr
     size = np.prod(ret.shape, dtype='int')
 
+    assert strides.size > 0 and strides.size < 6
     func(ptr1, ptr2, ptr3, size, & strides)
 
 
