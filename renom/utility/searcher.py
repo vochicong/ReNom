@@ -3,9 +3,10 @@ from collections import OrderedDict
 from abc import ABCMeta
 import numpy as np
 from future.utils import with_metaclass
+
 try:
     import GPy as gp
-except:
+except Exception as e:
     gp = None
 
 

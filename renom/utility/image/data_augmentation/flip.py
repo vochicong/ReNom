@@ -33,7 +33,7 @@ def flip(x, flip=0, random=False, labels=None, num_class=0):
         >>> fig, axes = plt.subplots(2, 1)
         >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
         >>> axes[1].imshow(flip_image[0] / 255); axes[1].set_title("Flip One Image")
-        >>> plt.show()    
+        >>> plt.show()
     """
     flip = Flip(flip)
     if isinstance(labels, np.ndarray):
@@ -82,7 +82,7 @@ class Flip(Image):
             >>> fig, axes = plt.subplots(2, 1)
             >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
             >>> axes[1].imshow(flip_image[0] / 255); axes[1].set_title("Flip One Image")
-            >>> plt.show()    
+            >>> plt.show()
         """
         flipped_images, batch_size, original_size = self.check_x_dim(x.copy())
         shuffle = None

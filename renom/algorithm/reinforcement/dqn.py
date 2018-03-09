@@ -208,9 +208,9 @@ class DQN(object):
                     self._network.set_models(inference=False)
                     with self._network.train():
                         z = self._network(train_prestate)
-                        l = loss_func(z, target)
-                    l.grad().update(optimizer)
-                    loss += l.as_ndarray()
+                        ls = loss_func(z, target)
+                    ls.grad().update(optimizer)
+                    loss += ls.as_ndarray()
 
                     if count % update_period == 0:
                         self.update()
@@ -218,7 +218,7 @@ class DQN(object):
                     count += 1
 
                 msg = "epoch {:03d} loss:{:6.4f} sum reward:{:5.3f}".format(
-                    e, float(l.as_ndarray()), sum_reward)
+                    e, float(ls.as_ndarray()), sum_reward)
                 tq.set_description(msg)
                 tq.update(1)
 

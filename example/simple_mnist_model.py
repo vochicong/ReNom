@@ -73,13 +73,13 @@ for i in range(epoch):
 
         with nn.train():
             result = nn(train_batch)
-            l = rm.softmax_cross_entropy(result, responce_batch)
+            ls = rm.softmax_cross_entropy(result, responce_batch)
 
-        l.to_cpu()
+        ls.to_cpu()
 
-        grad = l.grad()
+        grad = ls.grad()
         grad.update(opt)
-        loss += l
+        loss += ls
 
     train_loss = loss / (N // batch)
     train_loss.to_cpu()

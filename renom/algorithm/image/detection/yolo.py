@@ -81,7 +81,7 @@ def apply_nms(x, cells, bbox, classes, image_size, thresh=0.2, iou_thresh=0.3):
     Default threshold for detection is prob < 0.2.
     Default threshold for suppression is IOU > 0.4
 
-    Args: 
+    Args:
         cells (int): Cell size.
         bbox (int): Number of bbox.
         classes (int): Number of class.
@@ -232,7 +232,7 @@ class Yolo(object):
     X[0,0,0] = S  X  Y  W  H  S  X  Y  W  H  0 0 0 1 0
               |---1st bbox--||---2nd bbox--||-classes-|
 
-    Args: 
+    Args:
         cells (int): Number of grid cells.
         bbox (int): Number of bbox.
         classes (int): Number of class.

@@ -155,6 +155,7 @@ namespace renom{
     template <typename T>
     __global__ static void cuda_binop4(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides strides) {
         size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
         if(idx >= size) {
             return;
         }

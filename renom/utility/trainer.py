@@ -34,7 +34,7 @@ def default_event_start_epoch(trainer):
         from tqdm import tqdm
         iter_count = len(trainer.train_distributor) / trainer.batch_size
         bar = tqdm(total=iter_count)
-    except:
+    except Exception as e:
         import warnings
         warnings.warn(
             "To display progress bar, you need to install 'tqdm' module.")

@@ -196,8 +196,8 @@ class concat(Node):
         axis = kwargs.get('axis', 1)
         assert all([len(args[0].shape) == len(args[i].shape) for i in range(1, len(args))]), \
             "All arguments must have same number of dimension."
-        assert np.sum(np.sum(np.array([list(map(lambda x, y: x != y,
-                                                args[0].shape, args[i].shape)) for i in range(1, len(args))]), axis=0).astype(np.bool)) < 2, \
+        assert np.sum(np.sum(np.array([list(map(lambda x, y: x != y, args[0].shape, args[i].shape))
+                                       for i in range(1, len(args))]), axis=0).astype(np.bool)) < 2, \
             "All dimensions must have same size except specified axis."
 
         val = cls.calc_value(args, axis)

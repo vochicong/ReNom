@@ -489,7 +489,7 @@ class MICE(Solver):
             for data in X[:, d]:
                 try:
                     data = float(data)
-                except:
+                except Exception as e:
                     categorical_flag = True
             if categorical_flag:
                 type_index["categorical"] += [d, ]

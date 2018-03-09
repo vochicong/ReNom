@@ -26,7 +26,7 @@ class _ImageThread(threading.Thread):
 
 class ImageLoader(object):
     """ImageLoader is a generator that yields images in batches.
-    By inputting list of image path, ImageLoader load images and 
+    By inputting list of image path, ImageLoader load images and
     yields according to number of batch size.
 
     Args:

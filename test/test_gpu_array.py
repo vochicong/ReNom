@@ -1341,7 +1341,7 @@ def test_getitem_bool():
     comp_get(ss, lambda s: s[[[[True, False], [True, False]]]])
 
     s2 = np.array([[1, 1], [1, 1], [1, 1]])
-    comp_get(s2, lambda s: s[np.array([[False, True], [True, False],  [True, False]])])
+    comp_get(s2, lambda s: s[np.array([[False, True], [True, False], [True, False]])])
 
 
 @test_utility.skipgpu

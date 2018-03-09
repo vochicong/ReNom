@@ -54,7 +54,7 @@ class embedding(Node):
 
 class Embedding(Parametrized):
     """Embedding layer.
-    This layer is the special case of dense layer. The case is that the input value is onehot encoded. 
+    This layer is the special case of dense layer. The case is that the input value is onehot encoded.
     Since the onehot encoded input is very sparse, the matrix product performed in the dense layer is redundant.
 
     The difference between dense layer and embedding layer is bellow.
@@ -63,12 +63,12 @@ class Embedding(Parametrized):
     |  data -> onehot encoding -> onehot data -> dense layer -> embedded data
 
     | [Embedding layer]
-    |  data -> embedding layer -> embedded data 
+    |  data -> embedding layer -> embedded data
 
     Args:
         output_size (int): Output unit size.
         input_size (int): Input unit size. This is same as number of embedding characters.
-        initializer (Initializer): Initializer object for weight initialization. 
+        initializer (Initializer): Initializer object for weight initialization.
 
     Example:
         >>> import numpy as np
