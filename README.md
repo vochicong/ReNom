@@ -54,7 +54,7 @@ calculations are performed with float64.
 Default case, the precision is float32.
 
 ## Limit of tensor dimension size.
-In ReNom version 2.4, only tensors that has less than 6 dimension size can be operated.
+In ReNom version 2.4, only tensors that have less than 6 dimension size can be operated.
 
 
 ## License
