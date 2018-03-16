@@ -34,11 +34,13 @@ namespace renom{
 	struct tanh_function;
 	void thrust_tanh(VALUE_TYPE *a, VALUE_TYPE *b, int size);
 
+    const unsigned int RENOM_CUDA_MAX_STRIDES= 5;
+
     struct binop_strides {
         size_t size;
-        size_t result_strides[16];
-        size_t lhs_strides[16];
-        size_t rhs_strides[16];
+        size_t result_strides[RENOM_CUDA_MAX_STRIDES]; // Max 5
+        size_t lhs_strides[RENOM_CUDA_MAX_STRIDES];
+        size_t rhs_strides[RENOM_CUDA_MAX_STRIDES];
     };
 
     void thrust_add(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, size_t size, binop_strides *strides);
@@ -101,7 +103,7 @@ namespace renom{
 	struct max_function;
 	void thrust_max(VALUE_TYPE v, VALUE_TYPE *a, VALUE_TYPE *b, int size);
 
-        const unsigned int RENOM_CUDA_MAX_AXIS= 16;
+        const unsigned int RENOM_CUDA_MAX_AXIS= 5;
 
         struct reduce_shape_infos {
             size_t out_size[RENOM_CUDA_MAX_AXIS];

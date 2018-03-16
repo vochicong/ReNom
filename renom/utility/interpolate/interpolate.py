@@ -89,7 +89,7 @@ def interpolate(x, mode, axis=0, missing=(np.nan, np.Inf), constant=None):
 
     try:
         x = x.astype(float)
-    except:
+    except Exception:
         raise ValueError("'{}' is not supported data type".format(x.dtype))
 
     if mode == "linear":

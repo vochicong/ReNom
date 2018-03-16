@@ -7,7 +7,8 @@ from bs4 import BeautifulSoup
 
 
 def get_nb_img(tag, path):
-    if not tag:return
+    if not tag:
+        return
     print(tag['src'])
     if 'grid00' in tag['src']:
         splited = tag['src'].split('/')

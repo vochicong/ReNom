@@ -100,10 +100,10 @@ class DDPG(object):
                 self._critic.set_models(inference=False)
                 with self._critic.train():
                     z = self._critic(train_prestate, self._actor(train_prestate))
-                    l = loss_func(z, target)
+                    ls = loss_func(z, target)
 
                 with self._actor.prevent_upadate():
-                    l.grad().update(optimizer_critic)
+                    ls.grad().update(optimizer_critic)
 
                 self._actor.set_models(inference=True)
                 self._critic.set_models(inference=False)
@@ -113,12 +113,12 @@ class DDPG(object):
                 with self._actor.prevent_upadate():
                     z.grad(-1.).update(optimizer_actor)
 
-                loss += l.as_ndarray()
+                loss += ls.as_ndarray()
                 if count % update_period == 0:
                     self.update()
                     count = 0
                 count += 1
-                tq.set_description("episode {:03d} loss:{:6.4f}".format(e, float(l.as_ndarray())))
+                tq.set_description("episode {:03d} loss:{:6.4f}".format(e, float(ls.as_ndarray())))
                 tq.update(1)
             tq.set_description("episode {:03d} avg loss:{:6.4f}".format(e, float(loss) / (j + 1)))
             tq.update(0)

@@ -85,7 +85,8 @@ class ImageDetectionDistributor(ImageDistributor):
         Args:
             batch_size (int): size of a batch.
         Returns:
-            (ndarray): Images(4 dimension) of input data for Network. If including labels, return with transformed labels
+            (ndarray): Images(4 dimension) of input data for Network.
+              If including labels, return with transformed labels
         """
         if shuffle:
             perm = np.random.permutation(self._data_size)
@@ -131,8 +132,7 @@ class ImageDetectionDistributor(ImageDistributor):
 class ImageClassificationDistributor(ImageDistributor):
     """Distributor class for tasks of image classification.
 
-    Args: 
-
+    Args:
         image_path_list (list): list of image path
         y_list (list): list of labels (bbox and class) for every image
         class_list (list): list of classes name for this dataset

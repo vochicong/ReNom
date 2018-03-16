@@ -492,11 +492,10 @@ def _build_broadcast_mask(left, right):
         right = (1,) * (len(left) - len(right)) + right
 
     mask = []
-    for l, r in zip(left, right):
-        if l != r:
-            if r != 1:
+    for lft, rgt in zip(left, right):
+        if lft != rgt:
+            if rgt != 1:
                 raise ValueError("could not broadcast")
-
             mask.append(0)
         else:
             mask.append(1)
@@ -628,13 +627,12 @@ class GPUValue(object):
     def transpose(self, axis):
         return cu_transpose(self, axis)
 
-    def split(self,  indices_or_sections, axis=0):
+    def split(self, indices_or_sections, axis=0):
         N = self.shape[axis]  # Raises IndexError if axis is invalid
 
         try:
             len(indices_or_sections)
         except TypeError:
-            sections = indices_or_sections
             size, mod = divmod(N, indices_or_sections)
             if N % indices_or_sections:
                 raise ValueError(
@@ -660,7 +658,7 @@ class GPUValue(object):
 
         return ret
 
-    def hsplit(self,  indices_or_sections):
+    def hsplit(self, indices_or_sections):
         return self.split(indices_or_sections, 1)
 
     def __pos__(self):
@@ -1866,7 +1864,6 @@ class Pow(BinOp):
             lhs = get_gpu(self.attrs._lhs)
             rhs = get_gpu(self.attrs._rhs)
 
-            new_l_dx = lhs.zeros_like_me()
             v = get_gpu(dy) * rhs * (GPUValue.__pow__(lhs, rhs - 1))
 
             dxl = cu_broad_cast(lhs, v)
@@ -2358,7 +2355,7 @@ class Amax(Abase):
          [2 3]]
         >>> rm.amax(a, axis=1)
         [ 1.  3.]
-        >>> 
+        >>>
         >>> rm.amax(a, axis=0)
         [ 2.  3.]
         >>> rm.amax(a, axis=0, keepdims=True)
@@ -2404,7 +2401,7 @@ class Amin(Abase):
          [2 3]]
         >>> rm.amin(a, axis=1)
         [ 0.  2.]
-        >>> 
+        >>>
         >>> rm.amin(a, axis=0)
         [ 0.  1.]
         >>> rm.amin(a, axis=0, keepdims=True)

@@ -9,6 +9,13 @@ __pycache__/
 
 # C extensions
 *.so
+*.cpp
+
+# others
+*.h5
+*.swp
+.pytest_cache/
+dataset/
 
 # Distribution / packaging
 .Python

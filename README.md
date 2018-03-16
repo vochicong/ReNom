@@ -4,7 +4,7 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
-## ReNom version 2.4.1
+## ReNom version 2.4.2
 
 - http://renom.jp/rsts/changes.html
 
@@ -52,6 +52,9 @@ If you set an environment variable RENOM_PRECISION=64,
 calculations are performed with float64.
 
 Default case, the precision is float32.
+
+## Limit of tensor dimension size.
+In ReNom version 2.4, only tensors that have less than 6 dimension size can be operated.
 
 
 ## License

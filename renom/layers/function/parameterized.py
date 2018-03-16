@@ -290,7 +290,7 @@ class Model(with_metaclass(ABCMeta, object)):
             ...         h = self._l2(h)
             ...         self._moving_avg = np.float32(self._moving_avg*0.5 + rm.sum(h)*0.5)
             ...         return h
-            ...    
+            ...
             >>> model = MyModel()
             >>> model(np.random.rand(12, 4))
             >>> print(model._moving_avg)
