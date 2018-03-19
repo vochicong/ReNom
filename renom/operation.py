@@ -339,13 +339,12 @@ class sqrt(UnaryOp):
 class square(UnaryOp):
     @classmethod
     def _oper_cpu(cls, arg):
-        return np.sqrt(arg)
+        return arg*arg
 
-    @classmethod
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            dx = np.power(self, 2)
-            self.attrs_arg._update_diff(context, dx, **kwargs)	
+            dx = self.attrs._arg * 2
+            self.attrs._arg._update_diff(context, dx*dy, **kwargs)	
 
 class log(UnaryOp):
     """
