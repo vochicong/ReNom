@@ -781,6 +781,21 @@ def test_exp(node, use_gpu):
         return sum(rm.exp(node))
     compare(func, node, node)
 
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 2, 1, 1))),
+    Variable(rand((1, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1,))),
+])
+def test_square(node, use_gpu):
+    node = Variable(node)
+    use_gpu = False
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.square(node))
+    compare(func, node, node)
 
 @pytest.mark.parametrize("node, shape", [
     [Variable(rand((2, 2))), (1, 4)],
