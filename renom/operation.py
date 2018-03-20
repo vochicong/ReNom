@@ -328,34 +328,36 @@ class sqrt(UnaryOp):
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            dx = 0.5 / self 
-            self.attrs._arg._update_diff(context, dx*dy, **kwargs)
+            dx = 0.5 / self
+            self.attrs._arg._update_diff(context, dx * dy, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            dx =  0.5 / self
-            self.attrs._arg._update_diff(context, dx*dy, **kwargs)
+            dx = 0.5 / self
+            self.attrs._arg._update_diff(context, dx * dy, **kwargs)
+
 
 class square(UnaryOp):
     @classmethod
     def _oper_cpu(cls, arg):
-        return arg*arg
+        return arg * arg
 
     @classmethod
     def _oper_gpu(cls, arg):
         ret = GPUValue(shape=arg.shape)
         cupow(get_gpu(arg), 2, ret)
-        return ret 
+        return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             dx = self.attrs._arg * 2
-            self.attrs._arg._update_diff(context, dx*dy, **kwargs)	
+            self.attrs._arg._update_diff(context, dx * dy, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             dx = self.attrs._arg * 2
-            self.attrs._arg._update_diff(context, dx*dy, **kwargs)
+            self.attrs._arg._update_diff(context, dx * dy, **kwargs)
+
 
 class log(UnaryOp):
     """

@@ -781,6 +781,7 @@ def test_exp(node, use_gpu):
         return sum(rm.exp(node))
     compare(func, node, node)
 
+
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
     Variable(rand((2, 2, 1, 1))),
@@ -801,7 +802,7 @@ def test_sqrt(node, use_gpu):
     compare(func2, node, node)
 
     def func3(node):
-        return sum(rm.sqrt(node)* 3+ 15)
+        return sum(rm.sqrt(node) * 3 + 15)
     compare(func3, node, node)
 
     def func4(node):
@@ -829,7 +830,7 @@ def test_square(node, use_gpu):
     compare(func2, node, node)
 
     def func3(node):
-        return sum(rm.square(node)* 3+ 15)
+        return sum(rm.square(node) * 3 + 15)
     compare(func3, node, node)
 
     def func4(node):

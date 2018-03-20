@@ -343,6 +343,7 @@ def test_gpu_node_sqrt(a):
     close(g3, c3)
     close(c_g1, g_g1)
 
+
 @test_utility.skipgpu
 @pytest.mark.parametrize("a", [
     rand((2, 3)),
@@ -364,6 +365,7 @@ def test_gpu_node_square(a):
 
     close(g3, c3)
     close(c_g1, g_g1)
+
 
 @test_utility.skipgpu
 @pytest.mark.parametrize("a, b", [
