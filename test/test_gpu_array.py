@@ -9,7 +9,7 @@ import renom.cuda
 import renom.core
 from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device, curand_generator
 from renom.core import to_value, Variable, get_gpu
-from renom.operation import dot, sum, sqrt
+from renom.operation import dot, sum, sqrt, square
 from renom.config import precision
 import renom as rm
 import test_utility
@@ -326,7 +326,7 @@ def test_gpu_node_sum_axis(a):
     rand((2, 3)),
     rand((2, 3, 3, 4)),
 ])
-def test_gpu_node_square(a):
+def test_gpu_node_sqrt(a):
     set_cuda_active(True)
 
     g1 = Variable(a)
@@ -337,6 +337,29 @@ def test_gpu_node_square(a):
 
     set_cuda_active(False)
     c3 = sum(sqrt(g1))
+    c = c3.grad()
+    c_g1 = c.get(g1)
+
+    close(g3, c3)
+    close(c_g1, g_g1)
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a", [
+    rand((2, 3)),
+    rand((2, 3, 3, 4)),
+])
+def test_gpu_node_square(a):
+    set_cuda_active(True)
+
+    g1 = Variable(a)
+    g3 = sum(square(g1))
+    g = g3.grad()
+    g_g1 = g.get(g1)
+    g3.to_cpu()
+
+    set_cuda_active(False)
+    c3 = sum(square(g1))
     c = c3.grad()
     c_g1 = c.get(g1)
 
