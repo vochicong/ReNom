@@ -790,7 +790,6 @@ def test_exp(node, use_gpu):
 ])
 def test_square(node, use_gpu):
     node = Variable(node)
-    use_gpu = False
     set_cuda_active(use_gpu)
 
     def func(node):
