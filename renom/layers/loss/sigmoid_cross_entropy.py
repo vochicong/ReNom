@@ -33,7 +33,7 @@ class sigmoid_cross_entropy(Node):
         cu.cusigmoid(get_gpu(lhs), z)
         cu.cucross_entropy(get_gpu(z), get_gpu(rhs), tmp1)
         cu.cucross_entropy(get_gpu(-z + 1.), get_gpu(-rhs + 1.), tmp2)
-        loss = cu.cusum(-(tmp1 + tmp2)) / N
+        loss = (-(tmp1 + tmp2)) / N
         ret = cls._create_node(loss)
         ret.attrs._z = z
         ret.attrs._lhs = lhs

@@ -902,3 +902,6 @@ def cu_set_item(value, valuesize, gpu_value1, slices, strides, broadcasted_strid
         infos.broadcasted_strides[i] = b
 
     thrust_setitem(ptr1, valuesize, ptr2, & infos)
+
+def cu_nms(bbox, thresh):
+    N = bbox.shape[0]
