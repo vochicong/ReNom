@@ -49,19 +49,17 @@ class Grads:
 
         q = collections.deque(root._args)
 
-        def walk():
-            while q:
-                t = q.pop()
-                if isinstance(t, Node):
-                    nodeid = id(t)
-                    seen = nodeid in self._refcounts
-                    yield nodeid
-                    if not seen and not getattr(t, '_no_backward', False):
-                        for c in t._args:
-                            q.append(c)
+        while q:
+            t = q.pop()
+            if isinstance(t, Node):
+                nodeid = id(t)
+                seen = nodeid in self._refcounts
+                self._refcounts[nodeid] += 1
 
-        for nodeid in walk():
-            self._refcounts[nodeid] += 1
+                if not seen and not getattr(t, '_no_backward', False):
+                    for c in t._args:
+                        q.append(c)
+
 
     @contextlib.contextmanager
     def unlock_node(self, node):
