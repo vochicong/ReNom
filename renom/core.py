@@ -2157,6 +2157,7 @@ class Abase(Node):
         ret.attrs._arg = arg
         ret.attrs._axis = axis
         ret.attrs._index = index
+        ret.attrs._keepdims = keepdims
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
@@ -2164,6 +2165,7 @@ class Abase(Node):
             axis = self.attrs._axis
             index = self.attrs._index
             dx = np.zeros(self.attrs._arg.shape, dtype=dy.dtype)
+
             if axis is None:
                 dxx = dx.reshape(-1)
                 dxx[index] = dy
@@ -2175,8 +2177,20 @@ class Abase(Node):
                 for i, a in enumerate(axis_list):
                     rev[a] = i
                 dxx = np.transpose(dx, axis_list)
+                if(not self.attrs._keepdims):
+                    dyy = dy
+                else:
+                    axis_list = list(range(len(dy.shape)))
+                    axis_list.pop(axis)
+                    axis_list.append(axis)
+                    rev = [-1] * len(axis_list)
+                    for i, a in enumerate(axis_list):
+                        rev[a] = i
+                    dyy = np.transpose(dy, axis_list)
                 for i in np.ndindex(index.shape):
-                    dxx[i][index[i]] = dy[i]
+                    dxx[i][index[i]] = dyy[i]
+
+            # dxx is a representation of the same memory as dx
 
             self.attrs._arg._update_diff(context, dx, **kwargs)
 
@@ -2197,8 +2211,12 @@ class Abase(Node):
                 for i, a in enumerate(axis_list):
                     rev[a] = i
                 dxx = np.transpose(dx, axis_list)
+                if(not self.attrs._keepdims):
+                    dyy = dy
+                else:
+                    dyy = np.transpose(dy, axis_list)
                 for i in np.ndindex(index.shape):
-                    dxx[i][index[i]] = dy[i]
+                    dxx[i][index[i]] = dyy[i]
             self.attrs._arg._update_diff(context, get_gpu(dx), **kwargs)
 
 
@@ -2208,7 +2226,7 @@ class Amax(Abase):
     Args:
         arg (Variable, ndarray): Input matrix.
         axis (int): Perform calculation along this argument.
-        keepdims (bool): If `Ture` is passed, reduced dimentions remain.
+        keepdims (bool): If `True` is passed, reduced dimensions remain.
 
     Example:
         >>> import numpy as np
@@ -2238,6 +2256,7 @@ class Amax(Abase):
     @classmethod
     def _oper_cpu(cls, arg, axis, keepdims):
         array = to_value(arg)
+        # Max is calculated twice, update?
         return np.amax(array, axis, keepdims=keepdims), np.argmax(array, axis)
 
     @classmethod

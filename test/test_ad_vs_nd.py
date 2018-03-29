@@ -21,6 +21,7 @@ from renom.operation import sum
 from renom.layers.activation.sigmoid import sigmoid
 from renom.layers.activation.tanh import tanh
 from renom.layers.activation.relu import relu
+from renom.layers.activation.maxout import maxout
 
 from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
@@ -880,32 +881,88 @@ def test_transpose(node, axis, use_gpu):
         return sum(node.transpose(axis))
     compare(func, node, node)
 
+@pytest.fixture(params=[False, True])
+def keep_dimensions(request):
+    """
+    Swap between keeping dimensions
+    """
+    yield request.param
 
+# TODO: Add tests to check if max is actually the result
 @pytest.mark.parametrize("node, axis", [
     [Variable(rand((2, 2))), None],
     [Variable(rand((2, 2))), 0],
     [Variable(rand((2, 2))), 1],
     [Variable(rand((2, 2, 2))), 2],
 ])
-def test_max(node, axis, use_gpu):
+def test_max(node, axis, use_gpu, keep_dimensions):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
     def func(node):
-        return sum(rm.amax(node, axis))
+        return sum(rm.amax(node, axis = axis, keepdims = keep_dimensions))
+
+    def func2(node):
+        return sum(rm.amax(node, axis = axis, keepdims = keep_dimensions) + 10)
+    compare(func2, node, node)
+
+    def func3(node):
+        return sum(rm.amax(node, axis = axis, keepdims = keep_dimensions) * 3 + 15)
+    compare(func3, node, node)
+
+    def func4(node):
+        return sum(rm.amax(node, axis = axis, keepdims = keep_dimensions) + rm.amax(node, axis = axis, keepdims = keep_dimensions))
+    compare(func4, node, node)
+
+    # A simple check to see if we actually return the maximum
+    renom_max = rm.amax(node, axis = axis, keepdims = keep_dimensions)
+    numpy_max = np.amax(node, axis = axis, keepdims = keep_dimensions)
+    assert np.allclose(renom_max, numpy_max, atol=1e-5, rtol=1e-3)
+
     compare(func, node, node)
 
-
 @pytest.mark.parametrize("node, axis", [
     [Variable(rand((2, 2))), None],
     [Variable(rand((2, 2))), 0],
     [Variable(rand((2, 2))), 1],
     [Variable(rand((2, 2, 2))), 2],
 ])
-def test_min(node, axis, use_gpu):
+def test_maxout(node, axis, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
     def func(node):
-        return sum(rm.amin(node, axis))
+        return sum(rm.maxout(node, axis = axis))
+    compare(func, node, node)
+"""
+    def func2(node):
+        return sum(rm.maxout(node, axis = axis) + 10)
+    compare(func2, node, node)
+
+    def func3(node):
+        return sum(rm.maxout(node, axis = axis) * 3 + 15)
+    compare(func3, node, node)
+
+    def func4(node):
+        return sum(rm.maxout(node, axis = axis) + rm.maxout(node, axis = axis))
+    compare(func4, node, node)
+"""
+
+# TODO: Add tests to check if min is actually the result
+# e.g. rm.amin(node,axis)
+@pytest.mark.parametrize("node, axis", [
+    [Variable(rand((2, 2))), None],
+    [Variable(rand((2, 2))), 0],
+    [Variable(rand((2, 2))), 1],
+    [Variable(rand((2, 2, 2))), 2],
+])
+def test_min(node, axis, use_gpu, keep_dimensions):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.amin(node, axis, keepdims = keep_dimensions))
+    renom_min = rm.amin(node, axis = axis, keepdims = keep_dimensions)
+    numpy_min = np.amin(node, axis = axis, keepdims = keep_dimensions)
+    assert np.allclose(renom_min, numpy_min, atol=1e-5, rtol=1e-3)
     compare(func, node, node)
