@@ -4,18 +4,20 @@ import renom as rm
 #from renom.operation import concat, amax
 from renom.core import Node
 
+
 class maxout(Node):
 
-    def __new__(self, x, axis = 1, slice_size = 1):
+    def __new__(self, x, axis=1, slice_size=1):
         if axis == None:
             axis = 1
         assert len(x.shape) > 1
         input_length = x.shape[axis]
         out = []
         maxes = []
-        for u in range(input_length//slice_size): # TODO: Ensure that input_length is evenly divisible by _slice_size
+        # TODO: Ensure that input_length is evenly divisible by _slice_size
+        for u in range(input_length//slice_size):
             offset = u*slice_size
-            maxes.append(rm.amax(x[:, offset:offset + slice_size], \
+            maxes.append(rm.amax(x[:, offset:offset + slice_size],
                                  axis=axis, keepdims=True))
         return rm.concat(*maxes, axis=axis)
 
@@ -51,9 +53,10 @@ class Maxout:
     >>> activation = rm.Maxout(slice_size=2)
     >>> activation(x)
     concat([[1.]])
-    >>> 
+    >>>
     '''
-    def __init__(self, axis = 1, slice_size = 1):
+
+    def __init__(self, axis=1, slice_size=1):
         self._axis = axis
         self._slice_size = slice_size
 
