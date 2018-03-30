@@ -8,15 +8,14 @@ from renom.core import Node
 class maxout(Node):
 
     def __new__(self, x, axis=1, slice_size=1):
-        if axis == None:
+        if axis is None:
             axis = 1
         assert len(x.shape) > 1
         input_length = x.shape[axis]
-        out = []
         maxes = []
         # TODO: Ensure that input_length is evenly divisible by _slice_size
-        for u in range(input_length//slice_size):
-            offset = u*slice_size
+        for u in range(input_length // slice_size):
+            offset = u * slice_size
             maxes.append(rm.amax(x[:, offset:offset + slice_size],
                                  axis=axis, keepdims=True))
         return rm.concat(*maxes, axis=axis)
