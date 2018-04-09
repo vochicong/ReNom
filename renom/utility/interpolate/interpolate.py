@@ -1,5 +1,6 @@
 import numpy as np
 import itertools
+from distutils.version import StrictVersion
 from scipy.interpolate import interp1d
 
 
@@ -24,7 +25,10 @@ class _Interpolate:
             if np.isnan(mis):
                 cond = cond & ~np.isnan(x_1d)
             else:
-                cond = cond & ~np.isin(x_1d, [mis])
+                if StrictVersion(np.version.full_version) < StrictVersion("1.13.0"):
+                    cond = cond & ~np.in1d(x_1d, [mis])
+                else:
+                    cond = cond & ~np.isin(x_1d, [mis])
         return np.argwhere(cond).flatten()
 
     def _linear_interpolate(self):
