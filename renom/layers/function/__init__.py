@@ -10,4 +10,5 @@ from .flatten import Flatten, flatten
 from .lrn import Lrn
 from .unpool2d import MaxUnPool2d, max_unpool2d
 from .lstm import Lstm as Lstm
+from .gru import Gru as Gru
 from .embedding import embedding, Embedding
