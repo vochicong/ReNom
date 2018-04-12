@@ -248,7 +248,7 @@ cdef extern from "cudnn.h":
         int upscaley,  # upscale the input in y-direction
         cudnnConvolutionMode_t mode)
 
-    cudnnStatus_t cudnnSetConvolution2dDescriptor_v5(
+    cudnnStatus_t cudnnSetConvolution2dDescriptor(
         cudnnConvolutionDescriptor_t convDesc,
         int pad_h,    # zero-padding height
         int pad_w,    # zero-padding width
