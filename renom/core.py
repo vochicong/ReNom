@@ -118,7 +118,10 @@ class Grads:
             ndarray, Node, None: Gradient of given node object.
         '''
         if default is self._omit:
-            return self.variables[id(node)]
+            #try:
+                return self.variables[id(node)]
+            #except KeyError:
+            #    assert False, 'Searched for {} but could not find in graph.'.format(type(self))
         else:
             return self.variables.get(id(node), default)
 
@@ -1358,6 +1361,8 @@ class Node(np.ndarray):
         else:
             ax = tuple(axis)
 
+        #print ('Shape is: {}, length of shape: {}'.format(self.shape,len(self.shape)))
+        #print ('Ax is: {}, length of ax: {}'.format(ax,len(ax)))
         assert len(self.shape) == len(ax), "Axis must be same size to matrix dim size."
         return Transpose(self, ax)
 

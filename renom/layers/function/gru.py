@@ -11,22 +11,11 @@ from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
 from renom.cuda import cuda as cu
 
+def sigmoid_diff(x):
+    return sigmoid(x)*(1-sigmoid(x))
 
-def gate(x):
-    return 1. / (1. + np.exp(-x))
-
-
-def activation(x):
-    return np.tanh(x)
-
-
-def gate_diff(x):
-    return x * (- x + 1.)
-
-
-def activation_diff(x):
-    return (1.0 - x**2)
-
+def tanh_diff(x):
+    return (1.0 - tanh(x)**2)
 
 class gru(Node):
     '''
@@ -35,210 +24,121 @@ class gru(Node):
     x: input value to the node
     pz: The previously calculated value within the same model
     w: the weights to be multiplied with the input
-    wr: the weights to be multiplied with the previous input
+    u: the weights to be multiplied with the previous input
     b: the biases to be added
     '''
-    def __new__(cls, x, pz, w, wr, b):
-        return cls.calc_value(x, pz, w, wr, b)
+    def __new__(cls, x, pz, w, u, b):
+        return cls.calc_value(x, pz, w, u, b)
 
     @classmethod
-    def _oper_cpu(cls, x, pz, w, wr, b):
-        h_minus = np.zeros((x.shape[0], w.shape[1] // 3), dtype=precision) if pz is None else pz
+    def _oper_cpu(cls, x, pz, w, u, b):
 
-        m = w.shape[1] // 4
-        w_r, w_z, w_h = np.split(w, m, axis=1)
-        u_r, u_z, u_h = np.split(wr, m, axis=1)
-        b_r, b_z, b_h = np.split(b, m, axis=1)
+        # Initialize Variables
+        m = w.shape[1] // 3
+        w_z, w_r, w_h = np.split(w, [m, m*2, ], axis=1)
+        b_z, b_r, b_h = np.split(b, [m, m*2 ], axis=1)
+        u_z, u_r, u_h = np.split(u, [m, m*2], axis=1)
+        hminus = np.zeros((x.shape[0], w.shape[1] // 3), dtype=precision) if pz is None else pz
+        # Perform Forward Calcuations
+        # z = sigmoid( dot(x,w_z) + dot(h_minus,u_z) + b_z)
+        A = dot(x, w_z) + hminus*u_z + b_z
+        B = dot(x, w_r) + u_r*hminus + b_r
+        C = dot(x, w_h) + sigmoid(B)*u_h*hminus + b_h
+        h = sigmoid(A) + tanh(C)
 
-        print (w_z.shape)
-        print (x.shape)
-        B = w_z*x + u_z*h_minus + b_z
-        C = w_r*x + u_r*h_minus + b_r
-
-        z = sigmoid(B)
-        r = sigmoid(C)
-
-        A = w_h*x + u_h*h_minus*r + b_z
-        h_tilde = tanh(A)
-
-        h = (1 - z) * h_minus + z * h_tilde
-
+        # Store Variables for Graph
         ret = cls._create_node(h)
         ret.attrs._x = x
         ret.attrs._w = w
-        ret.attrs._wr = wr
+        ret.attrs._w_z = w_z
+        ret.attrs._w_r = w_r
+        ret.attrs._w_h = w_h
         ret.attrs._b = b
-        ret.attrs._pz = pz
+        ret.attrs._b_z = b_z
+        ret.attrs._b_r = b_r
+        ret.attrs._b_h = b_h
+        ret.attrs._u = u
+        ret.attrs._u_z = u_z
+        ret.attrs._u_h = u_h
+        ret.attrs._u_r = u_r
+        ret.attrs._pz = hminus
         ret.attrs._A = A
         ret.attrs._B = B
         ret.attrs._C = C
-        ret.attrs._h_tilde = h_tilde
-        ret.attrs._u_h = u_h
 
-        #if isinstance(pz, Node):
-        #    pz.attrs._pfgate = gated[:, :m]
+
 
         return ret
-'''
-    @classmethod
-    def _oper_gpu(cls, x, pz, ps, w, wr, b):
-        if ps is None:
-            tmp = GPUValue(shape=(x.shape[0], w.shape[1] // 4))
-            s_p = tmp.zeros_like_me()
-            z_p = tmp.zeros_like_me()
-        else:
-            s_p = ps
-            z_p = get_gpu(pz)
 
-        u = dot(x, w) + dot(z_p, wr) + b
 
-        z = get_gpu(z_p).empty_like_me()
-        state = get_gpu(s_p).empty_like_me()
+    def _backward_cpu(self, context, dy, **kwargs):
 
-        cu.cugru_forward_activate(get_gpu(u))
-        cu.cugru_forward(get_gpu(u), get_gpu(state), get_gpu(s_p), get_gpu(z))
-
-        ret = cls._create_node(z)
-        ret.attrs._x = x
-        ret.attrs._w = w
-        ret.attrs._wr = wr
-        ret.attrs._b = b
-        ret.attrs._pz = pz
-        ret.attrs._u = u
-        ret.attrs._pstate = s_p
-        ret.attrs._state = state
-        ret._state = state
-
-        if isinstance(pz, Node):
-            pz.attrs._pfgate = u
-
-        return ret
-'''
-
-def _backward_cpu(self, context, dy, **kwargs):
-        #n, m = dy.shape
-
-        A, B, C = self.attrs._A, self.attrs._B, self.attrs._C
-        h_tilde = self.attrs._h_tilde
-        x_t, h_minus = self.attrs._x, self.attrs._pz
-        u_h = self.attrs._u_h
-
-        dydwz = sigmoid(B)(1 - sigmoid(B)) * x_t + h_tilde * (sigmoid(B) * (1 - sigmoid(B))) * x_t
-        dyduz = sigmoid(B)(1 - sigmoid(B)) * h_minus + h_tilde * (sigmoid(B) * (1 - sigmoid(B))) * h_minus
-
-        dydwr = sigmoid(B) * activation_diff(tanh(A)) * u_h * h_minus * sigmoid(C)(1 - sigmoid(C)) * x_t
-        dydur = sigmoid(B) * activation_diff(tanh(A)) * u_h * h_minus * sigmoid(C)(1 - sigmoid(C)) * h_minus
-
-        dydwh = sigmoid(B) * activation_diff(tanh(A)) * x_t
-        dyduh = sigmoid(B) * activation_diff(tanh(A)) * h_minus * sigmoid(C)
-
-        dw = np.stack((dydwz, dydwr, dydwh))
-        dwr = np.stack((dyduz, dydur, dyduh))
-
-        #if isinstance(self.attrs._x, Node):
-        #    self.attrs._x._update_diff(context, dx)
-
-        #if isinstance(w, Node):
-        #    w._update_diff(context, np.dot(self.attrs._x.T, dr))
-
-        #if isinstance(wr, Node):
-        #    wr._update_diff(context, np.dot(self.T, drt))
-
-        #if isinstance(b, Node):
-        #    b._update_diff(context, np.sum(dr, axis=0, keepdims=True))
-
-        #if isinstance(self.attrs._pz, Node):
-        #    self.attrs._pz._update_diff(context, np.dot(dr, wr.T))
-'''
-    def _backward_gpu(self, context, dy, **kwargs):
+        x = self.attrs._x
         w = self.attrs._w
-        wr = self.attrs._wr
+        w_z = self.attrs._w_z
+        w_r = self.attrs._w_r
+        w_h = self.attrs._w_h
+        A = self.attrs._A
+        B = self.attrs._B
+        C = self.attrs._C
         b = self.attrs._b
-
+        b_z = self.attrs._b_z
+        b_r = self.attrs._b_r
+        b_h = self.attrs._b_h
         u = self.attrs._u
-        s = tanh(self.attrs._state)
-        ps = self.attrs._pstate
+        u_z = self.attrs._u_z
+        u_h = self.attrs._u_h
+        u_r = self.attrs._u_r
+        hminus = self.attrs._pz
+        y = dy
 
-        drt = context.restore(wr, get_gpu(u).zeros_like_me())
-        dou = context.restore(w, get_gpu(dy).zeros_like_me())
-        pfg = getattr(self.attrs, "_pfgate", get_gpu(u).zeros_like_me())
+        dA = sigmoid_diff(A)
+        dB = sigmoid_diff(B)
+        dC = tanh_diff(C)
 
-        e = get_gpu(dy)
+        # Calculate dx
+        dx_z = dot(y*dA,w_z.T)
+        dx_r = dot(y*dB*dC*u_h*hminus,w_r.T)
+        dx_h = dot(y*dC,w_h.T)
+        dx = dx_z + dx_r + dx_h
 
-        dr, dou_n = (get_gpu(a).empty_like_me() for a in (drt, dou))
-        cu.cugru_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n)))
+        # Calculate dw
+        dw_z = dot(x.T,y*dA)
+        dw_r = dot(x.T,y*dB*dC*u_h*hminus)
+        dw_h = dot(x.T,y*dC)
+        dw = np.concatenate([dw_z,dw_r,dw_h],axis=1)
 
-        dx = dot(dr, w.T)
+        # Calculate db
+        db_z = np.sum(y*dA,axis=0,keepdims=True)
+        db_r = np.sum(y*dB*dC*u_h*hminus,axis=0,keepdims=True)
+        db_h = np.sum(y*dC,axis=0,keepdims=True)
+        db = np.concatenate([db_z, db_r, db_h],axis=1)
 
-        context.store(wr, dr)
-        context.store(w, dou_n)
+        du_z = np.sum(dA*hminus*y,axis=0,keepdims=True)
+        du_r = np.sum(y*dC*dB*u_h*hminus*hminus,axis=0,keepdims=True)
+        du_r = np.zeros_like(du_z)
+        du_h = np.sum(sigmoid(B)*dC*y*hminus,axis=0,keepdims=True)
+        du = np.concatenate([du_z, du_r, du_h],axis=1)
+        print ('du is {}'.format(du))
 
-        if isinstance(self.attrs._x, Node):
-            self.attrs._x._update_diff(context, dx)
+        pz_z = y*dA*u_z
+        pz_r = y*dC*dB*u_h*hminus*u_r
+        pz_h = y*dC*sigmoid(B)*u_h
 
-        if isinstance(w, Node):
-            w._update_diff(context, dot(self.attrs._x.T, dr))
+        dpz = pz_z + pz_r + pz_h
 
-        if isinstance(wr, Node):
-            wr._update_diff(context, dot(self.T, drt))
 
-        if isinstance(b, Node):
-            b._update_diff(context, sum(dr, axis=0))
 
-        if isinstance(self.attrs._pz, Node):
-            self.attrs._pz._update_diff(context, dot(dr, wr.T))
-'''
+        self.attrs._x._update_diff(context, dx)
+        self.attrs._w._update_diff(context, dw)
+        self.attrs._b._update_diff(context, db)
+        self.attrs._u._update_diff(context, du)
+        if isinstance(hminus, Node):
+            self.attrs._pz._update_diff(context, dpz)
+
+
 
 class Gru(Parametrized):
-    '''Long short time memory[4]_ .
-    Gru object has 8 weights and 4 biases parameters to learn.
-
-    Weights applied to the input of the input gate, forget gate and output gate.
-    :math:`W_{ij}, Wgi_{ij}, Wgf_{ij}, Wgo_{ij}`
-
-    Weights applied to the recuurent input of the input gate, forget gate and output gate.
-    :math:`R_{ij}, Rgi_{ij}, Rgf_{ij}, Rgo_{ij}`
-
-    .. math::
-        u^t_{i} &= \sum_{j = 0}^{J-1} W_{ij}x^t_{j} +
-            \sum_{k = 0}^{K-1} R_{ik}y^{t-1}_{k} + b_i \\\\
-        gi^t_{i} &= \sum_{j = 0}^{J-1} Wgi_{ij}x^t_{j} +
-                \sum_{k = 0}^{K-1} Rgi_{ik}y^{t-1}_{k} + bi_i \\\\
-        gf^t_{i} &= \sum_{j = 0}^{J-1} Wgfi_{ij}x^t_{j} +
-                \sum_{k = 0}^{K-1} Rgf_{ik}y^{t-1}_{k} + bi_f \\\\
-        go^t_{i} &= \sum_{j = 0}^{J-1} Wgo_{ij}x^t_{j} +
-                \sum_{k = 0}^{K-1} Rgo_{ik}y^{t-1}_{k} + bi_o \\\\
-        s^t_i &= sigmoid(gi^t_{i})tanh(u^t_{i}) + s^{t-1}_isigmoid(gf^t_{i}) \\\\
-        y^t_{i} &= go^t_{i}tanh(s^t_{i})
-
-    If the argument ``input_size`` is passed, this layers' weight is initialized
-    in the __init__ function.
-    Otherwise, the weight is initialized in its first forward calculation.
-
-    Args:
-        output_size (int): Output unit size.
-        input_size (int): Input unit size.
-        initializer (Initializer): Initializer object for weight initialization.
-
-    Example:
-        >>> import numpy as np
-        >>> import renom as rm
-        >>>
-        >>> n, d, t = (2, 3, 4)
-        >>> x = rm.Variable(np.random.rand(n, d))
-        >>> layer = rm.Gru(2)
-        >>> z = 0
-        >>> for i in range(t):
-        ...     z += rm.sum(layer(x))
-        ...
-        >>> grad = z.grad()    # Backpropagation.
-        >>> grad.get(x)    # Gradient of x.
-        Add([[-0.01853334, -0.0585249 ,  0.01290053],
-             [-0.0205425 , -0.05837972,  0.00467286]], dtype=float32)
-        >>> layer.truncate()
-
-    .. [4] Learning Precise Timing with GRU Recurrent Networks
-    '''
 
     def __init__(self, output_size, input_size=None, initializer=GlorotNormal()):
         self._size_o = output_size
@@ -248,21 +148,21 @@ class Gru(Parametrized):
     def weight_initiallize(self, size_i):
         size_i = size_i[0]
         size_o = self._size_o
-        bias = np.zeros((1, size_o * 3), dtype=precision)
-        bias[:, size_o:size_o * 2] = 1
+        print ('Dimension is {:d} x {:d}'.format(size_i,size_o))
+        bias = np.zeros((1, size_o*3), dtype=precision)
+        bias[:,:] = 1
         self.params = {
-            "w": Variable(self._initializer((size_i, size_o * 3)), auto_update=True),
-            "wr": Variable(self._initializer((size_o, size_o * 3)), auto_update=True),
+            "w": Variable(self._initializer((size_i, size_o*3)), auto_update=True),
+            "u": Variable(self._initializer((1, size_o*3)), auto_update=True),
             "b": Variable(bias, auto_update=True),
         }
 
     def forward(self, x):
         ret = gru(x, getattr(self, "_z", None),
-                   self.params.w,
-                   self.params.wr,
-                   self.params.b)
+               self.params.w,
+               self.params.u,
+               self.params.b)
         self._z = ret
-        self._state = getattr(ret.attrs, '_state', None)
         return ret
 
     def truncate(self):

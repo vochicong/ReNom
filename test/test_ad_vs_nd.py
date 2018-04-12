@@ -546,20 +546,21 @@ def test_lstm(node, use_gpu):
         compare(func, layer1.params[k], node)
 
 @pytest.mark.parametrize("node", [
-    #Variable(rand((6, 6))),
-    #Variable(rand((6, 3))),
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
     Variable(rand((1, 2))),
+    Variable(rand((1, 1))),
 ])
 def test_gru(node):#, use_gpu):
     node = Variable(node)
     #set_cuda_active(use_gpu)
 
-    layer1 = Gru(output_size=4)
+    layer1 = Gru(output_size=3)
 
     def func(node):
         loss = 0
-        for _ in range(3):
-            loss += sum(layer1(node))
+        for _ in range(4):
+            loss = sum(layer1(node))
         layer1.truncate()
         return loss
 
