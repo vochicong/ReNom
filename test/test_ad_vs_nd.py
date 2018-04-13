@@ -28,7 +28,7 @@ from renom.layers.function.deconv2d import Deconv2d
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
-from renom.layers.function.gru import Gru
+from renom.layers.function.gru import Gru, GruSimpleUnit
 from renom.layers.function.batch_normalize import BatchNormalize,\
     BATCH_NORMALIZE_FEATUREMAP
 from renom.layers.function.lrn import Lrn
@@ -569,6 +569,43 @@ def test_gru(node):  # , use_gpu):
     for k in layer1.params.keys():
         compare(func, layer1.params[k], node)
 
+@pytest.mark.parametrize("node", [
+    Variable(rand((4, 4))),
+    Variable(rand((4, 3))),
+    Variable(rand((4, 2))),
+    Variable(rand((4, 1))),
+])
+def test_gruunit(node):  # , use_gpu):
+    node = Variable(node)
+    # set_cuda_active(use_gpu)
+
+    out_size = 3
+    layer1 = GruSimpleUnit(output_size=out_size)
+    layer2 = GruSimpleUnit(output_size=out_size)
+    layer3 = GruSimpleUnit(output_size=out_size)
+    layer4 = GruSimpleUnit(output_size=out_size)
+    vars = [
+        Variable(node[0,np.newaxis]),
+        Variable(node[1,np.newaxis]),
+        Variable(node[2,np.newaxis]),
+        Variable(node[3,np.newaxis]),
+    ]
+
+
+    def func(node):
+        loss = 0
+        for _ in range(1):
+            h = layer1(vars[0])
+            h = layer2(vars[1],pz=h)
+            h = layer3(vars[2],pz=h)
+            loss = sum(layer4(vars[3],pz=h))
+        layer1.truncate()
+        return loss
+
+    #compare(func, node, node)
+    compare(func, vars[0], vars[0])
+    for k in layer1.params.keys():
+        compare(func, layer1.params[k], node)
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),

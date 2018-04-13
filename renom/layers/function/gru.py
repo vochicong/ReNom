@@ -5,7 +5,7 @@ from __future__ import division
 import numpy as np
 from renom.layers.activation.sigmoid import sigmoid
 from renom.layers.activation.tanh import tanh
-from renom.core import Node, Variable, get_gpu, precision, GPUValue
+from renom.core import Node, Variable, get_gpu, precision, GPUValue, GetItem
 from renom.operation import dot, sum
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
@@ -163,40 +163,30 @@ class Gru(Parametrized):
         self._count = 0
         """Truncates temporal connection."""
         self._z = None
-        self._state = None
 
+# Encapsulates a single unit in a ReNom model
+class GruSimpleUnit(Parametrized):
 
-class GruSplitMemory(Gru):
-
-    def __init__(self, output_size, num_units, input_size=None, initializer=GlorotNormal()):
-        self._num_units = num_units
-        print("Initializing Split Weights GRU model with {:d} output size and {:d} units.".format(
-            output_size, num_units))
-        super(GruSplitMemory, self).__init__(output_size, input_size, initializer)
+    def __init__(self, output_size, input_size=None, initializer=GlorotNormal()):
+        self._size_o = output_size
+        self._initializer = initializer
+        super(GruSimpleUnit, self).__init__(input_size)
 
     def weight_initiallize(self, size_i):
         size_i = size_i[0]
         size_o = self._size_o
-        num_units = self._num_units
-        bias = np.zeros((1, size_o * 3 * num_units), dtype=precision)
+        bias = np.zeros((1, size_o * 3), dtype=precision)
         bias[:, :] = 1
         # At this point, all connected units in the same layer will use the SAME weights
         self.params = {
-            "w": Variable(self._initializer((size_i, size_o * 3 * num_units)), auto_update=True),
-            "u": Variable(self._initializer((1, size_o * 3 * num_units)), auto_update=True),
+            "w": Variable(self._initializer((size_i, size_o * 3)), auto_update=True),
+            "u": Variable(self._initializer((1, size_o * 3)), auto_update=True),
             "b": Variable(bias, auto_update=True),
         }
 
-    def forward(self, x):
-        num_units = self._num_units
-        size_o = self._size_o
-        assert x.shape[0] == num_units, "There should be at least one input per unit"
-        ret = None
-
-        for i in range(num_units):
-            ret = gru(x[np.newaxis, i], ret,
-                      self.params.w[:, i * num_units:i * num_units + size_o * 3],
-                      self.params.u[:, i * num_units:i * num_units + size_o * 3],
-                      self.params.b[:, i * num_units:i * num_units + size_o * 3])
-
+    def forward(self, x, pz = None):
+        ret = gru(x, pz,
+                  self.params.w,
+                  self.params.u,
+                  self.params.b)
         return ret
