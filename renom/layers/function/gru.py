@@ -164,3 +164,37 @@ class Gru(Parametrized):
         """Truncates temporal connection."""
         self._z = None
         self._state = None
+
+class GruSplitMemory(Gru):
+
+    def __init__(self, output_size, num_units, input_size=None, initializer=GlorotNormal()):
+        self._num_units = num_units
+        print ("Initializing Split Weights GRU model with {:d} output size and {:d} units.".format(output_size,num_units))
+        super(GruSplitMemory, self).__init__(output_size,input_size,initializer)
+
+    def weight_initiallize(self, size_i):
+        size_i = size_i[0]
+        size_o = self._size_o
+        num_units = self._num_units
+        bias = np.zeros((1, size_o * 3 * num_units), dtype=precision)
+        bias[:, :] = 1
+        # At this point, all connected units in the same layer will use the SAME weights
+        self.params = {
+            "w": Variable(self._initializer((size_i, size_o * 3 * num_units)), auto_update=True),
+            "u": Variable(self._initializer((1, size_o * 3 * num_units)), auto_update=True),
+            "b": Variable(bias, auto_update=True),
+        }
+
+    def forward(self, x):
+        num_units = self._num_units
+        size_o = self._size_o
+        assert x.shape[0] == num_units, "There should be at least one input per unit"
+
+        for i in range(num_units-1):
+            ret = gru(x[np.newaxis,i], None if i == 0 else ret,
+                    self.params.w[:,i * num_units:i * num_units + size_o * 3],
+                    self.params.u[:,i * num_units:i * num_units + size_o * 3],
+                    self.params.b[:,i * num_units:i * num_units + size_o * 3])
+
+
+        return ret
