@@ -118,9 +118,9 @@ class Grads:
             ndarray, Node, None: Gradient of given node object.
         '''
         if default is self._omit:
-            #try:
-                return self.variables[id(node)]
-            #except KeyError:
+            # try:
+            return self.variables[id(node)]
+            # except KeyError:
             #    assert False, 'Searched for {} but could not find in graph.'.format(type(self))
         else:
             return self.variables.get(id(node), default)
