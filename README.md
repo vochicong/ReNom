@@ -7,7 +7,7 @@ Documents are available on the ReNom.jp web site.
 ## ReNom version 2.5.0
 - http://renom.jp/rsts/renomdl/main.html
 
-#### Changes from 2.5.0
+#### Changes from 2.4.2
 - Adopted CUDA 9.1 and cuDNN 7.1.
 
 ## Requirements
