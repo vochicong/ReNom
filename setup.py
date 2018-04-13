@@ -143,6 +143,7 @@ cuda_sources = []
 cuda_depends = ['renom/cuda/thrust_func_defs.pxi',
                 'renom/cuda/thrust_funcs.pxi',
                 'renom/cuda/thrust_funcs.h'
+                'renom/cuda/compat.h'
                 ]
 
 
@@ -189,7 +190,7 @@ def setup_cuda():
                            )
 
     ext_cudnn = Extension('renom.cuda.cudnn',
-                          sources=['renom/cuda/cudnn.pyx'],
+                          sources=['renom/cuda/cudnn.pyx', 'renom/cuda/compat.cpp'],
                           depends=cuda_depends,
                           libraries=['cublas', 'cuda', 'cudart', 'cudnn'],
                           library_dirs=libraries,
