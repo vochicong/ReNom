@@ -7,7 +7,7 @@ from renom.core import Node
 
 class maxout(Node):
 
-    def __new__(self, x, axis=1, slice_size=1):
+    def __new__(self, x, slice_size=1, axis=1):
         if axis is None:
             axis = 1
         assert len(x.shape) > 1
@@ -55,9 +55,9 @@ class Maxout:
     >>>
     '''
 
-    def __init__(self, axis=1, slice_size=1):
+    def __init__(self, slice_size=1, axis=1):
         self._axis = axis
         self._slice_size = slice_size
 
     def __call__(self, x):
-        return maxout(x, self._axis, self._slice_size)
+        return maxout(x, self._slice_size, self._axis)
