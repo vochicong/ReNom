@@ -60,7 +60,6 @@ class Grads:
                     for c in t._args:
                         q.append(c)
 
-
     @contextlib.contextmanager
     def unlock_node(self, node):
         if hasattr(node, "setflags") and not node.flags.writeable:

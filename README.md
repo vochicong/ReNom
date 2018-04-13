@@ -4,10 +4,10 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
-## ReNom version 2.4.2
+## ReNom version 2.5.0
 - http://renom.jp/rsts/changes.html
 
-#### Changes from 2.4.1
+#### Changes from 2.5.0
 - Optimized binary operator gpu calculation.
 
 ## Requirements

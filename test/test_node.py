@@ -56,9 +56,6 @@ def test_grad():
     assert g._refcounts[id(g5)] == g._backwards[id(g5)]
 
 
-
-
-
 def test_grad2():
     class D(Variable):
         pass
@@ -70,10 +67,8 @@ def test_grad2():
     e = b + c
     f = d + e
 
-
     print([id(g) for g in (a, b, c, d, e, f)])
 
     g = f.grad(np.array([1., 2.]))
     print(g._refcounts)
     print(g._backwards)
-
