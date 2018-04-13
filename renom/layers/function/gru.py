@@ -110,7 +110,6 @@ class gru(Node):
 
         du_z = np.sum(dA * hminus * y, axis=0, keepdims=True)
         du_r = np.sum(y * dC * dB * u_h * hminus * hminus, axis=0, keepdims=True)
-        du_r = np.zeros_like(du_z)
         du_h = np.sum(sigmoid(B) * dC * y * hminus, axis=0, keepdims=True)
         du = np.concatenate([du_z, du_r, du_h], axis=1)
         print('du is {}'.format(du))
