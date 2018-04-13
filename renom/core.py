@@ -612,7 +612,7 @@ class GPUValue(object):
 
         # todo: value.flatten() copies buffer
         with use_device(self.device_id):
-            ptr.memcpyH2D(value.flatten(), value.nbytes)
+            ptr.memcpyH2D(value.ravel(), value.nbytes)
 
         self._ptr = ptr
 

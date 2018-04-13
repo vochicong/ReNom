@@ -173,7 +173,7 @@ class GPUHeap(object):
 
     def memcpyH2D(self, cpu_ptr, nbytes):
         # todo: this copy is not necessary
-        buf = cpu_ptr.flatten()
+        buf = cpu_ptr.ravel()
         cdef _VoidPtr ptr = _VoidPtr(buf)
 
         with renom.cuda.use_device(self.device_id):
