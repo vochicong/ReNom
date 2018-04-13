@@ -73,6 +73,7 @@ class gru(Node):
 
     def _backward_cpu(self, context, dy, **kwargs):
 
+        #print ('Current depth is: {:d}'.format(self._count))
         x = self.attrs._x
         w_z = self.attrs._w_z
         w_r = self.attrs._w_r
@@ -112,7 +113,6 @@ class gru(Node):
         du_r = np.sum(y * dC * dB * u_h * hminus * hminus, axis=0, keepdims=True)
         du_h = np.sum(sigmoid(B) * dC * y * hminus, axis=0, keepdims=True)
         du = np.concatenate([du_z, du_r, du_h], axis=1)
-        print('du is {}'.format(du))
 
         pz_z = y * dA * u_z
         pz_r = y * dC * dB * u_h * hminus * u_r
@@ -138,9 +138,11 @@ class Gru(Parametrized):
     def weight_initiallize(self, size_i):
         size_i = size_i[0]
         size_o = self._size_o
-        print('Dimension is {:d} x {:d}'.format(size_i, size_o))
         bias = np.zeros((1, size_o * 3), dtype=precision)
         bias[:, :] = 1
+        # Use count to determine the depth of the current node
+        self._count = 0
+        # At this point, all connected units in the same layer will use the SAME weights
         self.params = {
             "w": Variable(self._initializer((size_i, size_o * 3)), auto_update=True),
             "u": Variable(self._initializer((1, size_o * 3)), auto_update=True),
@@ -152,10 +154,13 @@ class Gru(Parametrized):
                   self.params.w,
                   self.params.u,
                   self.params.b)
+        ret._count = self._count
+        self._count += 1
         self._z = ret
         return ret
 
     def truncate(self):
+        self._count = 0
         """Truncates temporal connection."""
         self._z = None
         self._state = None
