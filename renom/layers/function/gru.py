@@ -165,12 +165,14 @@ class Gru(Parametrized):
         self._z = None
         self._state = None
 
+
 class GruSplitMemory(Gru):
 
     def __init__(self, output_size, num_units, input_size=None, initializer=GlorotNormal()):
         self._num_units = num_units
-        print ("Initializing Split Weights GRU model with {:d} output size and {:d} units.".format(output_size,num_units))
-        super(GruSplitMemory, self).__init__(output_size,input_size,initializer)
+        print("Initializing Split Weights GRU model with {:d} output size and {:d} units.".format(
+            output_size, num_units))
+        super(GruSplitMemory, self).__init__(output_size, input_size, initializer)
 
     def weight_initiallize(self, size_i):
         size_i = size_i[0]
@@ -189,12 +191,12 @@ class GruSplitMemory(Gru):
         num_units = self._num_units
         size_o = self._size_o
         assert x.shape[0] == num_units, "There should be at least one input per unit"
+        ret = None
 
-        for i in range(num_units-1):
-            ret = gru(x[np.newaxis,i], None if i == 0 else ret,
-                    self.params.w[:,i * num_units:i * num_units + size_o * 3],
-                    self.params.u[:,i * num_units:i * num_units + size_o * 3],
-                    self.params.b[:,i * num_units:i * num_units + size_o * 3])
-
+        for i in range(num_units):
+            ret = gru(x[np.newaxis, i], ret,
+                      self.params.w[:, i * num_units:i * num_units + size_o * 3],
+                      self.params.u[:, i * num_units:i * num_units + size_o * 3],
+                      self.params.b[:, i * num_units:i * num_units + size_o * 3])
 
         return ret
