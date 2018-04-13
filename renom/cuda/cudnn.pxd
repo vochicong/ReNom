@@ -238,27 +238,6 @@ cdef extern from "cudnn.h":
     cudnnStatus_t cudnnCreateConvolutionDescriptor(
         cudnnConvolutionDescriptor_t * convDesc)
 
-    cudnnStatus_t cudnnSetConvolution2dDescriptor(
-        cudnnConvolutionDescriptor_t convDesc,
-        int pad_h,    # zero-padding height
-        int pad_w,    # zero-padding width
-        int u,        # vertical filter stride
-        int v,        # horizontal filter stride
-        int upscalex,  # upscale the input in x-direction
-        int upscaley,  # upscale the input in y-direction
-        cudnnConvolutionMode_t mode)
-
-    cudnnStatus_t cudnnSetConvolution2dDescriptor(
-        cudnnConvolutionDescriptor_t convDesc,
-        int pad_h,    # zero-padding height
-        int pad_w,    # zero-padding width
-        int u,   # vertical filter stride
-        int v,   # horizontal filter stride
-        int upscalex,  # upscale the input in x-direction
-        int upscaley,  # upscale the input in y-direction
-        cudnnConvolutionMode_t mode,
-        cudnnDataType_t dataType)
-
     cudnnStatus_t cudnnGetConvolution2dDescriptor(
         const cudnnConvolutionDescriptor_t convDesc,
         int * pad_h,    # zero-padding height
@@ -1365,3 +1344,17 @@ cdef extern from "cudnn.h":
         const void * beta,
         const cudnnTensorDescriptor_t       dxDesc,
         void * dx)
+
+cdef extern from "compat.h":
+
+    cudnnStatus_t cudnnSetConvolution2dDescriptor_9(
+        cudnnConvolutionDescriptor_t convDesc,
+        int pad_h,    # zero-padding height
+        int pad_w,    # zero-padding width
+        int u,        # vertical filter stride
+        int v,        # horizontal filter stride
+        int upscalex,  # upscale the input in x-direction
+        int upscaley,  # upscale the input in y-direction
+        cudnnConvolutionMode_t mode,
+        cudnnDataType_t dataType)
+

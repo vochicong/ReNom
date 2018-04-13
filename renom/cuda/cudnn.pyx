@@ -120,7 +120,7 @@ cdef class ConvolutionDescriptor:
         upscalex, upscaley = 1, 1
 
         check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))
-        check(cudnnSetConvolution2dDescriptor(
+        check(cudnnSetConvolution2dDescriptor_9(
             self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
 
     def __del__(self):
