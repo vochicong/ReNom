@@ -49,18 +49,16 @@ class Grads:
 
         q = collections.deque(root._args)
 
-        def walk():
-            while q:
-                t = q.pop()
-                if isinstance(t, Node):
-                    yield t
-                    if not getattr(t, '_no_backward', False):
-                        for c in t._args:
-                            q.append(c)
+        while q:
+            t = q.pop()
+            if isinstance(t, Node):
+                nodeid = id(t)
+                seen = nodeid in self._refcounts
+                self._refcounts[nodeid] += 1
 
-        for n in walk():
-            nodeid = id(n)
-            self._refcounts[nodeid] += 1
+                if not seen and not getattr(t, '_no_backward', False):
+                    for c in t._args:
+                        q.append(c)
 
     @contextlib.contextmanager
     def unlock_node(self, node):
@@ -96,11 +94,7 @@ class Grads:
             if node._auto_update:
                 self._auto_updates.append(node)
 
-        if caller is not None:
-            caller_refs = self._refcounts[id(caller)] or 1
-        else:
-            caller_refs = 1
-        self._backwards[selfid] += caller_refs
+        self._backwards[selfid] += 1
 
         return self._refcounts[selfid] <= self._backwards[selfid], GradsWithCaller(node, self)
 
@@ -118,10 +112,7 @@ class Grads:
             ndarray, Node, None: Gradient of given node object.
         '''
         if default is self._omit:
-            # try:
             return self.variables[id(node)]
-            # except KeyError:
-            #    assert False, 'Searched for {} but could not find in graph.'.format(type(self))
         else:
             return self.variables.get(id(node), default)
 
@@ -620,7 +611,7 @@ class GPUValue(object):
 
         # todo: value.flatten() copies buffer
         with use_device(self.device_id):
-            ptr.memcpyH2D(value.flatten(), value.nbytes)
+            ptr.memcpyH2D(value.ravel(), value.nbytes)
 
         self._ptr = ptr
 
@@ -1361,8 +1352,6 @@ class Node(np.ndarray):
         else:
             ax = tuple(axis)
 
-        #print ('Shape is: {}, length of shape: {}'.format(self.shape,len(self.shape)))
-        #print ('Ax is: {}, length of ax: {}'.format(ax,len(ax)))
         assert len(self.shape) == len(ax), "Axis must be same size to matrix dim size."
         return Transpose(self, ax)
 
