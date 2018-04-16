@@ -813,6 +813,62 @@ def test_exp(node, use_gpu):
 def test_sign(node, use_gpu):
 =======
 
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 2, 1, 1))),
+    Variable(rand((1, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1,))),
+])
+def test_sqrt(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func1(node):
+        return sum(rm.sqrt(node))
+    compare(func1, node, node)
+
+    def func2(node):
+        return sum(rm.sqrt(node) + 10)
+    compare(func2, node, node)
+
+    def func3(node):
+        return sum(rm.sqrt(node) * 3 + 15)
+    compare(func3, node, node)
+
+    def func4(node):
+        return sum(rm.sqrt(node) + rm.sqrt(node))
+    compare(func4, node, node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 2, 1, 1))),
+    Variable(rand((1, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1,))),
+])
+def test_square(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func1(node):
+        return sum(rm.square(node))
+    compare(func1, node, node)
+
+    def func2(node):
+        return sum(rm.square(node) + 10)
+    compare(func2, node, node)
+
+    def func3(node):
+        return sum(rm.square(node) * 3 + 15)
+    compare(func3, node, node)
+
+    def func4(node):
+        return sum(rm.square(node) + rm.square(node))
+    compare(func4, node, node)
+
+
 @pytest.mark.parametrize("node, shape", [
     [Variable(rand((2, 2))), (1, 4)],
     [Variable(rand((2, 2, 1, 1))), (4, 1)],

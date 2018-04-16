@@ -9,4 +9,4 @@ from renom.core import Variable
 from renom.operation import *
 from renom.optimizer import *
 
-__version__ = "2.4.1"
+__version__ = "2.5.0"

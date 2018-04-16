@@ -4,18 +4,20 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
-## ReNom version 2.4.2
+## ReNom version 2.5.0
+- http://renom.jp/rsts/renomdl/main.html
 
-- http://renom.jp/rsts/changes.html
+#### Changes from 2.4.2
+- Adopted CUDA 9.1 and cuDNN 7.1.
 
 ## Requirements
 
 - python2.7, 3.4
-- numpy 1.13.0 1.12.1
+- numpy 1.13.0, 1.12.1
 - pytest 3.0.7
 - cython 0.24
-- cuda-toolkit 8.0
-- cudnn 5.1, 6.0
+- cuda-toolkit 8.0, 9.1
+- cudnn 5.1, 6.0, 7.1
 - matplotlib 2.0.2
 - pandas 0.20.3
 - scikit-learn 0.18.2
