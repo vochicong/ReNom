@@ -260,4 +260,4 @@ setup(
     name='renom',
     packages=find_packages(),
     include_dirs=[numpy.get_include()],
-    version='2.5.0')
+    version='2.5.1')
