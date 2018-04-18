@@ -147,6 +147,7 @@ class Adam(Optimizer):
         self._min = 2e-20
 
     CHECK_ZERO_VALUE = 100
+
     def __call__(self, dy, node):
         node_id = id(node)
         pdy = self._params.get(node_id, None)
@@ -178,7 +179,7 @@ class Adam(Optimizer):
                                  "ganma": g * self._g,
                                  "u": u,
                                  "r": r,
-                                 "nth": nth+1}
+                                 "nth": nth + 1}
 
         ret = self._lr * u / (sqrt(r / (1 - g)) + self._epsilon) / (1 - b)
         if isinstance(ret, Node):
