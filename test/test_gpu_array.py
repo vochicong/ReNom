@@ -11,6 +11,8 @@ from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device, cura
 from renom.core import to_value, Variable, get_gpu
 from renom.operation import dot, sum, sqrt, square
 from renom.config import precision
+from renom.layers.function.test_unit import TestUnit
+from renom.layers.function.gru import Gru
 import renom as rm
 import test_utility
 from renom.layers.function.batch_normalize import BATCH_NORMALIZE_FEATUREMAP
@@ -751,16 +753,49 @@ def test_gpu_lstm(a):
     close(g3, c3)
     close(c_g1, g_g1)
 
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a", [
+    rand((1, 2)),
+    rand((2, 2)),
+])
+def test_gpu_gru(a):
+    unit = Gru(output_size=2)
+
+    def func(x):
+        return sum(unit(x))
+
+    set_cuda_active(True)
+
+    g1 = Variable(a)
+
+    g3 = func(g1)
+    g3.to_cpu()
+
+    g = g3.grad()
+    g_g1 = g.get(g1)
+    g_g1.to_cpu()
+
+    set_cuda_active(False)
+    unit.truncate()
+    c3 = func(g1)
+    c = c3.grad()
+    c_g1 = c.get(g1)
+
+    close(g3, c3)
+    close(c_g1, g_g1)
+
+
 @test_utility.skipgpu
 @pytest.mark.parametrize("a", [
     rand((1, 2)),
     rand((2, 2)),
 ])
 def test_gpu_testunit(a):
-    unit = rm.TestUnit(output_size=2)
+    unit = TestUnit(output_size=2)
 
     def func(x):
-        return sum(unit(node))
+        return sum(unit(x))
 
     set_cuda_active(True)
 

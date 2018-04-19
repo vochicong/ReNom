@@ -58,11 +58,11 @@ class sum(Node):
 
     @classmethod
     def _oper_cpu(cls, arg, axis=None):
-        return np.sum(arg, axis=axis)
+        return np.sum(arg, axis=axis, keepdims=True)
 
     @classmethod
     def _oper_gpu(cls, arg, axis=None):
-        return cusum(get_gpu(arg), axis=axis)
+        return cusum(get_gpu(arg), axis=axis, keepdims=True)
 
     def __new__(cls, arg, axis=None):
         assert not hasattr(axis, "__getitem__"), "The argument axis only accepts integer."

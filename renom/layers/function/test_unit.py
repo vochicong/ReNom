@@ -10,6 +10,8 @@ from renom.operation import dot, sum
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
 from renom.cuda import cuda as cu
+from renom.cuda.cublas import cublas_gemm as gpu_calc
+
 
 class test_unit(Node):
     '''
@@ -29,11 +31,25 @@ class test_unit(Node):
 
         # Perform Forward Calcuations
         # Pay attention to the ordering of the dot arguments.
-        h = dot(x,w) + b
+        h = dot(x, w) + b
 
         # Store Variables for the graph.
         # If this is not done, the variables used by this node will not be visible.
         ret = cls._create_node(h)
+        ret.attrs._x = x
+        ret.attrs._w = w
+        ret.attrs._b = b
+
+        return ret
+
+    @classmethod
+    def _oper_gpu(cls, x, w, b):
+        memory_shape = (x.shape[0], w.shape[1])
+        gpu_mem = GPUValue(shape=memory_shape)
+        gpu_calc(get_gpu(x), 0,
+                 get_gpu(w), 0,
+                 get_gpu(gpu_mem))
+        ret = cls._create_node(gpu_mem)
         ret.attrs._x = x
         ret.attrs._w = w
         ret.attrs._b = b
@@ -45,18 +61,39 @@ class test_unit(Node):
         # Retreive previously stored variables
         x = self.attrs._x
         w = self.attrs._w
-        b = self.attrs._b
         y = dy
 
         # Remember to find the differential for dx as well as dw and db
         dx = dot(y, w.T)
-        dw = dot(x.T,y)
-        db = np.sum(dy,axis=0)
+        dw = dot(x.T, y)
+        db = np.sum(dy, axis=0)
 
         self.attrs._x._update_diff(context, dx)
         self.attrs._w._update_diff(context, dw)
         self.attrs._b._update_diff(context, db)
 
+    def _backward_gpu(self, context, dy, **kwargs):
+
+        x = self.attrs._x
+        w = self.attrs._w
+        b = self.attrs._b
+        y = dy
+
+        dx = GPUValue(shape=(x.shape))
+        dw = GPUValue(shape=(w.shape))
+        db = GPUValue(shape=(b.shape))
+
+        gpu_calc(get_gpu(y), 0,
+                 get_gpu(w), 1,
+                 get_gpu(dx))
+        gpu_calc(get_gpu(x), 1,
+                 get_gpu(y), 0,
+                 get_gpu(dw))
+        db = np.sum(dy * 0, axis=0)
+
+        self.attrs._x._update_diff(context, dx, **kwargs)
+        self.attrs._w._update_diff(context, dw, **kwargs)
+        self.attrs._b._update_diff(context, db, **kwargs)
 
 
 class TestUnit(Parametrized):
@@ -80,4 +117,4 @@ class TestUnit(Parametrized):
         }
 
     def forward(self, x):
-        return test_unit(x,self.params.w,self.params.b)
+        return test_unit(x, self.params.w, self.params.b)

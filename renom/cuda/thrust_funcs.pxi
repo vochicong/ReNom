@@ -3,7 +3,7 @@
 """
 関数命名規則
 関数名: cu〜    (python側から呼ばれる関数)
-        
+
 引数名: gpu_value
 """
 import numpy as np
@@ -53,7 +53,7 @@ def culeaky_leru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def culeaky_leru_backward(s, gpu_value1, gpu_value2):
@@ -62,7 +62,7 @@ def culeaky_leru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_forward(s, gpu_value1, gpu_value2):
@@ -71,7 +71,7 @@ def cueru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_backward(s, gpu_value1, gpu_value2):
@@ -80,7 +80,7 @@ def cueru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cusigmoid(gpu_value1, gpu_value2):
@@ -336,6 +336,24 @@ def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dot, dr, dou
     cdef VALUE_TYPE * ptr_dwc = < VALUE_TYPE * > < uintptr_t > dwc._ptr
     thrust_backward_peephole_lstm(N, M, ptr_u, ptr_ps, ptr_s, ptr_pfg, ptr_wc,
                                   ptr_dy, ptr_drt, ptr_dot, ptr_dr, ptr_dou, ptr_dwc)
+
+
+def cugru_forward(x, w, h):
+    cdef int N = x.shape[0]
+    cdef int M = w.shape[1]
+    cdef VALUE_TYPE * ptr_x = < VALUE_TYPE * > < uintptr_t > x._ptr
+    cdef VALUE_TYPE * ptr_w = < VALUE_TYPE * > < uintptr_t > w._ptr
+    cdef VALUE_TYPE * ptr_h = < VALUE_TYPE * > < uintptr_t > h._ptr
+    thrust_forward_gru(N, M, ptr_x, ptr_w, ptr_h)
+
+
+def cugru_backward(a, b, c):
+    cdef int N = a.shape[0]
+    cdef int M = a.shape[1]
+    cdef VALUE_TYPE * ptr_da = < VALUE_TYPE * > < uintptr_t > a._ptr
+    cdef VALUE_TYPE * ptr_db = < VALUE_TYPE * > < uintptr_t > b._ptr
+    cdef VALUE_TYPE * ptr_dc = < VALUE_TYPE * > < uintptr_t > c._ptr
+    thrust_backward_gru(N, M, ptr_da, ptr_db, ptr_dc)
 
 
 def cubinarize(gpu_value1, th, gpu_value2):
@@ -772,7 +790,7 @@ def cu_get_item(gpu_value1, size, dest_size, slices):
     cdef VALUE_TYPE * ptr_result = <VALUE_TYPE * > < uintptr_t > result._ptr
 
     cdef getitem_slice_infos infos
-    _build_slice_infos(& infos, slices)
+    _build_slice_infos( & infos, slices)
 
     cdef getitem_slice_info * info
 
@@ -797,7 +815,7 @@ def cu_set_item(value, valuesize, gpu_value1, slices, strides, broadcasted_strid
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
 
     cdef getitem_slice_infos infos
-    _build_slice_infos(& infos, slices)
+    _build_slice_infos( & infos, slices)
 
     infos.stride_size = len(strides)
     for i, (s, b) in enumerate(zip(strides, broadcasted_strides)):

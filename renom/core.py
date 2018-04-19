@@ -112,7 +112,11 @@ class Grads:
             ndarray, Node, None: Gradient of given node object.
         '''
         if default is self._omit:
-            return self.variables[id(node)]
+            try:
+                return self.variables[id(node)]
+            except KeyError:
+                raise KeyError(
+                    "Node of type {} could not be found in the current graph".format(type(node)))
         else:
             return self.variables.get(id(node), default)
 
@@ -874,6 +878,8 @@ class Node(np.ndarray):
 
     @classmethod
     def _create_node(cls, value):
+        # Add check for case where value._gpu is a node and set without being sent to cpu first?
+        # Is currently caught in first statement and value._gpu is not reused.
         if isinstance(value, np.ndarray):
             ret = value.astype(precision).view(cls)
         elif isinstance(value, GPUValue):

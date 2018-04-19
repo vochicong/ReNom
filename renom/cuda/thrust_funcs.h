@@ -178,7 +178,7 @@ namespace renom{
 
         long long adv_indexes_len;
         long long *adv_indexes;
-        
+
         size_t stride, dest_stride;
     };
 
@@ -200,7 +200,7 @@ namespace renom{
         VALUE_TYPE *dest,
         getitem_slice_infos *info);
 
-    __global__ void cuda_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);        
+    __global__ void cuda_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);
     void thrust_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);
 
     struct leaky_relu_forward_function;
@@ -252,8 +252,16 @@ namespace renom{
             VALUE_TYPE *prefg, VALUE_TYPE *wc, VALUE_TYPE *dy, VALUE_TYPE *drt, \
             VALUE_TYPE *dot, VALUE_TYPE *dr, VALUE_TYPE *dou, VALUE_TYPE *dwc);
 
+		// Gru forward function
+		__global__ void cuda_forward_gru(VALUE_TYPE *x, VALUE_TYPE *w, VALUE_TYPE *h);
+		void thrust_forward_gru(int N, int M, VALUE_TYPE *x, VALUE_TYPE *w, VALUE_TYPE *h);
+
+		// Gru backward function
+		__global__ void cuda_backward_gru(int N, int M, VALUE_TYPE *da, VALUE_TYPE *db, VALUE_TYPE *dc);
+		void thrust_backward_gru(int N, int M, VALUE_TYPE *da, VALUE_TYPE *db, VALUE_TYPE *dc);
+
     // Binarize
-    void thrust_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b); 
+    void thrust_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b);
     __global__ void cuda_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b);
 
     // Embedding
@@ -262,6 +270,6 @@ namespace renom{
 
     void thrust_embedding_backward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *dy, VALUE_TYPE *dx);
     __global__ void cuda_embedding_backward(int N, int K, int M, VALUE_TYPE *a, VALUE_TYPE *dy, VALUE_TYPE *dx);
-    
+
 }
 #endif
