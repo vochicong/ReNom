@@ -10,6 +10,7 @@ from renom.operation import dot, sum, concat
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
 from renom.cuda import cuda as cu
+import benchmarker as bm
 
 
 def sigmoid_diff(x):
@@ -74,32 +75,46 @@ class gru(Node):
     @classmethod
     def _oper_gpu(cls, x, pz, w, u, b):
 
+        bm.startTiming('Loading GPU')
+        get_gpu(w)
+        get_gpu(b)
+        get_gpu(u)
+        #get_gpu(x)
+        bm.endTiming()
         # Initialize Variables
+        bm.startTiming('Forward data_init')
         m = w.shape[1] // 3
         w_z, w_r, w_h = get_gpu(w).split([m, m * 2, ], axis=1)
         b_z, b_r, b_h = get_gpu(b).split([m, m * 2, ], axis=1)
         u_z, u_r, u_h = get_gpu(u).split([m, m * 2, ], axis=1)
         hminus = Variable(np.zeros((x.shape[0], m), dtype=precision)) if pz is None else pz
-        hminus.to_gpu()
-        x.to_gpu()
-        w.to_gpu()
-        b.to_gpu()
-        u.to_gpu()
+        bm.endTiming()
+        get_gpu(hminus)
 
         # Perform Forward Calcuations
-        input = dot(x,w) + b
-        AB = input[:,:m*2] + concat([hminus,hminus],axis=1)*u[:,:m*2]
+        bm.startTiming('Forward calculation p1')
+        input = dot(get_gpu(x),get_gpu(w)) + get_gpu(b)
+        bm.endTiming()
+        bm.startTiming('Forward calculation p21')
+        AB = input[:,:m*2] + concat([get_gpu(hminus),get_gpu(hminus)],axis=1)*u[:,:m*2]
+        bm.endTiming()
+        bm.startTiming('Forward calculation p23')
+        A = input[:,:m] + hminus*u[:,:m]
+        B = input[:,m:m*2] + hminus*u[:,m:m*2]
         A = AB[:,:m]
         B = AB[:,m:m*2]
+        bm.endTiming()
+        bm.startTiming('Forward calculation p31')
         sigAB = sigmoid(AB[:,:m*2])
         sigB = sigAB[:,m:m*2]
+        bm.endTiming()
+        bm.startTiming('Forward calculation p32')
         C = input[:,m*2:m*3] + hminus*u[:,m*2:m*3]*sigB
-
-
-
+        bm.endTiming()
+        bm.startTiming('Forward calculation p4')
         h = sigAB[:,:m] + tanh(C)
-        #h = sigAB[:,:m] + tanh(C)
         h.to_cpu()
+        bm.endTiming()
 
         # Store Variables for Graph
         ret = cls._create_node(h)
@@ -188,6 +203,7 @@ class gru(Node):
 
         #print ('Current depth is: {:d}'.format(self._count))
 
+        bm.startTiming('Backward data_init')
         x =         get_gpu(self.attrs._x)
         w_z =       get_gpu(self.attrs._w_z)
         w_r =       get_gpu(self.attrs._w_r)
@@ -200,11 +216,10 @@ class gru(Node):
         u_r =       get_gpu(self.attrs._u_r)
         sigB =      get_gpu(self.attrs._sigB)
         hminus =    get_gpu(self.attrs._pz)
-
         y = get_gpu(dy)
+        bm.endTiming()
 
-
-        print (self._create_node(hminus))
+        bm.startTiming('Backward calculation')
         cu.cugru_backward(A, B, C)
         #dA = get_gpu(sigmoid_diff(A))
         #dB = get_gpu(sigmoid_diff(B))
@@ -219,6 +234,7 @@ class gru(Node):
         ydCBuh = ydC * dB * u_h * hminus
 
         yconc = concat([ydA, ydCBuh, ydC],axis=1)
+
 
         # Calculate dx
         dx_z = get_gpu(dot(ydA, w_z.T))
@@ -247,6 +263,7 @@ class gru(Node):
         pz_h = ydC * sigB * u_h
 
         dpz = pz_z + pz_r + pz_h
+        bm.endTiming()
 
 
         self.attrs._x._update_diff(context, dx)
@@ -255,6 +272,9 @@ class gru(Node):
         self.attrs._u._update_diff(context, du)
         if isinstance(self.attrs._pz, Node):
             self.attrs._pz._update_diff(context, dpz)
+        #bm.getTimes()
+        #print(bm.getTimeHist('Forward data_init p1')[0])
+        #assert False
 '''
 Basic Implementations
 

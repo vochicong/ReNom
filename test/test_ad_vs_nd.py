@@ -523,15 +523,17 @@ def test_spatial_dropout(node, seed, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
 
+import benchmarker as bm
 
 @pytest.mark.parametrize("node", [
-    Variable(rand((2, 2))),
-    Variable(rand((2, 1))),
-    Variable(rand((1, 2))),
+    #Variable(rand((2, 2))),
+    #Variable(rand((2, 1))),
+    Variable(rand((30, 30))),
 ])
-def test_lstm(node, use_gpu):
+def test_verybigguys(node):#, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    #set_cuda_active(use_gpu)
+    set_cuda_active(True)
 
     layer1 = Lstm(output_size=4)
 
@@ -545,23 +547,27 @@ def test_lstm(node, use_gpu):
     compare(func, node, node)
     for k in layer1.params.keys():
         compare(func, layer1.params[k], node)
+    bm.getTimes()
+    print(bm.time_vars['ttimes'])
+    assert False
 
 
 @pytest.mark.parametrize("node", [
-    Variable(rand((2, 2))),
-    Variable(rand((2, 1))),
-    Variable(rand((1, 2))),
-    Variable(rand((1, 1))),
+    #Variable(rand((2, 2))),
+    #Variable(rand((2, 1))),
+    #Variable(rand((1, 2))),
+    Variable(rand((3, 3))),
 ])
-def test_gru(node, use_gpu):
+def test_gru(node):#, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    #set_cuda_active(use_gpu)
+    set_cuda_active(True)
 
-    layer1 = Gru(output_size=3)
+    layer1 = Gru(output_size=4)
 
     def func(node):
         loss = 0
-        for _ in range(2):
+        for _ in range(3):
             loss = sum(layer1(node))
         layer1.truncate()
         return loss
@@ -579,6 +585,9 @@ def test_gru(node, use_gpu):
         #set_cuda_active(True)
         print("Finding gradient value for d{}, GPU".format(k))
         compare(func, layer1.params[k], node)
+    bm.getTimes()
+    print(bm.time_vars['ttimes'])
+    assert False
 
 
 @pytest.mark.parametrize("node", [
