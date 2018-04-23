@@ -499,8 +499,12 @@ def _build_broadcast_mask(left, right):
 
 class GPUValue(object):
     ACTIVE_GPU = None
-
+    _ptr = None
     def __init__(self, array=None, shape=None, ptr=None, dtype=None):
+        if not is_cuda_active():
+            raise ValueError('Cuda is not active. '
+                'Use renom.cuda.set_cuda_active() to activate.')
+
         if shape is not None:
             self.shape = tuple(shape)
         else:
