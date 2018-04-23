@@ -2,7 +2,7 @@
 from __future__ import print_function, division
 
 import numpy as np
-from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshape
+from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshape, Amin, Amax
 from renom.config import precision
 
 try:
@@ -39,12 +39,12 @@ def reshape(array, shape):
 class sum(Node):
     '''
     This function sums up matrix elements.
-    In the current version(2.0), summation along 1st axis and
-    summation of all elements are supported.
+    If the argument 'axis' is passed, this function performs
+    sum along specified axis.
 
     Args:
         array (Variable): Input array.
-        axis (int): Summing up along specified axis.
+        axis (int): Summing up along this axis.
 
     Example:
         >>> import numpy as np
@@ -66,7 +66,6 @@ class sum(Node):
 
     def __new__(cls, arg, axis=None):
         assert not hasattr(axis, "__getitem__"), "The argument axis only accepts integer."
-        assert (axis is None) or (axis < 1)
         value = cls.calc_value(arg, axis)
         ret = super(sum, cls).__new__(cls, value)
         ret.attrs._axis = axis
@@ -75,13 +74,24 @@ class sum(Node):
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            dx = np.ones_like(self.attrs._arg) * dy
-            self.attrs._arg._update_diff(context, dx, **kwargs)
+            arg = self.attrs._arg
+            axis = self.attrs._axis
+            if axis is None or axis == 0:
+                dx = np.ones_like(arg) * dy
+            else:
+                dx = np.ones_like(arg) * np.expand_dims(dy, axis)
+            arg._update_diff(context, dx, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            dx = get_gpu(self.attrs._arg).ones_like_me() * get_gpu(dy)
-            self.attrs._arg._update_diff(context, dx, **kwargs)
+            arg = self.attrs._arg
+            axis = self.attrs._axis
+            if axis is None or axis == 0:
+                dx = get_gpu(arg).ones_like_me() * get_gpu(dy)
+            else:
+                dy = get_gpu(dy).new_array()
+                dx = np.ones(arg.shape, dtype=arg.dtype) * np.expand_dims(dy, axis=axis)
+            arg._update_diff(context, get_gpu(dx), **kwargs)
 
 
 class dot(BinOp):
@@ -144,15 +154,13 @@ class dot(BinOp):
             self.attrs._rhs._update_diff(context, rdx, **kwargs)
 
 
-class concat(BinOp):
+class concat(Node):
     """
-    Join a sequence of arrays along an existing axis.
-    In the current version(2.0), concatenation along 2nd axis is
-    only supported.
+    Join a sequence of arrays along specified axis.
 
     Args:
-        lhs (Variable,ndarray): Input array.
-        rhs (Variable,ndarray): Input array.
+        args (*Variable, tuple): Input arrays or tuple of input arrays.
+        axis (int): Concatenation will be performed along this axis. Default value is 1.
 
     Example:
         >>> import numpy as np
@@ -170,38 +178,56 @@ class concat(BinOp):
     """
 
     @classmethod
-    def _oper_cpu(cls, lhs, rhs):
-        return np.hstack((lhs, rhs))
+    def _oper_cpu(cls, args, axis):
+        return np.concatenate(args, axis=axis).copy()
 
     @classmethod
-    def _oper_gpu(cls, lhs, rhs):
-        axis = 1
-        newshape = lhs.shape[:axis] + (lhs.shape[axis] + rhs.shape[axis],) + lhs.shape[axis + 1:]
+    def _oper_gpu(cls, args, axis):
+        newshape = args[0].shape[:axis] + \
+            (np.sum([a.shape[axis] for a in args]), ) + args[0].shape[axis + 1:]
 
         ret = GPUValue(shape=newshape)
-        cuconcat(get_gpu(lhs), get_gpu(rhs), ret, axis)
+        cuconcat([get_gpu(a) for a in args], ret, axis)
         return ret
 
-    def __new__(cls, lhs, rhs):
-        ret = super(concat, cls).__new__(cls, lhs, rhs)
-        ret.attrs._index = lhs.shape[1]
+    def __new__(cls, *args, **kwargs):
+        if isinstance(args[0], (tuple, list)):
+            args = args[0]
+        axis = kwargs.get('axis', 1)
+        assert all([len(args[0].shape) == len(args[i].shape) for i in range(1, len(args))]), \
+            "All arguments must have same number of dimension."
+        assert np.sum(np.sum(np.array([list(map(lambda x, y: x != y, args[0].shape, args[i].shape))
+                                       for i in range(1, len(args))]), axis=0).astype(np.bool)) < 2, \
+            "All dimensions must have same size except specified axis."
+
+        val = cls.calc_value(args, axis)
+        ret = super(concat, cls).__new__(cls, val)
+        tmp = 0
+        index = []
+        for a in args[:-1]:
+            tmp += a.shape[axis]
+            index.append(tmp)
+        ret.attrs._index = index
+        ret.attrs._axis = axis
+        for i, v in enumerate(args):
+            setattr(ret.attrs, "_arg%d" % i, args[i])
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        ldy, rdy = np.hsplit(to_value(dy), [self.attrs._index])
-        if isinstance(self.attrs._lhs, Node):
-            self.attrs._lhs._update_diff(context, ldy, **kwargs)
-
-        if isinstance(self.attrs._rhs, Node):
-            self.attrs._rhs._update_diff(context, rdy, **kwargs)
+        axis = self.attrs._axis
+        args = np.split(to_value(dy), self.attrs._index, axis=axis)
+        for i in range(len(self.attrs._index) + 1):
+            arg = getattr(self.attrs, "_arg%d" % i)
+            if isinstance(arg, Node):
+                arg._update_diff(context, args[i], **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
-        ldy, rdy = np.hsplit(get_gpu(dy).new_array(), [self.attrs._index])
-        if isinstance(self.attrs._lhs, Node):
-            self.attrs._lhs._update_diff(context, GPUValue(ldy), **kwargs)
-
-        if isinstance(self.attrs._rhs, Node):
-            self.attrs._rhs._update_diff(context, GPUValue(rdy), **kwargs)
+        axis = self.attrs._axis
+        args = get_gpu(dy).split(self.attrs._index, axis=axis)
+        for i in range(len(self.attrs._index) + 1):
+            arg = getattr(self.attrs, "_arg%d" % i)
+            if isinstance(arg, Node):
+                arg._update_diff(context, args[i], **kwargs)
 
 
 class where(Node):
@@ -302,13 +328,35 @@ class sqrt(UnaryOp):
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            dx = np.power(self, -0.5) / 2
-            self.attrs._arg._update_diff(context, dx, **kwargs)
+            dx = 0.5 / self
+            self.attrs._arg._update_diff(context, dx * dy, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
-            dx = (self**-0.5) * 0.5
-            self.attrs._arg._update_diff(context, dx, **kwargs)
+            dx = 0.5 / self
+            self.attrs._arg._update_diff(context, dx * dy, **kwargs)
+
+
+class square(UnaryOp):
+    @classmethod
+    def _oper_cpu(cls, arg):
+        return arg * arg
+
+    @classmethod
+    def _oper_gpu(cls, arg):
+        ret = GPUValue(shape=arg.shape)
+        cupow(get_gpu(arg), 2, ret)
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            dx = self.attrs._arg * 2
+            self.attrs._arg._update_diff(context, dx * dy, **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            dx = self.attrs._arg * 2
+            self.attrs._arg._update_diff(context, dx * dy, **kwargs)
 
 
 class log(UnaryOp):
@@ -365,12 +413,9 @@ class exp(UnaryOp):
             self.attrs._arg._update_diff(context, dy * get_gpu(self), **kwargs)
 
 
-# Not implemented.
-class mean(Node):
+class amin(Amin):
     pass
 
-# Not implemented.
 
-
-class max(Node):
+class amax(Amax):
     pass

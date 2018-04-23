@@ -7,7 +7,7 @@ import warnings
 
 # CuDNN settings
 _available = True
-_version_list = [4, 5]
+_version_list = [4, 5, 6]
 if sys.platform in ("linux", "linux2"):
     _libcudnn_libname_list = ['libcudnn.so'] + \
         ['libcudnn.so.%s' % v for v in _version_list]

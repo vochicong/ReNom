@@ -267,14 +267,43 @@ class Model(with_metaclass(ABCMeta, object)):
                 grads.set(obj, newdiff)
 
     def save(self, filename):
-        """Save model weights.
+        """Save model attributes.
+        For save attributes, please register attributes to the dictionary
+        which is named as 'SERIALIZED'.
+
+        Following example shows how to do it.
+
+        Example:
+            >>> import renom as rm
+            >>> import numpy as np
+            >>>
+            >>> class MyModel(rm.Model):
+            ...     SERIALIZED = ('_moving_avg', ) # Put any attributes for saving.
+            ...     def __init__(self):
+            ...         super(MyModel, self).__init__()
+            ...         self._l1 = rm.Dense(2)
+            ...         self._l2 = rm.Dense(1)
+            ...         self._moving_avg = 0
+            ...     def forward(self, x):
+            ...         h = self._l1(x)
+            ...         h = rm.relu(h)
+            ...         h = self._l2(h)
+            ...         self._moving_avg = np.float32(self._moving_avg*0.5 + rm.sum(h)*0.5)
+            ...         return h
+            ...
+            >>> model = MyModel()
+            >>> model(np.random.rand(12, 4))
+            >>> print(model._moving_avg)
+            1.95637
+            >>> model.save("test.h5") # Save
+            >>> model = MyModel() # Reset model object.
+            >>> model.load("test.h5") # Load
+            >>> print(model._moving_avg)
+            1.95637
 
         Args:
             filename (str): File name to save model.
 
-        Example:
-            >>> model = rm.Dense(2)
-            >>> model.save("model.hd5")
         """
         import h5py
 
@@ -304,7 +333,6 @@ class Model(with_metaclass(ABCMeta, object)):
                         g['__dict__.' + propname] = propvalue.new_array()
                     else:
                         g['__dict__.' + propname] = propvalue
-
 
     def load(self, filename):
         """Load saved weights to model.

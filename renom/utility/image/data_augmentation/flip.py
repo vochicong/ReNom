@@ -8,31 +8,32 @@ def flip(x, flip=0, random=False, labels=None, num_class=0):
     if x is a Batch, apply flip transform to Batch.
     if arguments include labels, apply label transformation.
 
-    :param ndarray x: 3 or 4(batch) dimensional images
-    :param int flip: 1 means Horizontal Flip.
+    Args:
+        x (ndarray): 3 or 4(batch) dimensional images
+        flip (int): 1 means Horizontal Flip.
                      2 means Vertical Flip.
                      3 means both.
                      else no flip conversion.
-    :param bool random: apply random flip or not
-    :param ndarray labels: rectangle labels(2-dimensional array)
+        random (bool): apply random flip or not
+        labels (ndarray): rectangle labels(2-dimensional array)
                            ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
-    :param int num_class: number of class of datasets (for rectangle transformation)
-    :return: Images(4 dimension) of flip transformed. If including labels, return with transformed labels
-    :rtype: ndarray
+        num_class (int): number of class of datasets (for rectangle transformation)
 
-    :Example:
-    >>> from renom.utility.image.data_augmentation.flip import flip
-    >>> from PIL import Image as im
-    >>> import matplotlib.pyplot as plt
-    >>> import numpy as np
-    >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
-    >>> image = np.array(image).astype(np.float32)
-    >>> flip_image = flip(image, flip=1) # Horizontal Flip
-    >>> fig, axes = plt.subplots(2, 1)
-    >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
-    >>> axes[1].imshow(flip_image[0] / 255); axes[1].set_title("Flip One Image")
-    >>> plt.show()
+    Returns:
+        (ndarray): Images(4 dimension) of flip transformed. If including labels, return with transformed labels
 
+    Example:
+        >>> from renom.utility.image.data_augmentation.flip import flip
+        >>> from PIL import Image as im
+        >>> import matplotlib.pyplot as plt
+        >>> import numpy as np
+        >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
+        >>> image = np.array(image).astype(np.float32)
+        >>> flip_image = flip(image, flip=1) # Horizontal Flip
+        >>> fig, axes = plt.subplots(2, 1)
+        >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
+        >>> axes[1].imshow(flip_image[0] / 255); axes[1].set_title("Flip One Image")
+        >>> plt.show()
     """
     flip = Flip(flip)
     if isinstance(labels, np.ndarray):
@@ -43,7 +44,8 @@ def flip(x, flip=0, random=False, labels=None, num_class=0):
 class Flip(Image):
     """Apply flip transformation to the input x and labels.
 
-    :param int flip: 1 means Horizontal Flip.
+    Args:
+        flip (int): 1 means Horizontal Flip.
                      2 means Vertical Flip.
                      3 means both.
                      else no flip conversion.
@@ -58,28 +60,29 @@ class Flip(Image):
         if x is a Batch, apply flip transform to Batch
         if arguments include labels, apply label transformation
 
-        :param ndarray x: 3 or 4(batch) dimensional images
-        :param bool random: apply random flip or not
-        :param ndarray labels: rectangle labels(2-dimensional array)
+        Args:
+            x (ndarray): 3 or 4(batch) dimensional images
+            random (bool): apply random flip or not
+            labels (ndarray): rectangle labels(2-dimensional array)
                                ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
-        :param int num_class: number of class of datasets (for rectangle transformation)
-        :return: Images(4 dimension) of flip transformed. If including labels, return with transformed labels
-        :rtype: ndarray
+            num_class (int): number of class of datasets (for rectangle transformation)
+
+        Returns:
+            (ndarray): Images(4 dimension) of flip transformed. If including labels, return with transformed labels
 
         :Example:
-        >>> from renom.utility.image.data_augmentation.flip import Flip
-        >>> from PIL import Image as im
-        >>> import matplotlib.pyplot as plt
-        >>> import numpy as np
-        >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
-        >>> image = np.array(image).astype(np.float32)
-        >>> fl = Flip(flip=1) # Horizontal Flip
-        >>> flip_image = fl.transform(image)
-        >>> fig, axes = plt.subplots(2, 1)
-        >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
-        >>> axes[1].imshow(flip_image[0] / 255); axes[1].set_title("Flip One Image")
-        >>> plt.show()
-
+            >>> from renom.utility.image.data_augmentation.flip import Flip
+            >>> from PIL import Image as im
+            >>> import matplotlib.pyplot as plt
+            >>> import numpy as np
+            >>> image = im.open(image path) # ex:) "./image_folder/camera.jpg"
+            >>> image = np.array(image).astype(np.float32)
+            >>> fl = Flip(flip=1) # Horizontal Flip
+            >>> flip_image = fl.transform(image)
+            >>> fig, axes = plt.subplots(2, 1)
+            >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
+            >>> axes[1].imshow(flip_image[0] / 255); axes[1].set_title("Flip One Image")
+            >>> plt.show()
         """
         flipped_images, batch_size, original_size = self.check_x_dim(x.copy())
         shuffle = None
@@ -104,17 +107,6 @@ class Flip(Image):
         return flipped_images
 
     def _labels_transform(self, labels, num_class, shuffle, img_shape):
-        """Perform labels transformation for rectangle
-
-           # Args:
-               labels(ndarray) : numpy array of labels
-               num_class(int)  : number of classes of datasets
-               shuffle(ndarray): numpy array of index which flip transformation applied
-               img_shape(tuple): (height, width)
-
-           # Returns:
-               transformed_labels(ndarray) : numpy array of transformed labels(2-dimensional array)
-        """
         transformed_labels = labels.copy()
         block_len = 4 + num_class
         num_block = labels[0].shape[0] // block_len

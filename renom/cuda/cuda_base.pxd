@@ -1,7 +1,11 @@
 
 cdef extern from "cuda_runtime.h":
     ctypedef enum cudaError_t:
-        cudaError
+        cudaSuccess = 0,
+        cudaErrorMissingConfiguration = 1
+        cudaErrorMemoryAllocation = 2,
+        cudaErrorInitializationError = 3
+
     ctypedef enum cudaMemcpyKind:
         cudaMemcpyHostToHost,
         cudaMemcpyHostToDevice,
@@ -80,3 +84,4 @@ cdef extern from "cuda.h":
     CUresult cuCtxGetLimit (size_t *value, CUlimit limit)
 
     CUresult cuInit(unsigned int)
+

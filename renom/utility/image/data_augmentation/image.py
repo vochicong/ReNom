@@ -12,7 +12,10 @@ class Image(object):
         raise NotImplementedError
 
     def check_x_dim(self, x):
-        """Check input dimension. If x dimension is 3, convert to 4 dimension by np.expand_dims(x, axis=0)"""
+        """Check input dimension. If x dimension is 3, convert to 4 dimension by np.expand_dims(x, axis=0)
+        Args:
+            x (ndarray): Input matrix.
+        """
         if x.ndim == 3:
             x = np.expand_dims(x, axis=0)
         if x.ndim != 4:

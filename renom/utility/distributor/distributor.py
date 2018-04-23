@@ -68,11 +68,11 @@ class Distributor(object):
 
     def split(self, ratio=0.8, shuffle=True):
         '''
-        データを分割し、新たなDistributorインスタンスを作成する。
+        This method splits its own data and generates 2 distributors using the split data.
 
         Args:
-            ratio (float): 分割比
-            shuffle (boolean): 真のとき、分割時に並び順をシャッフルする。
+            ratio (float): Ratio for dividing data.
+            shuffle (bool): If True, the data is shuffled before dividing.
         '''
         div = int(self._data_size * ratio)
         if shuffle:
@@ -101,10 +101,11 @@ class Distributor(object):
 class NdarrayDistributor(Distributor):
 
     '''
-    NumpyArrayを扱うDistributorクラス
+    Derived class of Distributor which manages ndarray data.
 
-    :param ndarray x: 入力データ
-    :param ndarray y: 教師データ
+    Args:
+        x (ndarray): Input data.
+        y (ndarray): Target data.
     '''
 
     def __init__(self, x, y, **kwargs):
@@ -141,19 +142,6 @@ class NdarrayDistributor(Distributor):
 
 
 class TimeSeriesDistributor(NdarrayDistributor):
-
-    '''
-    時系列データを扱うDistributorクラス。
-    時系列データは以下のフォーマットで与えられる必要がある。
-
-    N: データ数
-    T: 時系列長
-    D: データ次元
-    (N, T, D)
-
-    :param ndarray x: 入力データ
-    :param ndarray y: 教師データ
-    '''
 
     def __init__(self, x, y, **kwargs):
         super(TimeSeriesDistributor, self).__init__(x=x, y=y,

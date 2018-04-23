@@ -1,0 +1,43 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.4\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-02-01 00:33+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: ../../rsts/renom.utility.reinforcement.rst:2
+msgid "renom.utility.reinforcement package"
+msgstr ""
+
+#: ../../rsts/renom.utility.reinforcement.rst:5
+msgid "Submodules"
+msgstr ""
+
+#: ../../rsts/renom.utility.reinforcement.rst:8
+msgid "renom.utility.reinforcement.replaybuffer module"
+msgstr ""
+
+#: of renom.utility.reinforcement.replaybuffer.DecompThread:1
+msgid "Bases: :class:`threading.Thread`"
+msgstr ""
+
+#: of renom.utility.reinforcement.replaybuffer.ReplayBuffer:1
+msgid "Bases: :class:`object`"
+msgstr ""
+
+#: ../../rsts/renom.utility.reinforcement.rst:17
+msgid "Module contents"
+msgstr ""
+

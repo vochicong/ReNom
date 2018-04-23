@@ -13,9 +13,15 @@ class Dense(Parametrized):
 
         :math:`f(x)= w \cdot x + b`
 
+
+    If the argument `input_size` is passed, this layers' weight is initialized
+    in the __init__ function.
+    Otherwise, the weight is initialized in its first forward calculation.
+
     Args:
         output_size (int): Output unit size.
         input_size (int): Input unit size.
+        initializer (Initializer): Initializer object for weight initialization.
 
     Example:
         >>> import numpy as np

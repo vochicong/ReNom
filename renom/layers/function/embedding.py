@@ -17,7 +17,10 @@ class embedding(Node):
 
     @classmethod
     def _oper_cpu(cls, x, w):
-        index = x.as_ndarray().astype(np.int)[:, 0]
+        if isinstance(x, Node):
+            index = x.as_ndarray().astype(np.int)[:, 0]
+        else:
+            index = x.astype(np.int)[:, 0]
         value = w[index]
         ret = cls._create_node(value)
         ret.attrs._x = x
@@ -50,8 +53,37 @@ class embedding(Node):
 
 
 class Embedding(Parametrized):
+    """Embedding layer.
+    This layer is the special case of dense layer. The case is that the input value is onehot encoded.
+    Since the onehot encoded input is very sparse, the matrix product performed in the dense layer is redundant.
 
-    def __init__(self, output_size, input_size=None, initializer=GlorotNormal()):
+    The difference between dense layer and embedding layer is bellow.
+
+    | [Dense layer]
+    |  data -> onehot encoding -> onehot data -> dense layer -> embedded data
+
+    | [Embedding layer]
+    |  data -> embedding layer -> embedded data
+
+    Args:
+        output_size (int): Output unit size.
+        input_size (int): Input unit size. This is same as number of embedding characters.
+        initializer (Initializer): Initializer object for weight initialization.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> N = 4
+        >>> a = np.arange(N).reshape(N, 1)
+        >>> layer = rm.Embedding(output_size=1, input_size=8)
+        >>> out = layer(a)
+
+    Note:
+        1. This layer only accepts matrix which shape is (N, 1) and has integer value. *N is batch size.
+        2. Both ``output_size`` and ``input_size`` must be specified.
+    """
+
+    def __init__(self, output_size, input_size, initializer=GlorotNormal()):
         self._output_size = output_size
         self._initializer = initializer
         super(Embedding, self).__init__(input_size)

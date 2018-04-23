@@ -101,9 +101,9 @@ def cuFree(uintptr_t ptr):
 
 # cuda runtime check
 def runtime_check(error):
-    if error != 0:
+    if error != cudaSuccess:
         error_msg = cudaGetErrorString(error)
-        raise Exception(error_msg)
+        raise Exception("CUDA Error: {}".format(error_msg))
     return
 
 # cuda runtime check
@@ -173,7 +173,7 @@ class GPUHeap(object):
 
     def memcpyH2D(self, cpu_ptr, nbytes):
         # todo: this copy is not necessary
-        buf = cpu_ptr.flatten()
+        buf = cpu_ptr.ravel()
         cdef _VoidPtr ptr = _VoidPtr(buf)
 
         with renom.cuda.use_device(self.device_id):
@@ -227,6 +227,9 @@ class GPUHeap(object):
                 finally:
                     free(buf)
 
+    def free(self):
+        with renom.cuda.use_device(self.device_id):
+            cuFree(self.ptr)
 
 class allocator(object):
 
@@ -274,9 +277,22 @@ class allocator(object):
 
         return pool
 
+    def release_pool(self, deviceID=None):
+
+        def release(pool_list):
+            available_pools = [p for p in pool_list if p[1].available]
+            for p in available_pools:
+                p[1].free()
+                pool_list.remove(p)
+
+        if deviceID is None:
+            for d_id, pools in self._pool_lists.items():
+                release(pools)
+        else:
+            release(self._pool_lists[deviceID])
+          
 
 gpu_allocator = allocator()
-
 
 def _cuSetLimit(limit, value):
     cdef size_t c_value=999;

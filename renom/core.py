@@ -12,10 +12,13 @@ from renom.cuda import *
 
 
 class Grads:
-    '''This class contains gradients of each Node object.
+    '''Grads class. This class contains gradients of each Node object.
 
-    When the function ``grad`` which is instance of Node class called,
-    an instance of Grads is returned.
+    When the function ``grad`` which is instance of Node class is called,
+    an instance of Grads class will be returned.
+
+    For getting the gradient with respect to a Variable object 'x' which is on a
+    computational graph, call the 'get' function of Grads object (An example is bellow).
 
     Example:
         >>> import numpy as np
@@ -46,18 +49,16 @@ class Grads:
 
         q = collections.deque(root._args)
 
-        def walk():
-            while q:
-                t = q.pop()
-                if isinstance(t, Node):
-                    yield t
-                    if not getattr(t, '_no_backward', False):
-                        for c in t._args:
-                            q.append(c)
+        while q:
+            t = q.pop()
+            if isinstance(t, Node):
+                nodeid = id(t)
+                seen = nodeid in self._refcounts
+                self._refcounts[nodeid] += 1
 
-        for n in walk():
-            nodeid = id(n)
-            self._refcounts[nodeid] += 1
+                if not seen and not getattr(t, '_no_backward', False):
+                    for c in t._args:
+                        q.append(c)
 
     @contextlib.contextmanager
     def unlock_node(self, node):
@@ -93,24 +94,22 @@ class Grads:
             if node._auto_update:
                 self._auto_updates.append(node)
 
-        if caller is not None:
-            caller_refs = self._refcounts[id(caller)] or 1
-        else:
-            caller_refs = 1
-        self._backwards[selfid] += caller_refs
+        self._backwards[selfid] += 1
 
         return self._refcounts[selfid] <= self._backwards[selfid], GradsWithCaller(node, self)
 
     _omit = object()
 
     def get(self, node, default=_omit):
-        '''This function returns the gradient of the given node.
+        '''This function returns the gradient with respect to the given node.
+        In the case of there are not any gradient of the given node, this function
+        returns 'None'.
 
         Args:
-            node (Node):
+            node (Node): Returns a gradient with respect to this argument.
 
         Return:
-            ndarray,Node,None: This method returns gradient of passed node object.
+            ndarray, Node, None: Gradient of given node object.
         '''
         if default is self._omit:
             return self.variables[id(node)]
@@ -138,7 +137,8 @@ class Grads:
             node.detach_graph()
 
     def update(self, opt=None, models=()):
-        '''Updates variables using earned gradients.
+        '''This function updates variable objects on the computational graph
+        using obtained gradients.
 
         If an optimizer instance is passed, gradients are rescaled
         with regard to the optimization algorithm before updating.
@@ -174,26 +174,345 @@ class GradsWithCaller(object):
 # todo: move this method to Cython
 
 
-def calc_broadcast_shape(s1, s2):
+def calc_broadcast_shape(*args):
     # silly, but works
-    if all([isinstance(s, (np.ndarray, Number, GPUValue)) for s in (s1, s2)]):
-        return np.broadcast(np.empty(getattr(s1, "shape", 1), dtype=np.bool),
-                            np.empty(getattr(s2, "shape", 1), dtype=np.bool)).shape
+    if all([isinstance(s, (np.ndarray, Number, GPUValue)) for s in args]):
+        arrays = [np.empty(getattr(s, 'shape', 1), dtype=np.bool) for s in args]
+        return np.broadcast(*arrays).shape
     else:
         raise Exception("Not supported data type.")
 
 
+class _AdvIndex:
+    def __init__(self, index):
+        if isinstance(index, (list, tuple)):
+            index = np.array(index)
+
+        isbool = index.dtype.name == 'bool'
+        if isbool:
+            if isinstance(index, GPUValue):
+                index = index.new_array()
+
+            elems = []
+            for j, v in enumerate(index.reshape(-1)):
+                if v:
+                    elems.append(j)
+
+            index = np.array(elems, dtype='int64')
+        elif isinstance(index, np.ndarray):
+            index = index.astype('int64')
+
+        self.org_index = index
+        if not isinstance(index, GPUValue):
+            index = index.reshape(-1)
+            index = GPUValue(index.astype('int64'), dtype='int64')
+
+        if index.dtype.type is not np.int64:
+            raise IndexError("Invalid index type: %r" % index.dtype)
+
+        self.shape = index.shape
+        self.index = index
+
+
+def _parse_index(arr, indexes):
+    if not isinstance(indexes, tuple):
+        indexes = [indexes]
+    else:
+        indexes = list(indexes)
+
+    ellipsis = None
+    num_values = 0
+
+    # calc number of slice or int
+    for i, s in enumerate(indexes):
+        if s is None:
+            continue
+
+        elif s is Ellipsis:
+            if ellipsis is not None:
+                assert 0
+            ellipsis = i
+            continue
+
+        num_values += 1
+
+    # expand Ellipsis or append slices at tail
+    if num_values != len(arr.shape):
+        if ellipsis is None:
+            ellipsis = len(indexes)
+
+        f, b = indexes[:ellipsis], indexes[ellipsis + 1:]
+        rest = len(arr.shape) - num_values
+        mid = list(slice(0, arr.shape[i + ellipsis], 1) for i in range(rest))
+        indexes = f + mid + b
+
+    if len([i for i in indexes if i is not None]) != len(arr.shape):
+        raise IndexError()
+
+    # build slices
+    slices = []
+    dest_shapes = []
+    result_shapes = []
+
+    for i, index in enumerate(indexes):
+        shape = arr.shape[len(slices)]
+
+        if isinstance(index, slice):
+            start, stop, step = index.indices(shape)
+            slices.append((start, stop, step))
+
+            dest_shape = 0
+            if step < 0:
+                if stop < start:
+                    dest_shape = (start - stop - 1) // (-step) + 1
+            else:
+                if start < stop:
+                    dest_shape = (stop - start - 1) // step + 1
+
+            dest_shapes.append(dest_shape)
+            result_shapes.append(dest_shape)
+
+        elif isinstance(index, int):
+            if index < 0:
+                index = index + shape
+
+            if not (0 <= index < shape):
+                raise IndexError()
+
+            slices.append((index, index + 1, 1))
+            dest_shapes.append(1)
+
+        else:
+            # None(newaxis)
+            result_shapes.append(1)
+
+    strides = [np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
+    dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+
+    return slices, strides, dest_strides, result_shapes, dest_shapes
+
+
+def build_shapes(arr, indexes):
+    strides = [np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
+
+    # make indexes a list
+    if isinstance(indexes, bool):
+        slices = [[0, s, 1, None, st, st] for s, st in zip(arr.shape, strides)]
+        return slices, [1 if indexes else 0] + list(arr.shape), list(arr.shape)
+
+    elif isinstance(indexes, list):
+        # if indexes is in form of `[[1]]`, then unwrap the outer list.
+        for elem in indexes:
+            if isinstance(elem, (list, tuple, np.ndarray, GPUValue)):
+                indexes = indexes[:]
+                break
+        else:
+            indexes = [indexes]
+    elif isinstance(indexes, tuple):
+        indexes = list(indexes)
+    else:
+        indexes = [indexes]
+
+    # check if boolean index with same shape
+    if len(indexes) == 1:
+        elem = indexes[0]
+        if isinstance(elem, (list, tuple, np.ndarray, GPUValue)):
+            if not isinstance(elem, (np.ndarray, GPUValue)):
+                elem = np.array(elem)
+            if elem.dtype.name == 'bool':
+                if elem.shape == arr.shape:
+                    idxes = _AdvIndex(elem).index
+                    slices = [[0, 0, 0, idxes, 1, 1]]
+                    return slices, [idxes.size], [idxes.size]
+
+    ellipsis = None
+    num_values = 0
+    is_advanced = False
+
+    # calc number of slice or index
+    for i, s in enumerate(indexes):
+        # check if advanced index or not
+        if isinstance(s, (list, tuple, np.ndarray, GPUValue)):
+            is_advanced = True
+
+        elif s is None:
+            continue
+
+        elif s is Ellipsis:
+            if ellipsis is not None:
+                assert 0
+            ellipsis = i
+            continue
+
+        num_values += 1
+
+    # expand Ellipsis or append slices at tail
+    if num_values != len(arr.shape):
+        if ellipsis is None:
+            ellipsis = len(indexes)
+
+        f, b = indexes[:ellipsis], indexes[ellipsis + 1:]
+        rest = len(arr.shape) - num_values
+        mid = list(slice(0, arr.shape[i + ellipsis], 1) for i in range(rest))
+        indexes = f + mid + b
+
+    if len([i for i in indexes if i is not None]) != len(arr.shape):
+        raise IndexError()
+
+    src_shape = arr.shape
+    adv_shape = []
+    if is_advanced:
+        # convert int index to the advanced index
+        # note that 1 in the [1, []] is an advanced index
+        for i, elem in enumerate(indexes[:]):
+            if isinstance(elem, int):
+                indexes[i] = _AdvIndex([elem])
+            elif isinstance(elem, (list, tuple, np.ndarray, GPUValue)):
+                indexes[i] = _AdvIndex(elem)
+
+        # collect advanced indexes
+        advs = []
+        stds = []
+        num_advs = 0
+        all = zip(indexes, strides, src_shape)
+        for k, g in itertools.groupby(all, key=lambda e: isinstance(e[0], _AdvIndex)):
+            if k:
+                num_advs += 1
+                advs.extend(g)
+            else:
+                stds.extend(g)
+
+        # check if The advanced indexes are all next to each other.
+        is_split_adv = (num_advs >= 2)
+
+        if is_split_adv:
+            # move adv indexes at topmost
+            indexes = ([ind for ind, stride, shape in advs] +
+                       [ind for ind, stride, shape in stds])
+            strides = ([stride for ind, stride, shape in advs] +
+                       [stride for ind, stride, shape in stds])
+            src_shape = ([shape for ind, stride, shape in advs] +
+                         [shape for ind, stride, shape in stds])
+
+        adv_shape = calc_broadcast_shape(*(adv.org_index for adv, stride, shape in advs))
+
+    # build slices
+    # (start, stop, step, adv_indexes, stride, dest_stride)
+    slices = []
+    result_shapes = []
+    dest_shapes = []
+    adv_result_shapes = adv_shape[:]
+    adv_ldxsize = np.prod(adv_shape, dtype='int')
+    adv_positions = []
+
+    n_idx = 0
+    for index in indexes:
+        shape = src_shape[n_idx]
+        stride = strides[n_idx]
+
+        if isinstance(index, slice):
+            start, stop, step = index.indices(shape)
+
+            dest_shape = 0
+            if step < 0:
+                if stop < start:
+                    dest_shape = (start - stop - 1) // (-step) + 1
+            else:
+                if start < stop:
+                    dest_shape = (stop - start - 1) // step + 1
+
+            slices.append([start, stop, step, None, stride])
+            dest_shapes.append(dest_shape)
+            result_shapes.append(dest_shape)
+            n_idx += 1
+
+        elif isinstance(index, int):
+            if index < 0:
+                index = index + shape
+
+            if not (0 <= index < shape):
+                raise IndexError()
+
+            slices.append([index, index + 1, 1, None, stride])
+            dest_shapes.append(1)
+            n_idx += 1
+
+        elif index is None:
+            # None(newaxis)
+            result_shapes.append(1)
+
+        else:  # should be sequence
+            adv_positions.append(len(slices))
+            maxidx = cu_reduce_max(index.index)
+            if maxidx.new_array() >= shape:
+                raise IndexError()
+
+            assert index.index
+            slices.append([0, 0, 0, index.index, stride])
+            if adv_result_shapes:
+                dest_shapes.append(adv_ldxsize)
+                result_shapes.extend(adv_result_shapes)
+                adv_result_shapes = None
+
+            n_idx += 1
+
+    dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+    adv_dest_stride = dest_strides[adv_positions[0]] if adv_positions else None
+
+    j = 0
+    # set dest_stride
+    for i in range(len(slices)):
+        s = slices[i]
+        if s[3] is None:
+            # slice
+            s.append(dest_strides[j])
+            j += 1
+        else:
+            # adv index
+            s.append(adv_dest_stride)
+            j = adv_positions[0] + 1
+
+    return slices, result_shapes, dest_shapes
+
+
+def _build_broadcast_mask(left, right):
+    if len(right) > len(left):
+        reminds = right[:-1 * len(left)]
+        for r in reminds:
+            if r != 1:
+                raise ValueError("could not broadcast")
+        right = right[-1 * len(left):]
+    elif len(right) < len(left):
+        right = (1,) * (len(left) - len(right)) + right
+
+    mask = []
+    for lft, rgt in zip(left, right):
+        if lft != rgt:
+            if rgt != 1:
+                raise ValueError("could not broadcast")
+            mask.append(0)
+        else:
+            mask.append(1)
+
+    return mask, right
+
+
 class GPUValue(object):
     ACTIVE_GPU = None
+    _ptr = None
 
     def __init__(self, array=None, shape=None, ptr=None, dtype=None):
+        if not is_cuda_active():
+            raise ValueError('Cuda is not active. '
+                             'Use renom.cuda.set_cuda_active() to activate.')
+
         if shape is not None:
             self.shape = tuple(shape)
         else:
             self.shape = getattr(array, "shape", None) or ()
 
         if not dtype:
-            self.dtype = precision
+            self.dtype = np.dtype(precision)
         else:
             self.dtype = np.dtype(dtype)
 
@@ -297,12 +616,49 @@ class GPUValue(object):
 
         # todo: value.flatten() copies buffer
         with use_device(self.device_id):
-            ptr.memcpyH2D(value.flatten(), value.nbytes)
+            ptr.memcpyH2D(value.ravel(), value.nbytes)
 
         self._ptr = ptr
 
     def copy_from(self, other):
         self._ptr.copy_from(other._ptr, self.nbytes)
+
+    def transpose(self, axis):
+        return cu_transpose(self, axis)
+
+    def split(self, indices_or_sections, axis=0):
+        N = self.shape[axis]  # Raises IndexError if axis is invalid
+
+        try:
+            len(indices_or_sections)
+        except TypeError:
+            size, mod = divmod(N, indices_or_sections)
+            if N % indices_or_sections:
+                raise ValueError(
+                    'array split does not result in an equal division')
+            indices_or_sections = range(size, N, size)
+
+        slices = []
+        for s in self.shape:
+            slices.append(slice(0, s, 1))
+
+        ret = []
+        pos = 0
+        for to in indices_or_sections:
+            slices[axis] = slice(pos, to, 1)
+            v = self[tuple(slices)]
+            ret.append(v)
+            pos = to
+
+        if to < N:
+            slices[axis] = slice(to, N, 1)
+            v = self[tuple(slices)]
+            ret.append(v)
+
+        return ret
+
+    def hsplit(self, indices_or_sections):
+        return self.split(indices_or_sections, 1)
 
     def __pos__(self):
         return self.copy()
@@ -398,19 +754,56 @@ class GPUValue(object):
             curpow(self, other, ret)
             return ret
 
-    def __getitem__(self, index):
+    def __getitem__(self, indexes):
         with use_device(self.device_id):
-            arry = self.new_array()
-            arry = arry[index]
-            ret = GPUValue(arry)
+            slices, result_shapes, dest_shapes = build_shapes(self, indexes)
+
+            dest_size = np.prod(dest_shapes, dtype='int64')
+
+            ret = cu_get_item(self, self.size, dest_size, slices)
+
+            ret.shape = result_shapes
             return ret
 
-    def __setitem__(self, index, value):
+    def __setitem__(self, indexes, value):
         with use_device(self.device_id):
-            arry = self.new_array()
-            arry[index] = get_gpu(value).new_array()
-            self.free()
-            self.to_gpu(arry)
+            #            if isinstance(indexes, (tuple, list, np.ndarray)):
+            #                arry = self.new_array()
+            #                arry[indexes] = get_gpu(value).new_array()
+            #                self.free()
+            #                self.to_gpu(arry)
+            #                return
+
+            value = get_gpu(value)
+            slices, result_shapes, dest_shapes = build_shapes(self, indexes)
+            if np.prod(result_shapes, dtype='int') == 0:
+                return
+
+            dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int')
+                            for i in range(len(dest_shapes))]
+            mask, broadcasted = _build_broadcast_mask(dest_shapes, value.shape)
+            broadcasted_strides = [np.prod(broadcasted[i + 1:], dtype='int')
+                                   for i in range(len(broadcasted))]
+            broadcasted_strides = [m * b for m, b in zip(mask, broadcasted_strides)]
+
+            valuesize = np.prod(dest_shapes, dtype='int')
+
+            cu_set_item(value, valuesize, self, slices, dest_strides, broadcasted_strides)
+
+
+#    def __getitem__(self, index):
+#        with use_device(self.device_id):
+#            arry = self.new_array()
+#            arry = arry[index]
+#            ret = GPUValue(arry)
+#            return ret
+#
+#    def __setitem__(self, index, value):
+#        with use_device(self.device_id):
+#            arry = self.new_array()
+#            arry[index] = get_gpu(value).new_array()
+#            self.free()
+#            self.to_gpu(arry)
 
     @property
     def T(self):
@@ -955,7 +1348,17 @@ class Node(np.ndarray):
 
     @property
     def T(self):
-        return Transpose(self)
+        return Transpose2d(self)
+
+    def transpose(self, *axis):
+        ax = axis
+        if isinstance(ax[0], (tuple, list)):
+            ax = ax[0]
+        else:
+            ax = tuple(axis)
+
+        assert len(self.shape) == len(ax), "Axis must be same size to matrix dim size."
+        return Transpose(self, ax)
 
     def reshape(self, *shape):
         if isinstance(shape[0], (list, tuple)):
@@ -1104,6 +1507,23 @@ def broad_cast(hs, dy):
     return dy
 
 
+def cu_broad_cast(hs, dy):
+    if isinstance(hs, GPUValue):
+        shape = list(hs.shape)
+        if hs.shape != dy.shape:
+            axis = []
+            while len(shape) != len(dy.shape):
+                if len(shape) < len(dy.shape):
+                    shape.insert(0, 1)
+            for i, s in enumerate(shape):
+                if s == 1:
+                    axis.append(i)
+            if axis:
+                dy = cusum(dy, axis=tuple(axis))
+        dy = dy.reshape(hs.shape)
+    return dy
+
+
 def get_gpu(array):
     if isinstance(array, Number) or isinstance(array, GPUValue):
         return array
@@ -1141,21 +1561,24 @@ class Add(BinOp):
         gdy = get_gpu(dy)
 
         if isinstance(self.attrs._rhs, Node):
-            grhs = get_gpu(self.attrs._rhs)
-            if grhs.shape == gdy.shape:
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            if rhs.shape == gdy.shape:
                 new_r_dx = gdy.copy()
             else:
-                new_r_dx = grhs.zeros_like_me()
-                cubroadcast(gdy, new_r_dx)
+                new_r_dx = cu_broad_cast(rhs, gdy)
+
             self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
 
         if isinstance(self.attrs._lhs, Node):
-            glhs = get_gpu(self.attrs._lhs)
-            if glhs.shape == gdy.shape:
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            if lhs.shape == gdy.shape:
                 new_l_dx = gdy.copy()
             else:
-                new_l_dx = glhs.zeros_like_me()
-                cubroadcast(gdy, new_l_dx)
+                new_l_dx = cu_broad_cast(lhs, gdy)
             self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
 
 
@@ -1191,15 +1614,18 @@ class Sub(BinOp):
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._lhs, Node):
-            new_l_dx = get_gpu(self.attrs._lhs).zeros_like_me()
-            dxl = get_gpu(dy)
-            cubroadcast(dxl, new_l_dx)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            new_l_dx = cu_broad_cast(lhs, get_gpu(dy))
             self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
 
         if isinstance(self.attrs._rhs, Node):
-            new_r_dx = get_gpu(self.attrs._rhs).zeros_like_me()
-            dxr = -get_gpu(dy)
-            cubroadcast(dxr, new_r_dx)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            new_r_dx = cu_broad_cast(rhs, -1 * get_gpu(dy))
+
             self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
 
 
@@ -1225,6 +1651,7 @@ class Mul(BinOp):
         return get_gpu(lhs) * get_gpu(rhs)
 
     def _backward_cpu(self, context, dy, **kwargs):
+
         lhs = to_value(self.attrs._lhs)
         rhs = to_value(self.attrs._rhs)
 
@@ -1237,19 +1664,19 @@ class Mul(BinOp):
             self.attrs._lhs._update_diff(context, l_dx, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
-
         if isinstance(self.attrs._rhs, Node):
-            new_r_dx = get_gpu(self.attrs._rhs).zeros_like_me()
-            dxr = get_gpu(dy) * get_gpu(self.attrs._lhs)
-            cubroadcast(dxr, new_r_dx)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+            dxr = cu_broad_cast(rhs, lhs * get_gpu(dy))
 
-            self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
+            self.attrs._rhs._update_diff(context, dxr, **kwargs)
 
         if isinstance(self.attrs._lhs, Node):
-            new_l_dx = get_gpu(self.attrs._lhs).zeros_like_me()
-            dxl = get_gpu(dy) * get_gpu(self.attrs._rhs)
-            cubroadcast(dxl, new_l_dx)
-            self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+            dxl = cu_broad_cast(lhs, rhs * get_gpu(dy))
+
+            self.attrs._lhs._update_diff(context, dxl, **kwargs)
 
 
 class RMul(Mul):
@@ -1290,17 +1717,19 @@ class Div(BinOp):
     def _backward_gpu(self, context, dy, **kwargs):
 
         if isinstance(self.attrs._lhs, Node):
-            new_l_dx = get_gpu(self.attrs._lhs).zeros_like_me()
-            dxl = get_gpu(dy) / get_gpu(self.attrs._rhs)
-            cubroadcast(dxl, new_l_dx)
-            self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            dxl = cu_broad_cast(lhs, get_gpu(dy) / rhs)
+            self.attrs._lhs._update_diff(context, dxl, **kwargs)
 
         if isinstance(self.attrs._rhs, Node):
-            new_r_dx = get_gpu(self.attrs._rhs).zeros_like_me()
-            dxr = (get_gpu(self.attrs._rhs) ** (-2.0)) * - \
-                1.0 * get_gpu(self.attrs._lhs) * get_gpu(dy)
-            cubroadcast(dxr, new_r_dx)
-            self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
+            lhs = get_gpu(self.attrs._lhs)
+            rhs = get_gpu(self.attrs._rhs)
+
+            v = rhs ** (-2.0) * -1.0 * lhs * get_gpu(dy)
+            dxr = cu_broad_cast(rhs, v)
+            self.attrs._rhs._update_diff(context, dxr, **kwargs)
 
 
 class RDiv(Div):
@@ -1413,11 +1842,13 @@ class Pow(BinOp):
     def _backward_gpu(self, context, dy, **kwargs):
 
         if isinstance(self.attrs._lhs, Node):
+            lhs = get_gpu(self.attrs._lhs)
             rhs = get_gpu(self.attrs._rhs)
-            new_l_dx = get_gpu(self.attrs._lhs).zeros_like_me()
-            dxl = get_gpu(dy) * rhs * (GPUValue.__pow__(get_gpu(self.attrs._lhs), rhs - 1))
-            cubroadcast(dxl, new_l_dx)
-            self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
+
+            v = get_gpu(dy) * rhs * (GPUValue.__pow__(lhs, rhs - 1))
+
+            dxl = cu_broad_cast(lhs, v)
+            self.attrs._lhs._update_diff(context, dxl, **kwargs)
 
         if isinstance(self.attrs._rhs, Node):
             lhs = get_gpu(self.attrs._lhs).empty_like_me()
@@ -1666,7 +2097,7 @@ class Reshape(Node):
                 dy).reshape(self.attrs._shape), **kwargs)
 
 
-class Transpose(UnaryOp):
+class Transpose2d(UnaryOp):
     @classmethod
     def _oper_cpu(cls, arg):
         assert(len(arg.shape) < 3)
@@ -1684,9 +2115,185 @@ class Transpose(UnaryOp):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, get_gpu(dy).T, **kwargs)
 
+class Transpose(Node):
+
+    @classmethod
+    def _oper_cpu(cls, arg, axis):
+        return np.transpose(to_value(arg), axis)
+
+    @classmethod
+    def _oper_gpu(cls, arg, axis):
+        return get_gpu(arg).transpose(axis)
+
+    def __new__(cls, arg, axis):
+        value = cls.calc_value(arg, axis)
+        ret = super(Transpose, cls).__new__(cls, value)
+        rev = [-1] * len(axis)
+        for i, a in enumerate(axis):
+            rev[a] = i
+        ret.attrs._arg = arg
+        ret.attrs._axis = rev
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            axis = self.attrs._axis
+            self.attrs._arg._update_diff(context, to_value(dy).transpose(axis), **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            axis = self.attrs._axis
+            self.attrs._arg._update_diff(context, get_gpu(dy).transpose(axis), **kwargs)
+
+
+class Abase(Node):
+
+    def __new__(cls, arg, axis=None, keepdims=False):
+        assert isinstance(axis, (type(None), int)), 'This function only accepts int or None.'
+        value, index = cls.calc_value(arg, axis, keepdims)
+        ret = super(Abase, cls).__new__(cls, value)
+        ret.attrs._arg = arg
+        ret.attrs._axis = axis
+        ret.attrs._index = index
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            axis = self.attrs._axis
+            index = self.attrs._index
+            dx = np.zeros(self.attrs._arg.shape, dtype=dy.dtype)
+            if axis is None:
+                dxx = dx.reshape(-1)
+                dxx[index] = dy
+            else:
+                axis_list = list(range(len(dx.shape)))
+                axis_list.pop(axis)
+                axis_list.append(axis)
+                rev = [-1] * len(axis_list)
+                for i, a in enumerate(axis_list):
+                    rev[a] = i
+                dxx = np.transpose(dx, axis_list)
+                for i in np.ndindex(index.shape):
+                    dxx[i][index[i]] = dy[i]
+
+            self.attrs._arg._update_diff(context, dx, **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            axis = self.attrs._axis
+            index = self.attrs._index.new_array()
+            dx = np.zeros(self.attrs._arg.shape, dy.dtype)
+
+            if axis is None:
+                dxx = dx.reshape(-1)
+                dxx[index] = dy
+            else:
+                axis_list = list(range(len(dx.shape)))
+                axis_list.pop(axis)
+                axis_list.append(axis)
+                rev = [-1] * len(axis_list)
+                for i, a in enumerate(axis_list):
+                    rev[a] = i
+                dxx = np.transpose(dx, axis_list)
+                for i in np.ndindex(index.shape):
+                    dxx[i][index[i]] = dy[i]
+            self.attrs._arg._update_diff(context, get_gpu(dx), **kwargs)
+
+
+class Amax(Abase):
+    """This function performs max calculation.
+
+    Args:
+        arg (Variable, ndarray): Input matrix.
+        axis (int): Perform calculation along this argument.
+        keepdims (bool): If `Ture` is passed, reduced dimentions remain.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> # Forward Calculation
+        >>> a = np.arange(4).reshape(2, 2)
+        >>> a
+        [[0 1]
+         [2 3]]
+        >>> rm.amax(a, axis=1)
+        [ 1.  3.]
+        >>>
+        >>> rm.amax(a, axis=0)
+        [ 2.  3.]
+        >>> rm.amax(a, axis=0, keepdims=True)
+        [[ 2.  3.]]
+        >>>
+        >>> # Calculation of differentiation
+        >>> va = rm.Variable(a)
+        >>> out = rm.amax(va)
+        >>> grad = out.grad()
+        >>> grad.get(va) # Getting the gradient of 'va'.
+        [[ 0.,  0.],
+         [ 0.,  1.]]
+    """
+
+    @classmethod
+    def _oper_cpu(cls, arg, axis, keepdims):
+        array = to_value(arg)
+        return np.amax(array, axis, keepdims=keepdims), np.argmax(array, axis)
+
+    @classmethod
+    def _oper_gpu(cls, arg, axis, keepdims):
+        array = get_gpu(arg)
+        value = cu_reduce_max(array, axis, keepdims)
+        index = cu_reduce_argmax(array, axis)
+        return value, index
+
+
+class Amin(Abase):
+    """This function performs min calculation.
+
+    Args:
+        arg (Variable, ndarray): Input matrix.
+        axis (int): Perform calculation along this argument.
+        keepdims (bool): If `Ture` is passed, reduced dimentions remain.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> # Forward Calculation
+        >>> a = np.arange(4).reshape(2, 2)
+        >>> a
+        [[0 1]
+         [2 3]]
+        >>> rm.amin(a, axis=1)
+        [ 0.  2.]
+        >>>
+        >>> rm.amin(a, axis=0)
+        [ 0.  1.]
+        >>> rm.amin(a, axis=0, keepdims=True)
+        [[ 0.  1.]]
+        >>>
+        >>> # Calculation of differentiation
+        >>> va = rm.Variable(a)
+        >>> out = rm.amin(va)
+        >>> grad = out.grad()
+        >>> grad.get(va) # Getting the gradient of 'va'.
+        [[ 1.,  0.],
+         [ 0.,  0.]]
+    """
+
+    @classmethod
+    def _oper_cpu(cls, arg, axis, keepdims):
+        array = to_value(arg)
+        return np.amin(array, axis, keepdims=keepdims), np.argmin(array, axis)
+
+    @classmethod
+    def _oper_gpu(cls, arg, axis, keepdims):
+        array = get_gpu(arg)
+        value = cu_reduce_min(array, axis, keepdims)
+        index = cu_reduce_argmin(array, axis)
+        return value, index
+
+
 def _plot_graph(objs):
     g = Digraph('G', filename='graphviz_output')
-
     s = set()
     for n in objs:
         g.node(str(id(n)), str(type(n)))

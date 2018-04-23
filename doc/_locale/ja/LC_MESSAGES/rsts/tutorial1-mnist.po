@@ -1,0 +1,127 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-07-20 17:04+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.3.4\n"
+
+#: ../../rsts/tutorial1-mnist.ipynb:6
+msgid "Tutorial 1 Mnist classifier"
+msgstr "チュートリアル 1 MNIST文字認識"
+
+#: ../../rsts/tutorial1-mnist.ipynb:14
+msgid "Required libraries"
+msgstr "必要なライブラリ"
+
+#: ../../rsts/tutorial1-mnist.ipynb:67
+msgid "Load data"
+msgstr "MNISTデータのロード"
+
+#: ../../rsts/tutorial1-mnist.ipynb:69
+msgid ""
+"Next, we have to load-in the raw, binary MNIST data and shape into "
+"training-ready objects. To accomplish this, we'll use the "
+"``fetch_mldata`` module included in the scikit-learn package."
+msgstr "最初にMNISTデータ・セットをダウンロードし、学習ができるように前処理を施します."
+"今回はsckit-learnの ``fetch_mldata`` 関数を使用します."
+
+#: ../../rsts/tutorial1-mnist.ipynb:73
+msgid ""
+"The MNIST dataset consists of 70000 digit images. Before we do anything "
+"else, we have to split the data into a training set and a test set. We'll"
+" then do two important pre-processing steps that make for a smoother "
+"training process: **1)** Re-scale the image data (originaly integer "
+"values 0-255) to have a range from 0 to 1. **2)**''Binarize'' the labels-"
+" map each digit (0-9) to a vector of 0s and 1s."
+msgstr "MNISTデータセットは70000枚の数字画像からなります.まずは、データセットを学習用とテスト様に分割します."
+"次にデータ255で割ることで、画像を0-1の間にスケーリングします.更に、教師データを二値化します."
+"このようにして、データの前処理が完了しました."
+
+#: ../../rsts/tutorial1-mnist.ipynb:110
+msgid "Define the neural network"
+msgstr "ニューラルネットワークの定義"
+
+#: ../../rsts/tutorial1-mnist.ipynb:112
+msgid ""
+"Next, we setup the neural network itself. In this tutorial, we'll "
+"construct a 2-layer network. In other words, it will consist of an input "
+"layer in additional to 2 parametrized layers. We then have to choose an "
+"activation function for the neurons. Although the ''sigmoid'' function is"
+" a popular starting example in ML courses, the ''rectified linear "
+"function'' (ReLu) is becoming a popular default when training neural "
+"networks. We'll use the ReLU function here."
+msgstr "次にニューラルネットワークを定義します.このチュートリアルでは、"
+"二層ニューラルネットワークを定義します."
+"具体的には全結合層を2つ持つニューラルネットワークになります."
+"次に活性化関数を選びます.ここでは relu 関数を選びました."
+
+#: ../../rsts/tutorial1-mnist.ipynb:120
+msgid ""
+"For validation and prediction purposes, it's not necessary build a "
+"computational graph. During these two processes, we'll disable the graph "
+"in order to conserve memory usage,. This is done by calling the method "
+"``detach_graph()``"
+msgstr "ReNomでは、演算にVariableオブジェクトが含まれると演算の履歴を残し、計算グラフを作り続けます。"
+"もし誤差逆伝播を実行する必要が無いのであれば、計算グラフを保持することは"
+"メモリの無駄遣いとなるので、 Nodeオブジェクトの ``detach_graph()`` メソッドを呼び"
+"計算グラフを削除することが出来ます。 もしくはTutrial0.2で説明しているように、"
+"withブロックを用いて計算グラフの生成を管理することができます。"
+
+
+#: ../../rsts/tutorial1-mnist.ipynb:149
+msgid "Neural network with a L2 normalization term"
+msgstr "L2ノルム正則化を加えたニューラルネットワークモデル"
+
+#: ../../rsts/tutorial1-mnist.ipynb:178
+msgid "Definition of a nural network with sequential model"
+msgstr "Sequentialモデルを用いたニューラルネットワークの定義"
+
+#: ../../rsts/tutorial1-mnist.ipynb:198
+msgid "Instantiation"
+msgstr "インスタンス化"
+
+#: ../../rsts/tutorial1-mnist.ipynb:217
+msgid "Training loop"
+msgstr "学習ループ"
+
+#: ../../rsts/tutorial1-mnist.ipynb:219
+msgid ""
+"Now that the network is built, we can start to do the actual training. "
+"Rather than using vanilla \"batch\" gradient descent, which is "
+"computationally expensive, we'll use mini-batch stochastic gradient "
+"descent (SGD). This method trains on a handful of examples per iteration "
+"(the \"batch-size\"), allowing us to make \"stochastic\" updates to the "
+"weights in a short time. The learning curve will appear noisier, but this"
+" method tends to converge much faster."
+msgstr "ここまでで、ニューラルネットワークを構築することが出来ました。"
+"次に学習ループを定義します。ここではミニバッチを用いた確率的勾配降下法(SGD)による"
+"学習を行います。学習のたびに学習データから重複なしにデータをランダムに取り出し"
+"そのデータを用いて重みを更新します。このような確率的な重み更新方法を取ることで"
+"学習曲線はスムーズではなくなりますが、結果的に学習の結果が改善します。"
+
+#: ../../rsts/tutorial1-mnist.ipynb:321
+msgid "Model evaluation"
+msgstr "モデルの評価"
+
+#: ../../rsts/tutorial1-mnist.ipynb:323
+msgid ""
+"After training our model, we have to evaluate it. For each class (digit),"
+" we'll use several scoring metrics: precision, recall, F1 score, and "
+"support, to get a full sense of how the model performs on our test data."
+msgstr "学習が終了したモデルを評価します。ここでは混同行列を用いて、各クラスに属するテストデータの"
+"正解割合を表示しました。また、テストデータに対する、再現率、適合率、F1スコアについても同様に"
+"表示しています。今回のモデルでは、テストデータを95%の正解率で識別できるモデルを構築"
+"することができました。"
+

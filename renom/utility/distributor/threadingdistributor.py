@@ -13,13 +13,14 @@ class ImageDistributor(object):
     ImageDetectionDistributor, ImageSegmentationDistributor depending
     on the image task. Or sublass it for original image tasks.
 
-    :param list image_path_list: list of image path
-    :param list y_list: list of labels (bbox and class) for every image (2 dimensional array)
-    :param list class_list: list of classes name for this dataset
-    :param bool shuffle: If True, apply datasets shuffle per epoch
-    :param tuple imsize: resize input image for converting batch ndarray
-    :param str color: color of Input Image. ["RGB", "GRAY"]
-    :param fucntion augmentation: augmentater for Input Image
+    Args:
+        image_path_list (list): List of image path.
+        y_list (list): List of labels (bbox and class) for every image (2 dimensional array).
+        class_list (list): List of classes name for this dataset.
+        shuffle (bool): If True, apply datasets shuffle per epoch
+        imsize (tuple): Resize input image for converting batch ndarray.
+        color (str): Color of Input Image. ["RGB", "GRAY"]
+        augmentation (function): Augmentater for input Image.
     """
 
     def __init__(self, image_path_list, y_list=None, class_list=None, imsize=(32, 32), color="RGB", augmentation=None):
@@ -40,32 +41,33 @@ class ImageDetectionDistributor(ImageDistributor):
     Labels are expected to be Bounding boxes and Classes.
     ex:) np.array([[center x, center y, x_top_left, height, 0, 0, 0, 1, 0]])
 
-    :param list image_path_list: list of image path
-    :param list y_list: list of labels (bbox and class) for every image
-    :param list class_list: list of classes name for this dataset
-    :param bool shuffle: If True, apply datasets shuffle per epoch
-    :param tuple imsize: resize input image for converting batch ndarray
-    :param str color: color of Input Image. ["RGB", "GRAY"]
-    :param fucntion augmentation: augmentater for Input Image
+    Args:
+        image_path_list (list): list of image path
+        y_list (list): list of labels (bbox and class) for every image
+        class_list (list): list of classes name for this dataset
+        shuffle (bool): If True, apply datasets shuffle per epoch
+        imsize (tuple): resize input image for converting batch ndarray
+        color (str): color of Input Image. ["RGB", "GRAY"]
+        augmentation (function): augmentater for Input Image
 
     :Example:
-    >>> from renom.utility.load.imageloader.threadingdistributor import ImageDetectionDistributor
-    >>> from renom.utility.image.data_augmentation import *
-    >>> datagenerator = DataAugmentation([
-    ...     Flip(1),
-    ...     Rotate(20),
-    ...     Crop(size=(300, 300)),
-    ...     Resize(size=(500, 500)),
-    ...     Shift((20, 50)),
-    ...     Color_jitter(v = (0.5, 2.0)),
-    ...     Zoom(zoom_rate=(1.2, 2))
-    ...     # Rescale(option='zero'),
-    ... ], random = True)
-    >>> dist = ImageDetectionDistributor(x_list, y_list=y_list,
+        >>> from renom.utility.load.imageloader.threadingdistributor import ImageDetectionDistributor
+        >>> from renom.utility.image.data_augmentation import *
+        >>> datagenerator = DataAugmentation([
+        ...     Flip(1),
+        ...     Rotate(20),
+        ...     Crop(size=(300, 300)),
+        ...     Resize(size=(500, 500)),
+        ...     Shift((20, 50)),
+        ...     Color_jitter(v = (0.5, 2.0)),
+        ...     Zoom(zoom_rate=(1.2, 2))
+        ...     # Rescale(option='zero'),
+        ... ], random = True)
+        >>> dist = ImageDetectionDistributor(x_list, y_list=y_list,
                                         class_list=class_list,callback=datagenerator,
                                         shuffle=True, imsize=(360, 360), color='RGB')
-    >>> for i, (x, y) in enumerate(dist.batch(32)):
-    ...     print 'Batch', i
+        >>> for i, (x, y) in enumerate(dist.batch(32)):
+        ...     print 'Batch', i
     """
 
     def __init__(self, image_path_list, y_list=None, class_list=None, imsize=(360, 360),
@@ -78,11 +80,13 @@ class ImageDetectionDistributor(ImageDistributor):
             self._data_y, _ = make_ndarray(self._data_y, len(self._class_list))
 
     def batch(self, batch_size, shuffle):
-        """generator of batch images.
+        """Returns generator of batch images.
 
-        :param int batch_size: size of a batch.
-        :return: Images(4 dimension) of input data for Network. If including labels, return with transformed labels
-        :rtype: ndarray
+        Args:
+            batch_size (int): size of a batch.
+        Returns:
+            (ndarray): Images(4 dimension) of input data for Network.
+              If including labels, return with transformed labels
         """
         if shuffle:
             perm = np.random.permutation(self._data_size)
@@ -128,33 +132,33 @@ class ImageDetectionDistributor(ImageDistributor):
 class ImageClassificationDistributor(ImageDistributor):
     """Distributor class for tasks of image classification.
 
-    :param list image_path_list: list of image path
-    :param list y_list: list of labels (bbox and class) for every image
-    :param list class_list: list of classes name for this dataset
-    :param bool shuffle: If True, apply datasets shuffle per epoch
-    :param tuple imsize: resize input image for converting batch ndarray
-    :param str color: color of Input Image. ["RGB", "GRAY"]
-    :param fucntion augmentation: augmentater for Input Image
+    Args:
+        image_path_list (list): list of image path
+        y_list (list): list of labels (bbox and class) for every image
+        class_list (list): list of classes name for this dataset
+        shuffle (bool): If True, apply datasets shuffle per epoch
+        imsize (tuple): resize input image for converting batch ndarray
+        color (str): color of Input Image. ["RGB", "GRAY"]
+        augmentation: (function) augmentater for Input Image
 
-    :Example:
-    >>> from renom.utility.load.imageloader.threadingdistributor import ImageClassificationDistributor
-    >>> from renom.utility.image.data_augmentation import *
-    >>> datagenerator = DataAugmentation([
-    ...     Flip(1),
-    ...     Rotate(20),
-    ...     Crop(size=(300, 300)),
-    ...     Resize(size=(500, 500)),
-    ...     Shift((20, 50)),
-    ...     Color_jitter(v = (0.5, 2.0)),
-    ...     Zoom(zoom_rate=(1.2, 2))
-    ...     # Rescale(option='zero'),
-    ... ], random = True)
-    >>> dist = ImageClassificationDistributor(x_list, y_list=y_list,
+    Example:
+        >>> from renom.utility.load.imageloader.threadingdistributor import ImageClassificationDistributor
+        >>> from renom.utility.image.data_augmentation import *
+        >>> datagenerator = DataAugmentation([
+        ...     Flip(1),
+        ...     Rotate(20),
+        ...     Crop(size=(300, 300)),
+        ...     Resize(size=(500, 500)),
+        ...     Shift((20, 50)),
+        ...     Color_jitter(v = (0.5, 2.0)),
+        ...     Zoom(zoom_rate=(1.2, 2))
+        ...     # Rescale(option='zero'),
+        ... ], random = True)
+        >>> dist = ImageClassificationDistributor(x_list, y_list=y_list,
                                                 class_list=class_list, callback=datagenerator,
                                                 shuffle=True, imsize=(360, 360), color='RGB')
-    >>> for i, (x, y) in enumerate(dist.batch(32)):
-    ...     print 'Batch', i
-
+        >>> for i, (x, y) in enumerate(dist.batch(32)):
+        ...     print 'Batch', i
     """
 
     def __init__(self, image_path_list, y_list=None, class_list=None,
@@ -165,9 +169,10 @@ class ImageClassificationDistributor(ImageDistributor):
 
     def batch(self, batch_size, shuffle):
         """
-        :param int batch_size: size of a batch.
-        :return: Images(4 dimension) of input data for Network. If including labels, return with original labels
-        :rtype: ndarray
+        Args:
+            batch_size (int): size of a batch.
+        Returns:
+            (ndarray): Images(4 dimension) of input data for Network. If including labels, return with original labels
         """
         if shuffle:
             perm = np.random.permutation(self._data_size)

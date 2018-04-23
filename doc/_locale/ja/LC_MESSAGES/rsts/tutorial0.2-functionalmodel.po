@@ -1,0 +1,223 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2017-08-09 14:52+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.4.0\n"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:6
+msgid "Tutorial 0.2 Functional Model"
+msgstr "チュートリアル 0.2 Functionalモデル"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:8
+msgid "In this tutorial, you can learn the following:"
+msgstr "このチュートリアルでは、以下の内容を紹介します."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:10
+msgid "How to define a neural network."
+msgstr "どのようにニューラルネットワークを定義するか."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:11
+msgid "How to make it learn."
+msgstr "どのように学習させるか."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:12
+msgid "Accessing to each layers weight parameters."
+msgstr "定義したニューラルネットワークの重みパラメータにどのようにアクセスするか."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:14
+msgid ""
+"No datasets or GPU are used in this tutorial. Renom version2.0 and numpy "
+"modules are required."
+msgstr "このチュートリアルでは、データセットやGPUの設定は必要ありません.ReNom 2.0 とNumpyが必要となります."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:23
+msgid "Required modules"
+msgstr "必要なライブラリ"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:43
+msgid "Create original model class"
+msgstr "モデルを用いたニューラルネットワークの定義"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:45
+msgid ""
+"In ReNom, using the model class to define the neural network class is "
+"recommended. The class **renom.Model** is able to prevent memory leaks "
+"and makes the code more understandable. Moreover, utilities (used for "
+"saving and copying weights) are designed for the model class."
+msgstr ""
+"ReNomでは、ニューラルネットワークの定義方法としてModelクラスを継承したオリジナルなニューラルネットワークモデルクラスを定義する方法を推奨しています."
+" **renom.Model** "
+"クラスは、メモリリークを防ぎコードを簡単化するのに有効です.更に、学習済み重みパラメータの保存などのユーティリティ関数を使用出来ます."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:50
+msgid "Start with defining our own model class using **renom.Model**."
+msgstr "最初に、 **renom.Model** クラスを継承して、新たなニューラルネットワークモデルクラスを定義します."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:52
+msgid ""
+"Then define learnable layers (parameters) in the ****init**\\ ()** method"
+" as attributes of the class."
+msgstr "まずは ****init**\\ ()** 内に、学習対象となる全結合レイヤを定義します."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:55
+msgid "Finally, forward calculation is done with the **forward()** method."
+msgstr "そして、 **forward()** 関数の中に順伝播計算を記述します."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:81
+msgid "Dense object"
+msgstr "全結合(Dense)オブジェクト"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:83
+msgid "A dense object represents a fully connected layer as decribed below:"
+msgstr "Denseオブジェクトは層間のユニット同士が密に結合していることを表す全結合オブジェクトです."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:89
+msgid "while W and b are the learnable parameters."
+msgstr "そのため、Denseオブジェクトは学習対象のパラメータとして、重みパラメータ W とバイアスパラメータ b を持ちます."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:91
+msgid ""
+"The class Tutorial02, which is a 2 layer neural network, can be written "
+"as follows:"
+msgstr "上で定義した二層ニューラルネットワークを表すTutorial02クラスにおける順伝播は以下の式のように書きます."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:98
+msgid ""
+"All objects that have learnable parameters refer to the Parametrized "
+"class."
+msgstr "以下のプログラムで確認できるように、学習対象のパラメータを持つクラスはすべてParametrizedクラスを継承しています."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:156
+msgid "Activation functions"
+msgstr "活性化関数"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:158
+msgid ""
+"In the class Tutorial02, we use **rm.relu** as an activation function. "
+"For more different functions, please check the API section in the "
+"document."
+msgstr ""
+"上記で定義したTutorial02クラスでは活性化関数として **rm.relu** "
+"を使用しています.その他の活性化関数については、ドキュメントのAPIセクションを確認してください."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:212
+msgid "Execute forward propagation"
+msgstr "順伝播計算の実行"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:214
+msgid ""
+"After preparing the input data **x** and the target data **y**, "
+"instantiate the class object and execute forward propagation."
+msgstr ""
+"入力データ **x** と教師データ **y** "
+"を準備します.さらに、定義したTutorial02クラスをインスタンス化します.インスタンス化したモデルオブジェクトに対して入力データ **x**"
+" を与えると順伝播計算を実行することが出来ます."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:264
+msgid "Define loss function"
+msgstr "誤差関数の定義"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:266
+msgid ""
+"For building the model, we use the gradient discent method to update the "
+"weight parameters. First, we have to define an objective function."
+msgstr "モデルを学習させるために、モデルの出力と教師データ間の誤差を測る誤差関数を定義します。"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:269
+msgid ""
+"**renom.mean\\_squared\\_error(z, y)** is a loss function for measuring "
+"the distance between z and y(ex.1). You can also write it without the "
+"function (ex.2)."
+msgstr "**renom.mean\\_squared\\_error(z, y)**　はモデルの出力と教師データ"
+"間の誤差を平均二乗誤差関数で測ります。　平均二乗誤差は、(ex.2)のように書くことも出来ます。"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:289
+msgid "Execute backward propagation"
+msgstr "誤差逆伝播の実行"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:291
+msgid ""
+"Call the the method **grad()** to execute backpropagation. **grad()** "
+"returns a Grad class object, which contains references of the learnable "
+"parameters. Therefore you can update learnable parameters by calling the "
+"**update()** method of the Grad object."
+msgstr "誤差逆伝播を実行するには **grad()** メソッドを呼びます。　**grad()** はVariable"
+"オブジェクトの勾配を持つGradのオブジェクトを返します。"
+"得られたGradクラスのオブジェクトのupdateメソッドを実行することで、計算された勾配を用いて"
+"重みパラメータを更新します。"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:296
+msgid ""
+"At this point, there are 2 differences between renom versions 1 and 2. "
+"One is the name of the backpropagation function. Another one is the "
+"**with block**."
+msgstr "ReNom version1.0と2.0では、学習時に二点ほど違いがあります。"
+"1つは、逆伝播を実行する際のメソッド名です。version 1.0では **backward()**"
+"でしたが、version2.0では、grad()へと変更されました."
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:300
+msgid ""
+"Because of the auto-differentiation function, computational graphs are "
+"generated throughout the code. This causes a memory leaks in both the cpu"
+" and gpu cases."
+msgstr "また二点目として、逆伝播時に遡る計算履歴(計算グラフ)を"
+"作成するか否かを明示的に書く必要があります。"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:304
+msgid ""
+"Therefore, in ReNom version 2, the auto-differentiation function is only "
+"enabled in the **with block**."
+msgstr "そのためReNom versoin2.0では以下のような **with block** の中での計算グラフが"
+"作られます。つまり、 **with block** ないで行われた計算については自動微分を実行することが出来ます。"
+"**with block** の外部で実行された計算については、勾配計算に考慮されません。"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:307
+msgid ""
+"'with model.train()': means the computational graph, which contains "
+"learnable parameters of the 'model' instance, is generatable."
+msgstr "下記の例では **with model.train()** ブロック内で実行された計算のみ"
+"計算グラフが作られます。"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:310
+msgid "If there is no **with block**, learnable parameters will never be updated."
+msgstr "下記の例はwithブロックが無いと、grad()メソッドを呼び出しても勾配が計算されないので"
+"重みパラメータが更新されません。"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:362
+msgid "Update weights with optimizer"
+msgstr "勾配降下アルゴリズムを用いたパラメータの更新"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:364
+msgid "ReNom provides some optimizers, such as stochastic gradient descent."
+msgstr "ReNomはAdamやAdagraadのような、いくつかの勾配降下アルゴリズムを提供しています。"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:416
+msgid "Access the weight parameters"
+msgstr "重みパラメータへのアクセス方法"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:418
+msgid ""
+"Once weight parameters are created after forward propagation, you can "
+"access them through the 'params' attribute."
+msgstr "ReNomでは重みパラメータは最初の順伝播実行時に初期化されます。"
+"一度重みパラメータが作成されると、それらのパラメータはparams属性を通して"
+"アクセスすることが出来ます。"
+
+#: ../../rsts/tutorial0.2-functionalmodel.ipynb:421
+msgid "'params' is a dictionary which contains learnable parameters."
+msgstr "paramsは辞書型オブジェクトなので、キーを用いたパラメータへのアクセスも可能です。"
+
+

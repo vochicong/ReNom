@@ -102,9 +102,10 @@ def test_save(tmpdir_factory):
             super(NN2, self).__init__()
             self.layer1 = rm.Dense(output_size=2)
             self.layer2 = rm.Dense(output_size=2)
+            self.bn = rm.BatchNormalize()
 
         def forward(self, x):
-            return self.layer2(rm.relu(self.layer1(x)))
+            return self.layer2(self.bn(rm.relu(self.layer1(x))))
 
     class NN3(rm.Model):
         SERIALIZED = ('AAA', 'BBB')

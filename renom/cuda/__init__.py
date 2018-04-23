@@ -9,7 +9,7 @@ try:
     from renom.cuda.curand import *
     _has_cuda = True
 except ImportError as e:
-    warnings.warn("Couldn't find cuda modules. %s" % e)
+    gpu_allocator = None
     curand_generator = None
     _has_cuda = False
 
@@ -18,20 +18,19 @@ _cuda_is_disabled = False
 
 
 def set_cuda_active(activate=True):
-    '''If True is given, this method activate cuda.
+    '''If True is given, cuda will be activated.
 
     Args:
-        activate (bool): Cuda activation flag.
-
+        activate (bool): Activation flag.
     '''
     global _cuda_is_active
-    if not has_cuda():
+    if not has_cuda() and activate:
         warnings.warn("Couldn't find cuda modules.")
     _cuda_is_active = activate
 
 
 def is_cuda_active():
-    """Check the CUDA active.
+    """Checks whether CUDA is activated.
 
     Returns:
         True if cuda is active.
@@ -93,11 +92,21 @@ _CuRandGens = {}
 
 def curand_generator(seed=None):
     deviceid = cuGetDevice()
-    if deviceid in _CuRandGens:
-        return _CuRandGens[deviceid]
-
     if seed is None:
-        seed = np.random.randint(0, int(1e5))
+        seed = seed if seed else np.random.randint(4294967295, size=1)
+
+    if deviceid in _CuRandGens:
+        gen = _CuRandGens[deviceid]
+        gen.set_seed(seed)
+        return gen
+
     ret = CuRandGen(seed)
     _CuRandGens[deviceid] = ret
     return ret
+
+
+def release_mem_pool():
+    """This function releases GPU memory pool.
+    """
+    if gpu_allocator:
+        gpu_allocator.release_pool()

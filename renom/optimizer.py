@@ -56,11 +56,14 @@ class Sgd(Optimizer):
 
 
 class Adagrad(Optimizer):
-    '''Adaptive gradient algorithm.
+    '''Adaptive gradient algorithm. [Adagrad]_
 
     Args:
         lr (float): Learning rate.
         epsilon (float): Small number in the equation for avoiding zero division.
+
+    .. [Adagrad] Duchi, J., Hazan, E., & Singer, Y. Adaptive Subgradient Methods for
+        Online Learning and Stochastic Optimization. Journal of Machine Learning Research, 12, 2121–2159.
     '''
 
     def __init__(self, lr=0.01, epsilon=1e-8):
@@ -80,7 +83,7 @@ class Adagrad(Optimizer):
 
 
 class Rmsprop(Optimizer):
-    '''Rmsprop described by following formula.
+    '''Rmsprop described by following formula. [Rmsprop]_
 
     .. math::
 
@@ -92,6 +95,8 @@ class Rmsprop(Optimizer):
         lr (float): Learning rate.
         g (float):
         epsilon (float): Small number in the equation for avoiding zero division.
+
+    .. [Rmsprop] Nitish Srivastava, Kevin Swersky, Geoffrey Hinton. Neural Networks for Machine Learning.
     '''
 
     def __init__(self, lr=0.001, g=0.9, epsilon=1e-8):
@@ -112,7 +117,7 @@ class Rmsprop(Optimizer):
 
 
 class Adam(Optimizer):
-    '''Adaptive moment estimation described by following formula.
+    '''Adaptive moment estimation described by following formula. [Adam]_
 
     .. math::
 
@@ -122,12 +127,15 @@ class Adam(Optimizer):
         \\hat{n}_{t+1} &=& \\frac{n_{t+1}}{1-g^{t+1}} \\\\
         w_{t+1} &=& w_{t} - \\frac{\\alpha \hat{m}_{t+1}}{\sqrt{\hat{n}_{t+1}}+\epsilon}
 
-
     Args:
         lr (float): Learning rate.
         g (float): Coefficient
         b (float): Coefficient
         epsilon (float): Small number in the equation for avoiding zero division.
+
+
+    .. [Adam] Diederik P. Kingma, Jimmy Ba. ADAM: A METHOD FOR STOCHASTIC OPTIMIZATION(2014)
+        https://arxiv.org/pdf/1412.6980.pdf
     '''
 
     def __init__(self, lr=0.001, g=0.999, b=0.9, epsilon=1e-8):
@@ -138,9 +146,12 @@ class Adam(Optimizer):
         self._params = {}
         self._min = 2e-20
 
+    CHECK_ZERO_VALUE = 100
+
     def __call__(self, dy, node):
         node_id = id(node)
         pdy = self._params.get(node_id, None)
+        nth = 0
         if pdy is None:
             b = self._b
             g = self._g
@@ -151,23 +162,27 @@ class Adam(Optimizer):
             r = pdy["r"]
             b = pdy["beta"]
             g = pdy["ganma"]
+            nth = pdy["nth"]
 
-            u.setflags(write=True)
-            r.setflags(write=True)
-
-            if not is_cuda_active():
-                min_flug = np.where(np.abs(u) < self._min, True, False)
-                min_flug = np.where(np.abs(r) < self._min, True, False)
-                u[min_flug] = 0
-                r[min_flug] = 0
+            if nth % self.CHECK_ZERO_VALUE == 0:
+                if not is_cuda_active():
+                    min_flug = np.where(np.abs(u) < self._min, True, False)
+                    min_flug = np.where(np.abs(r) < self._min, True, False)
+                    u.setflags(write=True)
+                    r.setflags(write=True)
+                    u[min_flug] = 0
+                    r[min_flug] = 0
             u = self._b * u + (1 - self._b) * dy
             r = self._g * r + (1 - self._g) * (dy**2)
+
         self._params[node_id] = {"beta": b * self._b,
                                  "ganma": g * self._g,
                                  "u": u,
-                                 "r": r}
+                                 "r": r,
+                                 "nth": nth + 1}
 
         ret = self._lr * u / (sqrt(r / (1 - g)) + self._epsilon) / (1 - b)
         if isinstance(ret, Node):
             ret.detach_graph()
+
         return ret

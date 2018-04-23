@@ -6,11 +6,10 @@ class DataAugmentation(Image):
     """Apply transformation to the input x and labels.
     You could choose transform function from below.
     ["Flip", "Resize", "Crop", "Color_jitter", "Rescale", "Rotate", "Shift"].
-    "Rotate" transform can't apply label transformation. So when you want to use "Rotate",
-    Please use only image transformation.
 
-    :param list converter_list: list of instance for converter.
-    :param bool random: apply random transformation or not
+    Args:
+        converter_list (list): list of instance for converter.
+        random (bool): apply random transformation or not
     """
 
     def __init__(self, converter_list, random=False):
@@ -23,32 +22,35 @@ class DataAugmentation(Image):
         if x is a Batch, apply DataAugmentation to Batch.
         if arguments include labels, apply label transformation.
 
-        :param ndarray x: 3 or 4(batch) dimensional images. dtype is float32. value=[0.0, 255.0].
-        :param ndarray labels: labels for classification, detection and segmentation. 2-dimensional array
-        :param int num_class: number of class of datasets
-        :return: Images(4 dimension) of augment transformed. If including labels, return with transformed labels
-        :rtype: ndarray
+        Args:
+            x (ndarray): 3 or 4(batch) dimensional images. dtype is float32. value=[0.0, 255.0].
+            labels (ndarray): labels for classification, detection and segmentation. 2-dimensional array
+            num_class (int): number of class of datasets
 
-        >>> import matplotlib.pyplot as plt
-        >>> from PIL import Image as im
-        >>> from renom.utility.image.data_augmentation import *
-        >>> image = im.open("/Users/tsujiyuuki/env_python/code/my_code/Utilities/doc/img_autodoc/2007_000027.jpg")
-        >>> image = np.array(image, dtype=np.float32)
-        >>> datagenerator = DataAugmentation([
-        ...     Flip(1),
-        ...     Rotate(20),
-        ...     Crop(size=(300, 300)),
-        ...     Resize(size=(500, 500)),
-        ...     Shift((20, 50)),
-        ...     Color_jitter(v = (0.5, 2.0)),
-        ...     Zoom(zoom_rate=(1.2, 2))
-        ...     # Rescale(option='zero'),
-        ... ], random = True)
-        >>> augment_image = datagenerator.create(image)
-        >>> fig, axes = plt.subplots(2, 1)
-        >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
-        >>> axes[1].imshow(augment_image[0] / 255); axes[1].set_title("Shift One Image")
-        >>> plt.show()
+        Returns:
+            (ndarray): Images(4 dimension) of augment transformed. If including labels, return with transformed labels
+
+        Example:
+            >>> import matplotlib.pyplot as plt
+            >>> from PIL import Image as im
+            >>> from renom.utility.image.data_augmentation import *
+            >>> image = im.open("/Users/tsujiyuuki/env_python/code/my_code/Utilities/doc/img_autodoc/2007_000027.jpg")
+            >>> image = np.array(image, dtype=np.float32)
+            >>> datagenerator = DataAugmentation([
+            ...     Flip(1),
+            ...     Rotate(20),
+            ...     Crop(size=(300, 300)),
+            ...     Resize(size=(500, 500)),
+            ...     Shift((20, 50)),
+            ...     Color_jitter(v = (0.5, 2.0)),
+            ...     Zoom(zoom_rate=(1.2, 2))
+            ...     # Rescale(option='zero'),
+            ... ], random = True)
+            >>> augment_image = datagenerator.create(image)
+            >>> fig, axes = plt.subplots(2, 1)
+            >>> axes[0].imshow(image/255); axes[0].set_title("Original Image")
+            >>> axes[1].imshow(augment_image[0] / 255); axes[1].set_title("Shift One Image")
+            >>> plt.show()
 
         """
         augmented_images = x.copy().astype(np.float32)
