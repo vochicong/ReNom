@@ -10,6 +10,7 @@ from renom.operation import dot, sum, concat
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
 from renom.cuda import cuda as cu
+import benchmarker as bm
 
 
 def sigmoid_diff(x):
@@ -74,31 +75,46 @@ class gru(Node):
     @classmethod
     def _oper_gpu(cls, x, pz, w, u, b):
 
+        bm.startTiming('Loading GPU')
+        get_gpu(w)
+        get_gpu(b)
+        get_gpu(u)
+        #get_gpu(x)
+        bm.endTiming()
         # Initialize Variables
+        bm.startTiming('Forward data_init')
         m = w.shape[1] // 3
         w_z, w_r, w_h = get_gpu(w).split([m, m * 2, ], axis=1)
         b_z, b_r, b_h = get_gpu(b).split([m, m * 2, ], axis=1)
         u_z, u_r, u_h = get_gpu(u).split([m, m * 2, ], axis=1)
         hminus = Variable(np.zeros((x.shape[0], m), dtype=precision)) if pz is None else pz
-        hminus.to_gpu()
-        x.to_gpu()
-        w.to_gpu()
-        b.to_gpu()
-        u.to_gpu()
+        bm.endTiming()
+        get_gpu(hminus)
 
         # Perform Forward Calcuations
-        input = dot(x,w) + b
-        AB = input[:,:m*2] + concat([hminus,hminus],axis=1)*u[:,:m*2]
+        bm.startTiming('Forward calculation p1')
+        input = dot(get_gpu(x),get_gpu(w)) + get_gpu(b)
+        bm.endTiming()
+        bm.startTiming('Forward calculation p21')
+        AB = input[:,:m*2] + concat([get_gpu(hminus),get_gpu(hminus)],axis=1)*u[:,:m*2]
+        bm.endTiming()
+        bm.startTiming('Forward calculation p23')
+        A = input[:,:m] + hminus*u[:,:m]
+        B = input[:,m:m*2] + hminus*u[:,m:m*2]
         A = AB[:,:m]
         B = AB[:,m:m*2]
+        bm.endTiming()
+        bm.startTiming('Forward calculation p31')
         sigAB = sigmoid(AB[:,:m*2])
         sigB = sigAB[:,m:m*2]
+        bm.endTiming()
+        bm.startTiming('Forward calculation p32')
         C = input[:,m*2:m*3] + hminus*u[:,m*2:m*3]*sigB
-
-
-
+        bm.endTiming()
+        bm.startTiming('Forward calculation p4')
         h = sigAB[:,:m] + tanh(C)
         h.to_cpu()
+        bm.endTiming()
 
         # Store Variables for Graph
         ret = cls._create_node(h)
@@ -185,6 +201,7 @@ class gru(Node):
     def _backward_gpu(self, context, dy, **kwargs):
 
 
+        bm.startTiming('Backward data_init')
         x =         get_gpu(self.attrs._x)
         w_z =       get_gpu(self.attrs._w_z)
         w_r =       get_gpu(self.attrs._w_r)
@@ -197,10 +214,14 @@ class gru(Node):
         u_r =       get_gpu(self.attrs._u_r)
         sigB =      get_gpu(self.attrs._sigB)
         hminus =    get_gpu(self.attrs._pz)
-
         y = get_gpu(dy)
+        bm.endTiming()
 
+<<<<<<< HEAD
 
+=======
+        bm.startTiming('Backward calculation')
+>>>>>>> ErrorBranch
         cu.cugru_backward(A, B, C)
         dA = A
         dB = B
@@ -212,6 +233,7 @@ class gru(Node):
         ydCBuh = ydC * dB * u_h * hminus
 
         yconc = concat([ydA, ydCBuh, ydC],axis=1)
+
 
         # Calculate dx
         dx_z = get_gpu(dot(ydA, w_z.T))
@@ -239,6 +261,7 @@ class gru(Node):
         pz_h = ydC * sigB * u_h
 
         dpz = pz_z + pz_r + pz_h
+        bm.endTiming()
 
 
         self.attrs._x._update_diff(context, dx)
@@ -247,6 +270,123 @@ class gru(Node):
         self.attrs._u._update_diff(context, du)
         if isinstance(self.attrs._pz, Node):
             self.attrs._pz._update_diff(context, dpz)
+<<<<<<< HEAD
+=======
+        #bm.getTimes()
+        #print(bm.getTimeHist('Forward data_init p1')[0])
+        #assert False
+'''
+Basic Implementations
+
+    @classmethod
+    def _oper_gpu(cls, x, pz, w, u, b):
+
+        # Initialize Variables
+        m = w.shape[1] // 3
+        w_z, w_r, w_h = get_gpu(w).split([m, m * 2, ], axis=1)
+        b_z, b_r, b_h = get_gpu(b).split([m, m * 2, ], axis=1)
+        u_z, u_r, u_h = get_gpu(u).split([m, m * 2, ], axis=1)
+        hminus = Variable(np.zeros((x.shape[0], w.shape[1] // 3), dtype=precision)) if pz is None else pz
+        hminus.to_gpu()
+        x.to_gpu()
+        # Perform Forward Calcuations
+        A = dot(x, w_z) + hminus._gpu * u_z + b_z
+        B = dot(x, w_r) + u_r * hminus._gpu + b_r
+        sigB = sigmoid(B)
+        C = dot(x, w_h) + sigB * u_h * hminus._gpu + b_h
+        h = sigmoid(A) + tanh(C)
+        h.to_cpu()
+
+        # Store Variables for Graph
+        ret = cls._create_node(h)
+        ret.attrs._x = x
+        ret.attrs._w = w
+        ret.attrs._w_z = w_z
+        ret.attrs._w_r = w_r
+        ret.attrs._w_h = w_h
+        ret.attrs._b = b
+        ret.attrs._b_z = b_z
+        ret.attrs._b_r = b_r
+        ret.attrs._b_h = b_h
+        ret.attrs._u = u
+        ret.attrs._u_z = u_z
+        ret.attrs._u_h = u_h
+        ret.attrs._u_r = u_r
+        ret.attrs._pz = hminus
+        ret.attrs._A = A
+        ret.attrs._B = B
+        ret.attrs._C = C
+        ret.attrs._sigB = sigB
+
+        return ret
+
+    def _backward_gpu(self, context, dy, **kwargs):
+
+        #print ('Current depth is: {:d}'.format(self._count))
+
+        x =         get_gpu(self.attrs._x)
+        w_z =       get_gpu(self.attrs._w_z)
+        w_r =       get_gpu(self.attrs._w_r)
+        w_h =       get_gpu(self.attrs._w_h)
+        A =         get_gpu(self.attrs._A)
+        B =         get_gpu(self.attrs._B)
+        C =         get_gpu(self.attrs._C)
+        u_z =       get_gpu(self.attrs._u_z)
+        u_h =       get_gpu(self.attrs._u_h)
+        u_r =       get_gpu(self.attrs._u_r)
+        hminus =    get_gpu(self.attrs._pz)
+
+        y = get_gpu(dy)
+
+        #A = get_gpu(A)
+        #cu.cugru_backward(A)
+        #dA = A
+        dA = get_gpu(sigmoid_diff(A))
+        dB = get_gpu(sigmoid_diff(B))
+        dC = get_gpu(tanh_diff(C))
+
+        # Calculate dx
+        dx_z = get_gpu(dot(y * dA, w_z.T))
+        dx_r = get_gpu(dot(y * dB * dC * u_h * hminus, w_r.T))
+        dx_h = get_gpu(dot(y * dC, w_h.T))
+        dx = dx_z + dx_r + dx_h
+        v = self._create_node(dx)
+
+        # Calculate dw
+        dw_z = dot(x.T, y * dA)
+        dw_r = dot(x.T, y * dB * dC * u_h * hminus)
+        dw_h = dot(x.T, y * dC)
+        dw = concat([dw_z, dw_r, dw_h], axis=1)
+
+        # Calculate db
+        db_z = sum(y * dA, axis=0)  # , keepdims=True)
+        db_r = sum(y * dB * dC * u_h * hminus, axis=0)  # , keepdims=True)
+        db_h = sum(y * dC, axis=0)  # , keepdims=True)
+        db = concat([db_z, db_r, db_h], axis=1)
+        #print ('Updating b with: {},{},{}'.format(db_z,db_r,db_h))
+
+        du_z = sum(dA * hminus * y, axis=0)  # , keepdims=True)
+        du_r = sum(y * dC * dB * u_h * hminus * hminus, axis=0)  # , keepdims=True)
+        du_h = sum(sigmoid(B) * dC * y * hminus, axis=0)  # , keepdims=True)
+        du = concat([du_z, du_r, du_h], axis=1)
+
+        pz_z = y * dA * u_z
+        pz_r = y * dC * dB * u_h * hminus * u_r
+        pz_h = y * dC * get_gpu(sigmoid(B)) * u_h
+
+        dpz = pz_z + pz_r + pz_h
+        v = self._create_node(dpz)
+
+
+        self.attrs._x._update_diff(context, dx)
+        self.attrs._w._update_diff(context, dw)
+        self.attrs._b._update_diff(context, db)
+        self.attrs._u._update_diff(context, du)
+        if isinstance(self.attrs._pz, Node):
+            self.attrs._pz._update_diff(context, dpz)
+'''
+
+>>>>>>> ErrorBranch
 
 class Gru(Parametrized):
 
