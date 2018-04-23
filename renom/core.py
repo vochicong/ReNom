@@ -2115,6 +2115,7 @@ class Transpose2d(UnaryOp):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, get_gpu(dy).T, **kwargs)
 
+
 class Transpose(Node):
 
     @classmethod
