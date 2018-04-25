@@ -38,18 +38,20 @@ class gru(Node):
     def _oper_cpu(cls, x, pz, w, u, b):
 
 
+        bm.startTiming('Forward data_init')
         # Initialize Variables
         m = w.shape[1] // 3
         w_z, w_r, w_h = np.split(w, [m, m * 2, ], axis=1)
         b_z, b_r, b_h = np.split(b, [m, m * 2], axis=1)
         u_z, u_r, u_h = np.split(u, [m, m * 2], axis=1)
         hminus = Variable(np.zeros((x.shape[0], w.shape[1] // 3), dtype=precision)) if pz is None else pz
+        bm.newTiming('Forward calculation')
         # Perform Forward Calcuations
         A = dot(x, w_z) + hminus * u_z + b_z
         B = dot(x, w_r) + u_r * hminus + b_r
         C = dot(x, w_h) + sigmoid(B) * u_h * hminus + b_h
         h = sigmoid(A) + tanh(C)
-
+        bm.endTiming()
         # Store Variables for Graph
         ret = cls._create_node(h)
         ret.attrs._x = x
@@ -92,29 +94,35 @@ class gru(Node):
         get_gpu(hminus)
 
         # Perform Forward Calcuations
-        bm.startTiming('Forward calculation p1')
         input = dot(get_gpu(x),get_gpu(w)) + get_gpu(b)
+        bm.startTiming('Forward calculation GPU func')
+        ABC = get_gpu(input).empty_like_me()
+        h = get_gpu(hminus).empty_like_me()
+        cu.cugru_forward(get_gpu(input),get_gpu(hminus),get_gpu(u),get_gpu(ABC),get_gpu(h))
+
+        #bm.newTiming('Forward calculation auto func')
+        #AB = input[:,:m*2] + concat([get_gpu(hminus),get_gpu(hminus)],axis=1)*u[:,:m*2]
+        #A = AB[:,:m]
+        #v = cls._create_node(ABC)
+        #assert np.allclose(A,v[:,:m]), '{} vs {}'.format(A, v[:,:m])
+        #B = AB[:,m:m*2]
+        #assert np.allclose(B,v[:,m:m*2]), '{} vs {}'.format(B, v[:,m:m*2])
+        #sigAB = sigmoid(AB[:,:m*2])
+        #sigB = sigAB[:,m:m*2]
+        #C = input[:,m*2:m*3] + hminus*u[:,m*2:m*3]*sigB
+        #assert np.allclose(C,v[:,m*2:m*3]), '{} vs {}'.format(C, v[:,m*2:m*3])
+        #v = cls._create_node(hh)
+        #bm.newTiming('Forward calculation h')
+        #h = sigAB[:,:m] + tanh(C)
+        #assert np.allclose(h,v), '{} vs {}'.format(h,v)
+
+
         bm.endTiming()
-        bm.startTiming('Forward calculation p21')
-        AB = input[:,:m*2] + concat([get_gpu(hminus),get_gpu(hminus)],axis=1)*u[:,:m*2]
-        bm.endTiming()
-        bm.startTiming('Forward calculation p23')
-        A = input[:,:m] + hminus*u[:,:m]
-        B = input[:,m:m*2] + hminus*u[:,m:m*2]
-        A = AB[:,:m]
-        B = AB[:,m:m*2]
-        bm.endTiming()
-        bm.startTiming('Forward calculation p31')
-        sigAB = sigmoid(AB[:,:m*2])
-        sigB = sigAB[:,m:m*2]
-        bm.endTiming()
-        bm.startTiming('Forward calculation p32')
-        C = input[:,m*2:m*3] + hminus*u[:,m*2:m*3]*sigB
-        bm.endTiming()
-        bm.startTiming('Forward calculation p4')
-        h = sigAB[:,:m] + tanh(C)
-        h.to_cpu()
-        bm.endTiming()
+        abc = cls._create_node(ABC)
+        A = abc[:,:m]
+        B = abc[:,m:m*2]
+        C = abc[:,m*2:m*3]
+        sigB = sigmoid(B)
 
         # Store Variables for Graph
         ret = cls._create_node(h)
@@ -143,6 +151,7 @@ class gru(Node):
     def _backward_cpu(self, context, dy, **kwargs):
 
 
+        bm.startTiming('Backward data_init')
         x = self.attrs._x
         w_z = self.attrs._w_z
         w_r = self.attrs._w_r
@@ -156,6 +165,7 @@ class gru(Node):
         hminus = self.attrs._pz
         y = dy
 
+        bm.newTiming('Backward calculation')
         dA = sigmoid_diff(A)
         dB = sigmoid_diff(B)
         dC = tanh_diff(C)
@@ -190,6 +200,7 @@ class gru(Node):
         pz_h = y * dC * sigmoid(B) * u_h
 
         dpz = pz_z + pz_r + pz_h
+        bm.endTiming()
 
         self.attrs._x._update_diff(context, dx)
         self.attrs._w._update_diff(context, dw)
@@ -217,11 +228,8 @@ class gru(Node):
         y = get_gpu(dy)
         bm.endTiming()
 
-<<<<<<< HEAD
 
-=======
         bm.startTiming('Backward calculation')
->>>>>>> ErrorBranch
         cu.cugru_backward(A, B, C)
         dA = A
         dB = B
@@ -270,8 +278,6 @@ class gru(Node):
         self.attrs._u._update_diff(context, du)
         if isinstance(self.attrs._pz, Node):
             self.attrs._pz._update_diff(context, dpz)
-<<<<<<< HEAD
-=======
         #bm.getTimes()
         #print(bm.getTimeHist('Forward data_init p1')[0])
         #assert False
@@ -386,7 +392,6 @@ Basic Implementations
             self.attrs._pz._update_diff(context, dpz)
 '''
 
->>>>>>> ErrorBranch
 
 class Gru(Parametrized):
 

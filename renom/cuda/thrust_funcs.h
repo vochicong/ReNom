@@ -253,8 +253,8 @@ namespace renom{
             VALUE_TYPE *dot, VALUE_TYPE *dr, VALUE_TYPE *dou, VALUE_TYPE *dwc);
 
 		// Gru forward function
-		__global__ void cuda_forward_gru(VALUE_TYPE *x, VALUE_TYPE *w, VALUE_TYPE *h);
-		void thrust_forward_gru(int N, int M, VALUE_TYPE *x, VALUE_TYPE *w, VALUE_TYPE *h);
+		__global__ void cuda_forward_gru(int X, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus, VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h);
+		void thrust_forward_gru(int X, int Y, int M, VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, VALUE_TYPE *d, VALUE_TYPE *e);
 
 		// Gru backward function
 		__global__ void cuda_backward_gru(int N, int M, VALUE_TYPE *da, VALUE_TYPE *db, VALUE_TYPE *dc);

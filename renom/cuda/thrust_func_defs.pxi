@@ -142,7 +142,7 @@ cdef extern from * namespace "renom":
         (int N, int M, VALUE_TYPE *u, VALUE_TYPE *prestate, VALUE_TYPE *state, VALUE_TYPE *prefg, VALUE_TYPE *wc,\
              VALUE_TYPE *dy, VALUE_TYPE *drt, VALUE_TYPE *dot, VALUE_TYPE *dr, VALUE_TYPE *dou, VALUE_TYPE *dwc);
 
-    cdef void thrust_forward_gru(int N, int M, VALUE_TYPE *x, VALUE_TYPE *w, VALUE_TYPE *h);
+    cdef void thrust_forward_gru(int X, int Y, int M, VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, VALUE_TYPE *d, VALUE_TYPE *e);
     cdef void thrust_backward_gru(int N, int M, VALUE_TYPE *da, VALUE_TYPE *db, VALUE_TYPE *dc);
 
     cdef void thrust_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b);

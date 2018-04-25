@@ -1412,16 +1412,24 @@ namespace renom{
         }
     }
 
-    __global__ void cuda_forward_gru(VALUE_TYPE *x, VALUE_TYPE *w, VALUE_TYPE *h)
+    __global__ void cuda_forward_gru(int X, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
+                                      VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
-      h[idx] = x[idx] * w[idx];
+      if(idx < M) {
+        for (int i = 0; i < X; i++) {
+          ABC[idx + i*Y] = input[idx + i*Y] + hminus[idx + i*M] * u[idx];
+          ABC[idx+M + i*Y] = input[idx+M + i*Y] + hminus[idx + i*M] * u[idx+M]; //input[idx+M*2 + i*Y] +
+          ABC[idx+M*2 + i*Y] = input[idx+M*2 + i*Y] + hminus[idx + i*M] * u[idx+M*2] * (1.0/(1.0+exp(-ABC[idx+M + i*Y])));
+          h[idx + i*M] = (1.0/(1.0+exp(-ABC[idx + i*Y]))) + tanh(ABC[idx+M*2 + i*Y]);
+        }
+      }
     }
 
-    void thrust_forward_gru(int N, int M, VALUE_TYPE *x, VALUE_TYPE *w, VALUE_TYPE *h)
+    void thrust_forward_gru(int X, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus, VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
     {
-      int elements = N*M;
-      cuda_forward_gru <<<1,elements>>> (x, w, h);
+      int elements = X*Y;
+      cuda_forward_gru <<<elements/256+1,256>>> (X,Y,M,input,hminus,u,ABC,h);
     }
 
     __global__ void cuda_backward_gru(int N, int M, VALUE_TYPE *da, VALUE_TYPE *db, VALUE_TYPE *dc)

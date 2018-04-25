@@ -338,13 +338,16 @@ def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dot, dr, dou
                                   ptr_dy, ptr_drt, ptr_dot, ptr_dr, ptr_dou, ptr_dwc)
 
 
-def cugru_forward(x, w, h):
-    cdef int N = x.shape[0]
-    cdef int M = w.shape[1]
-    cdef VALUE_TYPE * ptr_x = < VALUE_TYPE * > < uintptr_t > x._ptr
-    cdef VALUE_TYPE * ptr_w = < VALUE_TYPE * > < uintptr_t > w._ptr
+def cugru_forward(input,hminus,u,ABC,h):
+    cdef int X = input.shape[0]
+    cdef int Y = input.shape[1]
+    cdef int M = input.shape[1] // 3
+    cdef VALUE_TYPE * ptr_input = < VALUE_TYPE * > < uintptr_t > input._ptr
+    cdef VALUE_TYPE * ptr_hminus = < VALUE_TYPE * > < uintptr_t > hminus._ptr
+    cdef VALUE_TYPE * ptr_u = < VALUE_TYPE * > < uintptr_t > u._ptr
+    cdef VALUE_TYPE * ptr_ABC = < VALUE_TYPE * > < uintptr_t > ABC._ptr
     cdef VALUE_TYPE * ptr_h = < VALUE_TYPE * > < uintptr_t > h._ptr
-    thrust_forward_gru(N, M, ptr_x, ptr_w, ptr_h)
+    thrust_forward_gru(X,Y,M,ptr_input,ptr_hminus,ptr_u,ptr_ABC,ptr_h)
 
 
 def cugru_backward(a, b, c):
