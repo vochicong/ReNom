@@ -1416,7 +1416,7 @@ namespace renom{
                                       VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
-      if(idx < M) {
+      if (idx < M) {
         for (int i = 0; i < X; i++) {
           ABC[idx + i*Y] = input[idx + i*Y] + hminus[idx + i*M] * u[idx];
           ABC[idx+M + i*Y] = input[idx+M + i*Y] + hminus[idx + i*M] * u[idx+M]; //input[idx+M*2 + i*Y] +
@@ -1432,30 +1432,23 @@ namespace renom{
       cuda_forward_gru <<<elements/256+1,256>>> (X,Y,M,input,hminus,u,ABC,h);
     }
 
-    __global__ void cuda_backward_gru(int N, int M, VALUE_TYPE *da, VALUE_TYPE *db, VALUE_TYPE *dc)
+    __global__ void cuda_backward_gru(int H, int W, int M, VALUE_TYPE *ABC, VALUE_TYPE *y, VALUE_TYPE *yc, VALUE_TYPE *u, VALUE_TYPE *hminus)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
-      int elements = N * M;
-      if(idx < elements)
-      {
-        da[idx] = 1.0/(1.0 + exp(da[idx])) * (1 - 1.0/(1.0 + exp(da[idx])));
-      }
-      else if(idx < elements*2)
-      {
-        idx -= elements;
-        db[idx] = 1.0/(1.0 + exp(db[idx])) * (1 - 1.0/(1.0 + exp(db[idx])));
-      }
-      else if(idx < elements*3)
-      {
-        idx -= elements*2;
-        dc[idx] = (1.0 - tanh(dc[idx]) * tanh(dc[idx]));
+      if (idx < M) {
+        for (int i = 0; i < H; i++) {
+          yc[idx + i * W] = y[idx + i * M] * (1.0 / (1.0+exp(-ABC[idx + i * W]))) * (1 - (1.0 / (1.0+exp(-ABC[idx + i * W]))));
+          yc[idx+M*2 + i * W] = y[idx + i * M] * (1.0 - tanh(-ABC[idx+M*2 + i * W]) * tanh(-ABC[idx+M*2 + i * W]));
+          yc[idx+M + i * W] = (1.0 / (1.0+exp(-ABC[idx+M + i * W]))) * (1 - (1.0 / (1.0+exp(-ABC[idx+M + i * W])))) \
+                              * hminus[idx + i * M] * u[idx+M*2] * yc[idx+M*2 + i * W];
+        }
       }
     }
 
-    void thrust_backward_gru(int N, int M, VALUE_TYPE *da, VALUE_TYPE *db, VALUE_TYPE *dc)
+    void thrust_backward_gru(int H, int W, int M, VALUE_TYPE *ABC, VALUE_TYPE *y, VALUE_TYPE *yc, VALUE_TYPE *u, VALUE_TYPE *hminus)
     {
-      int elements = N * M;
-      cuda_backward_gru <<<elements,256>>> (N, M, da, db, dc);
+      int elements = H * W;
+      cuda_backward_gru <<<elements/256+1,256>>> (H, W, M, ABC, y, yc, u, hminus);
 
     }
 

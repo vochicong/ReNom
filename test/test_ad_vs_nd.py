@@ -29,7 +29,6 @@ from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
 from renom.layers.function.gru import Gru, GruSimpleUnit
-from renom.layers.function.test_unit import TestUnit
 from renom.layers.function.batch_normalize import BatchNormalize,\
     BATCH_NORMALIZE_FEATUREMAP
 from renom.layers.function.lrn import Lrn
@@ -556,14 +555,14 @@ def test_verybigguys(node):#, use_gpu):
     #Variable(rand((2, 2))),
     #Variable(rand((2, 1))),
     #Variable(rand((1, 2))),
-    Variable(rand((3, 3))),
+    Variable(rand((1, 1))),
 ])
 def test_gru(node):#, use_gpu):
     node = Variable(node)
     #set_cuda_active(use_gpu)
     set_cuda_active(True)
 
-    layer1 = Gru(output_size=3)
+    layer1 = Gru(output_size=1)
 
     def func(node):
         loss = 0
@@ -583,26 +582,6 @@ def test_gru(node):#, use_gpu):
     bm.getTimes()
     print(bm.time_vars['ttimes'])
     assert False
-
-
-@pytest.mark.parametrize("node", [
-    Variable(rand((2, 2))),
-    Variable(rand((2, 1))),
-    Variable(rand((1, 2))),
-    Variable(rand((1, 1))),
-])
-def test_testunit(node, use_gpu):
-    node = Variable(node)
-    set_cuda_active(use_gpu)
-
-    unit = TestUnit(output_size=3)
-
-    def func(node):
-        return sum(unit(node))
-
-    compare(func, node, node)
-    for k in unit.params.keys():
-        compare(func, unit.params[k], node)
 
 
 @pytest.mark.parametrize("node", [

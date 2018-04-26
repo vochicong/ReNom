@@ -100,29 +100,14 @@ class gru(Node):
         h = get_gpu(hminus).empty_like_me()
         cu.cugru_forward(get_gpu(input),get_gpu(hminus),get_gpu(u),get_gpu(ABC),get_gpu(h))
 
-        #bm.newTiming('Forward calculation auto func')
-        #AB = input[:,:m*2] + concat([get_gpu(hminus),get_gpu(hminus)],axis=1)*u[:,:m*2]
-        #A = AB[:,:m]
-        #v = cls._create_node(ABC)
-        #assert np.allclose(A,v[:,:m]), '{} vs {}'.format(A, v[:,:m])
-        #B = AB[:,m:m*2]
-        #assert np.allclose(B,v[:,m:m*2]), '{} vs {}'.format(B, v[:,m:m*2])
-        #sigAB = sigmoid(AB[:,:m*2])
-        #sigB = sigAB[:,m:m*2]
-        #C = input[:,m*2:m*3] + hminus*u[:,m*2:m*3]*sigB
-        #assert np.allclose(C,v[:,m*2:m*3]), '{} vs {}'.format(C, v[:,m*2:m*3])
-        #v = cls._create_node(hh)
-        #bm.newTiming('Forward calculation h')
-        #h = sigAB[:,:m] + tanh(C)
-        #assert np.allclose(h,v), '{} vs {}'.format(h,v)
-
-
         bm.endTiming()
+        bm.startTiming('Useless data_init')
         abc = cls._create_node(ABC)
-        A = abc[:,:m]
+        A = ABC[:,:m]
         B = abc[:,m:m*2]
         C = abc[:,m*2:m*3]
         sigB = sigmoid(B)
+        bm.endTiming()
 
         # Store Variables for Graph
         ret = cls._create_node(h)
@@ -143,6 +128,7 @@ class gru(Node):
         ret.attrs._A = A
         ret.attrs._B = B
         ret.attrs._C = C
+        ret.attrs._ABC = ABC
         ret.attrs._sigB = sigB
 
         return ret
@@ -220,52 +206,55 @@ class gru(Node):
         A =         get_gpu(self.attrs._A)
         B =         get_gpu(self.attrs._B)
         C =         get_gpu(self.attrs._C)
+        b =         get_gpu(self.attrs._b)
+        u =         get_gpu(self.attrs._u)
         u_z =       get_gpu(self.attrs._u_z)
         u_h =       get_gpu(self.attrs._u_h)
         u_r =       get_gpu(self.attrs._u_r)
         sigB =      get_gpu(self.attrs._sigB)
         hminus =    get_gpu(self.attrs._pz)
+        ABC =       get_gpu(self.attrs._ABC)
         y = get_gpu(dy)
         bm.endTiming()
 
+        dx = get_gpu(x).empty_like_me()
+        yc = get_gpu(dy).empty_like_me()
+        db = get_gpu(b).empty_like_me()
+        yconc = get_gpu(ABC).empty_like_me()
 
-        bm.startTiming('Backward calculation')
-        cu.cugru_backward(A, B, C)
-        dA = A
-        dB = B
-        dC = C
+        cu.cugru_backward(ABC,y,yconc,u,hminus)
 
-
-        ydA = y * dA
-        ydC = y * dC
-        ydCBuh = ydC * dB * u_h * hminus
-
-        yconc = concat([ydA, ydCBuh, ydC],axis=1)
-
+        m = self.attrs._w_z.shape[1]
 
         # Calculate dx
+        ydA = yconc[:,:m]
+        ydB = yconc[:,m:m*2]
+        ydC = yconc[:,m*2:m*3]
+
+        bm.startTiming('Backward calculation')
+
         dx_z = get_gpu(dot(ydA, w_z.T))
-        dx_r = get_gpu(dot(ydCBuh, w_r.T))
+        dx_r = get_gpu(dot(ydB, w_r.T))
         dx_h = get_gpu(dot(ydC, w_h.T))
         dx = dx_z + dx_r + dx_h
 
         # Calculate dw
-        xconc = concat([x.T for _ in range(3)],axis=1)
-        dw = dot(xconc,yconc)
+        xconc = x.T
+        dw = get_gpu(dot(get_gpu(xconc),get_gpu(yconc)))
 
         # Calculate db
         db_z = sum(ydA, axis=0)  # , keepdims=True)
-        db_r = sum(ydCBuh, axis=0)  # , keepdims=True)
+        db_r = sum(ydB, axis=0)  # , keepdims=True)
         db_h = sum(ydC, axis=0)  # , keepdims=True)
         db = concat([db_z, db_r, db_h], axis=1)
 
         du_z = sum(ydA * hminus, axis=0)  # , keepdims=True)
-        du_r = sum(ydCBuh * hminus, axis=0)  # , keepdims=True)
+        du_r = sum(ydB * hminus, axis=0)  # , keepdims=True)
         du_h = sum(ydC * sigB * hminus, axis=0)  # , keepdims=True)
         du = concat([du_z, du_r, du_h], axis=1)
 
         pz_z = ydA * u_z
-        pz_r = ydCBuh * u_r
+        pz_r = ydB * u_r
         pz_h = ydC * sigB * u_h
 
         dpz = pz_z + pz_r + pz_h
