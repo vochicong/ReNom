@@ -914,11 +914,11 @@ class Node(np.ndarray):
         q = collections.deque([args])
         while q:
             a = q.pop()
-            if isinstance(a,Node):
+            if isinstance(a, Node):
                 self._args.append(a)
-            elif isinstance(a,list) or isinstance(a,tuple):
+            elif isinstance(a, list) or isinstance(a, tuple):
                 q.extend(a)
-            elif isinstance(a,dict):
+            elif isinstance(a, dict):
                 q.extend(a.values())
         self._args.extend(a for a in kwargs.values() if isinstance(a, Node))
         self._reduce_graph()
