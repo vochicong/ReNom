@@ -47,7 +47,7 @@ class Grads:
         self._refcounts = collections.Counter()
         self._backwards = collections.Counter()
 
-        q = collections.deque(root._args)
+        q = collections.deque([root])
 
         while q:
             t = q.pop()
@@ -910,7 +910,16 @@ class Node(np.ndarray):
 
     def __init__(self, *args, **kwargs):
         self.setflags(write=False)
-        self._args = [a for a in args if isinstance(a, Node)]
+        self._args = []
+        q = collections.deque([args])
+        while q:
+            a = q.pop()
+            if isinstance(a, Node):
+                self._args.append(a)
+            elif isinstance(a, list) or isinstance(a, tuple):
+                q.extend(a)
+            elif isinstance(a, dict):
+                q.extend(a.values())
         self._args.extend(a for a in kwargs.values() if isinstance(a, Node))
         self._reduce_graph()
         return
