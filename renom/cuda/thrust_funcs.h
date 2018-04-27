@@ -69,10 +69,10 @@ namespace renom{
 	void thrust_forward_roi_pool2d(int N, VALUE_TYPE *x, float spatial_scale, int channels, int height, int width, int outh, int outw, VALUE_TYPE *rois, VALUE_TYPE *z, VALUE_TYPE *argmax_data);
 
     __global__ void cuda_backward_roi_pool2d(int N, VALUE_TYPE *du, VALUE_TYPE *argmax, VALUE_TYPE *rois, float spatial_scale,
-                                        int channels, int height, int width, int outh,
+                                        int batch_N, int channels, int height, int width, int outh,
                                         int outw, VALUE_TYPE *dx);
     void thrust_backward_roi_pool2d(int N, VALUE_TYPE *du, VALUE_TYPE *argmax, VALUE_TYPE *rois, float spatial_scale,
-                                        int channels, int height, int width, int outh,
+                                        int batch_N, int channels, int height, int width, int outh,
                                         int outw, VALUE_TYPE *dx);
 
     // Fill

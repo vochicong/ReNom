@@ -1207,19 +1207,21 @@ namespace renom{
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
         if(idx >= (N*channels*outw*outh)) return;
-        int pw = idx % outw;   //idxw
-        int ph = (idx / outw) % outh;  //idxh
-        int c = (idx/outw/outh) % channels;
-        int num = idx/outw/outh/channels;
 
-        int roi_batch_idx = rois[num * 5 + 0];
+        int pw = idx % outw;            // idxw
+        int ph = (idx / outw) % outh;   // idxh
+        int c = (idx/outw/outh) % channels;
+        int num = idx/outw/outh/channels; // nth roi
+
+        int roi_batch_idx = rois[num * 5 + 0]; // one set is (id, xmin, ymin, xmax, ymax)
         int roi_start_w = round(rois[num * 5 + 1] * spatial_scale);  //xmin
         int roi_start_h = round(rois[num * 5 + 2] * spatial_scale);  //ymin
         int roi_end_w = round(rois[num * 5 + 3] * spatial_scale); //xmax
         int roi_end_h = round(rois[num * 5 + 4] * spatial_scale); //ymax
 
-        int roi_width = max(roi_end_w - roi_start_w + 1, 1);
+        int roi_width = max(roi_end_w - roi_start_w + 1, 1); // To avoid rounding 0.
         int roi_height = max(roi_end_h - roi_start_h + 1, 1);
+
         float bin_size_h = static_cast<float>(roi_height) / static_cast<float>(outh); // strideh
         float bin_size_w = static_cast<float>(roi_width) / static_cast<float>(outw);  // stridew
 
@@ -1227,8 +1229,10 @@ namespace renom{
         int wstart = static_cast<int>(floor(static_cast<float>(pw)*bin_size_w));
         int hend = static_cast<int>(ceil(static_cast<float>(ph+1)*bin_size_h));
         int wend = static_cast<int>(ceil(static_cast<float>(pw+1)*bin_size_w));
+
         float maxval = -1E+37;
         int maxidx = -1;
+
         hstart = min(max(hstart + roi_start_h, 0), height);
         hend = min(max(hend + roi_start_h, 0), height);
         wstart = min(max(wstart + roi_start_w, 0), width);
@@ -1248,7 +1252,6 @@ namespace renom{
                         maxval = x[data_offset + bottom_idx];
                         maxidx = bottom_idx;
                     }
-
                 }
             }
         }
@@ -1265,11 +1268,12 @@ namespace renom{
     }
 
 
-    __global__ void cuda_backward_roi_pool2d(int N, VALUE_TYPE *du ,VALUE_TYPE *argmax, VALUE_TYPE *rois, float spatial_scale, int channels, int height, 
-                                            int width, int outh, int outw, VALUE_TYPE *dx)
+    __global__ void cuda_backward_roi_pool2d(int N, VALUE_TYPE *du ,VALUE_TYPE *argmax, VALUE_TYPE *rois, float spatial_scale, 
+                                            int batch_N, int channels, int height, int width, int outh, int outw, VALUE_TYPE *dx)
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
-        if(idx >= (N*channels*outw*outh)) return;
+        if(idx >= (batch_N*channels*height*width)) return;
+
         int w = idx % width;
         int h = (idx / width) % height;
         int c = (idx / (width * height)) % channels;
@@ -1281,6 +1285,7 @@ namespace renom{
                 continue;
             }
 
+            int roi_batch_idx = rois[roi_n*5 + 0]; // one set is (id, xmin, ymin, xmax, ymax)
             int roi_start_w = round(rois[roi_n*5 + 1]*spatial_scale);
             int roi_start_h = round(rois[roi_n*5 + 2]*spatial_scale);
             int roi_end_w = round(rois[roi_n*5 + 3]*spatial_scale);
@@ -1288,6 +1293,7 @@ namespace renom{
 
             const bool in_roi = (w >= roi_start_w && w <= roi_end_w &&
                                     h >= roi_start_h && h <= roi_end_h);
+
             if (!in_roi){
                 continue;
             }
@@ -1323,10 +1329,10 @@ namespace renom{
     }
 
     void thrust_backward_roi_pool2d(int N, VALUE_TYPE *du ,VALUE_TYPE *argmax, VALUE_TYPE *rois,
-                                        float spatial_scale, int channels, int height, int width, int outh,
+                                        float spatial_scale, int batch_N, int channels, int height, int width, int outh,
                                         int outw, VALUE_TYPE *dx)
     {
-        cuda_backward_roi_pool2d <<<ceil((N*channels*height*width)/256.0), 256>>>(N, du, argmax, rois, spatial_scale, channels, height,
+        cuda_backward_roi_pool2d <<<ceil((batch_N*channels*height*width)/256.0), 256>>>(N, du, argmax, rois, spatial_scale, batch_N, channels, height,
                                                                                 width, outh, outw, dx);
     }
 

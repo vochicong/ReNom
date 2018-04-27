@@ -2,12 +2,14 @@
 import numpy as np
 from renom.core import precision, to_value
 
+
 def out_size(size, k, s, p):
     return ((np.array(size) + np.array(p) * 2 - np.array(k)) // np.array(s) + 1).astype(np.int)
 
 
 def transpose_out_size(size, k, s, p):
     return (np.array(s) * (np.array(size) - 1) + np.array(k) - 2 * np.array(p)).astype(np.int)
+
 
 def im2col(img, size, kernel, stride, padding, padwith=0.):
     N, channel, in_h, in_w = img.shape
@@ -47,6 +49,7 @@ def col2im(col, size, stride, padding):
 def tuplize(x):
     return x if isinstance(x, tuple) else (x, x)
 
+
 def roi_pooling_slice(size, stride, max_size, roi_offset):
     start = int(np.floor(size*stride))
     end = int(np.ceil((size+1)*stride))
@@ -55,6 +58,7 @@ def roi_pooling_slice(size, stride, max_size, roi_offset):
     end = min(max((end + roi_offset), 0), max_size)
 
     return slice(start, end), end-start
+
 
 def roi_pooling_slice_decode(size, stride, out_size, roi_offset):
     start = int(np.floor(float(size - roi_offset)/stride))
@@ -73,4 +77,3 @@ def region_cordinates(roi, spatial_scale):
     xmax = int(round(xmax * spatial_scale))
     ymax = int(round(ymax * spatial_scale))
     return idx, xmin, ymin, xmax, ymax
-

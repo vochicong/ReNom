@@ -136,7 +136,7 @@ cdef extern from * namespace "renom":
                                         int outw, VALUE_TYPE *rois, VALUE_TYPE *z,
                                         VALUE_TYPE *argmax_data);
     cdef void thrust_backward_roi_pool2d(int N, VALUE_TYPE *du, VALUE_TYPE *argmax, VALUE_TYPE *rois, float spatial_scale,
-                                        int channels, int height, int width, int outh,
+                                        int batch_N, int channels, int height, int width, int outh,
                                         int outw, VALUE_TYPE *dx);
     cdef void thrust_forward_lstm_activate(int N, int M, VALUE_TYPE *u);
     cdef void thrust_forward_lstm(int N, int M, VALUE_TYPE *u, VALUE_TYPE *s, VALUE_TYPE *ps, VALUE_TYPE *z);

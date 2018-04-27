@@ -384,6 +384,8 @@ class log(UnaryOp):
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, dy / get_gpu(self.attrs._arg), **kwargs)
+
+
 class exp(UnaryOp):
     """
     Exponential operation.
@@ -409,33 +411,6 @@ class exp(UnaryOp):
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, dy * get_gpu(self), **kwargs)
-
-class sign(UnaryOp):
-    """
-    Sign operation
-
-    Args:
-        arg (Variable, ndarray): Input array.
-    """
-
-    @classmethod
-    def _oper_cpu(cls, arg):
-        return np.sign(arg)
-
-    @classmethod
-    def _oper_gpu(cls, arg):
-        ret = get_gpu(arg).empty_like_me()
-        cusign(get_gpu(arg), ret)
-        return ret
-
-    #def _backward_cpu(self, context, dy, **kwargs):
-    #    if isinstance(self.attrs._lhs, Node):
-    #        zero = np.zeros_like(np.array(self.attrs._lhs))
-   #         self.attrs._lhs._update_diff(context, zero, **kwargs)
-   # def _backward_gpu(self, context, dy, **kwargs):
-   #     if isinstance(self.attrs._lhs, Node):
-   #         zero = get_gpu(self.attrs._lhs, Node)
-   #         self.attrs._lhs._update_diff(context, zero, **kwargs)
 
 
 class amin(Amin):

@@ -1395,6 +1395,7 @@ class UnaryOp(Node):
         ret.attrs._arg = arg
         return ret
 
+
 class Transpose(UnaryOp):
     @classmethod
     def _oper_cpu(cls, arg):
@@ -2055,6 +2056,7 @@ class GetItem(BinOp):
             zero[self.attrs._rhs] = dy
             self.attrs._lhs._update_diff(context, zero, **kwargs)
 
+
 class GetFgAry(Node):
     @classmethod
     def _oper_cpu(cls, arg):
@@ -2067,7 +2069,7 @@ class GetFgAry(Node):
         arg = get_gpu(arg)
         cu_get_fg_ary_forward(arg, fg_ary)
         return fg_ary
-    
+
     def __new__(cls, arg):
         value = cls.calc_value(arg)
         ret = super(GetFgAry, cls).__new__(cls, value)
@@ -2086,6 +2088,7 @@ class GetFgAry(Node):
             cu_get_fg_ary_backward(dy, zero)
             self.attrs._arg._update_diff(context, zero, **kwargs)
 
+
 class GetIthAry(Node):
     @classmethod
     def _oper_cpu(cls, arg, i):
@@ -2098,7 +2101,7 @@ class GetIthAry(Node):
         arg = get_gpu(arg)
         cu_get_ith_ary_forward(arg, ith_ary, i)
         return ith_ary
-    
+
     def __new__(cls, arg, i):
         value = cls.calc_value(arg, i)
         ret = super(GetIthAry, cls).__new__(cls, value)
@@ -2118,6 +2121,7 @@ class GetIthAry(Node):
             cu_get_ith_ary_backward(dy, zero, self.attrs._index)
             self.attrs._arg._update_diff(context, zero, **kwargs)
 
+
 class GetNthAry(Node):
     def __new__(cls, arg, i, j):
         value = cls.calc_value(arg, i, j)
@@ -2130,6 +2134,7 @@ class GetNthAry(Node):
         arg = get_gpu(arg)
         cu_get_every_nth_ary(arg, ary, i, j)
         return ary
+
 
 class GetSlice(Node):
     @classmethod
@@ -2156,6 +2161,7 @@ class GetSlice(Node):
     def _backward_gpu(self, context, dy, **kwargs):
         self._backward_cpu(context, dy, **kwargs)
 
+
 class AssignPredBox(Node):
     def __new__(cls, arg, x, y, h, w):
         ary = GPUValue(shape=arg.shape)
@@ -2166,11 +2172,13 @@ class AssignPredBox(Node):
         value = cls.calc_value(ary, x, y, h, w)
         ret = super(AssignPredBox, cls).__new__(cls, value)
         return ret
-    
+
     @classmethod
     def _oper_gpu(cls, ary, x, y, h, w):
         cu_assign_pred_box(x, y, h, w, ary)
         return ary
+
+
 class PredCtr(Node):
     def __new__(cls, arg, length, ctr):
         ary = GPUValue(shape=arg.shape)
@@ -2186,6 +2194,7 @@ class PredCtr(Node):
         cu_pred_ctr(arg, length, ctr, ary)
         return ary
 
+
 class GetIthBbox(Node):
     def __new__(cls, arg, i):
         arg = get_gpu(arg)
@@ -2198,6 +2207,7 @@ class GetIthBbox(Node):
     def _oper_gpu(cls, arg, i, ary):
         cu_get_ith_bbox(arg, i, ary)
         return ary
+
 
 class Reshape(Node):
 

@@ -6,7 +6,9 @@ from renom.core import Node, GPUValue, to_value, get_gpu
 from renom.layers.function.utils import roi_pooling_slice, region_cordinates, roi_pooling_slice_decode
 import renom.cuda as cu
 
+
 class roi_pool2d(Node):
+
     def __new__(cls, x, rois, outh=7, outw=7, spatial_scale=1/16.):
         ch, h, w = x.shape[1:]
         n_rois = rois.shape[0]
@@ -26,11 +28,11 @@ class roi_pool2d(Node):
 
             for idx_h in range(outh):
                 sliceh, lenh = roi_pooling_slice(idx_h, strideh, h, ymin)
-                if sliceh.stop <= sliceh.start:
+                if lenh <= 0:
                     continue
                 for idx_w in range(outw):
                     slicew, lenw = roi_pooling_slice(idx_w, stridew, w, xmin)
-                    if slicew.stop <= slicew.start:
+                    if lenw <= 0:
                         continue
                     roi_data = x[int(idx), :, sliceh, slicew].reshape(ch, -1)
                     z[i_roi, :, idx_h, idx_w] = np.max(roi_data, axis=1)
@@ -53,7 +55,8 @@ class roi_pool2d(Node):
         z = GPUValue(shape=(n_rois, ch, outh, outw))
         argmax_data = z.empty_like_me()
         rois = get_gpu(rois)
-        cu.curoi_pool2d_forward(rois, get_gpu(x), spatial_scale, ch, h, w, outh, outw, z, argmax_data)
+        cu.curoi_pool2d_forward(rois, get_gpu(x), spatial_scale, ch,
+                                h, w, outh, outw, z, argmax_data)
         ret = cls._create_node(z)
         ret.attrs._index = argmax_data
         ret.attrs._x = x
@@ -63,14 +66,11 @@ class roi_pool2d(Node):
         ret.attrs._spatial_scale = spatial_scale
         return ret
 
-
-
-
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
             ch, h, w = self.attrs._x.shape[1:]
             n_rois = self.attrs._rois.shape[0]
-            dx = np.zeros(self.attrs._x.shape, np.float64)
+            dx = np.zeros_like(self.attrs._x)
 
             for i_roi in range(n_rois):
                 idx, xmin, ymin, xmax, ymax = region_cordinates(self.attrs._rois[i_roi],
@@ -82,8 +82,10 @@ class roi_pool2d(Node):
                 stride_w = float(roi_width) / float(self.attrs._outw)
                 for idx_h in range(ymin, ymax+1):
                     for idx_w in range(xmin, xmax+1):
-                        start_w, end_w = roi_pooling_slice_decode(idx_w, stride_w, self.attrs._outw, xmin)
-                        start_h, end_h = roi_pooling_slice_decode(idx_h, stride_h, self.attrs._outh, ymin)
+                        start_w, end_w = roi_pooling_slice_decode(
+                            idx_w, stride_w, self.attrs._outw, xmin)
+                        start_h, end_h = roi_pooling_slice_decode(
+                            idx_h, stride_h, self.attrs._outh, ymin)
 
                         for ph in range(start_h, end_h):
                             for pw in range(start_w, end_w):
@@ -91,15 +93,16 @@ class roi_pool2d(Node):
                                 for c in range(ch):
                                     if max_idx_tmp[c] == (idx_h * w + idx_w):
                                         dx[idx, c, idx_h, idx_w] += dy[i_roi, c, ph, pw]
+
         self.attrs._x._update_diff(context, dx, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
             ch, h, w = self.attrs._x.shape[1:]
-            dx = GPUValue(shape=(self.attrs._x.shape))
-            cu.curoi_pool2d_backward(get_gpu(dy), self.attrs._index, self.attrs._rois, self.attrs._spatial_scale, ch, h, w, self.attrs._outh, self.attrs._outw, dx)
-        self.attrs._x._update_diff(context, dx, **kwargs)
-
+            dx = GPUValue(shape=self.attrs._x.shape)
+            cu.curoi_pool2d_backward(get_gpu(dy), self.attrs._index, self.attrs._rois,
+                                     self.attrs._spatial_scale, ch, h, w, self.attrs._outh, self.attrs._outw, dx)
+            self.attrs._x._update_diff(context, dx, **kwargs)
 
 
 class RoiPoolBase(object):
@@ -107,9 +110,9 @@ class RoiPoolBase(object):
         self.outw = outw
         self.outh = outh
         self.spatial_scale = spatial_scale
+
     def __call__(self, x, rois):
         return self.forward(x, rois)
-
 
 
 class RoiPool2d(RoiPoolBase):

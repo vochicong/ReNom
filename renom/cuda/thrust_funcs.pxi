@@ -53,7 +53,7 @@ def culeaky_leru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def culeaky_leru_backward(s, gpu_value1, gpu_value2):
@@ -62,7 +62,7 @@ def culeaky_leru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_forward(s, gpu_value1, gpu_value2):
@@ -71,7 +71,7 @@ def cueru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_backward(s, gpu_value1, gpu_value2):
@@ -80,7 +80,7 @@ def cueru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cusigmoid(gpu_value1, gpu_value2):
@@ -221,12 +221,14 @@ def cusqrt(gpu_value1, gpu_value2):
     cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_sqrt(ptr1, ptr2, size)
 
+
 def cusign(gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
-    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > <uintptr_t > gpu_value1._ptr
-    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > <uintptr_t > gpu_value2._ptr
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
     cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_sign(ptr1, ptr2, size)
+
 
 def cucross_entropy(gpu_value1, gpu_value2, gpu_value3):
     cdef int size = <int > gpu_value1.size
@@ -277,22 +279,26 @@ def cumax(value, gpu_value1, gpu_value2=None):
 
 
 def curoi_pool2d_forward(rois, x, spatial_scale, channels, height,
-                        width, outh, outw, z, augmax_data):
+                         width, outh, outw, z, augmax_data):
     cdef int N = rois.shape[0]
-    cdef VALUE_TYPE * ptr_x = <VALUE_TYPE * > < uintptr_t> x._ptr
-    cdef VALUE_TYPE * ptr_rois = <VALUE_TYPE  *> < uintptr_t> rois._ptr
-    cdef VALUE_TYPE * ptr_z = <VALUE_TYPE * > < uintptr_t> z._ptr
-    cdef VALUE_TYPE * ptr_augmax_data = <VALUE_TYPE * > < uintptr_t> augmax_data._ptr
-    thrust_forward_roi_pool2d(N, ptr_x, spatial_scale, channels, height, width, outh, outw, ptr_rois, ptr_z, ptr_augmax_data)
+    cdef VALUE_TYPE * ptr_x = <VALUE_TYPE * > < uintptr_t > x._ptr
+    cdef VALUE_TYPE * ptr_rois = <VALUE_TYPE * > < uintptr_t > rois._ptr
+    cdef VALUE_TYPE * ptr_z = <VALUE_TYPE * > < uintptr_t > z._ptr
+    cdef VALUE_TYPE * ptr_augmax_data = <VALUE_TYPE * > < uintptr_t > augmax_data._ptr
+    thrust_forward_roi_pool2d(N, ptr_x, spatial_scale, channels, height,
+                              width, outh, outw, ptr_rois, ptr_z, ptr_augmax_data)
+
 
 def curoi_pool2d_backward(du, argmax, rois, spatial_scale, ch, h, w, outh, outw, dx):
-    cdef int N = rois.shape[0]
+    cdef int roi_N = rois.shape[0]
+    cdef int batch_N = dx.shape[0]
+    cdef VALUE_TYPE * ptr_du = <VALUE_TYPE * > < uintptr_t > du._ptr
+    cdef VALUE_TYPE * ptr_argmax = <VALUE_TYPE * > < uintptr_t > argmax._ptr
+    cdef VALUE_TYPE * ptr_rois = <VALUE_TYPE * > < uintptr_t > rois._ptr
+    cdef VALUE_TYPE * ptr_dx = <VALUE_TYPE * > < uintptr_t > dx._ptr
+    thrust_backward_roi_pool2d(roi_N, ptr_du, ptr_argmax, ptr_rois,
+                               spatial_scale, batch_N, ch, h, w, outh, outw, ptr_dx)
 
-    cdef VALUE_TYPE * ptr_du = <VALUE_TYPE *> < uintptr_t> du._ptr
-    cdef VALUE_TYPE * ptr_argmax = <VALUE_TYPE * > < uintptr_t> argmax._ptr
-    cdef VALUE_TYPE * ptr_rois = <VALUE_TYPE  *> < uintptr_t> rois._ptr
-    cdef VALUE_TYPE * ptr_dx = <VALUE_TYPE * > < uintptr_t> dx._ptr
-    thrust_backward_roi_pool2d(N, ptr_du, ptr_argmax, ptr_rois, spatial_scale, ch, h, w, outh, outw, ptr_dx)
 
 def culstm_forward_activate(u):
     cdef int N = u.shape[0]
@@ -734,79 +740,91 @@ def cu_add_bias(bias, gpu_value):
     cdef int n = <int > gpu_value.shape[0]
     thrust_add_bias(size, n, wh, ptr1, ptr2)
 
+
 def cu_get_fg_ary_forward(ary, fg_ary):
     N = ary.shape[0] * ary.shape[1] * ary.shape[2] * ary.shape[3] * ary.shape[4]
     M = ary.shape[3] * ary.shape[4]
-    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > <uintptr_t > ary._ptr
-    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > <uintptr_t > fg_ary._ptr
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > ary._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > fg_ary._ptr
     thrust_get_fg_ary_forward(N, M, ptr1, ptr2)
+
 
 def cu_get_fg_ary_backward(du, zero):
     N = zero.shape[0] * zero.shape[1] * zero.shape[2] * zero.shape[3] * zero.shape[4]
     M = du.shape[3] * du.shape[4]
-    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > <uintptr_t > du._ptr
-    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > <uintptr_t > zero._ptr
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > du._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > zero._ptr
     thrust_get_fg_ary_forward(N, M, ptr1, ptr2)
+
 
 def cu_get_ith_ary_forward(ary, ith_ary, i):
     N = ary.size
     M = ary.size / ary.shape[0]
-    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > <uintptr_t > ary._ptr
-    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > <uintptr_t > ith_ary._ptr
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > ary._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > ith_ary._ptr
     thrust_get_ith_ary_forward(N, M, i, ptr1, ptr2)
+
 
 def cu_get_ith_ary_backward(du, zero, i):
     N = zero.size
     M = zero.size / zero.shape[0]
-    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > <uintptr_t > du._ptr
-    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > <uintptr_t > zero._ptr
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > du._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > zero._ptr
     thrust_get_ith_ary_forward(N, M, i, ptr1, ptr2)
+
 
 def cu_get_every_nth_ary(ary1, ary2, i, j):
     N = ary1.shape[0]
     M = ary1.shape[1]
-    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > <uintptr_t > ary1._ptr
-    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > <uintptr_t > ary2._ptr
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > ary1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > ary2._ptr
     thrust_get_nth_ary(N, M, i, j, ptr1, ptr2)
+
 
 def cu_assign_pred_box(x, y, w, h, ary):
     N, M = ary.shape
-    cdef VALUE_TYPE * ary_ptr = <VALUE_TYPE *> <uintptr_t> ary._ptr
-    cdef VALUE_TYPE * x_ptr = <VALUE_TYPE *> <uintptr_t> x._ptr
-    cdef VALUE_TYPE * y_ptr = <VALUE_TYPE *> <uintptr_t> y._ptr
-    cdef VALUE_TYPE * h_ptr = <VALUE_TYPE *> <uintptr_t> h._ptr
-    cdef VALUE_TYPE * w_ptr = <VALUE_TYPE *> <uintptr_t> w._ptr
+    cdef VALUE_TYPE * ary_ptr = <VALUE_TYPE * > < uintptr_t > ary._ptr
+    cdef VALUE_TYPE * x_ptr = <VALUE_TYPE * > < uintptr_t > x._ptr
+    cdef VALUE_TYPE * y_ptr = <VALUE_TYPE * > < uintptr_t > y._ptr
+    cdef VALUE_TYPE * h_ptr = <VALUE_TYPE * > < uintptr_t > h._ptr
+    cdef VALUE_TYPE * w_ptr = <VALUE_TYPE * > < uintptr_t > w._ptr
     thrust_assign_pred_box(N, M, x_ptr, y_ptr, h_ptr, w_ptr, ary_ptr)
+
 
 def cu_pred_ctr(arg, length, ctr, ary):
     N, M = ary.shape
-    cdef VALUE_TYPE *arg_ptr = <VALUE_TYPE *><uintptr_t> arg._ptr
-    cdef VALUE_TYPE *length_ptr = <VALUE_TYPE *><uintptr_t> length._ptr
-    cdef VALUE_TYPE *ctr_ptr = <VALUE_TYPE *><uintptr_t> ctr._ptr
-    cdef VALUE_TYPE *ary_ptr = <VALUE_TYPE *><uintptr_t> ary._ptr
+    cdef VALUE_TYPE * arg_ptr = <VALUE_TYPE * > < uintptr_t > arg._ptr
+    cdef VALUE_TYPE * length_ptr = <VALUE_TYPE * > < uintptr_t > length._ptr
+    cdef VALUE_TYPE * ctr_ptr = <VALUE_TYPE * > < uintptr_t > ctr._ptr
+    cdef VALUE_TYPE * ary_ptr = <VALUE_TYPE * > < uintptr_t > ary._ptr
     thrust_pred_ctr(N, M, arg_ptr, length_ptr, ctr_ptr, ary_ptr)
+
 
 def cu_generate_anchors(shifts, base_size, ratios, scales, feat_stride, anchors):
     K, A, N = anchors.shape
     scale_size = scales.shape[0]
     ratio_size = ratios.shape[0]
-    cdef VALUE_TYPE * shifts_ptr = <VALUE_TYPE *><uintptr_t> shifts._ptr
-    cdef VALUE_TYPE * ratios_ptr = <VALUE_TYPE *><uintptr_t> ratios._ptr
-    cdef VALUE_TYPE * scales_ptr = <VALUE_TYPE *><uintptr_t> scales._ptr
-    cdef VALUE_TYPE * anchors_ptr = <VALUE_TYPE *><uintptr_t> anchors._ptr
-    thrust_generate_anchors(A, K, N, shifts_ptr, ratios_ptr, scales_ptr, ratio_size, scale_size, feat_stride, base_size, anchors_ptr)
+    cdef VALUE_TYPE * shifts_ptr = <VALUE_TYPE * > < uintptr_t > shifts._ptr
+    cdef VALUE_TYPE * ratios_ptr = <VALUE_TYPE * > < uintptr_t > ratios._ptr
+    cdef VALUE_TYPE * scales_ptr = <VALUE_TYPE * > < uintptr_t > scales._ptr
+    cdef VALUE_TYPE * anchors_ptr = <VALUE_TYPE * > < uintptr_t > anchors._ptr
+    thrust_generate_anchors(A, K, N, shifts_ptr, ratios_ptr, scales_ptr,
+                            ratio_size, scale_size, feat_stride, base_size, anchors_ptr)
+
 
 def cu_get_ith_bbox(bbox, i, ary):
     N, M = bbox.shape
-    cdef VALUE_TYPE * bbox_ptr = <VALUE_TYPE *><uintptr_t> bbox._ptr
-    cdef VALUE_TYPE * ary_ptr = <VALUE_TYPE *><uintptr_t> ary._ptr
+    cdef VALUE_TYPE * bbox_ptr = <VALUE_TYPE * > < uintptr_t > bbox._ptr
+    cdef VALUE_TYPE * ary_ptr = <VALUE_TYPE * > < uintptr_t > ary._ptr
     thrust_get_ith_bbox(N, M, bbox_ptr, i, ary_ptr)
+
 
 def cu_clip_roi(roi, start, end, step, min_v, max_v, ary):
     N, M = roi.shape
-    cdef VALUE_TYPE * roi_ptr = <VALUE_TYPE *><uintptr_t> roi._ptr
-    cdef VALUE_TYPE * ary_ptr = <VALUE_TYPE *><uintptr_t> ary._ptr
+    cdef VALUE_TYPE * roi_ptr = <VALUE_TYPE * > < uintptr_t > roi._ptr
+    cdef VALUE_TYPE * ary_ptr = <VALUE_TYPE * > < uintptr_t > ary._ptr
     thrust_clip_roi(N, M, roi_ptr, start, end, step, min_v, max_v, ary_ptr)
+
 
 def cu_transpose(gpu_value1, axis):
     strides = [np.prod(gpu_value1.shape[i + 1:], dtype='int') for i in range(len(gpu_value1.shape))]
@@ -869,7 +887,7 @@ def cu_get_item(gpu_value1, size, dest_size, slices):
     cdef VALUE_TYPE * ptr_result = <VALUE_TYPE * > < uintptr_t > result._ptr
 
     cdef getitem_slice_infos infos
-    _build_slice_infos(& infos, slices)
+    _build_slice_infos( & infos, slices)
 
     cdef getitem_slice_info * info
 
@@ -894,7 +912,7 @@ def cu_set_item(value, valuesize, gpu_value1, slices, strides, broadcasted_strid
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
 
     cdef getitem_slice_infos infos
-    _build_slice_infos(& infos, slices)
+    _build_slice_infos( & infos, slices)
 
     infos.stride_size = len(strides)
     for i, (s, b) in enumerate(zip(strides, broadcasted_strides)):
@@ -902,6 +920,7 @@ def cu_set_item(value, valuesize, gpu_value1, slices, strides, broadcasted_strid
         infos.broadcasted_strides[i] = b
 
     thrust_setitem(ptr1, valuesize, ptr2, & infos)
+
 
 def cu_nms(bbox, thresh):
     N = bbox.shape[0]

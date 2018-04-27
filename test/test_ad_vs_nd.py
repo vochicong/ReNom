@@ -26,6 +26,7 @@ from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
 from renom.layers.function.deconv2d import Deconv2d
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
+from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
 from renom.layers.function.batch_normalize import BatchNormalize,\
@@ -465,27 +466,24 @@ def test_max_pool2d(node, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
 
-<<<<<<< HEAD
+
 @pytest.mark.parametrize("node, rois", [
-    [Variable(rand((3, 3, 12, 8))), Variable(np.array([
-            [0, 1, 1, 6, 6],
-            [2, 6, 2, 7, 11],
-            [1, 3, 1, 5, 10],
-            [0, 3, 3, 3, 3]
-        ], dtype=np.float64))]
+    [Variable(rand((3, 3, 8, 13))*10), Variable(np.array([
+        [0, 1, 1, 6, 6],
+        [2, 6, 2, 7, 11],
+        [1, 3, 1, 5, 10],
+        [0, 3, 3, 3, 3]
+    ], dtype=np.float64))]
 ])
 def test_roi_pool2d(node, rois,  use_gpu):
+    set_cuda_active(use_gpu)
     node = Variable(node)
-    rois = Variable(rois)
     layer = RoiPool2d(outh=7, outw=5, spatial_scale=0.6)
 
     def func(node, rois):
         return sum(layer(node, rois))
     compare(func, node, node, rois)
 
-
-=======
->>>>>>> fd7a59bef484a9b8e70e9ee748dcc63451c0250a
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
@@ -802,16 +800,6 @@ def test_exp(node, use_gpu):
         return sum(rm.exp(node))
     compare(func, node, node)
 
-<<<<<<< HEAD
-@pytest.mark.parametrize("node", [
-    Variable(rand((2, 2))),
-    Variable(rand((2, 2, 1, 1))),
-    Variable(rand((1, 2))),
-    Variable(rand((2, 0))),
-    Variable(rand((1,))),
-])
-def test_sign(node, use_gpu):
-=======
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
@@ -892,21 +880,12 @@ def test_reshape(node, shape, use_gpu):
     Variable(rand((1,))),
 ])
 def test_T(node, use_gpu):
->>>>>>> fd7a59bef484a9b8e70e9ee748dcc63451c0250a
     node = Variable(node)
     set_cuda_active(use_gpu)
 
     def func(node):
-<<<<<<< HEAD
-        return sum(rm.sign(node))
-    compare(func, node, node)
-
-=======
         return sum(node.T)
     compare(func, node, node)
-<<<<<<< HEAD
->>>>>>> fd7a59bef484a9b8e70e9ee748dcc63451c0250a
-=======
 
 
 @pytest.mark.parametrize("node, axis", [
@@ -949,4 +928,3 @@ def test_min(node, axis, use_gpu):
     def func(node):
         return sum(rm.amin(node, axis))
     compare(func, node, node)
->>>>>>> 6474518e0169065117050f8246f9c8bcbf4e3d20

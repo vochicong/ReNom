@@ -8,6 +8,7 @@ def non_maximum_suppression(bbox, thresh, score=None, limit=None):
     else:
         return non_maximum_suppression_cpu()
 
+
 def non_maximum_suppression_gpu(bbox, thresh, score=None, limit=None):
     if len(bbox) == 0:
         return np.zeros((0,))
@@ -19,6 +20,7 @@ def non_maximum_suppression_gpu(bbox, thresh, score=None, limit=None):
 
     bbox = bbox[order, :]
     selec, n_selec = cu_call_nms_kernel(bbox, thresh)
+
 
 def non_maximum_suppression_cpu(bbox, thresh, score=None, limit=None):
     if len(bbox) == 0:
@@ -44,9 +46,8 @@ def non_maximum_suppression_cpu(bbox, thresh, score=None, limit=None):
         selec[True]
         if limit is not None and np.count_nonzero(selec) >= limit:
             break
-        
+
     selec = np.where(selec)[0]
     if score is not None:
         selec = order[selec]
     return selec.astype(np.int32)
-
