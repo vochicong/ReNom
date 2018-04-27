@@ -47,7 +47,7 @@ class Grads:
         self._refcounts = collections.Counter()
         self._backwards = collections.Counter()
 
-        q = collections.deque(root._args)
+        q = collections.deque([root])
 
         while q:
             t = q.pop()
@@ -499,8 +499,13 @@ def _build_broadcast_mask(left, right):
 
 class GPUValue(object):
     ACTIVE_GPU = None
+    _ptr = None
 
     def __init__(self, array=None, shape=None, ptr=None, dtype=None):
+        if not is_cuda_active():
+            raise ValueError('Cuda is not active. '
+                             'Use renom.cuda.set_cuda_active() to activate.')
+
         if shape is not None:
             self.shape = tuple(shape)
         else:
@@ -905,7 +910,16 @@ class Node(np.ndarray):
 
     def __init__(self, *args, **kwargs):
         self.setflags(write=False)
-        self._args = [a for a in args if isinstance(a, Node)]
+        self._args = []
+        q = collections.deque([args])
+        while q:
+            a = q.pop()
+            if isinstance(a, Node):
+                self._args.append(a)
+            elif isinstance(a, list) or isinstance(a, tuple):
+                q.extend(a)
+            elif isinstance(a, dict):
+                q.extend(a.values())
         self._args.extend(a for a in kwargs.values() if isinstance(a, Node))
         self._reduce_graph()
         return

@@ -109,4 +109,4 @@ def release_mem_pool():
     """This function releases GPU memory pool.
     """
     if gpu_allocator:
-        gpu_allocator.release_pool
+        gpu_allocator.release_pool()
