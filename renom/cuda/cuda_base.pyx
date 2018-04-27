@@ -155,7 +155,7 @@ def cuMemcpyD2DAsync(uintptr_t gpu_ptr1, uintptr_t gpu_ptr2, int size, int strea
 
 def check_heap_device(*heaps):
     devices = {h._ptr.device_id for h in heaps if isinstance(h, renom.core.GPUValue)}
-    
+
     current = {cuGetDevice()}
     if devices != current:
         raise RuntimeError('Invalid device_id: %s currennt: %s' % (devices, current))
@@ -290,7 +290,7 @@ class allocator(object):
                 release(pools)
         else:
             release(self._pool_lists[deviceID])
-          
+
 
 gpu_allocator = allocator()
 

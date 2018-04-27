@@ -566,7 +566,7 @@ def test_gru(node):#, use_gpu):
 
     def func(node):
         loss = 0
-        for _ in range(3):
+        for _ in range(2):
             loss = sum(layer1(node))
         layer1.truncate()
         return loss
@@ -580,7 +580,6 @@ def test_gru(node):#, use_gpu):
         print("Finding gradient value for d{}, GPU".format(k))
         compare(func, layer1.params[k], node)
     bm.getTimes()
-    print(bm.time_vars['ttimes'])
     assert False
 
 

@@ -685,6 +685,8 @@ class GPUValue(object):
         with use_device(self.device_id):
             new_shape = calc_broadcast_shape(self, other)
             ret = GPUValue(shape=new_shape)
+            #print ('mul me {}'.format(self))
+            #print ('with other {}'.format(other))
             cumul(self, other, ret)
             return ret
 

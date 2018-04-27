@@ -257,8 +257,8 @@ namespace renom{
 		void thrust_forward_gru(int X, int Y, int M, VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, VALUE_TYPE *d, VALUE_TYPE *e);
 
 		// Gru backward function
-		__global__ void cuda_backward_gru(int X, int Y, int M, VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, VALUE_TYPE *d, VALUE_TYPE *e);
-		void thrust_backward_gru(int X, int Y, int M, VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, VALUE_TYPE *d, VALUE_TYPE *e);
+		__global__ void cuda_backward_gru(int X, int Y, int M, VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, VALUE_TYPE *d, VALUE_TYPE *e, VALUE_TYPE *f, VALUE_TYPE *g, VALUE_TYPE *h);
+		void thrust_backward_gru(int X, int Y, int M, VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *c, VALUE_TYPE *d, VALUE_TYPE *e, VALUE_TYPE *f, VALUE_TYPE *g, VALUE_TYPE *h);
 
     // Binarize
     void thrust_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b);

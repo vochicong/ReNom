@@ -29,9 +29,15 @@ class benchmark_timer():
                 self._timers[keyval] = benchmark_timer()
             self._timers[keyval].startTiming(name)
 
-    def endTiming(self, name = None):
+    def endTiming(self, name = None, tm = None):
         t = time.clock()
-        t = t - self._start
+        if self._start is None:
+            return
+
+        if tm is None:
+            t = t - self._start
+        else:
+            t = tm
         if self._current is not None:
             if name is None:
                 name = self._current
@@ -49,7 +55,15 @@ class benchmark_timer():
                 self._current = None
                 self._start = None
             else:
-                self._timers[self._current].endTiming(name)
+                if self._current in self._timers:
+                    self._timers[self._current].endTiming(name, tm = t)
+
+    def newTiming(self, name = None):
+        if self._current in self._timers and self._timers[self._current]._current is not None:
+            self._timers[self._current].newTiming(name)
+        else:
+            self.endTiming()
+            self.startTiming(name)
 
 
     def getTimes(self,offset = None):
