@@ -47,7 +47,7 @@ def test_grad():
     g = g6.grad(np.array([1., 2.]))
     print(g._refcounts)
     print(g._backwards)
-    assert len(g._refcounts) == 8
+    assert len(g._refcounts) == 9
 
     assert g._refcounts[id(g1)] == g._backwards[id(g1)]
     assert g._refcounts[id(g2)] == g._backwards[id(g2)]
