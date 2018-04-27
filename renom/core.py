@@ -47,7 +47,7 @@ class Grads:
         self._refcounts = collections.Counter()
         self._backwards = collections.Counter()
 
-        q = collections.deque(root._args)
+        q = collections.deque([root])
 
         while q:
             t = q.pop()
@@ -910,7 +910,16 @@ class Node(np.ndarray):
 
     def __init__(self, *args, **kwargs):
         self.setflags(write=False)
-        self._args = [a for a in args if isinstance(a, Node)]
+        self._args = []
+        q = collections.deque([args])
+        while q:
+            a = q.pop()
+            if isinstance(a, Node):
+                self._args.append(a)
+            elif isinstance(a, list) or isinstance(a, tuple):
+                q.extend(a)
+            elif isinstance(a, dict):
+                q.extend(a.values())
         self._args.extend(a for a in kwargs.values() if isinstance(a, Node))
         self._reduce_graph()
         return
@@ -2307,14 +2316,13 @@ def _plot_graph(objs):
             nodeid = str(id(node))
             if not node.attrs:
                 return
-            for name in node.attrs.get_names():
-                val = getattr(node.attrs, name)
+            for val in node._args:
                 valid = str(id(val))
-
+                name = ''
                 g.node(valid, label=str(type(val)))
                 g.edge(valid, nodeid, label=name)
 
-            for o in node.attrs.get_attrs():
+            for o in node._args:
                 if id(o) not in s:
                     add_edge(o)
                     s.add(id(o))
@@ -2354,7 +2362,7 @@ def DEBUG_GET_ROOTS():
 
     forwards = collections.defaultdict(set)
     for o in Node.ACTIVE_NODE.values():
-        for ref in o.attrs.get_attrs():
+        for ref in o._args:
             forwards[id(ref)].add(id(o))
     rootids = set(Node.ACTIVE_NODE.keys()) - set(forwards.keys())
     roots = [Node.ACTIVE_NODE[o] for o in rootids]
