@@ -534,53 +534,51 @@ def test_verybigguys(node):#, use_gpu):
     #set_cuda_active(use_gpu)
     set_cuda_active(True)
 
-    layer1 = Lstm(output_size=4)
+    layer1 = Lstm(output_size=30)
 
     def func(node):
         loss = 0
         for _ in range(3):
-            loss += sum(layer1(node))
-        layer1.truncate()
-        return loss
-
-    compare(func, node, node)
-    for k in layer1.params.keys():
-        compare(func, layer1.params[k], node)
-    bm.getTimes()
-    print(bm.time_vars['ttimes'])
-    assert False
-
-
-@pytest.mark.parametrize("node", [
-    #Variable(rand((2, 2))),
-    #Variable(rand((2, 1))),
-    #Variable(rand((1, 2))),
-    Variable(rand((1, 1))),
-])
-def test_gru(node):#, use_gpu):
-    node = Variable(node)
-    #set_cuda_active(use_gpu)
-    set_cuda_active(True)
-
-    layer1 = Gru(output_size=1)
-
-    def func(node):
-        loss = 0
-        for _ in range(2):
             loss = sum(layer1(node))
         layer1.truncate()
         return loss
 
     compare(func, node, node)
     for k in layer1.params.keys():
-        #set_cuda_active(False)
-        #print("Finding gradient value for d{}, CPU".format(k))
-        #compare(func, layer1.params[k], node)
-        #set_cuda_active(True)
+        compare(func, layer1.params[k], node)
+    #bm.getTimes()
+    #assert False
+
+
+@pytest.mark.parametrize("node", [
+    #Variable(rand((2, 2))),
+    #Variable(rand((2, 1))),
+    #Variable(rand((1, 2))),
+    Variable(rand((2, 2))),
+])
+def test_gru(node):#, use_gpu):
+    node = Variable(node)
+    #set_cuda_active(use_gpu)
+    set_cuda_active(True)
+
+    layer1 = Gru(output_size=2)
+
+    def func(node):
+        loss = 0
+        for _ in range(2):
+            loss = sum(layer1(node))
+
+        layer1.truncate()
+        return loss
+
+    print("Finding gradient value for dx, GPU")
+    compare(func, node, node)
+    func(node)
+    for k in layer1.params.keys():
         print("Finding gradient value for d{}, GPU".format(k))
         compare(func, layer1.params[k], node)
-    bm.getTimes()
-    assert False
+    #bm.getTimes()
+    #assert False
 
 
 @pytest.mark.parametrize("node", [

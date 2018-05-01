@@ -1412,12 +1412,34 @@ namespace renom{
         }
     }
 
-    __global__ void cuda_forward_gru(int X, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
+
+
+    __global__ void cuda_forward_gru(int H, int W, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
+                                      VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      int off = (idx / M);
+      if (idx < M * H) {
+        ABC[idx + off * W] = input[idx + off * W] + hminus[idx + off * M] * u[idx];
+
+        ABC[idx + M + off * W] = input[idx + M + off * W] + hminus[idx + off * M] * u[idx + M];
+
+        ABC[idx + M * 2 + off * W] = input[idx + M * 2 + off * W] + hminus[idx + off * M] * u[idx + M * 2] \
+                    * (1.0 / (1.0 + exp(-ABC[idx + M + off * W])));
+
+        h[idx + off * M] = (1.0 / (1.0 + exp(-ABC[idx + off * W]))) + tanh(ABC[idx + M * 2 + off * W]);
+      }
+    }
+
+
+    /*
+
+    __global__ void cuda_forward_gru(int H, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
                                       VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
       if (idx < M) {
-        for (int i = 0; i < X; i++) {
+        for (int i = 0; i < H; i++) {
           ABC[idx + i*Y] = input[idx + i*Y] + hminus[idx + i*M] * u[idx];
           ABC[idx+M + i*Y] = input[idx+M + i*Y] + hminus[idx + i*M] * u[idx+M]; //input[idx+M*2 + i*Y] +
           ABC[idx+M*2 + i*Y] = input[idx+M*2 + i*Y] + hminus[idx + i*M] * u[idx+M*2] * (1.0/(1.0+exp(-ABC[idx+M + i*Y])));
@@ -1426,13 +1448,17 @@ namespace renom{
       }
     }
 
+    */
+
     void thrust_forward_gru(int X, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus, VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
     {
       int elements = X*Y;
       cuda_forward_gru <<<elements/256+1,256>>> (X,Y,M,input,hminus,u,ABC,h);
     }
 
-    __global__ void cuda_backward_gru(int H, int W, int M, VALUE_TYPE *ABC, VALUE_TYPE *y, VALUE_TYPE *yc, VALUE_TYPE *u, VALUE_TYPE *hminus, VALUE_TYPE *db, VALUE_TYPE *du, VALUE_TYPE *pz)
+    __global__ void cuda_backward_gru(int H, int W, int M, int V, VALUE_TYPE *ABC, VALUE_TYPE *y, \
+                                      VALUE_TYPE *yc, VALUE_TYPE *u, VALUE_TYPE *hminus, \
+                                      VALUE_TYPE *db, VALUE_TYPE *du, VALUE_TYPE *pz, VALUE_TYPE *dx)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -1451,23 +1477,52 @@ namespace renom{
           yc[idx+M*2 + i * W] = y[idx + i * M] * (1.0 - tanh(-ABC[idx+M*2 + i * W]) * tanh(-ABC[idx+M*2 + i * W]));
           yc[idx+M + i * W] = (1.0 / (1.0+exp(-ABC[idx+M + i * W]))) * (1 - (1.0 / (1.0+exp(-ABC[idx+M + i * W])))) \
                               * hminus[idx + i * M] * u[idx+M*2] * yc[idx+M*2 + i * W];
+
+
           db[idx] += yc[idx + i * W];
           db[idx+M] += yc[idx + i * W +M];
           db[idx+M*2] += yc[idx + i * W+M*2];
+
+
           du[idx] += yc[idx + i * W] * hminus[idx + i * M];
           du[idx+M] += yc[idx + i * W +M] * hminus[idx + i * M];
           du[idx+M*2] += yc[idx + i * W+M*2] * hminus[idx + i * M] * (1.0 / (1.0+exp(-ABC[idx+M + i * W])));
-          pz[idx] = yc[idx + i * W] * u[idx+M*0] + yc[idx + i * W +M] * u[idx+M*1] + yc[idx + i * W+M*2] * u[idx+M*2] * (1.0 / (1.0+exp(-ABC[idx+M + i * W])));
 
-          
+          pz[idx+M*i] =   yc[idx + i * W] * u[idx+M*0] + \
+                      yc[idx + i * W +M] * u[idx+M*1] + \
+                      yc[idx + i * W+M*2] * u[idx+M*2] * (1.0 / (1.0+exp(-ABC[idx+M + i * W])));
+
         }
       }
     }
 
-    void thrust_backward_gru(int H, int W, int M, VALUE_TYPE *ABC, VALUE_TYPE *y, VALUE_TYPE *yc, VALUE_TYPE *u, VALUE_TYPE *hminus, VALUE_TYPE *db, VALUE_TYPE *du, VALUE_TYPE *pz)
+    // Not implemented yet
+
+    __global__ void cuda_db_gru(int H, int W, int M, VALUE_TYPE *yc, VALUE_TYPE *db) {
+
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx < M) {
+        db[idx] = 0;
+        db[idx+M] = 0;
+        db[idx+M*2] = 0;
+        for (int i = H / 2; i > 0; i >>= 1) {
+          for (int j = 0; j < i; j++) {
+            yc[idx + j*W] += yc[idx + j*W + i*W];
+            yc[idx + j*W+M] += yc[idx + j*W + i*W +M];
+            yc[idx + j*W+M*2] += yc[idx + j*W + i*W+M*2];
+          }
+        }
+        db[idx] += yc[idx ];
+        db[idx+M] += yc[idx  +M];
+        db[idx+M*2] += yc[idx +M*2];
+      }
+    }
+
+    void thrust_backward_gru(int H, int W, int M, int V, VALUE_TYPE *ABC, VALUE_TYPE *y, VALUE_TYPE *yc, VALUE_TYPE *u, \
+      VALUE_TYPE *hminus, VALUE_TYPE *db, VALUE_TYPE *du, VALUE_TYPE *pz, VALUE_TYPE *dx)
     {
       int elements = H * W;
-      cuda_backward_gru <<<elements/256+1,256>>> (H, W, M, ABC, y, yc, u, hminus, db, du, pz);
+      cuda_backward_gru <<<elements/256+1,256>>> (H, W, M, V, ABC, y, yc, u, hminus, db, du, pz, dx);
 
     }
 

@@ -350,10 +350,11 @@ def cugru_forward(input,hminus,u,ABC,h):
     thrust_forward_gru(X,Y,M,ptr_input,ptr_hminus,ptr_u,ptr_ABC,ptr_h)
 
 
-def cugru_backward(a, b, c, d, e, f, g, h):
+def cugru_backward(a, b, c, d, e, f, g, h, i):
     cdef int H = a.shape[0]
     cdef int W = a.shape[1]
     cdef int M = a.shape[1] // 3
+    cdef int V = i.shape[1]
 
 
     cdef VALUE_TYPE * ptr_a = < VALUE_TYPE * > < uintptr_t > a._ptr
@@ -364,7 +365,8 @@ def cugru_backward(a, b, c, d, e, f, g, h):
     cdef VALUE_TYPE * ptr_f = < VALUE_TYPE * > < uintptr_t > f._ptr
     cdef VALUE_TYPE * ptr_g = < VALUE_TYPE * > < uintptr_t > g._ptr
     cdef VALUE_TYPE * ptr_h = < VALUE_TYPE * > < uintptr_t > h._ptr
-    thrust_backward_gru(H, W, M, ptr_a, ptr_b, ptr_c, ptr_d, ptr_e, ptr_f, ptr_g, ptr_h)
+    cdef VALUE_TYPE * ptr_i = < VALUE_TYPE * > < uintptr_t > i._ptr
+    thrust_backward_gru(H, W, M, V, ptr_a, ptr_b, ptr_c, ptr_d, ptr_e, ptr_f, ptr_g, ptr_h, ptr_i)
 
 
 def cubinarize(gpu_value1, th, gpu_value2):

@@ -10,7 +10,7 @@ from renom.operation import dot, sum
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
 from renom.cuda import cuda as cu
-import benchmarker as bm
+
 
 
 def gate(x):
@@ -67,7 +67,7 @@ class lstm(Node):
 
     @classmethod
     def _oper_gpu(cls, x, pz, ps, w, wr, b):
-        bm.startTiming('Forward data_init')
+
         if ps is None:
             tmp = GPUValue(shape=(x.shape[0], w.shape[1] // 4))
             s_p = tmp.zeros_like_me()
@@ -76,8 +76,8 @@ class lstm(Node):
             s_p = ps
             z_p = get_gpu(pz)
 
-        bm.endTiming()
-        bm.startTiming('Forward calculation')
+
+
         u = dot(x, w) + dot(z_p, wr) + b
 
         z = get_gpu(z_p).empty_like_me()
@@ -87,7 +87,7 @@ class lstm(Node):
         cu.culstm_forward(get_gpu(u), get_gpu(state), get_gpu(s_p), get_gpu(z))
 
         ret = cls._create_node(z)
-        bm.endTiming()
+
         ret.attrs._x = x
         ret.attrs._w = w
         ret.attrs._wr = wr
@@ -153,7 +153,7 @@ class lstm(Node):
             self.attrs._pz._update_diff(context, np.dot(dr, wr.T))
 
     def _backward_gpu(self, context, dy, **kwargs):
-        bm.startTiming('Backward data_init')
+
         w = self.attrs._w
         wr = self.attrs._wr
         b = self.attrs._b
@@ -169,15 +169,15 @@ class lstm(Node):
         e = get_gpu(dy)
 
         dr, dou_n = (get_gpu(a).empty_like_me() for a in (drt, dou))
-        bm.endTiming()
-        bm.startTiming('Backward calculation')
+
+
         cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n)))
 
         dx = dot(dr, w.T)
 
         context.store(wr, dr)
         context.store(w, dou_n)
-        bm.endTiming()
+
 
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx)
