@@ -1413,6 +1413,7 @@ namespace renom{
     }
 
 
+    /*
 
     __global__ void cuda_forward_gru(int H, int W, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
                                       VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
@@ -1431,8 +1432,9 @@ namespace renom{
       }
     }
 
+    */
 
-    /*
+
 
     __global__ void cuda_forward_gru(int H, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
                                       VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
@@ -1448,7 +1450,7 @@ namespace renom{
       }
     }
 
-    */
+    
 
     void thrust_forward_gru(int X, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus, VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
     {
