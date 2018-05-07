@@ -286,14 +286,14 @@ def _parse_index(arr, indexes):
             # None(newaxis)
             result_shapes.append(1)
 
-    strides = [np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
-    dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+    strides = calc_strides(arr.shape) #[np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
+    dest_strides = calc_strides(arr.shape) # [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
 
     return slices, strides, dest_strides, result_shapes, dest_shapes
 
 
 def build_shapes(arr, indexes):
-    strides = [np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
+    strides = calc_strides(arr.shape)  #[np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
 
     # make indexes a list
     if isinstance(indexes, bool):
@@ -456,7 +456,7 @@ def build_shapes(arr, indexes):
 
             n_idx += 1
 
-    dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+    dest_strides = calc_strides(dest_shapes) #[np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
     adv_dest_stride = dest_strides[adv_positions[0]] if adv_positions else None
 
     j = 0
@@ -779,11 +779,11 @@ class GPUValue(object):
             if np.prod(result_shapes, dtype='int') == 0:
                 return
 
-            dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int')
-                            for i in range(len(dest_shapes))]
+            dest_strides = calc_strides(dest_shapes) #[np.prod(dest_shapes[i + 1:], dtype='int')
+#                            for i in range(len(dest_shapes))]
             mask, broadcasted = _build_broadcast_mask(dest_shapes, value.shape)
-            broadcasted_strides = [np.prod(broadcasted[i + 1:], dtype='int')
-                                   for i in range(len(broadcasted))]
+            broadcasted_strides = calc_strides(broadcasted) #[np.prod(broadcasted[i + 1:], dtype='int')
+#                                   for i in range(len(broadcasted))]
             broadcasted_strides = [m * b for m, b in zip(mask, broadcasted_strides)]
 
             valuesize = np.prod(dest_shapes, dtype='int')

@@ -106,7 +106,20 @@ ctypedef void(*BINOP_FUNC)(
     size_t size, binop_strides * strides)
 
 
+
+cpdef calc_strides(shape):
+    cdef int shapelen = len(shape)
+    if not shapelen:
+        return []
+    ret = [0] * (shapelen-1) + [1]
+    cdef int n
+    for n in range(-1, shapelen*-1, -1):
+        ret[n-1] = shape[n] * ret[n]
+    return ret;
+
+
 cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
+
     cuda_base.check_heap_device(lhs, rhs, ret)
 
     if not isinstance(rhs, renom.core.GPUValue):
@@ -121,16 +134,16 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
         strides.lhs_strides[0] = 1
         strides.rhs_strides[0] = 1
     else:
-        ret_strides = [np.prod(ret.shape[i + 1:], dtype='int') for i in range(len(ret.shape))]
+        ret_strides = calc_strides(ret.shape)
 
-        lhs_strides = [np.prod(lhs.shape[i + 1:], dtype='int') for i in range(len(lhs.shape))]
+        lhs_strides = calc_strides(lhs.shape)
         lhs_strides = [0] * (len(ret.shape) - len(lhs.shape)) + lhs_strides
 
         for i, (arg, dest) in enumerate(zip(reversed(lhs.shape), reversed(ret.shape)), 1):
             if arg != dest:
                 lhs_strides[i * -1] = 0
 
-        rhs_strides = [np.prod(rhs.shape[i + 1:], dtype='int') for i in range(len(rhs.shape))]
+        rhs_strides = calc_strides(rhs.shape)
         rhs_strides = [0] * (len(ret.shape) - len(rhs.shape)) + rhs_strides
 
         for i, (arg, dest) in enumerate(zip(reversed(rhs.shape), reversed(ret.shape)), 1):
@@ -143,6 +156,7 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
             strides.lhs_strides[i] = lhs_strides[i]
             strides.rhs_strides[i] = rhs_strides[i]
 
+
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > rhs._ptr
     cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > ret._ptr
@@ -150,8 +164,8 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
 
     assert strides.size < 6, "Binary operation error. Only tensors that has less than 6dims are accepted. Actual is {} dim tensor.".format(
         strides.size)
-    func(ptr1, ptr2, ptr3, size, & strides)
 
+    func(ptr1, ptr2, ptr3, size, & strides)
 
 def cumul(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
