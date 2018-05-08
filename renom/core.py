@@ -531,16 +531,19 @@ class GPUValue(object):
         if self.ACTIVE_GPU is not None:
             self.ACTIVE_GPU[id(self)] = self
 
+        assert self._ptr
+
     def __del__(self):
-        self.free()
+        self._free()
 
     def alloc(self):
-        if self._ptr:
-            gpu_allocator.free(self._ptr)
+        self._free()
+
         self._ptr = gpu_allocator.malloc(self.nbytes)
         self.device_id = cuGetDevice()
+        assert self._ptr
 
-    def free(self):
+    def _free(self):
         if self._ptr:
             gpu_allocator.free(self._ptr)
         self._ptr = None
@@ -550,18 +553,6 @@ class GPUValue(object):
         a = np.empty(self.shape, dtype=np.bool).reshape(*shape)
         clone.shape = a.shape
         return clone
-
-    def attach(self, value):
-        ptr = value._ptr
-        self.detach()
-        self._ptr = ptr
-        self.device_id = value.device_id
-
-    def detach(self):
-        if self._ptr:
-            ret = GPUValue(shape=self.shape, ptr=self._ptr)
-            self._ptr = None
-            return ret
 
     def get_gpu(self):
         return self
@@ -997,7 +988,6 @@ class Node(np.ndarray):
     def release_gpu(self):
         '''This method releases memory on GPU.'''
         if self._gpu:
-            self._gpu.free()
             self._gpu = None
 
     def grad(self, initial=None, detach_graph=True, **kwargs):
@@ -1553,7 +1543,7 @@ class Add(BinOp):
             rhs = get_gpu(self.attrs._rhs)
 
             if rhs.shape == gdy.shape:
-                new_r_dx = gdy.copy()
+                new_r_dx = gdy
             else:
                 new_r_dx = cu_broad_cast(rhs, gdy)
 
@@ -1564,7 +1554,7 @@ class Add(BinOp):
             rhs = get_gpu(self.attrs._rhs)
 
             if lhs.shape == gdy.shape:
-                new_l_dx = gdy.copy()
+                new_l_dx = gdy
             else:
                 new_l_dx = cu_broad_cast(lhs, gdy)
             self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
