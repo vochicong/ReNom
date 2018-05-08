@@ -177,39 +177,87 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
 
     func(ptr1, ptr2, ptr3, size, & strides)
 
+
+ctypedef void(*BINOP_FUNC_NUM)(
+    VALUE_TYPE * a, VALUE_TYPE b, VALUE_TYPE * c,
+    size_t size)
+
+
+
+cdef bin_operation_num(BINOP_FUNC_NUM func, lhs, rhs, ret):
+    cuda_base.check_heap_device(lhs, ret)
+
+
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > ret._ptr
+    size = calc_int_prod(ret.shape)
+
+    cdef VALUE_TYPE num = rhs
+
+    func(ptr1, num, ptr2, size)
+
+
 def cumul(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_mul, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_mul, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_mul_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cuadd(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_add, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_add, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_add_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cusub(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_sub, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_sub, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_sub_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cudiv(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_div, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_div, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_div_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def curdiv(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_rdiv, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_rdiv, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_rdiv_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cupow(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_pow, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_pow, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_pow_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def curpow(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_rpow, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_rpow, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_rpow_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cufill(value, gpu_value):

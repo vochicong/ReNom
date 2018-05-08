@@ -120,11 +120,18 @@ class Grads:
         self.variables[id(node)] = diff
 
     def update_node(self, node, opt=None):
+        import time
+        f = time.time()
         if node.prevent_update:
             return
 
         with self.unlock_node(node):
+            f1 = time.time()
+
             dy = self.get(node) if opt is None else opt(self.get(node), node)
+
+            f2 = time.time()
+
             if node._auto_update:
                 if callable(node.auto_update):
                     node.auto_update(dy)
@@ -134,6 +141,7 @@ class Grads:
                         ngpu -= get_gpu(dy)
                     else:
                         node[...] -= dy
+            f3 = time.time()
             node.detach_graph()
 
     def update(self, opt=None, models=()):
@@ -1496,7 +1504,7 @@ def cu_broad_cast(hs, dy):
                     axis.append(i)
             if axis:
                 dy = cusum(dy, axis=tuple(axis))
-        dy = dy.reshape(hs.shape)
+            dy = dy.reshape(hs.shape)
     return dy
 
 
@@ -1539,25 +1547,15 @@ class Add(BinOp):
         gdy = get_gpu(dy)
 
         if isinstance(self.attrs._rhs, Node):
-            lhs = get_gpu(self.attrs._lhs)
             rhs = get_gpu(self.attrs._rhs)
 
-            if rhs.shape == gdy.shape:
-                new_r_dx = gdy
-            else:
-                new_r_dx = cu_broad_cast(rhs, gdy)
-
-            self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
+            r_dx = cu_broad_cast(rhs, get_gpu(dy))
+            self.attrs._rhs._update_diff(context, r_dx, **kwargs)
 
         if isinstance(self.attrs._lhs, Node):
             lhs = get_gpu(self.attrs._lhs)
-            rhs = get_gpu(self.attrs._rhs)
-
-            if lhs.shape == gdy.shape:
-                new_l_dx = gdy
-            else:
-                new_l_dx = cu_broad_cast(lhs, gdy)
-            self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
+            l_dx = cu_broad_cast(lhs, get_gpu(dy))
+            self.attrs._lhs._update_diff(context, l_dx, **kwargs)
 
 
 class RAdd(Add):

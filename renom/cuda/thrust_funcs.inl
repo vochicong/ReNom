@@ -305,6 +305,112 @@ namespace renom{
     }
 
 
+    __global__ static void cuda_add_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if(idx >= size) {
+            return;
+        }
+        c[idx] = a[idx] + b;
+    }
+
+    void thrust_add_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        if (!size)
+            return;
+        cuda_add_num <<<ceil((size)/256.0), 256>>> (a, b, c, size);
+    }
+
+    __global__ static void cuda_mul_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if(idx >= size) {
+            return;
+        }
+        c[idx] = a[idx] * b;
+    }
+
+    void thrust_mul_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        if (!size)
+            return;
+        cuda_mul_num <<<ceil((size)/256.0), 256>>> (a, b, c, size);
+    }
+
+    __global__ static void cuda_sub_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if(idx >= size) {
+            return;
+        }
+        c[idx] = a[idx] - b;
+    }
+
+    void thrust_sub_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        if (!size)
+            return;
+        cuda_sub_num <<<ceil((size)/256.0), 256>>> (a, b, c, size);
+    }
+
+    __global__ static void cuda_div_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if(idx >= size) {
+            return;
+        }
+        c[idx] = a[idx] / b;
+    }
+
+    void thrust_div_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        if (!size)
+            return;
+        cuda_div_num <<<ceil((size)/256.0), 256>>> (a, b, c, size);
+    }
+
+    __global__ static void cuda_rdiv_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if(idx >= size) {
+            return;
+        }
+        c[idx] = b / a[idx];
+    }
+
+    void thrust_rdiv_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        if (!size)
+            return;
+        cuda_rdiv_num <<<ceil((size)/256.0), 256>>> (a, b, c, size);
+    }
+
+    __global__ static void cuda_pow_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if(idx >= size) {
+            return;
+        }
+        c[idx] = powf(a[idx], b);
+    }
+
+    void thrust_pow_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        if (!size)
+            return;
+        cuda_pow_num <<<ceil((size)/256.0), 256>>> (a, b, c, size);
+    }
+
+
+    __global__ static void cuda_rpow_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+        if(idx >= size) {
+            return;
+        }
+        c[idx] = powf(b, a[idx]);
+    }
+
+    void thrust_rpow_num(VALUE_TYPE *a, VALUE_TYPE b, VALUE_TYPE *c, size_t size) {
+        if (!size)
+            return;
+        cuda_rpow_num <<<ceil((size)/256.0), 256>>> (a, b, c, size);
+    }
+
         __global__ void cuda_copy_memory_stride(VALUE_TYPE *dest, VALUE_TYPE *src, const size_t src_elems,
                              const size_t size_stride, const size_t size_srcblock) {
             size_t pos = threadIdx.x + blockIdx.x * blockDim.x;
