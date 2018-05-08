@@ -118,6 +118,16 @@ cpdef calc_strides(shape):
     return ret;
 
 
+cpdef calc_int_prod(arr):
+    cdef int arrlen = len(arr)
+    cdef int ret = 1
+
+    cdef int n
+    for i in range(0, arrlen):
+        ret *= arr[i]
+    return ret
+
+
 cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
 
     cuda_base.check_heap_device(lhs, rhs, ret)
@@ -160,7 +170,7 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > rhs._ptr
     cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > ret._ptr
-    size = np.prod(ret.shape, dtype='int')
+    size = calc_int_prod(ret.shape)
 
     assert strides.size < 6, "Binary operation error. Only tensors that has less than 6dims are accepted. Actual is {} dim tensor.".format(
         strides.size)
@@ -726,7 +736,7 @@ def cu_add_bias(bias, gpu_value):
 
 
 def cu_transpose(gpu_value1, axis):
-    strides = [np.prod(gpu_value1.shape[i + 1:], dtype='int') for i in range(len(gpu_value1.shape))]
+    strides = calc_strides(gpu_value1.shape) # [np.prod(gpu_value1.shape[i + 1:], dtype='int') for i in range(len(gpu_value1.shape))]
 
     if not axis:
         axis = tuple(reversed(range(len(gpu_value1.shape))))
@@ -741,11 +751,13 @@ def cu_transpose(gpu_value1, axis):
         src_strides[i] = strides[s]
 
     cdef size_t new_strides[16]
-    for i in range(len(new_shape)):
-        new_strides[i] = np.prod(new_shape[i + 1:], dtype='int')
+
+    s = calc_strides(new_shape)
+    for i in range(len(s)):
+        new_strides[i] = s[i]
 
     cdef VALUE_TYPE * ptr = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
-    size = np.prod(gpu_value1.shape)
+    size = calc_int_prod(gpu_value1.shape)
 
     result = renom.core.GPUValue(shape=new_shape)
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > result._ptr
