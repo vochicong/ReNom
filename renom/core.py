@@ -286,14 +286,14 @@ def _parse_index(arr, indexes):
             # None(newaxis)
             result_shapes.append(1)
 
-    strides = [np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
-    dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+    strides = calc_strides(arr.shape)
+    dest_strides = calc_strides(arr.shape)
 
     return slices, strides, dest_strides, result_shapes, dest_shapes
 
 
 def build_shapes(arr, indexes):
-    strides = [np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
+    strides = calc_strides(arr.shape)
 
     # make indexes a list
     if isinstance(indexes, bool):
@@ -402,7 +402,7 @@ def build_shapes(arr, indexes):
     result_shapes = []
     dest_shapes = []
     adv_result_shapes = adv_shape[:]
-    adv_ldxsize = np.prod(adv_shape, dtype='int')
+    adv_ldxsize = calc_int_prod(adv_shape)
     adv_positions = []
 
     n_idx = 0
@@ -456,7 +456,7 @@ def build_shapes(arr, indexes):
 
             n_idx += 1
 
-    dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+    dest_strides = calc_strides(dest_shapes)
     adv_dest_stride = dest_strides[adv_positions[0]] if adv_positions else None
 
     j = 0
@@ -517,7 +517,7 @@ class GPUValue(object):
             self.dtype = np.dtype(dtype)
 
         self.itemsize = np.dtype(self.dtype).itemsize
-        self.size = (np.prod(self.shape) if self.shape else 1) or 1
+        self.size = (calc_int_prod(self.shape) if self.shape else 1) or 1
         self.nbytes = self.size * self.itemsize
 
         self._ptr = ptr
@@ -758,7 +758,7 @@ class GPUValue(object):
         with use_device(self.device_id):
             slices, result_shapes, dest_shapes = build_shapes(self, indexes)
 
-            dest_size = np.prod(dest_shapes, dtype='int64')
+            dest_size = calc_int_prod(dest_shapes)
 
             ret = cu_get_item(self, self.size, dest_size, slices)
 
@@ -767,43 +767,20 @@ class GPUValue(object):
 
     def __setitem__(self, indexes, value):
         with use_device(self.device_id):
-            #            if isinstance(indexes, (tuple, list, np.ndarray)):
-            #                arry = self.new_array()
-            #                arry[indexes] = get_gpu(value).new_array()
-            #                self.free()
-            #                self.to_gpu(arry)
-            #                return
-
             value = get_gpu(value)
             slices, result_shapes, dest_shapes = build_shapes(self, indexes)
-            if np.prod(result_shapes, dtype='int') == 0:
+            if calc_int_prod(result_shapes) == 0:
                 return
 
-            dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int')
-                            for i in range(len(dest_shapes))]
+            dest_strides = calc_strides(dest_shapes)
             mask, broadcasted = _build_broadcast_mask(dest_shapes, value.shape)
-            broadcasted_strides = [np.prod(broadcasted[i + 1:], dtype='int')
-                                   for i in range(len(broadcasted))]
+
+            broadcasted_strides = calc_strides(broadcasted)
             broadcasted_strides = [m * b for m, b in zip(mask, broadcasted_strides)]
 
-            valuesize = np.prod(dest_shapes, dtype='int')
+            valuesize = calc_int_prod(dest_shapes)
 
             cu_set_item(value, valuesize, self, slices, dest_strides, broadcasted_strides)
-
-
-#    def __getitem__(self, index):
-#        with use_device(self.device_id):
-#            arry = self.new_array()
-#            arry = arry[index]
-#            ret = GPUValue(arry)
-#            return ret
-#
-#    def __setitem__(self, index, value):
-#        with use_device(self.device_id):
-#            arry = self.new_array()
-#            arry[index] = get_gpu(value).new_array()
-#            self.free()
-#            self.to_gpu(arry)
 
     @property
     def T(self):
@@ -1553,12 +1530,14 @@ def cu_broad_cast(hs, dy):
 
 
 def get_gpu(array):
-    if isinstance(array, Number) or isinstance(array, GPUValue):
-        return array
-    elif isinstance(array, Node):
-        return array.get_gpu()
-    elif isinstance(array, np.ndarray):
+    f = getattr(array, 'get_gpu', None)
+    if f:
+        return f()
+
+    if isinstance(array, np.ndarray):
         return GPUValue(array=array)
+    elif isinstance(array, Number):
+        return array
     else:
         raise Exception("Gpu not supported data type.")
 
