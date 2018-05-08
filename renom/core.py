@@ -286,14 +286,14 @@ def _parse_index(arr, indexes):
             # None(newaxis)
             result_shapes.append(1)
 
-    strides = calc_strides(arr.shape) #[np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
-    dest_strides = calc_strides(arr.shape) # [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+    strides = calc_strides(arr.shape)
+    dest_strides = calc_strides(arr.shape)
 
     return slices, strides, dest_strides, result_shapes, dest_shapes
 
 
 def build_shapes(arr, indexes):
-    strides = calc_strides(arr.shape)  #[np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
+    strides = calc_strides(arr.shape)
 
     # make indexes a list
     if isinstance(indexes, bool):
@@ -456,7 +456,7 @@ def build_shapes(arr, indexes):
 
             n_idx += 1
 
-    dest_strides = calc_strides(dest_shapes) #[np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+    dest_strides = calc_strides(dest_shapes)
     adv_dest_stride = dest_strides[adv_positions[0]] if adv_positions else None
 
     j = 0
@@ -767,43 +767,20 @@ class GPUValue(object):
 
     def __setitem__(self, indexes, value):
         with use_device(self.device_id):
-            #            if isinstance(indexes, (tuple, list, np.ndarray)):
-            #                arry = self.new_array()
-            #                arry[indexes] = get_gpu(value).new_array()
-            #                self.free()
-            #                self.to_gpu(arry)
-            #                return
-
             value = get_gpu(value)
             slices, result_shapes, dest_shapes = build_shapes(self, indexes)
             if calc_int_prod(result_shapes) == 0:
                 return
 
-            dest_strides = calc_strides(dest_shapes) #[np.prod(dest_shapes[i + 1:], dtype='int')
-#                            for i in range(len(dest_shapes))]
+            dest_strides = calc_strides(dest_shapes)
             mask, broadcasted = _build_broadcast_mask(dest_shapes, value.shape)
-            broadcasted_strides = calc_strides(broadcasted) #[np.prod(broadcasted[i + 1:], dtype='int')
-#                                   for i in range(len(broadcasted))]
+
+            broadcasted_strides = calc_strides(broadcasted)
             broadcasted_strides = [m * b for m, b in zip(mask, broadcasted_strides)]
 
             valuesize = calc_int_prod(dest_shapes)
 
             cu_set_item(value, valuesize, self, slices, dest_strides, broadcasted_strides)
-
-
-#    def __getitem__(self, index):
-#        with use_device(self.device_id):
-#            arry = self.new_array()
-#            arry = arry[index]
-#            ret = GPUValue(arry)
-#            return ret
-#
-#    def __setitem__(self, index, value):
-#        with use_device(self.device_id):
-#            arry = self.new_array()
-#            arry[index] = get_gpu(value).new_array()
-#            self.free()
-#            self.to_gpu(arry)
 
     @property
     def T(self):
