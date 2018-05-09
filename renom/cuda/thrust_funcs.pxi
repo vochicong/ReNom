@@ -106,16 +106,15 @@ ctypedef void(*BINOP_FUNC)(
     size_t size, binop_strides * strides)
 
 
-
 cpdef calc_strides(shape):
     cdef int shapelen = len(shape)
     if not shapelen:
         return []
-    ret = [0] * (shapelen-1) + [1]
+    ret = [0] * (shapelen - 1) + [1]
     cdef int n
-    for n in range(-1, shapelen*-1, -1):
-        ret[n-1] = shape[n] * ret[n]
-    return ret;
+    for n in range(-1, shapelen * -1, -1):
+        ret[n - 1] = shape[n] * ret[n]
+    return ret
 
 
 cpdef calc_int_prod(arr):
@@ -166,7 +165,6 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
             strides.lhs_strides[i] = lhs_strides[i]
             strides.rhs_strides[i] = rhs_strides[i]
 
-
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > rhs._ptr
     cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > ret._ptr
@@ -183,10 +181,8 @@ ctypedef void(*BINOP_FUNC_NUM)(
     size_t size)
 
 
-
 cdef bin_operation_num(BINOP_FUNC_NUM func, lhs, rhs, ret):
     cuda_base.check_heap_device(lhs, ret)
-
 
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > ret._ptr
@@ -784,7 +780,8 @@ def cu_add_bias(bias, gpu_value):
 
 
 def cu_transpose(gpu_value1, axis):
-    strides = calc_strides(gpu_value1.shape) # [np.prod(gpu_value1.shape[i + 1:], dtype='int') for i in range(len(gpu_value1.shape))]
+    # [np.prod(gpu_value1.shape[i + 1:], dtype='int') for i in range(len(gpu_value1.shape))]
+    strides = calc_strides(gpu_value1.shape)
 
     if not axis:
         axis = tuple(reversed(range(len(gpu_value1.shape))))
