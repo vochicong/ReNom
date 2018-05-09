@@ -9,6 +9,7 @@ try:
     from renom.cuda.curand import *
     _has_cuda = True
 except ImportError as e:
+    gpu_allocator = None
     curand_generator = None
     _has_cuda = False
 
@@ -108,4 +109,4 @@ def release_mem_pool():
     """This function releases GPU memory pool.
     """
     if gpu_allocator:
-        gpu_allocator.release_pool
+        gpu_allocator.release_pool()

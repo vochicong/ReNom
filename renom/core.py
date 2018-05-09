@@ -47,7 +47,7 @@ class Grads:
         self._refcounts = collections.Counter()
         self._backwards = collections.Counter()
 
-        q = collections.deque(root._args)
+        q = collections.deque([root])
 
         while q:
             t = q.pop()
@@ -59,7 +59,6 @@ class Grads:
                 if not seen and not getattr(t, '_no_backward', False):
                     for c in t._args:
                         q.append(c)
-
 
     @contextlib.contextmanager
     def unlock_node(self, node):
@@ -121,11 +120,18 @@ class Grads:
         self.variables[id(node)] = diff
 
     def update_node(self, node, opt=None):
+        import time
+        f = time.time()
         if node.prevent_update:
             return
 
         with self.unlock_node(node):
+            f1 = time.time()
+
             dy = self.get(node) if opt is None else opt(self.get(node), node)
+
+            f2 = time.time()
+
             if node._auto_update:
                 if callable(node.auto_update):
                     node.auto_update(dy)
@@ -135,6 +141,7 @@ class Grads:
                         ngpu -= get_gpu(dy)
                     else:
                         node[...] -= dy
+            f3 = time.time()
             node.detach_graph()
 
     def update(self, opt=None, models=()):
@@ -287,14 +294,14 @@ def _parse_index(arr, indexes):
             # None(newaxis)
             result_shapes.append(1)
 
-    strides = [np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
-    dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+    strides = calc_strides(arr.shape)
+    dest_strides = calc_strides(arr.shape)
 
     return slices, strides, dest_strides, result_shapes, dest_shapes
 
 
 def build_shapes(arr, indexes):
-    strides = [np.prod(arr.shape[i + 1:], dtype='int') for i in range(len(arr.shape))]
+    strides = calc_strides(arr.shape)
 
     # make indexes a list
     if isinstance(indexes, bool):
@@ -403,7 +410,7 @@ def build_shapes(arr, indexes):
     result_shapes = []
     dest_shapes = []
     adv_result_shapes = adv_shape[:]
-    adv_ldxsize = np.prod(adv_shape, dtype='int')
+    adv_ldxsize = calc_int_prod(adv_shape)
     adv_positions = []
 
     n_idx = 0
@@ -457,7 +464,7 @@ def build_shapes(arr, indexes):
 
             n_idx += 1
 
-    dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int') for i in range(len(dest_shapes))]
+    dest_strides = calc_strides(dest_shapes)
     adv_dest_stride = dest_strides[adv_positions[0]] if adv_positions else None
 
     j = 0
@@ -500,8 +507,13 @@ def _build_broadcast_mask(left, right):
 
 class GPUValue(object):
     ACTIVE_GPU = None
+    _ptr = None
 
     def __init__(self, array=None, shape=None, ptr=None, dtype=None):
+        if not is_cuda_active():
+            raise ValueError('Cuda is not active. '
+                             'Use renom.cuda.set_cuda_active() to activate.')
+
         if shape is not None:
             self.shape = tuple(shape)
         else:
@@ -513,7 +525,7 @@ class GPUValue(object):
             self.dtype = np.dtype(dtype)
 
         self.itemsize = np.dtype(self.dtype).itemsize
-        self.size = (np.prod(self.shape) if self.shape else 1) or 1
+        self.size = (calc_int_prod(self.shape) if self.shape else 1) or 1
         self.nbytes = self.size * self.itemsize
 
         self._ptr = ptr
@@ -527,16 +539,19 @@ class GPUValue(object):
         if self.ACTIVE_GPU is not None:
             self.ACTIVE_GPU[id(self)] = self
 
+        assert self._ptr
+
     def __del__(self):
-        self.free()
+        self._free()
 
     def alloc(self):
-        if self._ptr:
-            gpu_allocator.free(self._ptr)
+        self._free()
+
         self._ptr = gpu_allocator.malloc(self.nbytes)
         self.device_id = cuGetDevice()
+        assert self._ptr
 
-    def free(self):
+    def _free(self):
         if self._ptr:
             gpu_allocator.free(self._ptr)
         self._ptr = None
@@ -546,18 +561,6 @@ class GPUValue(object):
         a = np.empty(self.shape, dtype=np.bool).reshape(*shape)
         clone.shape = a.shape
         return clone
-
-    def attach(self, value):
-        ptr = value._ptr
-        self.detach()
-        self._ptr = ptr
-        self.device_id = value.device_id
-
-    def detach(self):
-        if self._ptr:
-            ret = GPUValue(shape=self.shape, ptr=self._ptr)
-            self._ptr = None
-            return ret
 
     def get_gpu(self):
         return self
@@ -612,7 +615,7 @@ class GPUValue(object):
 
         # todo: value.flatten() copies buffer
         with use_device(self.device_id):
-            ptr.memcpyH2D(value.flatten(), value.nbytes)
+            ptr.memcpyH2D(value.ravel(), value.nbytes)
 
         self._ptr = ptr
 
@@ -754,7 +757,7 @@ class GPUValue(object):
         with use_device(self.device_id):
             slices, result_shapes, dest_shapes = build_shapes(self, indexes)
 
-            dest_size = np.prod(dest_shapes, dtype='int64')
+            dest_size = calc_int_prod(dest_shapes)
 
             ret = cu_get_item(self, self.size, dest_size, slices)
 
@@ -763,43 +766,20 @@ class GPUValue(object):
 
     def __setitem__(self, indexes, value):
         with use_device(self.device_id):
-            #            if isinstance(indexes, (tuple, list, np.ndarray)):
-            #                arry = self.new_array()
-            #                arry[indexes] = get_gpu(value).new_array()
-            #                self.free()
-            #                self.to_gpu(arry)
-            #                return
-
             value = get_gpu(value)
             slices, result_shapes, dest_shapes = build_shapes(self, indexes)
-            if np.prod(result_shapes, dtype='int') == 0:
+            if calc_int_prod(result_shapes) == 0:
                 return
 
-            dest_strides = [np.prod(dest_shapes[i + 1:], dtype='int')
-                            for i in range(len(dest_shapes))]
+            dest_strides = calc_strides(dest_shapes)
             mask, broadcasted = _build_broadcast_mask(dest_shapes, value.shape)
-            broadcasted_strides = [np.prod(broadcasted[i + 1:], dtype='int')
-                                   for i in range(len(broadcasted))]
+
+            broadcasted_strides = calc_strides(broadcasted)
             broadcasted_strides = [m * b for m, b in zip(mask, broadcasted_strides)]
 
-            valuesize = np.prod(dest_shapes, dtype='int')
+            valuesize = calc_int_prod(dest_shapes)
 
             cu_set_item(value, valuesize, self, slices, dest_strides, broadcasted_strides)
-
-
-#    def __getitem__(self, index):
-#        with use_device(self.device_id):
-#            arry = self.new_array()
-#            arry = arry[index]
-#            ret = GPUValue(arry)
-#            return ret
-#
-#    def __setitem__(self, index, value):
-#        with use_device(self.device_id):
-#            arry = self.new_array()
-#            arry[index] = get_gpu(value).new_array()
-#            self.free()
-#            self.to_gpu(arry)
 
     @property
     def T(self):
@@ -906,7 +886,16 @@ class Node(np.ndarray):
 
     def __init__(self, *args, **kwargs):
         self.setflags(write=False)
-        self._args = [a for a in args if isinstance(a, Node)]
+        self._args = []
+        q = collections.deque([args])
+        while q:
+            a = q.pop()
+            if isinstance(a, Node):
+                self._args.append(a)
+            elif isinstance(a, list) or isinstance(a, tuple):
+                q.extend(a)
+            elif isinstance(a, dict):
+                q.extend(a.values())
         self._args.extend(a for a in kwargs.values() if isinstance(a, Node))
         self._reduce_graph()
         return
@@ -1007,7 +996,6 @@ class Node(np.ndarray):
     def release_gpu(self):
         '''This method releases memory on GPU.'''
         if self._gpu:
-            self._gpu.free()
             self._gpu = None
 
     def grad(self, initial=None, detach_graph=True, **kwargs):
@@ -1516,17 +1504,19 @@ def cu_broad_cast(hs, dy):
                     axis.append(i)
             if axis:
                 dy = cusum(dy, axis=tuple(axis))
-        dy = dy.reshape(hs.shape)
+            dy = dy.reshape(hs.shape)
     return dy
 
 
 def get_gpu(array):
-    if isinstance(array, Number) or isinstance(array, GPUValue):
-        return array
-    elif isinstance(array, Node):
-        return array.get_gpu()
-    elif isinstance(array, np.ndarray):
+    f = getattr(array, 'get_gpu', None)
+    if f:
+        return f()
+
+    if isinstance(array, np.ndarray):
         return GPUValue(array=array)
+    elif isinstance(array, Number):
+        return array
     else:
         raise Exception("Gpu not supported data type.")
 
@@ -1557,25 +1547,15 @@ class Add(BinOp):
         gdy = get_gpu(dy)
 
         if isinstance(self.attrs._rhs, Node):
-            lhs = get_gpu(self.attrs._lhs)
             rhs = get_gpu(self.attrs._rhs)
 
-            if rhs.shape == gdy.shape:
-                new_r_dx = gdy.copy()
-            else:
-                new_r_dx = cu_broad_cast(rhs, gdy)
-
-            self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
+            r_dx = cu_broad_cast(rhs, get_gpu(dy))
+            self.attrs._rhs._update_diff(context, r_dx, **kwargs)
 
         if isinstance(self.attrs._lhs, Node):
             lhs = get_gpu(self.attrs._lhs)
-            rhs = get_gpu(self.attrs._rhs)
-
-            if lhs.shape == gdy.shape:
-                new_l_dx = gdy.copy()
-            else:
-                new_l_dx = cu_broad_cast(lhs, gdy)
-            self.attrs._lhs._update_diff(context, new_l_dx, **kwargs)
+            l_dx = cu_broad_cast(lhs, get_gpu(dy))
+            self.attrs._lhs._update_diff(context, l_dx, **kwargs)
 
 
 class RAdd(Add):
@@ -2322,14 +2302,13 @@ def _plot_graph(objs):
             nodeid = str(id(node))
             if not node.attrs:
                 return
-            for name in node.attrs.get_names():
-                val = getattr(node.attrs, name)
+            for val in node._args:
                 valid = str(id(val))
-
+                name = ''
                 g.node(valid, label=str(type(val)))
                 g.edge(valid, nodeid, label=name)
 
-            for o in node.attrs.get_attrs():
+            for o in node._args:
                 if id(o) not in s:
                     add_edge(o)
                     s.add(id(o))
@@ -2369,7 +2348,7 @@ def DEBUG_GET_ROOTS():
 
     forwards = collections.defaultdict(set)
     for o in Node.ACTIVE_NODE.values():
-        for ref in o.attrs.get_attrs():
+        for ref in o._args:
             forwards[id(ref)].add(id(o))
     rootids = set(Node.ACTIVE_NODE.keys()) - set(forwards.keys())
     roots = [Node.ACTIVE_NODE[o] for o in rootids]

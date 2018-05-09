@@ -106,7 +106,29 @@ ctypedef void(*BINOP_FUNC)(
     size_t size, binop_strides * strides)
 
 
+cpdef calc_strides(shape):
+    cdef int shapelen = len(shape)
+    if not shapelen:
+        return []
+    ret = [0] * (shapelen - 1) + [1]
+    cdef int n
+    for n in range(-1, shapelen * -1, -1):
+        ret[n - 1] = shape[n] * ret[n]
+    return ret
+
+
+cpdef calc_int_prod(arr):
+    cdef int arrlen = len(arr)
+    cdef int ret = 1
+
+    cdef int n
+    for i in range(0, arrlen):
+        ret *= arr[i]
+    return ret
+
+
 cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
+
     cuda_base.check_heap_device(lhs, rhs, ret)
 
     if not isinstance(rhs, renom.core.GPUValue):
@@ -121,16 +143,16 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
         strides.lhs_strides[0] = 1
         strides.rhs_strides[0] = 1
     else:
-        ret_strides = [np.prod(ret.shape[i + 1:], dtype='int') for i in range(len(ret.shape))]
+        ret_strides = calc_strides(ret.shape)
 
-        lhs_strides = [np.prod(lhs.shape[i + 1:], dtype='int') for i in range(len(lhs.shape))]
+        lhs_strides = calc_strides(lhs.shape)
         lhs_strides = [0] * (len(ret.shape) - len(lhs.shape)) + lhs_strides
 
         for i, (arg, dest) in enumerate(zip(reversed(lhs.shape), reversed(ret.shape)), 1):
             if arg != dest:
                 lhs_strides[i * -1] = 0
 
-        rhs_strides = [np.prod(rhs.shape[i + 1:], dtype='int') for i in range(len(rhs.shape))]
+        rhs_strides = calc_strides(rhs.shape)
         rhs_strides = [0] * (len(ret.shape) - len(rhs.shape)) + rhs_strides
 
         for i, (arg, dest) in enumerate(zip(reversed(rhs.shape), reversed(ret.shape)), 1):
@@ -146,46 +168,92 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > rhs._ptr
     cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > ret._ptr
-    size = np.prod(ret.shape, dtype='int')
+    size = calc_int_prod(ret.shape)
 
     assert strides.size < 6, "Binary operation error. Only tensors that has less than 6dims are accepted. Actual is {} dim tensor.".format(
         strides.size)
+
     func(ptr1, ptr2, ptr3, size, & strides)
+
+
+ctypedef void(*BINOP_FUNC_NUM)(
+    VALUE_TYPE * a, VALUE_TYPE b, VALUE_TYPE * c,
+    size_t size)
+
+
+cdef bin_operation_num(BINOP_FUNC_NUM func, lhs, rhs, ret):
+    cuda_base.check_heap_device(lhs, ret)
+
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > ret._ptr
+    size = calc_int_prod(ret.shape)
+
+    cdef VALUE_TYPE num = rhs
+
+    func(ptr1, num, ptr2, size)
 
 
 def cumul(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_mul, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_mul, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_mul_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cuadd(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_add, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_add, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_add_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cusub(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_sub, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_sub, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_sub_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cudiv(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_div, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_div, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_div_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def curdiv(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_rdiv, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_rdiv, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_rdiv_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cupow(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_pow, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_pow, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_pow_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def curpow(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_rpow, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_rpow, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_rpow_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cufill(value, gpu_value):
@@ -712,7 +780,8 @@ def cu_add_bias(bias, gpu_value):
 
 
 def cu_transpose(gpu_value1, axis):
-    strides = [np.prod(gpu_value1.shape[i + 1:], dtype='int') for i in range(len(gpu_value1.shape))]
+    # [np.prod(gpu_value1.shape[i + 1:], dtype='int') for i in range(len(gpu_value1.shape))]
+    strides = calc_strides(gpu_value1.shape)
 
     if not axis:
         axis = tuple(reversed(range(len(gpu_value1.shape))))
@@ -727,11 +796,13 @@ def cu_transpose(gpu_value1, axis):
         src_strides[i] = strides[s]
 
     cdef size_t new_strides[16]
-    for i in range(len(new_shape)):
-        new_strides[i] = np.prod(new_shape[i + 1:], dtype='int')
+
+    s = calc_strides(new_shape)
+    for i in range(len(s)):
+        new_strides[i] = s[i]
 
     cdef VALUE_TYPE * ptr = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
-    size = np.prod(gpu_value1.shape)
+    size = calc_int_prod(gpu_value1.shape)
 
     result = renom.core.GPUValue(shape=new_shape)
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > result._ptr
