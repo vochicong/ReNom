@@ -2,13 +2,31 @@
 # encoding: utf-8
 from __future__ import division, print_function
 import numpy as np
-from renom.core import get_gpu, Node
+from renom.core import get_gpu, Node, Variable
 from renom.operation import sqrt
 from renom.cuda.cuda import is_cuda_active
+from abc import ABCMeta, abstractmethod
+from future.utils import with_metaclass
+from renom.cuda import cuda as cu
 
 
-class Optimizer(object):
-    pass
+
+class Optimizer(with_metaclass(ABCMeta, object)):
+
+    # Called by update_node in core.py
+    def __call__(self, *args, **kwargs):
+        if is_cuda_active():
+            return self._get_gpu(*args, **kwargs)
+        else:
+            return self._get_cpu(*args, **kwargs)
+
+    @abstractmethod
+    def _get_cpu(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def _get_gpu(self, *args, **kwargs):
+        pass
 
 
 class Sgd(Optimizer):
@@ -39,11 +57,11 @@ class Sgd(Optimizer):
     '''
 
     def __init__(self, lr=0.1, momentum=0.4):
-        self._lr = lr
-        self._momentum = momentum
+        self._lr = Variable(np.array(lr))
+        self._momentum = Variable(np.array(lr))
         self._params = {}
 
-    def __call__(self, dy, node):
+    def _get_cpu(self, dy, node):
 
         node_id = id(node)
         pdy = self._params.get(node_id, 0)
@@ -53,6 +71,21 @@ class Sgd(Optimizer):
         if isinstance(ret, Node):
             ret.detach_graph()
         return ret
+
+    def _get_gpu(self, dy, node):
+
+        node_id = id(node)
+        pdy = self._params.get(node_id, Variable(0))
+        h = get_gpu(dy).empty_like_me()
+        cu.cu_optimizer_sgd(get_gpu(self._lr), get_gpu(dy), get_gpu(self._momentum), get_gpu(pdy), h)
+        #ret = get_gpu(self._lr) * get_gpu(dy) + get_gpu(self._momentum) * get_gpu(pdy)
+
+        if self._momentum > 0:
+            self._params[node_id] = h
+        return h
+
+    def reset(self):
+        self._params = {}
 
 
 class Adagrad(Optimizer):
@@ -71,7 +104,7 @@ class Adagrad(Optimizer):
         self._epsilon = epsilon
         self._params = {}
 
-    def __call__(self, dy, node):
+    def _get_cpu(self, dy, node):
         node_id = id(node)
         pdy = self._params.get(node_id, 0)
         r = pdy + dy**2
@@ -105,7 +138,7 @@ class Rmsprop(Optimizer):
         self._epsilon = epsilon
         self._params = {}
 
-    def __call__(self, dy, node):
+    def _get_cpu(self, dy, node):
         node_id = id(node)
         pdy = self._params.get(node_id, 0)
         r = self._g * pdy + (1 - self._g) * (dy**2)
@@ -148,7 +181,7 @@ class Adam(Optimizer):
 
     CHECK_ZERO_VALUE = 100
 
-    def __call__(self, dy, node):
+    def _get_cpu(self, dy, node):
         node_id = id(node)
         pdy = self._params.get(node_id, None)
         nth = 0

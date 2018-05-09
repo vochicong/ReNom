@@ -3,7 +3,7 @@
 """
 関数命名規則
 関数名: cu〜    (python側から呼ばれる関数)
-        
+
 引数名: gpu_value
 """
 import numpy as np
@@ -876,3 +876,8 @@ def cu_set_item(value, valuesize, gpu_value1, slices, strides, broadcasted_strid
         infos.broadcasted_strides[i] = b
 
     thrust_setitem(ptr1, valuesize, ptr2, & infos)
+
+
+def cu_optimizer_sgd(learning_rate, dy, momentum, previous_dy):
+    H = 
+    pass
