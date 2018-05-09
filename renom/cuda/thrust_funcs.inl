@@ -1413,28 +1413,25 @@ namespace renom{
     }
 
 
-    /*
 
-    __global__ void cuda_forward_gru(int H, int W, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
+
+    __global__ void cuda_forward_gru(int H, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
                                       VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
-      int off = (idx / M);
+      int ypos = idx / M;
+      int xpos = idx - ypos * M;
       if (idx < M * H) {
-        ABC[idx + off * W] = input[idx + off * W] + hminus[idx + off * M] * u[idx];
-
-        ABC[idx + M + off * W] = input[idx + M + off * W] + hminus[idx + off * M] * u[idx + M];
-
-        ABC[idx + M * 2 + off * W] = input[idx + M * 2 + off * W] + hminus[idx + off * M] * u[idx + M * 2] \
-                    * (1.0 / (1.0 + exp(-ABC[idx + M + off * W])));
-
-        h[idx + off * M] = (1.0 / (1.0 + exp(-ABC[idx + off * W]))) + tanh(ABC[idx + M * 2 + off * W]);
+        ABC[xpos + ypos*Y] = input[xpos + ypos*Y] + hminus[xpos + ypos*M] * u[xpos];
+        ABC[xpos+M + ypos*Y] = input[xpos+M + ypos*Y] + hminus[xpos + ypos*M] * u[xpos+M];
+        ABC[xpos+M*2 + ypos*Y] = input[xpos+M*2 + ypos*Y] + hminus[xpos + ypos*M] * u[xpos+M*2] * (1.0/(1.0+exp(-ABC[xpos+M + ypos*Y])));
+        h[xpos + ypos*M] = (1.0/(1.0+exp(-ABC[xpos + ypos*Y]))) + tanh(ABC[xpos+M*2 + ypos*Y]);
       }
     }
 
-    */
 
 
+    /*
 
     __global__ void cuda_forward_gru(int H, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
                                       VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
@@ -1450,7 +1447,7 @@ namespace renom{
       }
     }
 
-    
+    */
 
     void thrust_forward_gru(int X, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus, VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
     {

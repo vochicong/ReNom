@@ -63,8 +63,11 @@ def onehot(shape):
 
 
 def compare(func, node, *args):
+    bm.startTiming('Auto Differentiation')
     ad = auto_diff(func, node, *args)
+    bm.newTiming('Numeric Differentiation')
     nd = numeric_diff(func, node, *args)
+    bm.endTiming()
     print("ad = \n{}".format(ad))
     print("nd = \n{}".format(nd))
     print("difference = \n{}".format(ad - nd))
@@ -576,8 +579,8 @@ def test_gru(node):#, use_gpu):
     for k in layer1.params.keys():
         print("Finding gradient value for d{}, GPU".format(k))
         compare(func, layer1.params[k], node)
-    #bm.getTimes()
-    #assert False
+    bm.getTimes()
+    assert False
 
 
 @pytest.mark.parametrize("node", [
