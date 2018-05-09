@@ -878,6 +878,12 @@ def cu_set_item(value, valuesize, gpu_value1, slices, strides, broadcasted_strid
     thrust_setitem(ptr1, valuesize, ptr2, & infos)
 
 
-def cu_optimizer_sgd(learning_rate, dy, momentum, previous_dy):
-    H = 
-    pass
+def cu_optimizer_sgd(learning_rate, dy, momentum, previous_dy, new_dy):
+    cdef int H = dy.shape[0]
+    cdef int W = dy.shape[1]
+    cdef VALUE_TYPE lr = learning_rate
+    cdef VALUE_TYPE mo = momentum
+    cdef VALUE_TYPE * ptr_dy = <VALUE_TYPE * > < uintptr_t > dy._ptr
+    cdef VALUE_TYPE * ptr_pdy = <VALUE_TYPE * > < uintptr_t > previous_dy._ptr
+    cdef VALUE_TYPE * ptr_ndy = <VALUE_TYPE * > < uintptr_t > new_dy._ptr
+    thrust_optimizer_sgd(H, W, lr, ptr_dy, mo, ptr_pdy, ptr_ndy)

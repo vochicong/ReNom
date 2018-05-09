@@ -1576,8 +1576,18 @@ namespace renom{
         }
     }
 
-    void thrust_optimizer_sgd()
+    __global__ void cuda_optimizer_sgd(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy)
     {
-      
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx < H * W) {
+        ndy[idx] = dy[idx] * learning_rate + pdy[idx] * momentum;
+      }
+    }
+
+    void thrust_optimizer_sgd(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy)
+    {
+      if(H * W) {
+        cuda_optimizer_sgd <<<(H*W)/256.0 + 1, 256>>> (H, W, learning_rate, dy, momentum, pdy, ndy);
+      }
     }
 }

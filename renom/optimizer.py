@@ -57,8 +57,8 @@ class Sgd(Optimizer):
     '''
 
     def __init__(self, lr=0.1, momentum=0.4):
-        self._lr = Variable(np.array(lr))
-        self._momentum = Variable(np.array(lr))
+        self._lr = lr
+        self._momentum = momentum
         self._params = {}
 
     def _get_cpu(self, dy, node):
@@ -76,13 +76,12 @@ class Sgd(Optimizer):
 
         node_id = id(node)
         pdy = self._params.get(node_id, Variable(0))
-        h = get_gpu(dy).empty_like_me()
-        cu.cu_optimizer_sgd(get_gpu(self._lr), get_gpu(dy), get_gpu(self._momentum), get_gpu(pdy), h)
-        #ret = get_gpu(self._lr) * get_gpu(dy) + get_gpu(self._momentum) * get_gpu(pdy)
+        ndy = get_gpu(dy).empty_like_me()
+        cu.cu_optimizer_sgd(self._lr, get_gpu(dy), self._momentum, get_gpu(pdy), ndy)
 
         if self._momentum > 0:
-            self._params[node_id] = h
-        return h
+            self._params[node_id] = ndy
+        return ndy
 
     def reset(self):
         self._params = {}
