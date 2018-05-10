@@ -77,7 +77,7 @@ class Sgd(Optimizer):
         node_id = id(node)
         pdy = self._params.get(node_id, Variable(0))
         ndy = get_gpu(dy).empty_like_me()
-        cu.cu_optimizer_sgd(self._lr, get_gpu(dy), self._momentum, get_gpu(pdy), ndy)
+        cu.cu_optimizer_sgd(self._lr, self._momentum, get_gpu(dy), get_gpu(pdy), ndy)
 
         if self._momentum > 0:
             self._params[node_id] = ndy
@@ -113,6 +113,18 @@ class Adagrad(Optimizer):
             ret.detach_graph()
         return ret
 
+    def _get_gpu(self, dy, node):
+        node_id = id(node)
+        pdy = self._params.get(node_id, get_gpu(dy).zeros_like_me())
+        ndy = get_gpu(dy).empty_like_me()
+        r = get_gpu(pdy).empty_like_me()
+        cu.cu_optimizer_adagrad(self._lr, self._epsilon, get_gpu(dy), get_gpu(pdy), ndy, r)
+        self._params[node_id] = r
+        return ndy
+
+    def reset(self):
+        self._params = {}
+
 
 class Rmsprop(Optimizer):
     '''Rmsprop described by following formula. [Rmsprop]_
@@ -146,6 +158,18 @@ class Rmsprop(Optimizer):
         if isinstance(ret, Node):
             ret.detach_graph()
         return ret
+
+    def _get_gpu(self, dy, node):
+        node_id = id(node)
+        pdy = self._params.get(node_id, get_gpu(dy).zeros_like_me())
+        ndy = get_gpu(dy).empty_like_me()
+        r = get_gpu(pdy).empty_like_me()
+        cu.cu_optimizer_rmsprop(self._lr, self._epsilon, self._g, get_gpu(dy), get_gpu(pdy), ndy, r)
+        self._params[node_id] = r
+        return ndy
+
+    def reset(self):
+        self._params = {}
 
 
 class Adam(Optimizer):
@@ -218,3 +242,45 @@ class Adam(Optimizer):
             ret.detach_graph()
 
         return ret
+
+    def _get_gpu(self, dy, node):
+        node_id = id(node)
+        pdy = self._params.get(node_id, None)
+        nth = 0
+        if pdy is None:
+            b = self._b
+            g = self._g
+            u = (1 - self._b) * dy
+            r = (1 - self._g) * (dy**2)
+        else:
+            u = pdy["u"]
+            r = pdy["r"]
+            b = pdy["beta"]
+            g = pdy["ganma"]
+            nth = pdy["nth"]
+
+            if nth % self.CHECK_ZERO_VALUE == 0:
+                if not is_cuda_active():
+                    min_flug = np.where(np.abs(u) < self._min, True, False)
+                    min_flug = np.where(np.abs(r) < self._min, True, False)
+                    u.setflags(write=True)
+                    r.setflags(write=True)
+                    u[min_flug] = 0
+                    r[min_flug] = 0
+            u = self._b * u + (1 - self._b) * dy
+            r = self._g * r + (1 - self._g) * (dy**2)
+
+        self._params[node_id] = {"beta": b * self._b,
+                                 "ganma": g * self._g,
+                                 "u": u,
+                                 "r": r,
+                                 "nth": nth + 1}
+
+        ret = self._lr * u / (sqrt(r / (1 - g)) + self._epsilon) / (1 - b)
+        if isinstance(ret, Node):
+            ret.detach_graph()
+
+        return get_gpu(ret)
+
+    def reset(self):
+        self._params = {}
