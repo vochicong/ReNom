@@ -918,7 +918,7 @@ def test_max(node, axis, use_gpu, keep_dimensions):
     compare(func4, node, node)
 
     # A simple check to see if we actually return the maximum
-    renom_max = rm.amax(node, axis=axis, keepdims=keep_dimensions)
+    renom_max = rm.amax(node, axis=axis, keepdims=keep_dimensions).as_ndarray()
     numpy_max = np.amax(node, axis=axis, keepdims=keep_dimensions)
     assert np.allclose(renom_max, numpy_max, atol=1e-5, rtol=1e-3)
 
@@ -970,7 +970,7 @@ def test_min(node, axis, use_gpu, keep_dimensions):
 
     def func(node):
         return sum(rm.amin(node, axis, keepdims=keep_dimensions))
-    renom_min = rm.amin(node, axis=axis, keepdims=keep_dimensions)
+    renom_min = rm.amin(node, axis=axis, keepdims=keep_dimensions).as_ndarray()
     numpy_min = np.amin(node, axis=axis, keepdims=keep_dimensions)
     assert np.allclose(renom_min, numpy_min, atol=1e-5, rtol=1e-3)
     compare(func, node, node)
