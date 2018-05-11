@@ -121,17 +121,11 @@ class Grads:
 
     def update_node(self, node, opt=None):
         import time
-        f = time.time()
         if node.prevent_update:
             return
 
         with self.unlock_node(node):
-            f1 = time.time()
-
             dy = self.get(node) if opt is None else opt(self.get(node), node)
-
-            f2 = time.time()
-
             if node._auto_update:
                 if callable(node.auto_update):
                     node.auto_update(dy)
@@ -141,7 +135,6 @@ class Grads:
                         ngpu -= get_gpu(dy)
                     else:
                         node[...] -= dy
-            f3 = time.time()
             node.detach_graph()
 
     def update(self, opt=None, models=()):
@@ -1544,8 +1537,6 @@ class Add(BinOp):
             self.attrs._lhs._update_diff(context, l_dx, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
-        gdy = get_gpu(dy)
-
         if isinstance(self.attrs._rhs, Node):
             rhs = get_gpu(self.attrs._rhs)
 
