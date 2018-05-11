@@ -1622,8 +1622,25 @@ namespace renom{
         cuda_optimizer_rmsprop<<<(H*W)/256.0 + 1, 256>>>(H, W, learning_rate, dy, eps, gamma, pdy, ndy, r);
       }
     }
-    void thrust_optimizer_adam(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE *pdy, VALUE_TYPE *ndy)
-    {
 
+    __global__ void cuda_optimizer_adam(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE gamma_orig, VALUE_TYPE beta, VALUE_TYPE beta_orig, VALUE_TYPE min, bool flug, VALUE_TYPE *u, VALUE_TYPE *r, VALUE_TYPE *ndy)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx < H * W) {
+        if (flug && (u[idx] < min || r[idx] < min)) {
+          u[idx] = 0;
+          r[idx] = 0;
+        }
+        u[idx] = beta_orig * u[idx] + (1-beta_orig) * dy[idx];
+        r[idx] = gamma_orig * r[idx] + (1-gamma_orig) * dy[idx] * dy[idx];
+        ndy[idx] = learning_rate * u[idx] / (sqrt(r[idx] / (1 - gamma)) + eps) / (1 - beta);
+      }
+    }
+
+    void thrust_optimizer_adam(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE gamma_orig, VALUE_TYPE beta, VALUE_TYPE beta_orig, VALUE_TYPE min, bool flug, VALUE_TYPE *u, VALUE_TYPE *r, VALUE_TYPE *ndy)
+    {
+      if(H * W) {
+        cuda_optimizer_adam<<<(H*W)/256.0 + 1, 256>>>(H, W, learning_rate, dy, eps, gamma, gamma_orig, beta, beta_orig, min, flug, u, r, ndy);
+      }
     }
 }

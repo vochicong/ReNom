@@ -10,7 +10,6 @@ from future.utils import with_metaclass
 from renom.cuda import cuda as cu
 
 
-
 class Optimizer(with_metaclass(ABCMeta, object)):
 
     # Called by update_node in core.py
@@ -250,8 +249,8 @@ class Adam(Optimizer):
         if pdy is None:
             b = self._b
             g = self._g
-            u = (1 - self._b) * dy
-            r = (1 - self._g) * (dy**2)
+            u = get_gpu(dy).zeros_like_me()
+            r = get_gpu(dy).zeros_like_me()
         else:
             u = pdy["u"]
             r = pdy["r"]
@@ -259,16 +258,9 @@ class Adam(Optimizer):
             g = pdy["ganma"]
             nth = pdy["nth"]
 
-            if nth % self.CHECK_ZERO_VALUE == 0:
-                if not is_cuda_active():
-                    min_flug = np.where(np.abs(u) < self._min, True, False)
-                    min_flug = np.where(np.abs(r) < self._min, True, False)
-                    u.setflags(write=True)
-                    r.setflags(write=True)
-                    u[min_flug] = 0
-                    r[min_flug] = 0
-            u = self._b * u + (1 - self._b) * dy
-            r = self._g * r + (1 - self._g) * (dy**2)
+        ndy = get_gpu(dy).empty_like_me()
+        cu.cu_optimizer_adam(self._lr, self._epsilon, g, self._g, b, self._b, self._min, nth %
+                             self.CHECK_ZERO_VALUE == 0, get_gpu(u), get_gpu(r), get_gpu(dy), ndy)
 
         self._params[node_id] = {"beta": b * self._b,
                                  "ganma": g * self._g,
@@ -276,11 +268,7 @@ class Adam(Optimizer):
                                  "r": r,
                                  "nth": nth + 1}
 
-        ret = self._lr * u / (sqrt(r / (1 - g)) + self._epsilon) / (1 - b)
-        if isinstance(ret, Node):
-            ret.detach_graph()
-
-        return get_gpu(ret)
+        return ndy
 
     def reset(self):
         self._params = {}
