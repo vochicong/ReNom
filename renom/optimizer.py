@@ -74,7 +74,7 @@ class Sgd(Optimizer):
     def _get_gpu(self, dy, node):
 
         node_id = id(node)
-        pdy = self._params.get(node_id, Variable(0))
+        pdy = self._params.get(node_id, get_gpu(dy).zeros_like_me())
         ndy = get_gpu(dy).empty_like_me()
         cu.cu_optimizer_sgd(self._lr, self._momentum, get_gpu(dy), get_gpu(pdy), ndy)
 
@@ -105,7 +105,7 @@ class Adagrad(Optimizer):
     def _get_cpu(self, dy, node):
         node_id = id(node)
         pdy = self._params.get(node_id, 0)
-        r = pdy + dy**2
+        r = pdy + dy * dy
         ret = self._lr * dy / (np.sqrt(r) + self._epsilon)
         self._params[node_id] = r
         if isinstance(ret, Node):
@@ -216,7 +216,7 @@ class Adam(Optimizer):
             u = pdy["u"]
             r = pdy["r"]
             b = pdy["beta"]
-            g = pdy["ganma"]
+            g = pdy["gamma"]
             nth = pdy["nth"]
 
             if nth % self.CHECK_ZERO_VALUE == 0:
@@ -228,10 +228,10 @@ class Adam(Optimizer):
                     u[min_flug] = 0
                     r[min_flug] = 0
             u = self._b * u + (1 - self._b) * dy
-            r = self._g * r + (1 - self._g) * (dy**2)
+            r = self._g * r + (1 - self._g) * (dy * dy)
 
         self._params[node_id] = {"beta": b * self._b,
-                                 "ganma": g * self._g,
+                                 "gamma": g * self._g,
                                  "u": u,
                                  "r": r,
                                  "nth": nth + 1}
@@ -239,7 +239,6 @@ class Adam(Optimizer):
         ret = self._lr * u / (sqrt(r / (1 - g)) + self._epsilon) / (1 - b)
         if isinstance(ret, Node):
             ret.detach_graph()
-
         return ret
 
     def _get_gpu(self, dy, node):
@@ -255,7 +254,7 @@ class Adam(Optimizer):
             u = pdy["u"]
             r = pdy["r"]
             b = pdy["beta"]
-            g = pdy["ganma"]
+            g = pdy["gamma"]
             nth = pdy["nth"]
 
         ndy = get_gpu(dy).empty_like_me()
@@ -263,7 +262,7 @@ class Adam(Optimizer):
                              self.CHECK_ZERO_VALUE == 0, get_gpu(u), get_gpu(r), get_gpu(dy), ndy)
 
         self._params[node_id] = {"beta": b * self._b,
-                                 "ganma": g * self._g,
+                                 "gamma": g * self._g,
                                  "u": u,
                                  "r": r,
                                  "nth": nth + 1}

@@ -12,7 +12,7 @@ class mean_squared_error(BinOp):
     def _oper_cpu(cls, lhs, rhs):
         assert rhs.ndim > 1, "Input arrays must have no less than 2 dimension."
         N = len(lhs)
-        return np.sum((lhs - rhs) ** 2) / (N)
+        return np.sum((lhs - rhs) ** 2) / (N * 2)
 
     @classmethod
     def _oper_gpu(cls, lhs, rhs):

@@ -937,5 +937,5 @@ def cu_optimizer_adam(learning_rate, epsilon, gamma, gamma_orig, beta, beta_orig
     cdef VALUE_TYPE * ptr_r = <VALUE_TYPE * > < uintptr_t > r._ptr
     cdef VALUE_TYPE * ptr_dy = <VALUE_TYPE * > < uintptr_t > dy._ptr
     cdef VALUE_TYPE * ptr_ndy = <VALUE_TYPE * > < uintptr_t > new_dy._ptr
-    thrust_optimizer_adam(Elems, lr, ptr_dy, eps, g, gamma_orig, b,
-                          beta_orig, min, flug, ptr_u, ptr_r, ptr_ndy)
+    thrust_optimizer_adam(Elems, lr, ptr_dy, eps, g, go, b,
+                          bo, min, flug, ptr_u, ptr_r, ptr_ndy)
