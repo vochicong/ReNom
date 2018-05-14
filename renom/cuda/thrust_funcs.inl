@@ -1576,57 +1576,57 @@ namespace renom{
         }
     }
 
-    __global__ void cuda_optimizer_sgd(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy)
+    __global__ void cuda_optimizer_sgd(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
-      if (idx < H * W) {
+      if (idx < Elems) {
         ndy[idx] = dy[idx] * learning_rate + pdy[idx] * momentum;
       }
     }
 
-    void thrust_optimizer_sgd(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy)
+    void thrust_optimizer_sgd(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy)
     {
-      if(H * W) {
-        cuda_optimizer_sgd <<<(H*W)/256.0 + 1, 256>>> (H, W, learning_rate, dy, momentum, pdy, ndy);
+      if(Elems) {
+        cuda_optimizer_sgd <<<(Elems)/256.0 + 1, 256>>> (Elems, learning_rate, dy, momentum, pdy, ndy);
       }
     }
 
-    __global__ void cuda_optimizer_adagrad(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE epsilon, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
+    __global__ void cuda_optimizer_adagrad(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE epsilon, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
-      if (idx < H * W) {
+      if (idx < Elems) {
         r[idx] = pdy[idx] + dy[idx] * dy[idx];
         ndy[idx] = learning_rate * dy[idx] / (sqrt(r[idx]) + epsilon);
       }
     }
 
-    void thrust_optimizer_adagrad(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
+    void thrust_optimizer_adagrad(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
     {
-      if(H * W) {
-        cuda_optimizer_adagrad<<<(H*W)/256.0 + 1, 256>>>(H, W, learning_rate, dy, eps, pdy, ndy, r);
+      if(Elems) {
+        cuda_optimizer_adagrad<<<(Elems)/256.0 + 1, 256>>>(Elems, learning_rate, dy, eps, pdy, ndy, r);
       }
     }
 
-    __global__ void cuda_optimizer_rmsprop(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE epsilon, VALUE_TYPE gamma, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
+    __global__ void cuda_optimizer_rmsprop(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE epsilon, VALUE_TYPE gamma, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
-      if (idx < H * W) {
+      if (idx < Elems) {
         r[idx] = gamma * pdy[idx] + (1-gamma)*dy[idx]*dy[idx];
         ndy[idx] = learning_rate * dy[idx] / (sqrt(r[idx]) + epsilon);
       }
     }
 
-    void thrust_optimizer_rmsprop(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
+    void thrust_optimizer_rmsprop(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
     {
-      if(H * W) {
-        cuda_optimizer_rmsprop<<<(H*W)/256.0 + 1, 256>>>(H, W, learning_rate, dy, eps, gamma, pdy, ndy, r);
+      if(Elems) {
+        cuda_optimizer_rmsprop<<<(Elems)/256.0 + 1, 256>>>(Elems, learning_rate, dy, eps, gamma, pdy, ndy, r);
       }
     }
 
-    __global__ void cuda_optimizer_adam(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE gamma_orig, VALUE_TYPE beta, VALUE_TYPE beta_orig, VALUE_TYPE min, bool flug, VALUE_TYPE *u, VALUE_TYPE *r, VALUE_TYPE *ndy)
+    __global__ void cuda_optimizer_adam(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE gamma_orig, VALUE_TYPE beta, VALUE_TYPE beta_orig, VALUE_TYPE min, bool flug, VALUE_TYPE *u, VALUE_TYPE *r, VALUE_TYPE *ndy)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
-      if (idx < H * W) {
+      if (idx < Elems) {
         if (flug && (u[idx] < min || r[idx] < min)) {
           u[idx] = 0;
           r[idx] = 0;
@@ -1637,10 +1637,10 @@ namespace renom{
       }
     }
 
-    void thrust_optimizer_adam(int H, int W, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE gamma_orig, VALUE_TYPE beta, VALUE_TYPE beta_orig, VALUE_TYPE min, bool flug, VALUE_TYPE *u, VALUE_TYPE *r, VALUE_TYPE *ndy)
+    void thrust_optimizer_adam(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE gamma_orig, VALUE_TYPE beta, VALUE_TYPE beta_orig, VALUE_TYPE min, bool flug, VALUE_TYPE *u, VALUE_TYPE *r, VALUE_TYPE *ndy)
     {
-      if(H * W) {
-        cuda_optimizer_adam<<<(H*W)/256.0 + 1, 256>>>(H, W, learning_rate, dy, eps, gamma, gamma_orig, beta, beta_orig, min, flug, u, r, ndy);
+      if(Elems) {
+        cuda_optimizer_adam<<<(Elems)/256.0 + 1, 256>>>(Elems, learning_rate, dy, eps, gamma, gamma_orig, beta, beta_orig, min, flug, u, r, ndy);
       }
     }
 }
