@@ -3,6 +3,8 @@
 from __future__ import division
 import warnings
 import numpy as np
+from renom.core import get_gpu, Node
+from renom.cuda import is_cuda_active
 
 
 class Distributor(object):
@@ -139,6 +141,50 @@ class NdarrayDistributor(Distributor):
                 self.__class__(x=self._data_x[perm[ts_flag]],
                                y=self._data_y[perm[ts_flag]],
                                data_table=self._data_table)
+
+class GPUDistributor(Distributor):
+
+        '''
+        Derived class of Distributor which manages GPUData data.
+
+        Args:
+            x (ndarray): Input data.
+            y (ndarray): Target data.
+        '''
+
+        def __init__(self, x, y):
+            assert is_cuda_active(), "Cuda must be activated to use GPU distributor"
+            super(GPUDistributor, self).__init__(x=get_gpu(x), y=get_gpu(y))
+            assert len(x) == len(y), "Input batches must have same number as output batches"
+            self._data_size = len(x)
+
+        def __getitem__(self, index):
+            return super(GPUDistributor, self).__getitem__(self, index)
+
+        def kfold(self, num=4, overlap=False, shuffle=True):
+            return super(GPUDistributor, self).kfold(self, num, overlap, shuffle)
+
+        def batch(self, batch_size, shuffle=True):
+            generator = super(GPUDistributor, self).batch(batch_size, shuffle)
+            notEmpty = True
+            first = True
+            while(notEmpty):
+                try:
+                    if(first):
+                        b1 = next(generator)
+                        x1, y1 = get_gpu(b1[0]), get_gpu(b1[1])
+                        first = False
+                    b2 = next(generator)
+                    x2, y2 = get_gpu(b2[0]), get_gpu(b2[1])
+                    yield Node(x1), Node(y1)
+                    x1, y1 = x2, y2
+                except StopIteration:
+                    notEmpty = False
+                yield Node(x2), Node(y2)
+
+
+        def split(self, ratio=0.8, shuffle=True):
+            return super(GPUDistributor, self).split(self, batch_size, shuffle)
 
 
 class TimeSeriesDistributor(NdarrayDistributor):

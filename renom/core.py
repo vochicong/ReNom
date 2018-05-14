@@ -652,6 +652,15 @@ class GPUValue(object):
     def hsplit(self, indices_or_sections):
         return self.split(indices_or_sections, 1)
 
+    def __len__(self):
+        if self.shape:
+            len = 1
+            for v in self.shape:
+                len *= v
+            return len
+        else:
+            return 0
+
     def __pos__(self):
         return self.copy()
 
