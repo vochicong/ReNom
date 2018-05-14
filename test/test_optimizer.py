@@ -91,14 +91,13 @@ def gpu_check(opt):
     dy_gpu.to_cpu()
 
     close(dy_gpu, dy_cpu)
-    #assert False, '\033[1;37;43mPassed!'
 
 
 def test_sgd_correct():
-    set_cuda_active(True)
     optimizer_check(Sgd())
 
 
+@test_utility.skipgpu
 def test_sgd_gpu():
     gpu_check(Sgd())
 
@@ -107,6 +106,7 @@ def test_Adagrad_correct():
     optimizer_check(Adagrad())
 
 
+@test_utility.skipgpu
 def test_Adagrad_gpu():
     gpu_check(Adagrad())
 
@@ -115,6 +115,7 @@ def test_Rmsprop_correct():
     optimizer_check(Rmsprop())
 
 
+@test_utility.skipgpu
 def test_Rmsprop_gpu():
     gpu_check(Rmsprop())
 
@@ -123,5 +124,6 @@ def test_Adam_correct():
     optimizer_check(Adam())
 
 
+@test_utility.skipgpu
 def test_Adam_gpu():
     gpu_check(Adam())
