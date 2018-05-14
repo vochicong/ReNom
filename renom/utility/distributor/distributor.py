@@ -173,7 +173,7 @@ class GPUDistributor(Distributor):
                     if(first):
                         b1 = next(generator)
                         x1, y1 = get_gpu(b1[0]), get_gpu(b1[1])
-                        first = False
+                        first = True
                     b2 = next(generator)
                     x2, y2 = get_gpu(b2[0]), get_gpu(b2[1])
                     yield Node(x1), Node(y1)
