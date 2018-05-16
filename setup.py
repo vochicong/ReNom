@@ -3,6 +3,8 @@ import os
 from setuptools import find_packages, setup, Extension
 
 from Cython.Distutils import build_ext as orig_build_ext
+from Cython.Build import cythonize
+
 from distutils.command.build_clib import build_clib
 from distutils.dep_util import newer_group
 import distutils.dist
@@ -225,6 +227,16 @@ def setup_cuda():
                                   include_dirs=includes,
                                   )
 
+    ext_gpuvalue = Extension('renom.cuda.gpuvalue',
+                                  sources=['renom/cuda/gpuvalue.py'],
+                                  depends=cuda_depends,
+                                  libraries=['cublas', 'cuda', 'cudart'],
+                                  library_dirs=libraries,
+                                  language='c++',
+                                  include_dirs=includes,
+                                  )
+
+
     global ext_modules, cuda_sources
 
     ext_modules = [ext_base,
@@ -233,7 +245,9 @@ def setup_cuda():
                    ext_cudnn,
                    ext_curand,
                    ext_thrust_float,
-                   ext_thrust_double]
+                   ext_thrust_double,
+                   ext_gpuvalue,
+                   ]
 
     cuda_sources = [('cuda_misc_a',
                      {'sources': [
@@ -246,7 +260,17 @@ def setup_cuda():
                       })]
 
 
+
+
+
+#def setup_pp():
+#    modules = ('renom/cuda/gpuvalue.py',
+#              )
+#    for m in modules:
+#        ext_modules.extend(cythonize(m, language='c++'))
+
 setup_cuda()
+#setup_pp()
 
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
