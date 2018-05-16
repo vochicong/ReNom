@@ -11,7 +11,6 @@ from renom.cuda import *
 from renom.cuda.gpuvalue import *
 
 
-
 class Grads:
     '''Grads class. This class contains gradients of each Node object.
 
@@ -160,8 +159,6 @@ class Grads:
                 for node in model.params.values():
                     if id(node) in self.variables:
                         self.update_node(node, opt)
-
-
 
 
 def to_value(array):
@@ -872,19 +869,6 @@ def cu_broad_cast(hs, dy):
                 dy = cusum(dy, axis=tuple(axis))
             dy = dy.reshape(hs.shape)
     return dy
-
-
-#def get_gpu(array):
-#    f = getattr(array, 'get_gpu', None)
-#    if f:
-#        return f()
-#
-#    if isinstance(array, np.ndarray):
-#        return GPUValue(array=array)
-#    elif isinstance(array, Number):
-#        return array
-#    else:
-#        raise Exception("Gpu not supported data type.")
 
 
 class Add(BinOp):
@@ -1650,5 +1634,3 @@ class Amin(Abase):
         value = cu_reduce_min(array, axis, keepdims)
         index = cu_reduce_argmin(array, axis)
         return value, index
-
-

@@ -72,7 +72,6 @@ def disable_cuda(is_disabled=True):
         _cuda_is_disabled = cur
 
 
-
 _CuRandGens = {}
 
 

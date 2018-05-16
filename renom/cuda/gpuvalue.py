@@ -352,6 +352,7 @@ def _build_broadcast_mask(left, right):
 
     return mask, right
 
+
 class GPUValue(object):
     def __init__(self, array=None, shape=None, ptr=None, dtype=None):
         self._ptr = None
@@ -463,7 +464,6 @@ class GPUValue(object):
         # todo: value.flatten() copies buffer
         with use_device(self.device_id):
             self._ptr.memcpyH2D(value.ravel(), value.nbytes)
-
 
     def copy_from(self, other):
         self._ptr.copy_from(other._ptr, self.nbytes)
@@ -593,7 +593,7 @@ class GPUValue(object):
             assert getattr(self, "shape", (1,)) == getattr(self, "shape", (1,))
             cublas.cublas_axpy(-get_gpu(other), get_gpu(self))
             return self
-    
+
     def _oper_pow(self, other):
         if not isinstance(self, GPUValue):
             return other.__rpow__(self, modulo)
@@ -661,7 +661,6 @@ class GPUValue(object):
             return clone
 
 
-
 try:
     from graphviz import Digraph
 except ImportError:
@@ -670,7 +669,8 @@ except ImportError:
 
 
 ACTIVE_GPU = None
-ACTIVE_NODE= None
+ACTIVE_NODE = None
+
 
 def DEBUG_GRAPH_INIT(active):
     global ACTIVE_GPU, ACTIVE_NODE
@@ -785,5 +785,3 @@ def _plot_graph(objs):
         add_edge(n)
 
     g.view()
-
-
