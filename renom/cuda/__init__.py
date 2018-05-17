@@ -13,6 +13,10 @@ except ImportError as e:
     curand_generator = None
     _has_cuda = False
 
+    @contextlib.contextmanager
+    def use_device(device_id):
+        yield
+
 _cuda_is_active = False
 _cuda_is_disabled = False
 

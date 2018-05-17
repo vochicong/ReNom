@@ -1,15 +1,18 @@
 import weakref
 from numbers import Number
 import itertools
+import collections
 import cython
 import numpy as np
 
-from . import is_cuda_active, use_device
-from .thrust import *
-from .cuda_base import *
-from . import cuda_base
-from . import cublas
-
+try:
+    from . import is_cuda_active, use_device
+    from .thrust import *
+    from .cuda_base import *
+    from . import cuda_base
+    from . import cublas
+except ImportError:
+    pass
 
 def _select_device(device_id):
     cur = cuGetDevice()
@@ -608,7 +611,7 @@ class GPUValue(object):
         return self._oper_pow(other)
 
     if not cython.compiled:
-        __pow__ = _oper_pow
+        __pow__ = _oper_pow  # noqa
 
     def __rpow__(self, other, modulo):
         with use_device(self.device_id):
