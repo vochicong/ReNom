@@ -14,6 +14,7 @@ try:
 except ImportError:
     pass
 
+
 def _select_device(device_id):
     cur = cuGetDevice()
     cuSetDevice(device_id)  # switch device
