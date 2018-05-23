@@ -1208,7 +1208,6 @@ class RLshift(Lshift):
         return cls._oper_cpu(lhs, rhs)
 
 
-
 class Rshift(BinOp):
 
     @classmethod
@@ -1235,7 +1234,6 @@ class RRshift(Lshift):
     @classmethod
     def _oper_gpu(cls, lhs, rhs):
         return cls._oper_cpu(lhs, rhs)
-
 
 
 class And(BinOp):
@@ -1267,7 +1265,6 @@ class RAnd(Lshift):
 
     def _backward_gpu(self, context, dy, **kwargs):
         self._backward_cpu(context, dy, **kwargs)
-
 
 
 class Xor(BinOp):
@@ -1338,15 +1335,29 @@ class GetItem(BinOp):
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._lhs, Node):
-            zero = np.zeros_like(np.array(self.attrs._lhs))
-            zero[self.attrs._rhs] = np.array(dy)
+            zero = np.zeros_like(to_value(self.attrs._lhs))
+            np.add.at(zero, self.attrs._rhs, to_value(dy))
             self.attrs._lhs._update_diff(context, zero, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._lhs, Node):
-            zero = get_gpu(self.attrs._lhs).zeros_like_me()
-            zero[self.attrs._rhs] = dy
-            self.attrs._lhs._update_diff(context, zero, **kwargs)
+            if self._is_advanced_indexing(self.attrs._lhs, self.attrs._rhs):
+                self._backward_cpu(context, to_value(dy), **kwargs)
+            else:
+                zero = get_gpu(self.attrs._lhs).zeros_like_me()
+                zero[self.attrs._rhs] = dy
+                self.attrs._lhs._update_diff(context, zero, **kwargs)
+
+    def _is_advanced_indexing(self, array, index):
+        if isinstance(index, (int, slice, type(None), type(Ellipsis))):
+            return False
+        elif isinstance(index, tuple):
+            if all([isinstance(o, (int, slice, type(None), type(Ellipsis))) for o in index]):
+                return False
+        elif isinstance(index, np.ndarray):
+            if index.dtype == np.bool:
+                return False
+        return True
 
 
 class GetSlice(Node):

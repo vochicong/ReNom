@@ -974,3 +974,36 @@ def test_min(node, axis, use_gpu, keep_dimensions):
     numpy_min = np.amin(node, axis=axis, keepdims=keep_dimensions)
     assert np.allclose(renom_min, numpy_min, atol=1e-5, rtol=1e-3)
     compare(func, node, node)
+
+
+@pytest.mark.parametrize("node, index, error", [
+    [Variable(rand((2,))), [1, 1], False],
+    [Variable(rand((2,))), [True, False], False],
+    [Variable(rand((2,))), np.array([0, 0]), False],
+    # [Variable(rand((2,))), (True, False), False], TODO: Make this acceptable with gpu.
+    [Variable(rand((2,))), (1, 1), True],
+
+    [Variable(rand((2, 2))), 0, False],
+    [Variable(rand((2, 2))), (0, 1), False],
+    [Variable(rand((2, 2))), (0, slice(None, None, None)), False],
+
+    [Variable(rand((2, 2, 2))), (slice(0, 2), 0, [1, 1]), False],
+    [Variable(rand((2, 2, 2))), ([np.array([0, 0]), [1, 1]]), False],
+    [Variable(rand((2, 2, 4))), ([[0, 0], [1, 1]], slice(0, 1, 2)), False],
+])
+def test_getitem(node, index, error, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(node[index])
+
+    if error:
+        occured = False
+        try:
+            func(node)
+        except:
+            occured = True
+        assert occured
+    else:
+        compare(func, node, node)
