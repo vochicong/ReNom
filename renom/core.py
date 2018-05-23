@@ -801,7 +801,6 @@ class Abs(UnaryOp):
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             arg = to_value(self.attrs._arg)
-            # TODO: 原点における劣微分の定義
             mask = np.where(arg > 0, 1, -1)
             self.attrs._arg._update_diff(context, mask * dy, **kwargs)
 
@@ -836,7 +835,6 @@ class BinOp(Node):
         return ret
 
 
-# TODO:cython化
 def broad_cast(hs, dy):
     if isinstance(hs, np.ndarray):
         shape = list(hs.shape)
@@ -879,12 +877,9 @@ class Add(BinOp):
 
     @classmethod
     def _oper_gpu(cls, lhs, rhs):
-        # TODO:scal vs scalの定義
         return get_gpu(lhs) + get_gpu(rhs)
 
     def _backward_cpu(self, context, dy, **kwargs):
-        # 次元が異なる場合の足し算を定義
-
         if isinstance(self.attrs._rhs, Node):
             r_dx = broad_cast(self.attrs._rhs, dy)
             self.attrs._rhs._update_diff(context, r_dx, **kwargs)
@@ -1078,17 +1073,12 @@ class TrueDiv(Div):
     def _oper_gpu(cls, lhs, rhs):
         return get_gpu(lhs) / get_gpu(rhs)
 
-# TODO:微分定義
-
 
 class RTrueDiv(TrueDiv):
 
     @classmethod
     def _oper_cpu(cls, lhs, rhs):
         return np.ndarray.__rtruediv__(rhs, lhs)
-
-
-# TODO:微分定義
 
 
 class Mod(BinOp):
@@ -1113,8 +1103,6 @@ class RMod(Mod):
     @classmethod
     def _oper_cpu(cls, lhs, rhs):
         return np.ndarray.__rmod__(rhs, lhs)
-
-# TODO:微分定義
 
 
 class DivMod(BinOp):
@@ -1191,8 +1179,6 @@ class RPow(Pow):
     def _oper_gpu(cls, lhs, rhs):
         return get_gpu(lhs) ** get_gpu(rhs)
 
-# TODO:微分定義
-
 
 class Lshift(BinOp):
 
@@ -1221,7 +1207,6 @@ class RLshift(Lshift):
     def _oper_gpu(cls, lhs, rhs):
         return cls._oper_cpu(lhs, rhs)
 
-# TODO:微分定義
 
 
 class Rshift(BinOp):
@@ -1251,7 +1236,6 @@ class RRshift(Lshift):
     def _oper_gpu(cls, lhs, rhs):
         return cls._oper_cpu(lhs, rhs)
 
-# TODO:微分定義
 
 
 class And(BinOp):
@@ -1284,7 +1268,6 @@ class RAnd(Lshift):
     def _backward_gpu(self, context, dy, **kwargs):
         self._backward_cpu(context, dy, **kwargs)
 
-# TODO:微分定義
 
 
 class Xor(BinOp):
@@ -1315,7 +1298,6 @@ class RXor(Lshift):
         return cls._oper_cpu(lhs, rhs)
 
 
-# TODO:微分定義
 class Or(BinOp):
 
     @classmethod
