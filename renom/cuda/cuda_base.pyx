@@ -7,6 +7,7 @@ cimport cython
 from numbers import Number
 from libc.stdlib cimport malloc, free
 from libc.stdint cimport uintptr_t
+from libc.string cimport memcpy
 from cuda_utils cimport _VoidPtr
 from renom.config import precision
 import collections
@@ -24,6 +25,57 @@ def cuMemset(uintptr_t ptr, int value, size_t size):
     runtime_check(cudaMemset(p, value, size))
     return
 
+# Global C-defined variables cannot be accessed from Python
+cdef void * ptrA, * ptrB # TODO: This is not a good solution. Change to pointer of arrays instead.
+cdef cudaEvent_t eventA, eventB # Similar to above
+cdef size_t pin_size = 0 # Make size always word-sized for increased performance in memcpy
+cdef bint usingA = True # Used for switching between different pinned memory spaces when sending
+cdef char toUse = '0' # Used for same purpose as above, inevitably useless but currently used in a bad implementation
+
+
+# This function initiates the pinned memory space based on a sample batch
+# This should be called before trying to pin memory
+def initPinnedMemory(np.ndarray batch_arr):
+    global pin_size, eventA, eventB, ptrA, ptrB
+    if pin_size is not 0:
+      freePinnedMemory()
+    pin_size = <size_t> batch_arr.descr.itemsize*len(batch_arr)
+    runtime_check(cudaMallocHost(&ptrA,pin_size))
+    runtime_check(cudaMallocHost(&ptrB,pin_size))
+    runtime_check(cudaEventCreate(&eventA))
+    runtime_check(cudaEventCreate(&eventB))
+
+# Pointless right now, as the user closing the program
+# will always free up the allocated memory anyway
+def freePinnedMemory():
+    global ptrA, ptrB, pin_size
+    cudaFreeHost(ptrA)
+    cudaFreeHost(ptrB)
+    pin_size = 0
+
+# This function will accept a numpy array and move its data to the spaces
+# previously allocated using initPinnedMemory.
+def pinNumpy(np.ndarray arr):
+    assert arr.descr.itemsize*len(arr) <= pin_size, "Attempting to insert memory larger than what was made available through initPinnedMemory.\n(Allocated,Requested)({:d},{:d})".format(pin_size,arr.descr.itemsize*len(arr))
+    cdef void * vptr = <void*> arr.data
+    cdef bin
+    global usingA, ptrA, ptrB, toUse, eventA, eventB
+    if usingA:
+      # If we are currently trying to copy host data to the device given
+      # space reserved in ptrA, wait until this transfer is finished
+      cudaEventSynchronize(eventA)
+      memcpy(ptrA, vptr, pin_size)
+      usingA = False
+      toUse = 'A'
+      return
+    else:
+      # Same check as for ptrA
+      cudaEventSynchronize(eventB)
+      memcpy(ptrB, vptr, pin_size)
+      usingA = True
+      toUse = 'B'
+      return
+    return
 
 def cuCreateStream():
     cdef cudaStream_t stream
@@ -135,10 +187,18 @@ def cuMemcpyD2D(uintptr_t gpu_ptr1, uintptr_t gpu_ptr2, int size):
     runtime_check(cudaMemcpy(< void*>gpu_ptr2, < const void*>gpu_ptr1, size, cudaMemcpyDeviceToDevice))
     return
 
-
-def cuMemcpyH2DAsync(np.ndarray[float, ndim=1, mode="c"] cpu_ptr, uintptr_t gpu_ptr, int size, int stream=0):
+cdef void cuMemcpyH2DAsync(void* cpu_ptr, uintptr_t gpu_ptr, int size, uintptr_t stream):
     # cpu to gpu
-    runtime_check(cudaMemcpyAsync( < void*>gpu_ptr, & cpu_ptr[0], size, cudaMemcpyHostToDevice, < cudaStream_t > stream))
+    global ptrA, ptrB, toUse
+    if toUse is 'A':
+      cpu_ptr = ptrA
+    elif toUse is 'B':
+      cpu_ptr = ptrB
+    runtime_check(cudaMemcpyAsync(<void *>gpu_ptr, cpu_ptr, size, cudaMemcpyHostToDevice, <cudaStream_t> stream))
+    if toUse is 'A':
+      cudaEventRecord(eventA, <cudaStream_t> stream)
+    elif toUse is 'B':
+      cudaEventRecord(eventB, <cudaStream_t> stream)
     return
 
 
@@ -155,18 +215,21 @@ def cuMemcpyD2DAsync(uintptr_t gpu_ptr1, uintptr_t gpu_ptr2, int size, int strea
 
 def check_heap_device(*heaps):
     devices = {h._ptr.device_id for h in heaps if isinstance(h, renom.core.GPUValue)}
-    
+
     current = {cuGetDevice()}
     if devices != current:
         raise RuntimeError('Invalid device_id: %s currennt: %s' % (devices, current))
 
-
 class GPUHeap(object):
-    def __init__(self, nbytes, ptr, device_id):
+    def __init__(self, nbytes, ptr, device_id, stream=0):
         self.ptr = ptr
         self.nbytes = nbytes
         self.available = False
         self.device_id = device_id
+        # The stream is decided by the allocator and given to all subsequently
+        # constructed GPUHeaps. All Memcpy operations will occur on the same
+        # stream.
+        self._mystream = stream
 
     def __int__(self):
         return self.ptr
@@ -177,7 +240,10 @@ class GPUHeap(object):
         cdef _VoidPtr ptr = _VoidPtr(buf)
 
         with renom.cuda.use_device(self.device_id):
-            cuMemcpyH2D(ptr.ptr, self.ptr, nbytes)
+            # Async can be called safely, since if the user does not
+            # set up all the requirements for Async, it will perform
+            # as an ordinairy blocking call
+            cuMemcpyH2DAsync(ptr.ptr, self.ptr, nbytes, self._mystream)
 
     def memcpyD2H(self, cpu_ptr, nbytes):
         shape = cpu_ptr.shape
@@ -235,6 +301,8 @@ class allocator(object):
 
     def __init__(self):
         self._pool_lists = collections.defaultdict(list)
+        # We create one stream for all the GPUHeaps to share
+        self._memsync_stream = cuCreateStream()
 
     @property
     def pool_list(self):
@@ -245,7 +313,7 @@ class allocator(object):
         pool = self.getAvailablePool(nbytes)
         if pool is None:
             ptr = cuMalloc(nbytes)
-            pool = GPUHeap(nbytes=nbytes, ptr=ptr, device_id=cuGetDevice())
+            pool = GPUHeap(nbytes=nbytes, ptr=ptr, device_id=cuGetDevice(), stream=self._memsync_stream)
         return pool
 
     def free(self, pool):

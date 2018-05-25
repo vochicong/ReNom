@@ -1,14 +1,22 @@
+from libc.stdint cimport uintptr_t
+from libc.stdlib cimport malloc, free
 
-cdef extern from "cublas.h":
+cdef extern from "cuda_runtime.h":
+  ctypedef struct CUstream:
+    pass
+  ctypedef CUstream * cudaStream_t
+
+cdef extern from "cublas_v2.h":
     ctypedef float cuComplex        # Not a collect type.
     ctypedef double cuDoubleComplex  # Not a collect type.
     ctypedef struct cublasContext
     ctypedef cublasContext * cublasHandle_t
 
     ctypedef enum cublasOperation_t:
-        CUBLAS_OP_N = 0,
-        CUBLAS_OP_T = 1,
-        CUBLAS_OP_C = 2
+        CUBLAS_OP_N=0,
+        CUBLAS_OP_T=1,
+        CUBLAS_OP_C=2
+
 
     ctypedef enum cublasStatus_t:
         CUBLAS_STATUS_SUCCESS = 0,
@@ -24,343 +32,343 @@ cdef extern from "cublas.h":
 
     # ---------------- CUBLAS BLAS1 functions ----------------
     # NRM2
-    float cublasSnrm2(int n, const float * x, int incx)
-    double cublasDnrm2(int n, const double * x, int incx)
-    float cublasScnrm2(int n, const cuComplex * x, int incx)
-    double cublasDznrm2(int n, const cuDoubleComplex * x, int incx)
+    cublasStatus_t cublasSnrm2(cublasHandle_t, int n, const float * x, int incx)
+    cublasStatus_t cublasDnrm2(cublasHandle_t, int n, const double * x, int incx)
+    cublasStatus_t cublasScnrm2(cublasHandle_t, int n, const cuComplex * x, int incx)
+    cublasStatus_t cublasDznrm2(cublasHandle_t, int n, const cuDoubleComplex * x, int incx)
 
     #------------------------------------------------------------------------
     # DOT
-    float cublasSdot(int n, const float * x, int incx, const float * y,
+    cublasStatus_t cublasSdot(cublasHandle_t, int n, const float * x, int incx, const float * y,
                      int incy)
-    double cublasDdot(int n, const double * x, int incx, const double * y,
+    cublasStatus_t cublasDdot(cublasHandle_t, int n, const double * x, int incx, const double * y,
                       int incy)
-    cuComplex cublasCdotu(int n, const cuComplex * x, int incx, const cuComplex * y,
+    cublasStatus_t cublasCdotu(cublasHandle_t, int n, const cuComplex * x, int incx, const cuComplex * y,
                           int incy)
-    cuComplex cublasCdotc(int n, const cuComplex * x, int incx, const cuComplex * y,
+    cublasStatus_t cublasCdotc(cublasHandle_t, int n, const cuComplex * x, int incx, const cuComplex * y,
                           int incy)
-    cuDoubleComplex cublasZdotu(int n, const cuDoubleComplex * x, int incx, const cuDoubleComplex * y,
+    cublasStatus_t cublasZdotu(cublasHandle_t, int n, const cuDoubleComplex * x, int incx, const cuDoubleComplex * y,
                                 int incy)
-    cuDoubleComplex cublasZdotc(int n, const cuDoubleComplex * x, int incx, const cuDoubleComplex * y,
+    cublasStatus_t cublasZdotc(cublasHandle_t, int n, const cuDoubleComplex * x, int incx, const cuDoubleComplex * y,
                                 int incy)
 
     #------------------------------------------------------------------------
     # SCAL
-    void cublasSscal(int n, float alpha, float * x, int incx)
-    void cublasDscal(int n, double alpha, double * x, int incx)
-    void cublasCscal(int n, cuComplex alpha, cuComplex * x, int incx)
-    void cublasZscal(int n, cuDoubleComplex alpha, cuDoubleComplex * x, int incx)
+    cublasStatus_t cublasSscal(cublasHandle_t handle,int n, float * alpha, float * x, int incx)
+    cublasStatus_t cublasDscal(cublasHandle_t handle,int n, double * alpha, double * x, int incx)
+    cublasStatus_t cublasCscal(cublasHandle_t handle,int n, cuComplex alpha, cuComplex * x, int incx)
+    cublasStatus_t cublasZscal(cublasHandle_t handle,int n, cuDoubleComplex alpha, cuDoubleComplex * x, int incx)
 
-    void cublasCsscal(int n, float alpha, cuComplex * x, int incx)
-    void cublasZdscal(int n, double alpha, cuDoubleComplex * x, int incx)
+    cublasStatus_t cublasCsscal(cublasHandle_t handle,int n, float alpha, cuComplex * x, int incx)
+    cublasStatus_t cublasZdscal(cublasHandle_t handle,int n, double alpha, cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
 
     # AXPY
-    void cublasSaxpy(int n, float alpha, const float * x, int incx,
+    cublasStatus_t cublasSaxpy(cublasHandle_t, int n, float * alpha, const float * x, int incx,
                      float * y, int incy)
-    void cublasDaxpy(int n, double alpha, const double * x,
+    cublasStatus_t cublasDaxpy(cublasHandle_t, int n, double * alpha, const double * x,
                      int incx, double * y, int incy)
-    void cublasCaxpy(int n, cuComplex alpha, const cuComplex * x,
+    cublasStatus_t cublasCaxpy(cublasHandle_t, int n, cuComplex alpha, const cuComplex * x,
                      int incx, cuComplex * y, int incy)
-    void cublasZaxpy(int n, cuDoubleComplex alpha, const cuDoubleComplex * x,
+    cublasStatus_t cublasZaxpy(cublasHandle_t, int n, cuDoubleComplex alpha, const cuDoubleComplex * x,
                      int incx, cuDoubleComplex * y, int incy)
 
     #------------------------------------------------------------------------
     # COPY
-    void cublasScopy(int n, const float * x, int incx, float * y,
+    cublasStatus_t cublasScopy(cublasHandle_t, int n, const float * x, int incx, float * y,
                      int incy)
-    void cublasDcopy(int n, const double * x, int incx, double * y,
+    cublasStatus_t cublasDcopy(cublasHandle_t, int n, const double * x, int incx, double * y,
                      int incy)
-    void cublasCcopy(int n, const cuComplex * x, int incx, cuComplex * y,
+    cublasStatus_t cublasCcopy(cublasHandle_t, int n, const cuComplex * x, int incx, cuComplex * y,
                      int incy)
-    void cublasZcopy(int n, const cuDoubleComplex * x, int incx, cuDoubleComplex * y,
+    cublasStatus_t cublasZcopy(cublasHandle_t, int n, const cuDoubleComplex * x, int incx, cuDoubleComplex * y,
                      int incy)
     #------------------------------------------------------------------------
     # SWAP
-    void cublasSswap(int n, float * x, int incx, float * y, int incy)
-    void cublasDswap(int n, double * x, int incx, double * y, int incy)
-    void cublasCswap(int n, cuComplex * x, int incx, cuComplex * y, int incy)
-    void cublasZswap(int n, cuDoubleComplex * x, int incx, cuDoubleComplex * y, int incy)
+    cublasStatus_t cublasSswap(cublasHandle_t, int n, float * x, int incx, float * y, int incy)
+    cublasStatus_t cublasDswap(cublasHandle_t, int n, double * x, int incx, double * y, int incy)
+    cublasStatus_t cublasCswap(cublasHandle_t, int n, cuComplex * x, int incx, cuComplex * y, int incy)
+    cublasStatus_t cublasZswap(cublasHandle_t, int n, cuDoubleComplex * x, int incx, cuDoubleComplex * y, int incy)
     #------------------------------------------------------------------------
     # AMAX
-    int cublasIsamax(int n, const float * x, int incx)
-    int cublasIdamax(int n, const double * x, int incx)
-    int cublasIcamax(int n, const cuComplex * x, int incx)
-    int cublasIzamax(int n, const cuDoubleComplex * x, int incx)
+    cublasStatus_t cublasIsamax(cublasHandle_t, int n, const float * x, int incx)
+    cublasStatus_t cublasIdamax(cublasHandle_t, int n, const double * x, int incx)
+    cublasStatus_t cublasIcamax(cublasHandle_t, int n, const cuComplex * x, int incx)
+    cublasStatus_t cublasIzamax(cublasHandle_t, int n, const cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
     # AMIN
-    int cublasIsamin(int n, const float * x, int incx)
-    int cublasIdamin(int n, const double * x, int incx)
+    cublasStatus_t cublasIsamin(cublasHandle_t, int n, const float * x, int incx)
+    cublasStatus_t cublasIdamin(cublasHandle_t, int n, const double * x, int incx)
 
-    int cublasIcamin(int n, const cuComplex * x, int incx)
-    int cublasIzamin(int n, const cuDoubleComplex * x, int incx)
+    cublasStatus_t cublasIcamin(cublasHandle_t, int n, const cuComplex * x, int incx)
+    cublasStatus_t cublasIzamin(cublasHandle_t, int n, const cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
     # ASUM
-    float cublasSasum(int n, const float * x, int incx)
-    double cublasDasum(int n, const double * x, int incx)
-    float cublasScasum(int n, const cuComplex * x, int incx)
-    double cublasDzasum(int n, const cuDoubleComplex * x, int incx)
+    cublasStatus_t cublasSasum(cublasHandle_t, int n, const float * x, int incx)
+    cublasStatus_t cublasDasum(cublasHandle_t, int n, const double * x, int incx)
+    cublasStatus_t cublasScasum(cublasHandle_t, int n, const cuComplex * x, int incx)
+    cublasStatus_t cublasDzasum(cublasHandle_t, int n, const cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
     # ROT
-    void cublasSrot(int n, float * x, int incx, float * y, int incy,
+    cublasStatus_t cublasSrot(cublasHandle_t, int n, float * x, int incx, float * y, int incy,
                     float sc, float ss)
-    void cublasDrot(int n, double * x, int incx, double * y, int incy,
+    cublasStatus_t cublasDrot(cublasHandle_t, int n, double * x, int incx, double * y, int incy,
                     double sc, double ss)
-    void cublasCrot(int n, cuComplex * x, int incx, cuComplex * y,
+    cublasStatus_t cublasCrot(cublasHandle_t, int n, cuComplex * x, int incx, cuComplex * y,
                     int incy, float c, cuComplex s)
-    void cublasZrot(int n, cuDoubleComplex * x, int incx,
+    cublasStatus_t cublasZrot(cublasHandle_t, int n, cuDoubleComplex * x, int incx,
                     cuDoubleComplex * y, int incy, double sc,
                     cuDoubleComplex cs)
-    void cublasCsrot(int n, cuComplex * x, int incx, cuComplex * y,
+    cublasStatus_t cublasCsrot(cublasHandle_t, int n, cuComplex * x, int incx, cuComplex * y,
                      int incy, float c, float s)
-    void cublasZdrot(int n, cuDoubleComplex * x, int incx,
+    cublasStatus_t cublasZdrot(cublasHandle_t, int n, cuDoubleComplex * x, int incx,
                      cuDoubleComplex * y, int incy, double c, double s)
     #------------------------------------------------------------------------
     # ROTG
-    void cublasSrotg(float * sa, float * sb, float * sc, float * ss)
-    void cublasDrotg(double * sa, double * sb, double * sc, double * ss)
-    void cublasCrotg(cuComplex * ca, cuComplex cb, float * sc,
+    cublasStatus_t cublasSrotg(cublasHandle_t, float * sa, float * sb, float * sc, float * ss)
+    cublasStatus_t cublasDrotg(cublasHandle_t, double * sa, double * sb, double * sc, double * ss)
+    cublasStatus_t cublasCrotg(cublasHandle_t, cuComplex * ca, cuComplex cb, float * sc,
                      cuComplex * cs)
-    void cublasZrotg(cuDoubleComplex * ca, cuDoubleComplex cb, double * sc,
+    cublasStatus_t cublasZrotg(cublasHandle_t, cuDoubleComplex * ca, cuDoubleComplex cb, double * sc,
                      cuDoubleComplex * cs)
     #------------------------------------------------------------------------
     # ROTM
-    void cublasSrotm(int n, float * x, int incx, float * y, int incy,
+    cublasStatus_t cublasSrotm(cublasHandle_t, int n, float * x, int incx, float * y, int incy,
                      const float * sparam)
-    void cublasDrotm(int n, double * x, int incx, double * y, int incy,
+    cublasStatus_t cublasDrotm(cublasHandle_t, int n, double * x, int incx, double * y, int incy,
                      const double * sparam)
     #------------------------------------------------------------------------
     # ROTMG
-    void cublasSrotmg(float * sd1, float * sd2, float * sx1,
+    cublasStatus_t cublasSrotmg(cublasHandle_t, float * sd1, float * sd2, float * sx1,
                       const float * sy1, float * sparam)
-    void cublasDrotmg(double * sd1, double * sd2, double * sx1,
+    cublasStatus_t cublasDrotmg(cublasHandle_t, double * sd1, double * sd2, double * sx1,
                       const double * sy1, double * sparam)
 
     # --------------- CUBLAS BLAS2 functions  ----------------
     # GEMV
-    void cublasSgemv(char trans, int m, int n, float alpha,
+    cublasStatus_t cublasSgemv(cublasHandle_t, char trans, int m, int n, float alpha,
                      const float * A, int lda, const float * x, int incx,
                      float beta, float * y, int incy)
-    void cublasDgemv(char trans, int m, int n, double alpha,
+    cublasStatus_t cublasDgemv(cublasHandle_t, char trans, int m, int n, double alpha,
                      const double * A, int lda, const double * x, int incx,
                      double beta, double * y, int incy)
-    void cublasCgemv(char trans, int m, int n, cuComplex alpha,
+    cublasStatus_t cublasCgemv(cublasHandle_t, char trans, int m, int n, cuComplex alpha,
                      const cuComplex * A, int lda, const cuComplex * x, int incx,
                      cuComplex beta, cuComplex * y, int incy)
-    void cublasZgemv(char trans, int m, int n, cuDoubleComplex alpha,
+    cublasStatus_t cublasZgemv(cublasHandle_t, char trans, int m, int n, cuDoubleComplex alpha,
                      const cuDoubleComplex * A, int lda, const cuDoubleComplex * x, int incx,
                      cuDoubleComplex beta, cuDoubleComplex * y, int incy)
     #------------------------------------------------------------------------
     # GBMV
-    void cublasSgbmv(char trans, int m, int n, int kl, int ku,
+    cublasStatus_t cublasSgbmv(cublasHandle_t, char trans, int m, int n, int kl, int ku,
                      float alpha, const float * A, int lda,
                      const float * x, int incx, float beta, float * y,
                      int incy)
-    void cublasDgbmv(char trans, int m, int n, int kl, int ku,
+    cublasStatus_t cublasDgbmv(cublasHandle_t, char trans, int m, int n, int kl, int ku,
                      double alpha, const double * A, int lda,
                      const double * x, int incx, double beta, double * y,
                      int incy)
-    void cublasCgbmv(char trans, int m, int n, int kl, int ku,
+    cublasStatus_t cublasCgbmv(cublasHandle_t, char trans, int m, int n, int kl, int ku,
                      cuComplex alpha, const cuComplex * A, int lda,
                      const cuComplex * x, int incx, cuComplex beta, cuComplex * y,
                      int incy)
-    void cublasZgbmv(char trans, int m, int n, int kl, int ku,
+    cublasStatus_t cublasZgbmv(cublasHandle_t, char trans, int m, int n, int kl, int ku,
                      cuDoubleComplex alpha, const cuDoubleComplex * A, int lda,
                      const cuDoubleComplex * x, int incx, cuDoubleComplex beta, cuDoubleComplex * y,
                      int incy)
     #------------------------------------------------------------------------
     # TRMV
-    void cublasStrmv(char uplo, char trans, char diag, int n,
+    cublasStatus_t cublasStrmv(cublasHandle_t, char uplo, char trans, char diag, int n,
                      const float * A, int lda, float * x, int incx)
-    void cublasDtrmv(char uplo, char trans, char diag, int n,
+    cublasStatus_t cublasDtrmv(cublasHandle_t, char uplo, char trans, char diag, int n,
                      const double * A, int lda, double * x, int incx)
-    void cublasCtrmv(char uplo, char trans, char diag, int n,
+    cublasStatus_t cublasCtrmv(cublasHandle_t, char uplo, char trans, char diag, int n,
                      const cuComplex * A, int lda, cuComplex * x, int incx)
-    void cublasZtrmv(char uplo, char trans, char diag, int n,
+    cublasStatus_t cublasZtrmv(cublasHandle_t, char uplo, char trans, char diag, int n,
                      const cuDoubleComplex * A, int lda, cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
     # TBMV
-    void cublasStbmv(char uplo, char trans, char diag, int n, int k,
+    cublasStatus_t cublasStbmv(cublasHandle_t, char uplo, char trans, char diag, int n, int k,
                      const float * A, int lda, float * x, int incx)
-    void cublasDtbmv(char uplo, char trans, char diag, int n, int k,
+    cublasStatus_t cublasDtbmv(cublasHandle_t, char uplo, char trans, char diag, int n, int k,
                      const double * A, int lda, double * x, int incx)
-    void cublasCtbmv(char uplo, char trans, char diag, int n, int k,
+    cublasStatus_t cublasCtbmv(cublasHandle_t, char uplo, char trans, char diag, int n, int k,
                      const cuComplex * A, int lda, cuComplex * x, int incx)
-    void cublasZtbmv(char uplo, char trans, char diag, int n, int k,
+    cublasStatus_t cublasZtbmv(cublasHandle_t, char uplo, char trans, char diag, int n, int k,
                      const cuDoubleComplex * A, int lda, cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
     # TPMV
-    void cublasStpmv(char uplo, char trans, char diag, int n, const float * AP, float * x, int incx)
+    cublasStatus_t cublasStpmv(cublasHandle_t, char uplo, char trans, char diag, int n, const float * AP, float * x, int incx)
 
-    void cublasDtpmv(char uplo, char trans, char diag, int n, const double * AP, double * x, int incx)
+    cublasStatus_t cublasDtpmv(cublasHandle_t, char uplo, char trans, char diag, int n, const double * AP, double * x, int incx)
 
-    void cublasCtpmv(char uplo, char trans, char diag, int n, const cuComplex * AP, cuComplex * x, int incx)
+    cublasStatus_t cublasCtpmv(cublasHandle_t, char uplo, char trans, char diag, int n, const cuComplex * AP, cuComplex * x, int incx)
 
-    void cublasZtpmv(char uplo, char trans, char diag, int n, const cuDoubleComplex * AP, cuDoubleComplex * x, int incx)
+    cublasStatus_t cublasZtpmv(cublasHandle_t, char uplo, char trans, char diag, int n, const cuDoubleComplex * AP, cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
     # TRSV
-    void cublasStrsv(char uplo, char trans, char diag, int n, const float * A, int lda, float * x, int incx)
+    cublasStatus_t cublasStrsv(cublasHandle_t, char uplo, char trans, char diag, int n, const float * A, int lda, float * x, int incx)
 
-    void cublasDtrsv(char uplo, char trans, char diag, int n, const double * A, int lda, double * x, int incx)
+    cublasStatus_t cublasDtrsv(cublasHandle_t, char uplo, char trans, char diag, int n, const double * A, int lda, double * x, int incx)
 
-    void cublasCtrsv(char uplo, char trans, char diag, int n, const cuComplex * A, int lda, cuComplex * x, int incx)
+    cublasStatus_t cublasCtrsv(cublasHandle_t, char uplo, char trans, char diag, int n, const cuComplex * A, int lda, cuComplex * x, int incx)
 
-    void cublasZtrsv(char uplo, char trans, char diag, int n, const cuDoubleComplex * A, int lda,
+    cublasStatus_t cublasZtrsv(cublasHandle_t, char uplo, char trans, char diag, int n, const cuDoubleComplex * A, int lda,
                      cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
     # TPSV
-    void cublasStpsv(char uplo, char trans, char diag, int n, const float * AP,
+    cublasStatus_t cublasStpsv(cublasHandle_t, char uplo, char trans, char diag, int n, const float * AP,
                      float * x, int incx)
 
-    void cublasDtpsv(char uplo, char trans, char diag, int n, const double * AP, double * x, int incx)
+    cublasStatus_t cublasDtpsv(cublasHandle_t, char uplo, char trans, char diag, int n, const double * AP, double * x, int incx)
 
-    void cublasCtpsv(char uplo, char trans, char diag, int n, const cuComplex * AP, cuComplex * x, int incx)
+    cublasStatus_t cublasCtpsv(cublasHandle_t, char uplo, char trans, char diag, int n, const cuComplex * AP, cuComplex * x, int incx)
 
-    void cublasZtpsv(char uplo, char trans, char diag, int n, const cuDoubleComplex * AP,
+    cublasStatus_t cublasZtpsv(cublasHandle_t, char uplo, char trans, char diag, int n, const cuDoubleComplex * AP,
                      cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
     # TBSV
-    void cublasStbsv(char uplo, char trans,
+    cublasStatus_t cublasStbsv(cublasHandle_t, char uplo, char trans,
                      char diag, int n, int k, const float * A,
                      int lda, float * x, int incx)
 
-    void cublasDtbsv(char uplo, char trans,
+    cublasStatus_t cublasDtbsv(cublasHandle_t, char uplo, char trans,
                      char diag, int n, int k, const double * A,
                      int lda, double * x, int incx)
-    void cublasCtbsv(char uplo, char trans,
+    cublasStatus_t cublasCtbsv(cublasHandle_t, char uplo, char trans,
                      char diag, int n, int k, const cuComplex * A,
                      int lda, cuComplex * x, int incx)
 
-    void cublasZtbsv(char uplo, char trans,
+    cublasStatus_t cublasZtbsv(cublasHandle_t, char uplo, char trans,
                      char diag, int n, int k, const cuDoubleComplex * A,
                      int lda, cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
     # SYMV/HEMV
-    void cublasSsymv(char uplo, int n, float alpha, const float * A,
+    cublasStatus_t cublasSsymv(cublasHandle_t, char uplo, int n, float alpha, const float * A,
                      int lda, const float * x, int incx, float beta,
                      float * y, int incy)
-    void cublasDsymv(char uplo, int n, double alpha, const double * A,
+    cublasStatus_t cublasDsymv(cublasHandle_t, char uplo, int n, double alpha, const double * A,
                      int lda, const double * x, int incx, double beta,
                      double * y, int incy)
-    void cublasChemv(char uplo, int n, cuComplex alpha, const cuComplex * A,
+    cublasStatus_t cublasChemv(cublasHandle_t, char uplo, int n, cuComplex alpha, const cuComplex * A,
                      int lda, const cuComplex * x, int incx, cuComplex beta,
                      cuComplex * y, int incy)
-    void cublasZhemv(char uplo, int n, cuDoubleComplex alpha, const cuDoubleComplex * A,
+    cublasStatus_t cublasZhemv(cublasHandle_t, char uplo, int n, cuDoubleComplex alpha, const cuDoubleComplex * A,
                      int lda, const cuDoubleComplex * x, int incx, cuDoubleComplex beta,
                      cuDoubleComplex * y, int incy)
     #------------------------------------------------------------------------
     # SBMV/HBMV
-    void cublasSsbmv(char uplo, int n, int k, float alpha,
+    cublasStatus_t cublasSsbmv(cublasHandle_t, char uplo, int n, int k, float alpha,
                      const float * A, int lda, const float * x, int incx,
                      float beta, float * y, int incy)
-    void cublasDsbmv(char uplo, int n, int k, double alpha,
+    cublasStatus_t cublasDsbmv(cublasHandle_t, char uplo, int n, int k, double alpha,
                      const double * A, int lda, const double * x, int incx,
                      double beta, double * y, int incy)
-    void cublasChbmv(char uplo, int n, int k, cuComplex alpha,
+    cublasStatus_t cublasChbmv(cublasHandle_t, char uplo, int n, int k, cuComplex alpha,
                      const cuComplex * A, int lda, const cuComplex * x, int incx,
                      cuComplex beta, cuComplex * y, int incy)
-    void cublasZhbmv(char uplo, int n, int k, cuDoubleComplex alpha,
+    cublasStatus_t cublasZhbmv(cublasHandle_t, char uplo, int n, int k, cuDoubleComplex alpha,
                      const cuDoubleComplex * A, int lda, const cuDoubleComplex * x, int incx,
                      cuDoubleComplex beta, cuDoubleComplex * y, int incy)
     #------------------------------------------------------------------------
     # SPMV/HPMV
-    void cublasSspmv(char uplo, int n, float alpha,
+    cublasStatus_t cublasSspmv(cublasHandle_t, char uplo, int n, float alpha,
                      const float * AP, const float * x,
                      int incx, float beta, float * y, int incy)
-    void cublasDspmv(char uplo, int n, double alpha,
+    cublasStatus_t cublasDspmv(cublasHandle_t, char uplo, int n, double alpha,
                      const double * AP, const double * x,
                      int incx, double beta, double * y, int incy)
-    void cublasChpmv(char uplo, int n, cuComplex alpha,
+    cublasStatus_t cublasChpmv(cublasHandle_t, char uplo, int n, cuComplex alpha,
                      const cuComplex * AP, const cuComplex * x,
                      int incx, cuComplex beta, cuComplex * y, int incy)
-    void cublasZhpmv(char uplo, int n, cuDoubleComplex alpha,
+    cublasStatus_t cublasZhpmv(cublasHandle_t, char uplo, int n, cuDoubleComplex alpha,
                      const cuDoubleComplex * AP, const cuDoubleComplex * x,
                      int incx, cuDoubleComplex beta, cuDoubleComplex * y, int incy)
 
     #------------------------------------------------------------------------
     # GER
-    void cublasSger(int m, int n, float alpha, const float * x, int incx,
+    cublasStatus_t cublasSger(cublasHandle_t, int m, int n, float alpha, const float * x, int incx,
                     const float * y, int incy, float * A, int lda)
-    void cublasDger(int m, int n, double alpha, const double * x, int incx,
+    cublasStatus_t cublasDger(cublasHandle_t, int m, int n, double alpha, const double * x, int incx,
                     const double * y, int incy, double * A, int lda)
 
-    void cublasCgeru(int m, int n, cuComplex alpha, const cuComplex * x,
+    cublasStatus_t cublasCgeru(cublasHandle_t, int m, int n, cuComplex alpha, const cuComplex * x,
                      int incx, const cuComplex * y, int incy,
                      cuComplex * A, int lda)
-    void cublasCgerc(int m, int n, cuComplex alpha, const cuComplex * x,
+    cublasStatus_t cublasCgerc(cublasHandle_t, int m, int n, cuComplex alpha, const cuComplex * x,
                      int incx, const cuComplex * y, int incy,
                      cuComplex * A, int lda)
-    void cublasZgeru(int m, int n, cuDoubleComplex alpha, const cuDoubleComplex * x,
+    cublasStatus_t cublasZgeru(cublasHandle_t, int m, int n, cuDoubleComplex alpha, const cuDoubleComplex * x,
                      int incx, const cuDoubleComplex * y, int incy,
                      cuDoubleComplex * A, int lda)
-    void cublasZgerc(int m, int n, cuDoubleComplex alpha, const cuDoubleComplex * x,
+    cublasStatus_t cublasZgerc(cublasHandle_t, int m, int n, cuDoubleComplex alpha, const cuDoubleComplex * x,
                      int incx, const cuDoubleComplex * y, int incy,
                      cuDoubleComplex * A, int lda)
     #------------------------------------------------------------------------
     # SYR/HER
-    void cublasSsyr(char uplo, int n, float alpha, const float * x,
+    cublasStatus_t cublasSsyr(cublasHandle_t, char uplo, int n, float alpha, const float * x,
                     int incx, float * A, int lda)
-    void cublasDsyr(char uplo, int n, double alpha, const double * x,
+    cublasStatus_t cublasDsyr(cublasHandle_t, char uplo, int n, double alpha, const double * x,
                     int incx, double * A, int lda)
 
-    void cublasCher(char uplo, int n, float alpha,
+    cublasStatus_t cublasCher(cublasHandle_t, char uplo, int n, float alpha,
                     const cuComplex * x, int incx, cuComplex * A, int lda)
-    void cublasZher(char uplo, int n, double alpha,
+    cublasStatus_t cublasZher(cublasHandle_t, char uplo, int n, double alpha,
                     const cuDoubleComplex * x, int incx, cuDoubleComplex * A, int lda)
 
     #------------------------------------------------------------------------
     # SPR/HPR
-    void cublasSspr(char uplo, int n, float alpha, const float * x,
+    cublasStatus_t cublasSspr(cublasHandle_t, char uplo, int n, float alpha, const float * x,
                     int incx, float * AP)
-    void cublasDspr(char uplo, int n, double alpha, const double * x,
+    cublasStatus_t cublasDspr(cublasHandle_t, char uplo, int n, double alpha, const double * x,
                     int incx, double * AP)
-    void cublasChpr(char uplo, int n, float alpha, const cuComplex * x,
+    cublasStatus_t cublasChpr(cublasHandle_t, char uplo, int n, float alpha, const cuComplex * x,
                     int incx, cuComplex * AP)
-    void cublasZhpr(char uplo, int n, double alpha, const cuDoubleComplex * x,
+    cublasStatus_t cublasZhpr(cublasHandle_t, char uplo, int n, double alpha, const cuDoubleComplex * x,
                     int incx, cuDoubleComplex * AP)
     #------------------------------------------------------------------------
     # SYR2/HER2
-    void cublasSsyr2(char uplo, int n, float alpha, const float * x,
+    cublasStatus_t cublasSsyr2(cublasHandle_t, char uplo, int n, float alpha, const float * x,
                      int incx, const float * y, int incy, float * A,
                      int lda)
-    void cublasDsyr2(char uplo, int n, double alpha, const double * x,
+    cublasStatus_t cublasDsyr2(cublasHandle_t, char uplo, int n, double alpha, const double * x,
                      int incx, const double * y, int incy, double * A,
                      int lda)
-    void cublasCher2(char uplo, int n, cuComplex alpha, const cuComplex * x,
+    cublasStatus_t cublasCher2(cublasHandle_t, char uplo, int n, cuComplex alpha, const cuComplex * x,
                      int incx, const cuComplex * y, int incy, cuComplex * A,
                      int lda)
-    void cublasZher2(char uplo, int n, cuDoubleComplex alpha, const cuDoubleComplex * x,
+    cublasStatus_t cublasZher2(cublasHandle_t, char uplo, int n, cuDoubleComplex alpha, const cuDoubleComplex * x,
                      int incx, const cuDoubleComplex * y, int incy, cuDoubleComplex * A,
                      int lda)
 
     #------------------------------------------------------------------------
     # SPR2/HPR2
-    void cublasSspr2(char uplo, int n, float alpha, const float * x,
+    cublasStatus_t cublasSspr2(cublasHandle_t, char uplo, int n, float alpha, const float * x,
                      int incx, const float * y, int incy, float * AP)
-    void cublasDspr2(char uplo, int n, double alpha,
+    cublasStatus_t cublasDspr2(cublasHandle_t, char uplo, int n, double alpha,
                      const double * x, int incx, const double * y,
                      int incy, double * AP)
-    void cublasChpr2(char uplo, int n, cuComplex alpha,
+    cublasStatus_t cublasChpr2(cublasHandle_t, char uplo, int n, cuComplex alpha,
                      const cuComplex * x, int incx, const cuComplex * y,
                      int incy, cuComplex * AP)
-    void cublasZhpr2(char uplo, int n, cuDoubleComplex alpha,
+    cublasStatus_t cublasZhpr2(cublasHandle_t, char uplo, int n, cuDoubleComplex alpha,
                      const cuDoubleComplex * x, int incx, const cuDoubleComplex * y,
                      int incy, cuDoubleComplex * AP)
     # ------------------------BLAS3 Functions -------------------------------
     # GEMM
-    void cublasSgemm(char transa, char transb, int m, int n, int k,
-                     float alpha, const float * A, int lda,
-                     const float * B, int ldb, float beta, float * C,
+    cublasStatus_t cublasSgemm(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k,
+                     float *alpha, const float * A, int lda,
+                     const float * B, int ldb, float *beta, float * C,
                      int ldc)
-    void cublasDgemm(char transa, char transb, int m, int n, int k,
-                     double alpha, const double * A, int lda,
-                     const double * B, int ldb, double beta, double * C,
+    cublasStatus_t cublasDgemm(cublasHandle_t handle, cublasOperation_t transa, cublasOperation_t transb, int m, int n, int k,
+                     double *alpha, const double * A, int lda,
+                     const double * B, int ldb, double *beta, double * C,
                      int ldc)
-    void cublasCgemm(char transa, char transb, int m, int n, int k,
+    cublasStatus_t cublasCgemm(cublasHandle_t, char transa, char transb, int m, int n, int k,
                      cuComplex alpha, const cuComplex * A, int lda,
                      const cuComplex * B, int ldb, cuComplex beta,
                      cuComplex * C, int ldc)
-    void cublasZgemm(char transa, char transb, int m, int n,
+    cublasStatus_t cublasZgemm(cublasHandle_t, char transa, char transb, int m, int n,
                      int k, cuDoubleComplex alpha,
                      const cuDoubleComplex * A, int lda,
                      const cuDoubleComplex * B, int ldb,
@@ -368,121 +376,121 @@ cdef extern from "cublas.h":
                      int ldc)
     # -------------------------------------------------------
     # SYRK
-    void cublasSsyrk(char uplo, char trans, int n, int k, float alpha,
+    cublasStatus_t cublasSsyrk(cublasHandle_t, char uplo, char trans, int n, int k, float alpha,
                      const float * A, int lda, float beta, float * C,
                      int ldc)
-    void cublasDsyrk(char uplo, char trans, int n, int k,
+    cublasStatus_t cublasDsyrk(cublasHandle_t, char uplo, char trans, int n, int k,
                      double alpha, const double * A, int lda,
                      double beta, double * C, int ldc)
 
-    void cublasCsyrk(char uplo, char trans, int n, int k,
+    cublasStatus_t cublasCsyrk(cublasHandle_t, char uplo, char trans, int n, int k,
                      cuComplex alpha, const cuComplex * A, int lda,
                      cuComplex beta, cuComplex * C, int ldc)
-    void cublasZsyrk(char uplo, char trans, int n, int k,
+    cublasStatus_t cublasZsyrk(cublasHandle_t, char uplo, char trans, int n, int k,
                      cuDoubleComplex alpha,
                      const cuDoubleComplex * A, int lda,
                      cuDoubleComplex beta,
                      cuDoubleComplex * C, int ldc)
     # -------------------------------------------------------
     # HERK
-    void cublasCherk(char uplo, char trans, int n, int k,
+    cublasStatus_t cublasCherk(cublasHandle_t, char uplo, char trans, int n, int k,
                      float alpha, const cuComplex * A, int lda,
                      float beta, cuComplex * C, int ldc)
-    void cublasZherk(char uplo, char trans, int n, int k,
+    cublasStatus_t cublasZherk(cublasHandle_t, char uplo, char trans, int n, int k,
                      double alpha,
                      const cuDoubleComplex * A, int lda,
                      double beta,
                      cuDoubleComplex * C, int ldc)
     # -------------------------------------------------------
     # SYR2K
-    void cublasSsyr2k(char uplo, char trans, int n, int k, float alpha,
+    cublasStatus_t cublasSsyr2k(cublasHandle_t, char uplo, char trans, int n, int k, float alpha,
                       const float * A, int lda, const float * B, int ldb,
                       float beta, float * C, int ldc)
 
-    void cublasDsyr2k(char uplo, char trans, int n, int k,
+    cublasStatus_t cublasDsyr2k(cublasHandle_t, char uplo, char trans, int n, int k,
                       double alpha, const double * A, int lda,
                       const double * B, int ldb, double beta,
                       double * C, int ldc)
-    void cublasCsyr2k(char uplo, char trans, int n, int k,
+    cublasStatus_t cublasCsyr2k(cublasHandle_t, char uplo, char trans, int n, int k,
                       cuComplex alpha, const cuComplex * A, int lda,
                       const cuComplex * B, int ldb, cuComplex beta,
                       cuComplex * C, int ldc)
 
-    void cublasZsyr2k(char uplo, char trans, int n, int k,
+    cublasStatus_t cublasZsyr2k(cublasHandle_t, char uplo, char trans, int n, int k,
                       cuDoubleComplex alpha, const cuDoubleComplex * A, int lda,
                       const cuDoubleComplex * B, int ldb, cuDoubleComplex beta,
                       cuDoubleComplex * C, int ldc)
     # -------------------------------------------------------
     # HER2K
-    void cublasCher2k(char uplo, char trans, int n, int k,
+    cublasStatus_t cublasCher2k(cublasHandle_t, char uplo, char trans, int n, int k,
                       cuComplex alpha, const cuComplex * A, int lda,
                       const cuComplex * B, int ldb, float beta,
                       cuComplex * C, int ldc)
 
-    void cublasZher2k(char uplo, char trans, int n, int k,
+    cublasStatus_t cublasZher2k(cublasHandle_t, char uplo, char trans, int n, int k,
                       cuDoubleComplex alpha, const cuDoubleComplex * A, int lda,
                       const cuDoubleComplex * B, int ldb, double beta,
                       cuDoubleComplex * C, int ldc)
 
     #------------------------------------------------------------------------
     # SYMM
-    void cublasSsymm(char side, char uplo, int m, int n, float alpha,
+    cublasStatus_t cublasSsymm(cublasHandle_t, char side, char uplo, int m, int n, float alpha,
                      const float * A, int lda, const float * B, int ldb,
                      float beta, float * C, int ldc)
-    void cublasDsymm(char side, char uplo, int m, int n, double alpha,
+    cublasStatus_t cublasDsymm(cublasHandle_t, char side, char uplo, int m, int n, double alpha,
                      const double * A, int lda, const double * B, int ldb,
                      double beta, double * C, int ldc)
 
-    void cublasCsymm(char side, char uplo, int m, int n, cuComplex alpha,
+    cublasStatus_t cublasCsymm(cublasHandle_t, char side, char uplo, int m, int n, cuComplex alpha,
                      const cuComplex * A, int lda, const cuComplex * B, int ldb,
                      cuComplex beta, cuComplex * C, int ldc)
 
-    void cublasZsymm(char side, char uplo, int m, int n, cuDoubleComplex alpha,
+    cublasStatus_t cublasZsymm(cublasHandle_t, char side, char uplo, int m, int n, cuDoubleComplex alpha,
                      const cuDoubleComplex * A, int lda, const cuDoubleComplex * B, int ldb,
                      cuDoubleComplex beta, cuDoubleComplex * C, int ldc)
     #------------------------------------------------------------------------
     # HEMM
-    void cublasChemm(char side, char uplo, int m, int n,
+    cublasStatus_t cublasChemm(cublasHandle_t, char side, char uplo, int m, int n,
                      cuComplex alpha, const cuComplex * A, int lda,
                      const cuComplex * B, int ldb, cuComplex beta,
                      cuComplex * C, int ldc)
-    void cublasZhemm(char side, char uplo, int m, int n,
+    cublasStatus_t cublasZhemm(cublasHandle_t, char side, char uplo, int m, int n,
                      cuDoubleComplex alpha, const cuDoubleComplex * A, int lda,
                      const cuDoubleComplex * B, int ldb, cuDoubleComplex beta,
                      cuDoubleComplex * C, int ldc)
 
     #------------------------------------------------------------------------
     # TRSM
-    void cublasStrsm(char side, char uplo, char transa, char diag,
+    cublasStatus_t cublasStrsm(cublasHandle_t, char side, char uplo, char transa, char diag,
                      int m, int n, float alpha, const float * A, int lda,
                      float * B, int ldb)
 
-    void cublasDtrsm(char side, char uplo, char transa,
+    cublasStatus_t cublasDtrsm(cublasHandle_t, char side, char uplo, char transa,
                      char diag, int m, int n, double alpha,
                      const double * A, int lda, double * B,
                      int ldb)
 
-    void cublasCtrsm(char side, char uplo, char transa, char diag,
+    cublasStatus_t cublasCtrsm(cublasHandle_t, char side, char uplo, char transa, char diag,
                      int m, int n, cuComplex alpha, const cuComplex * A,
                      int lda, cuComplex * B, int ldb)
 
-    void cublasZtrsm(char side, char uplo, char transa,
+    cublasStatus_t cublasZtrsm(cublasHandle_t, char side, char uplo, char transa,
                      char diag, int m, int n, cuDoubleComplex alpha,
                      const cuDoubleComplex * A, int lda,
                      cuDoubleComplex * B, int ldb)
     #------------------------------------------------------------------------
     # TRMM
-    void cublasStrmm(char side, char uplo, char transa, char diag,
+    cublasStatus_t cublasStrmm(cublasHandle_t, char side, char uplo, char transa, char diag,
                      int m, int n, float alpha, const float * A, int lda,
                      float * B, int ldb)
-    void cublasDtrmm(char side, char uplo, char transa,
+    cublasStatus_t cublasDtrmm(cublasHandle_t, char side, char uplo, char transa,
                      char diag, int m, int n, double alpha,
                      const double * A, int lda, double * B,
                      int ldb)
-    void cublasCtrmm(char side, char uplo, char transa, char diag,
+    cublasStatus_t cublasCtrmm(cublasHandle_t, char side, char uplo, char transa, char diag,
                      int m, int n, cuComplex alpha, const cuComplex * A,
                      int lda, cuComplex * B, int ldb)
-    void cublasZtrmm(char side, char uplo, char transa,
+    cublasStatus_t cublasZtrmm(cublasHandle_t, char side, char uplo, char transa,
                      char diag, int m, int n, cuDoubleComplex alpha,
                      const cuDoubleComplex * A, int lda, cuDoubleComplex * B,
                      int ldb)
@@ -491,8 +499,11 @@ cdef extern from "cublas.h":
     # Blas Extensions
     #
 
-    cublasStatus_t cublasCreate_v2(cublasHandle_t * handle)
-    cublasStatus_t cublasDestroy_v2 (cublasHandle_t handle);
+    cublasStatus_t cublasCreate_v2( cublasHandle_t * handle)
+    cublasStatus_t cublasCreate(cublasHandle_t * handle)
+    cublasStatus_t cublasSetStream(cublasHandle_t handle, cudaStream_t stream)
+    cublasStatus_t cublasGetStream(cublasHandle_t handle, cudaStream_t *stream)
+    cublasStatus_t cublasDestroy_v2 ( cublasHandle_t handle);
 
     # ---------------- CUBLAS BLAS-like extension ----------------
     # GEAM

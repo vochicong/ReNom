@@ -3,16 +3,17 @@ import numpy as np
 from cublas import *
 from libc.stdint cimport uintptr_t
 import cuda_base
+from cuda_base import cuCreateStream
 
 _cublas_handlers = {}
 
-def create_cublasHander():
-    cdef cublasHandle_t handle
-    cublasCreate_v2( & handle)
-    return < uintptr_t > handle
+cdef createCublashandler():
+  cdef cublasHandle_t * handle = <cublasHandle_t*> malloc(sizeof(cublasHandle_t))
+  cdef cublasStatus_t ret
+  check(cublasCreate(handle))
+  return <uintptr_t> handle
 
-
-def check(cublasStatus_t status):
+cdef check(cublasStatus_t status):
     if status != CUBLAS_STATUS_SUCCESS:
         raise Exception("An error has occurred in cuBlas function. Error code %d."%status)
 
@@ -33,15 +34,19 @@ def cublas_handler():
         pass
 
 # Scal
-def cublas_scal(alpha, gpu_value):
+def cublas_scal(alf, gpu_value):
     cdef int size = gpu_value.size
     cdef uintptr_t ptr = <uintptr_t>gpu_value._ptr
-    
+    cdef uintptr_t handle = <uintptr_t> get_handle()
+
     cuda_base.check_heap_device(gpu_value)
+    # cdef can only be defined at the function level
+    cdef float alpha = <float> alf
+    cdef double alpha2 = <double> alf
     if dtype == np.float32:
-        cublasSscal(size, <float>alpha, <float*>ptr, 1)
+        check(cublasSscal(<cublasHandle_t> handle,size, &alpha, <float*>ptr, 1))
     elif gpu_value1.dtype == np.float64:
-        cublasDscal(size, <double>alpha, <double*>ptr, 1)
+        check(cublasDscal(<cublasHandle_t> handle,size, &alpha2, <double*>ptr, 1))
     return
 
 # AXPY
@@ -49,13 +54,40 @@ def cublas_axpy(gpu_value1, gpu_value2):
     cdef int n = gpu_value1.size
     cdef uintptr_t ptr1 = <uintptr_t>gpu_value1._ptr
     cdef uintptr_t ptr2 = <uintptr_t>gpu_value2._ptr
-    
+    cdef uintptr_t handle = <uintptr_t> get_handle()
+
     cuda_base.check_heap_device(gpu_value1, gpu_value2)
+    # cdef can only be defined at the function level
+    cdef float alpha = 1.0
+    cdef double alpha2 = 1.0
     if gpu_value1.dtype == np.float32:
-        cublasSaxpy(n, <float>1.0, <const float*>ptr1, 1, <float*>ptr2, 1)
+        check(cublasSaxpy(<cublasHandle_t> handle,n, &alpha, <const float*>ptr1, 1, <float*>ptr2, 1))
     elif gpu_value1.dtype == np.float64:
-        cublasDaxpy(n, <double>1.0, <const double*>ptr1, 1, <double*>ptr2, 1)
+        check(cublasDaxpy(<cublasHandle_t> handle,n, &alpha2, <const double*>ptr1, 1, <double*>ptr2, 1))
     return
+
+cdef uintptr_t _stream = 0
+cdef cublasHandle_t _handle
+
+cdef get_handle(idx = 0):
+  cdef int newStream = 0
+  cdef cublasHandle_t handle
+  cdef uintptr_t stream
+  cdef cublasHandle_t *tmp3
+  cdef uintptr_t *tmp2
+  cdef uintptr_t tmp
+
+  if not idx in _cublas_handlers:
+    tmp = createCublashandler()
+    tmp3 = <cublasHandle_t*> tmp
+
+    stream = <uintptr_t> cuCreateStream()
+    _cublas_handlers[idx] = <uintptr_t> tmp3[0]
+    check(cublasSetStream(tmp3[0], <cudaStream_t> stream))
+
+
+  return _cublas_handlers[idx]
+
 
 # GEMM
 def cublas_gemm(gpu_value1, t1, gpu_value2, t2, gpu_value3):
@@ -63,27 +95,31 @@ def cublas_gemm(gpu_value1, t1, gpu_value2, t2, gpu_value3):
 
     shape1 = gpu_value1.shape or (1, 1)
     shape2 = gpu_value2.shape or (1, 1)
-    
-    cdef char c1 = 'T' if t1 == 1 else 'N'
-    cdef char c2 = 'T' if t2 == 1 else 'N'
+
+    cdef cublasOperation_t c1 = CUBLAS_OP_T if t1 == 1 else CUBLAS_OP_N
+    cdef cublasOperation_t c2 = CUBLAS_OP_T if t2 == 1 else CUBLAS_OP_N
     cdef int n = shape2[0] if t2 == 1 else shape2[1]
     cdef int m = shape1[1] if t1 == 1 else shape1[0]
     cdef int k = shape2[1] if t2 == 1 and t1 == 0 else shape2[0]
     cdef uintptr_t ptr1 = <uintptr_t>gpu_value1._ptr
     cdef uintptr_t ptr2 = <uintptr_t>gpu_value2._ptr
     cdef uintptr_t ptr3 = <uintptr_t>gpu_value3._ptr
-    
+
     if len(shape1) > 2:
         raise Exception("Operation cuBlas gemm is only accept 2 dimentional matrix.")
-    
+
+    cdef uintptr_t handle = <uintptr_t> get_handle()
+    # cdef can only be defined at the function level
+    cdef float alpha = 1.0, beta = 0.0
+    cdef double alpha2 = 1.0, beta2 = 0.0
     if gpu_value1.dtype == np.float32:
-        cublasSgemm(c2, c1, n, m, k, 1.0, <float*>ptr2, shape2[1], <float*>ptr1, shape1[1], 0.0, <float*>ptr3, n)
+        check(cublasSgemm(<cublasHandle_t> handle, c2, c1, n, m, k, &alpha, <float*>ptr2, shape2[1], <float*>ptr1, shape1[1], &beta, <float*>ptr3, n))
     else:
-        cublasDgemm(c2, c1, n, m, k, 1.0, <double*>ptr2, shape2[1], <double*>ptr1, shape1[1], 0.0, <double*>ptr3, n)
+        check(cublasDgemm(<cublasHandle_t> handle, c2, c1, n, m, k, &alpha2, <double*>ptr2, shape2[1], <double*>ptr1, shape1[1], &beta2, <double*>ptr3, n))
     return
 
 # GEAM
-def cublas_geam(handle, a, gpu_value1, t1, b, gpu_value2, t2, gpu_value3):
+def cublas_geam( a, gpu_value1, t1, b, gpu_value2, t2, gpu_value3):
     cdef int n, m
     cdef float f_alf = <float>a
     cdef float f_bet = <float>b
@@ -92,14 +128,14 @@ def cublas_geam(handle, a, gpu_value1, t1, b, gpu_value2, t2, gpu_value3):
     cdef uintptr_t ptr1 = <uintptr_t>gpu_value1._ptr
     cdef uintptr_t ptr2 = <uintptr_t>gpu_value2._ptr
     cdef uintptr_t ptr3 = <uintptr_t>gpu_value3._ptr
-    cdef cublasHandle_t handler = <cublasHandle_t><uintptr_t>handle
+    cdef uintptr_t handle = <uintptr_t> get_handle()
     cdef cublasOperation_t c1 = CUBLAS_OP_T if t1 == 1 else CUBLAS_OP_N
     cdef cublasOperation_t c2 = CUBLAS_OP_T if t2 == 1 else CUBLAS_OP_N
 
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
     shape1 = gpu_value1.shape or (1, 1)
     shape2 = gpu_value2.shape or (1, 1)
-    
+
     if t1 == 0:
         n = shape1[1]
         m = shape1[0]
@@ -109,17 +145,15 @@ def cublas_geam(handle, a, gpu_value1, t1, b, gpu_value2, t2, gpu_value3):
     else:
         n = shape2[0]
         m = shape2[1]
-    
+
     if gpu_value1.dtype == np.float32:
-        check(cublasSgeam(handler, c1, c2, n, m, &f_alf, <const float*>ptr1, shape1[1], &f_bet,
+        check(cublasSgeam(<cublasHandle_t> handle, c1, c2, n, m, &f_alf, <const float*>ptr1, shape1[1], &f_bet,
                           <const float*>ptr2, shape2[1], <float*>ptr3, n))
     elif gpu_value1.dtype == np.float64:
-        check(cublasDgeam(handler, c1, c2, n, m, &d_alf, <const double*>ptr1, shape1[1], &d_bet,
+        check(cublasDgeam(<cublasHandle_t> handle, c1, c2, n, m, &d_alf, <const double*>ptr1, shape1[1], &d_bet,
                           <const double*>ptr2, shape2[1], <double*>ptr3, n))
     return
 
-def cublas_transpose(handle, gpu_value1, gpu_value2):
+def cublas_transpose(gpu_value1, gpu_value2):
     cuda_base.check_heap_device(gpu_value1, gpu_value2)
-    cublas_geam(handle, 1.0, gpu_value1, 1, 0.0, gpu_value1, 1, gpu_value2)
-
-
+    cublas_geam(1.0, gpu_value1, 1, 0.0, gpu_value1, 1, gpu_value2)

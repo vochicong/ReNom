@@ -5,6 +5,7 @@ import warnings
 import numpy as np
 from renom.core import get_gpu, Node
 from renom.cuda import is_cuda_active
+from renom.cuda.cuda_base import pinNumpy, initPinnedMemory
 
 
 class Distributor(object):
@@ -58,11 +59,13 @@ class Distributor(object):
         '''
         if shuffle:
             perm = np.random.permutation(self._data_size)
+            for i in range(int(np.ceil(self._data_size / batch_size))):
+                p = perm[i * batch_size:(i + 1) * batch_size]
+                yield self._data_x[p], self._data_y[p]
         else:
-            perm = np.arange(self._data_size)
-        for i in range(int(np.ceil(self._data_size / batch_size))):
-            p = perm[i * batch_size:(i + 1) * batch_size]
-            yield self._data_x[p], self._data_y[p]
+            for i in range(int(np.ceil(self._data_size / batch_size))):
+                yield self._data_x[i * batch_size:(i + 1) * batch_size], \
+                    self._data_y[i * batch_size:(i + 1) * batch_size]
 
     def kfold(self, num, overlap=False, shuffle=False):
         for i in range(num):
@@ -142,49 +145,73 @@ class NdarrayDistributor(Distributor):
                                y=self._data_y[perm[ts_flag]],
                                data_table=self._data_table)
 
+
+import time
+
+
 class GPUDistributor(Distributor):
 
-        '''
-        Derived class of Distributor which manages GPUData data.
+    '''
+    Derived class of Distributor which manages GPUValue data.
 
-        Args:
-            x (ndarray): Input data.
-            y (ndarray): Target data.
-        '''
+    Args:
+        x (ndarray): Input data.
+        y (ndarray): Target data.
+    '''
 
-        def __init__(self, x, y):
-            assert is_cuda_active(), "Cuda must be activated to use GPU distributor"
-            super(GPUDistributor, self).__init__(x=get_gpu(x), y=get_gpu(y))
-            assert len(x) == len(y), "Input batches must have same number as output batches"
-            self._data_size = len(x)
+    def __init__(self, x, y):
+        assert is_cuda_active(), "Cuda must be activated to use GPU distributor"
+        super(GPUDistributor, self).__init__(x=x, y=y)
+        assert len(x) == len(y), "Input batches must have same number as output batches"
+        self._data_size = len(x)
 
-        def __getitem__(self, index):
-            return super(GPUDistributor, self).__getitem__(self, index)
+    def __getitem__(self, index):
+        return super(GPUDistributor, self).__getitem__(self, index)
 
-        def kfold(self, num=4, overlap=False, shuffle=True):
-            return super(GPUDistributor, self).kfold(self, num, overlap, shuffle)
+    def kfold(self, num=4, overlap=False, shuffle=True):
+        return super(GPUDistributor, self).kfold(self, num, overlap, shuffle)
 
-        def batch(self, batch_size, shuffle=True):
-            generator = super(GPUDistributor, self).batch(batch_size, shuffle)
-            notEmpty = True
-            first = True
-            while(notEmpty):
-                try:
-                    if(first):
-                        b1 = next(generator)
-                        x1, y1 = get_gpu(b1[0]), get_gpu(b1[1])
-                        first = True
-                    b2 = next(generator)
-                    x2, y2 = get_gpu(b2[0]), get_gpu(b2[1])
-                    yield Node(x1), Node(y1)
-                    x1, y1 = x2, y2
-                except StopIteration:
-                    notEmpty = False
+    @staticmethod
+    def preload_single(batch):
+        pinNumpy(batch)
+        return get_gpu(batch)
+
+    @staticmethod
+    def preload_pair(batch1, batch2):
+        return GPUDistributor.preload_single(batch1), GPUDistributor.preload_single(batch2)
+
+    def batch(self, batch_size, shuffle=True):
+        generator = super(GPUDistributor, self).batch(batch_size, shuffle)
+        notEmpty = True
+        first = True
+        while(notEmpty):
+            try:
+                # On entering, we preload the first two batches
+                if first:
+                    b = next(generator)
+                    initPinnedMemory(b[0])
+                    x1, y1 = GPUDistributor.preload_pair(b[0], b[1])
+                    first = False
+
+                # We continue to preload an extra batch until we are finished
+                # Values yet to be returned are stored in *2
+                b = next(generator)
+                x2, y2 = GPUDistributor.preload_pair(b[0], b[1])
+
+                yield Node(x1), Node(y1)
+                # Release currently released values and store the next as
+                # next to be yielded in *1
+                x1, y1 = x2, y2
+
+            # When kicked out of the loop, return the last pre-loaded values
+            except StopIteration:
+                notEmpty = False
+            # Check if there was only a single batch
+            if not first:
                 yield Node(x2), Node(y2)
+            else:
+                yield Node(x1), Node(y1)
 
-
-        def split(self, ratio=0.8, shuffle=True):
-            return super(GPUDistributor, self).split(self, batch_size, shuffle)
 
 
 class TimeSeriesDistributor(NdarrayDistributor):

@@ -596,16 +596,17 @@ class GPUValue(object):
 
     def to_gpu(self, value):
         if value.dtype.type is not self.dtype:
-            value = value.astype(self.dtype)
+            # Possible Bottleneck here if converting non-fitting data
+            value = value.astype(self.dtype, subok=True, copy=False)
 
         assert value.shape == self.shape, "{} {}".format(value.shape, self.shape)
-
         if self._ptr:
             ptr = self._ptr
         else:
             ptr = gpu_allocator.malloc(value.nbytes)
             self.device_id = cuGetDevice()
 
+        # Locates the pinned field if it has been asigned
         # todo: value.flatten() copies buffer
         with use_device(self.device_id):
             ptr.memcpyH2D(value.ravel(), value.nbytes)

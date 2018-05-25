@@ -1,3 +1,6 @@
+from libc.stdint cimport uintptr_t
+
+ctypedef uintptr_t cudaStream_ptr
 
 cdef extern from "cuda_runtime.h":
     ctypedef enum cudaError_t:
@@ -6,12 +9,19 @@ cdef extern from "cuda_runtime.h":
         cudaErrorMemoryAllocation = 2,
         cudaErrorInitializationError = 3
 
+    ctypedef struct CUevent_st:
+      pass
+    ctypedef struct CUstream_st:
+      pass
+
+    ctypedef CUevent_st * cudaEvent_t
+    ctypedef CUstream_st *  cudaStream_t
+
     ctypedef enum cudaMemcpyKind:
         cudaMemcpyHostToHost,
         cudaMemcpyHostToDevice,
         cudaMemcpyDeviceToHost,
         cudaMemcpyDeviceToDevice
-    ctypedef int cudaStream_t
     ctypedef int size_t
     ctypedef struct cudaDeviceProp:
         char * name,
@@ -45,8 +55,16 @@ cdef extern from "cuda_runtime.h":
     cudaError_t cudaMemcpyAsync(void * dst, const void * src, int count, cudaMemcpyKind kind, cudaStream_t stream)
     cudaError_t cudaMemcpyPeer(void * dst, int dstDevice, const void * src, int srcDevice, size_t count)
 
+    cudaError_t cudaHostAlloc(void ** ptr, size_t size, int flags)
+    cudaError_t cudaMallocHost(void ** ptr, size_t size)
+    cudaError_t cudaFreeHost(void * ptr)
+    cudaError_t cudaHostRegister(void * ptr, size_t size, int flags)
+    cudaError_t cudaHostUnregister(void *ptr)
+    cudaError_t cudaEventCreate(cudaEvent_t * event)
+    cudaError_t cudaEventRecord(cudaEvent_t event, cudaStream_t stream)
+    cudaError_t cudaEventSynchronize(cudaEvent_t)
     cudaError_t cudaMalloc(void ** ptr, size_t size)
-    cudaError_t cudaMallocHost(void ** ptr, size_t size, unsigned int flags)
+    #cudaError_t cudaMallocHost(void ** ptr, size_t size, unsigned int flags)
     cudaError_t cudaSetDevice(int size)
     cudaError_t cudaGetDevice(int *device)
     cudaError_t cudaDeviceSynchronize()
@@ -84,4 +102,3 @@ cdef extern from "cuda.h":
     CUresult cuCtxGetLimit (size_t *value, CUlimit limit)
 
     CUresult cuInit(unsigned int)
-
