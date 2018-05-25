@@ -146,8 +146,6 @@ class NdarrayDistributor(Distributor):
                                data_table=self._data_table)
 
 
-import time
-
 
 class GPUDistributor(Distributor):
 

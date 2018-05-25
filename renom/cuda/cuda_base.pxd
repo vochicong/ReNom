@@ -102,3 +102,7 @@ cdef extern from "cuda.h":
     CUresult cuCtxGetLimit (size_t *value, CUlimit limit)
 
     CUresult cuInit(unsigned int)
+
+
+cdef extern from "nvToolsExtCudaRt.h":
+  void nvtxNameCudaStreamA(cudaStream_t stream, const char* name)

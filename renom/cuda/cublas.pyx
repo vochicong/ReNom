@@ -81,7 +81,7 @@ cdef get_handle(idx = 0):
     tmp = createCublashandler()
     tmp3 = <cublasHandle_t*> tmp
 
-    stream = <uintptr_t> cuCreateStream()
+    stream = <uintptr_t> cuCreateStream("Cublas Stream #{:d}".format(idx))
     _cublas_handlers[idx] = <uintptr_t> tmp3[0]
     check(cublasSetStream(tmp3[0], <cudaStream_t> stream))
 

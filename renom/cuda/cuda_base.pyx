@@ -77,9 +77,14 @@ def pinNumpy(np.ndarray arr):
       return
     return
 
-def cuCreateStream():
+def cuCreateStream(name = None):
     cdef cudaStream_t stream
+    cdef char* cname
     runtime_check(cudaStreamCreate( & stream))
+    if name is not None:
+      py_byte_string = name.encode("UTF-8")
+      cname = py_byte_string
+      nvtxNameCudaStreamA(stream, cname)
     return < uintptr_t > stream
 
 
@@ -302,7 +307,7 @@ class allocator(object):
     def __init__(self):
         self._pool_lists = collections.defaultdict(list)
         # We create one stream for all the GPUHeaps to share
-        self._memsync_stream = cuCreateStream()
+        self._memsync_stream = cuCreateStream("Memcpy Stream")
 
     @property
     def pool_list(self):
@@ -358,7 +363,7 @@ class allocator(object):
                 release(pools)
         else:
             release(self._pool_lists[deviceID])
-          
+
 
 gpu_allocator = allocator()
 
