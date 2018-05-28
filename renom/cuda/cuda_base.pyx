@@ -77,10 +77,19 @@ def pinNumpy(np.ndarray arr):
       return
     return
 
+'''
+Creates a stream
+The name is optional, if not given a default name will be chosen
+
+A cudaStream_t type is a pointer to a CUstream_st struct
+The function return value is the integer converted value of this pointer
+To reuse this stream as a C-defined cudaStream_t variable, simply cast the
+returned integer value back to cudaStream_t
+'''
 def cuCreateStream(name = None):
     cdef cudaStream_t stream
     cdef char* cname
-    runtime_check(cudaStreamCreate( & stream))
+    runtime_check(cudaStreamCreateWithFlags( & stream, cudaStreamNonBlocking))
     if name is not None:
       py_byte_string = name.encode("UTF-8")
       cname = py_byte_string

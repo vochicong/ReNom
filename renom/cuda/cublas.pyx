@@ -69,19 +69,30 @@ def cublas_axpy(gpu_value1, gpu_value2):
 cdef uintptr_t _stream = 0
 cdef cublasHandle_t _handle
 
+
+'''
+Receives the shared handle for cublas classes, used for parallel
+execution of cublas kernels.
+
+The function return value is the integer converted value of this pointer
+To reuse this stream as a C-defined cudaStream_t variable, simply cast the
+returned integer value back to cublasHandle_t
+'''
 cdef get_handle(idx = 0):
+  # This function is a mess lol
   cdef int newStream = 0
   cdef cublasHandle_t handle
   cdef uintptr_t stream
   cdef cublasHandle_t *tmp3
   cdef uintptr_t *tmp2
   cdef uintptr_t tmp
-
   if not idx in _cublas_handlers:
-    tmp = createCublashandler()
-    tmp3 = <cublasHandle_t*> tmp
-
     stream = <uintptr_t> cuCreateStream("Cublas Stream #{:d}".format(idx))
+    # Receive the python object version of the handle
+    tmp = createCublashandler()
+    # Cast it to a pointer in order to de-reference later
+    tmp3 = <cublasHandle_t*> tmp
+    # Dereference the pointer and finally store the value of the de-reference pointer as an integer
     _cublas_handlers[idx] = <uintptr_t> tmp3[0]
     check(cublasSetStream(tmp3[0], <cudaStream_t> stream))
 

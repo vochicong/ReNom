@@ -22,6 +22,11 @@ cdef extern from "cuda_runtime.h":
         cudaMemcpyHostToDevice,
         cudaMemcpyDeviceToHost,
         cudaMemcpyDeviceToDevice
+    ctypedef enum cudaStreamFlags:
+        cudaStreamDefault = 0x00
+        cudaStreamLegacy = 0x1
+        cudaStreamNonBlocking = 0x01
+        cudaStreamPerThread = 0x2
     ctypedef int size_t
     ctypedef struct cudaDeviceProp:
         char * name,
@@ -72,6 +77,7 @@ cdef extern from "cuda_runtime.h":
     const char * cudaGetErrorString(cudaError_t erorr)
 
     cudaError_t cudaStreamCreate(cudaStream_t * pStream)
+    cudaError_t cudaStreamCreateWithFlags(cudaStream_t * pStream, unsigned int flags)
     cudaError_t cudaStreamDestroy(cudaStream_t stream)
     cudaError_t cudaStreamSynchronize(cudaStream_t stream)
 
