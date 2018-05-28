@@ -63,7 +63,7 @@ def cublas_scal(alf, gpu_value):
     return
 
 # AXPY
-def cublas_axpy(gpu_value1, gpu_value2):
+cpdef cublas_axpy(gpu_value1, gpu_value2):
     cdef int n = gpu_value1.size
     cdef uintptr_t ptr1 = <uintptr_t>gpu_value1._ptr
     cdef uintptr_t ptr2 = <uintptr_t>gpu_value2._ptr
@@ -112,7 +112,7 @@ cdef get_handle(idx = 0):
 
 
 # GEMM
-def cublas_gemm(gpu_value1, t1, gpu_value2, t2, gpu_value3):
+def cublas_gemm(gpu_value1, t1, gpu_value2, t2, gpu_value3, handle):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
 
     shape1 = gpu_value1.shape or (1, 1)
@@ -141,7 +141,7 @@ def cublas_gemm(gpu_value1, t1, gpu_value2, t2, gpu_value3):
     return
 
 # GEAM
-def cublas_geam( a, gpu_value1, t1, b, gpu_value2, t2, gpu_value3):
+def cublas_geam( a, gpu_value1, t1, b, gpu_value2, t2, gpu_value3, hand = None):
     cdef int n, m
     cdef float f_alf = <float>a
     cdef float f_bet = <float>b
@@ -150,7 +150,7 @@ def cublas_geam( a, gpu_value1, t1, b, gpu_value2, t2, gpu_value3):
     cdef uintptr_t ptr1 = <uintptr_t>gpu_value1._ptr
     cdef uintptr_t ptr2 = <uintptr_t>gpu_value2._ptr
     cdef uintptr_t ptr3 = <uintptr_t>gpu_value3._ptr
-    cdef uintptr_t handle = <uintptr_t> get_handle()
+    cdef uintptr_t handle = <uintptr_t> get_handle() if handle is None else <uintptr_t> hand
     cdef cublasOperation_t c1 = CUBLAS_OP_T if t1 == 1 else CUBLAS_OP_N
     cdef cublasOperation_t c2 = CUBLAS_OP_T if t2 == 1 else CUBLAS_OP_N
 
@@ -176,6 +176,6 @@ def cublas_geam( a, gpu_value1, t1, b, gpu_value2, t2, gpu_value3):
                           <const double*>ptr2, shape2[1], <double*>ptr3, n))
     return
 
-def cublas_transpose(gpu_value1, gpu_value2):
+def cublas_transpose(handle, gpu_value1, gpu_value2):
     cuda_base.check_heap_device(gpu_value1, gpu_value2)
-    cublas_geam(1.0, gpu_value1, 1, 0.0, gpu_value1, 1, gpu_value2)
+    cublas_geam(1.0, gpu_value1, 1, 0.0, gpu_value1, 1, gpu_value2, handle)

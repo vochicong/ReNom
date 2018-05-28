@@ -13,6 +13,10 @@ except ImportError as e:
     curand_generator = None
     _has_cuda = False
 
+    @contextlib.contextmanager
+    def use_device(device_id):
+        yield
+
 _cuda_is_active = False
 _cuda_is_disabled = False
 
@@ -70,21 +74,6 @@ def disable_cuda(is_disabled=True):
     finally:
         # restore cuda state
         _cuda_is_disabled = cur
-
-
-@contextlib.contextmanager
-def use_device(device_id):
-    active = is_cuda_active()
-
-    if active:
-        cur = cuGetDevice()
-        cuSetDevice(device_id)  # switch dedice
-
-    try:
-        yield
-    finally:
-        if active:
-            cuSetDevice(cur)   # restore device
 
 
 _CuRandGens = {}

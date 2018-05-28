@@ -1,6 +1,6 @@
+# distutils: language=c++
 from libc.stdint cimport uintptr_t
 from libc.stdlib cimport malloc, free
-
 cdef extern from "cuda_runtime.h":
   ctypedef struct CUstream:
     pass
@@ -562,3 +562,6 @@ cdef extern from "cublas_v2.h":
                                int ldb,
                                cuDoubleComplex * C,
                                int ldc)
+
+
+cpdef cublas_axpy(gpu_value1, gpu_value2)

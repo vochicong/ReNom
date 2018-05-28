@@ -109,6 +109,31 @@ cdef extern from "cuda.h":
 
     CUresult cuInit(unsigned int)
 
-
 cdef extern from "nvToolsExtCudaRt.h":
   void nvtxNameCudaStreamA(cudaStream_t stream, const char* name)
+
+cdef class GPUHeap(object):
+    cpdef object _mystream
+    cdef public size_t ptr
+    cdef public size_t nbytes
+    cdef public int device_id
+
+    cpdef memcpyH2D(self, cpu_ptr, size_t nbytes)
+    cpdef memcpyD2H(self, cpu_ptr, size_t nbytes)
+    cpdef memcpyD2D(self, gpu_ptr, size_t nbytes)
+    cpdef copy_from(self, other, size_t nbytes)
+
+
+cdef class GpuAllocator(object):
+    cpdef object _pool_lists, _all_pools
+    cpdef object _memsync_stream
+
+    cpdef GPUHeap malloc(self, size_t nbytes)
+    cpdef GPUHeap getAvailablePool(self, size_t size)
+    cpdef free(self, GPUHeap pool)
+    cpdef release_pool(self, deviceID=*)
+
+
+cpdef GpuAllocator get_gpu_allocator()
+
+cdef GpuAllocator c_gpu_allocator
