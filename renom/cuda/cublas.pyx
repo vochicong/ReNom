@@ -112,7 +112,7 @@ cdef get_handle(idx = 0):
 
 
 # GEMM
-def cublas_gemm(gpu_value1, t1, gpu_value2, t2, gpu_value3, handle):
+def cublas_gemm(gpu_value1, t1, gpu_value2, t2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
 
     shape1 = gpu_value1.shape or (1, 1)
