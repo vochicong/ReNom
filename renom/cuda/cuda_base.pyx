@@ -26,55 +26,54 @@ def cuMemset(uintptr_t ptr, int value, size_t size):
     return
 
 # Global C-defined variables cannot be accessed from Python
-cdef void * ptrA, * ptrB # TODO: This is not a good solution. Change to pointer of arrays instead.
-cdef cudaEvent_t eventA, eventB # Similar to above
-cdef size_t pin_size = 0 # Make size always word-sized for increased performance in memcpy
-cdef bint usingA = True # Used for switching between different pinned memory spaces when sending
-cdef char toUse = '0' # Used for same purpose as above, inevitably useless but currently used in a bad implementation
+cdef void ** ptrs # Keeps an array of pointers for storing pinned memory spaces
+cdef cudaEvent_t * events # Similar to above with regards to events
+# TODO: Make pin_size always word-sized for increased performance in memcpy
+cdef size_t pin_size = 0 # How much space is designed for each pinned memory location
+cdef int using = 0 # Designates which of the allocated spaces is currently being used
+cdef int pointers = 2 # How many pinned memory spaces we use
 
 
 # This function initiates the pinned memory space based on a sample batch
 # This should be called before trying to pin memory
 def initPinnedMemory(np.ndarray batch_arr):
-    global pin_size, eventA, eventB, ptrA, ptrB
-    if pin_size is not 0:
-      freePinnedMemory()
-    pin_size = <size_t> batch_arr.descr.itemsize*len(batch_arr)
-    runtime_check(cudaMallocHost(&ptrA,pin_size))
-    runtime_check(cudaMallocHost(&ptrB,pin_size))
-    runtime_check(cudaEventCreate(&eventA))
-    runtime_check(cudaEventCreate(&eventB))
+    global pin_size, events, ptrs, pointers
+    cdef size_t new_size = <size_t> batch_arr.descr.itemsize*len(batch_arr)
+    cdef int i
+    if not pin_size is new_size:
+      if new_size is 0 and pin_size is 0:
+        freePinnedMemory()
+      elif new_size > 0:
+        pin_size = new_size
+        ptrs = <void**> malloc(sizeof(void*)*pointers)
+        events = <cudaEvent_t*> malloc(sizeof(cudaEvent_t)*pointers)
+        for i in range(pointers):
+          runtime_check(cudaMallocHost(&(ptrs[i]), pin_size))
+          runtime_check(cudaEventCreate(&(events[i])))
+
+
+
 
 # Pointless right now, as the user closing the program
 # will always free up the allocated memory anyway
 def freePinnedMemory():
-    global ptrA, ptrB, pin_size
-    cudaFreeHost(ptrA)
-    cudaFreeHost(ptrB)
+    global ptrs, pin_size, pointers
+    cdef int i
+    for i in range(pointers):
+      cudaFreeHost(ptrs[i])
+    free(ptrs)
+    free(events)
     pin_size = 0
 
 # This function will accept a numpy array and move its data to the spaces
 # previously allocated using initPinnedMemory.
 def pinNumpy(np.ndarray arr):
+    global ptrs, using, events, pin_size
     assert arr.descr.itemsize*len(arr) <= pin_size, "Attempting to insert memory larger than what was made available through initPinnedMemory.\n(Allocated,Requested)({:d},{:d})".format(pin_size,arr.descr.itemsize*len(arr))
     cdef void * vptr = <void*> arr.data
-    cdef bin
-    global usingA, ptrA, ptrB, toUse, eventA, eventB
-    if usingA:
-      # If we are currently trying to copy host data to the device given
-      # space reserved in ptrA, wait until this transfer is finished
-      cudaEventSynchronize(eventA)
-      memcpy(ptrA, vptr, pin_size)
-      usingA = False
-      toUse = 'A'
-      return
-    else:
-      # Same check as for ptrA
-      cudaEventSynchronize(eventB)
-      memcpy(ptrB, vptr, pin_size)
-      usingA = True
-      toUse = 'B'
-      return
+    cudaEventSynchronize(events[using])
+    memcpy(ptrs[using], vptr, pin_size)
+    #using = (using + 1) % pointers
     return
 
 '''
@@ -95,6 +94,10 @@ def cuCreateStream(name = None):
       cname = py_byte_string
       nvtxNameCudaStreamA(stream, cname)
     return < uintptr_t > stream
+
+
+def cuDestroyStream(uintptr_t stream):
+    runtime_check(cudaStreamDestroy(<cudaStream_t> stream))
 
 
 def cuSetDevice(int dev):
@@ -203,16 +206,13 @@ def cuMemcpyD2D(uintptr_t gpu_ptr1, uintptr_t gpu_ptr2, int size):
 
 cdef void cuMemcpyH2DAsync(void* cpu_ptr, uintptr_t gpu_ptr, int size, uintptr_t stream):
     # cpu to gpu
-    global ptrA, ptrB, toUse
-    if toUse is 'A':
-      cpu_ptr = ptrA
-    elif toUse is 'B':
-      cpu_ptr = ptrB
+    global ptrs, using, events, pointers
+    if pin_size > 0:
+      cpu_ptr = ptrs[using]
     runtime_check(cudaMemcpyAsync(<void *>gpu_ptr, cpu_ptr, size, cudaMemcpyHostToDevice, <cudaStream_t> stream))
-    if toUse is 'A':
-      cudaEventRecord(eventA, <cudaStream_t> stream)
-    elif toUse is 'B':
-      cudaEventRecord(eventB, <cudaStream_t> stream)
+    if pin_size > 0:
+      cudaEventRecord(events[using], <cudaStream_t> stream)
+      using = (using + 1) % pointers
     return
 
 
@@ -358,6 +358,11 @@ class allocator(object):
                 break
 
         return pool
+
+    # TODO: Implement stream and handler destruction
+    #def __del__(self):
+    #  pass
+
 
     def release_pool(self, deviceID=None):
 

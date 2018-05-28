@@ -3,8 +3,13 @@ import numpy as np
 from cublas import *
 from libc.stdint cimport uintptr_t
 import cuda_base
-from cuda_base import cuCreateStream
+from cuda_base import cuCreateStream, cuDestroyStream
 
+# This variable stores the integer value of a pointer directing towards
+# the actual cublasHandle_t variable
+# To get the variable, use <cublasHandle_t> _cublas_handlers[desired_id]
+# Alternatively, since cublasHandle_t is an integer value itself, simply use
+# _cublas_handlers[desired_id] to receive the value
 _cublas_handlers = {}
 
 cdef createCublashandler():
@@ -12,6 +17,14 @@ cdef createCublashandler():
   cdef cublasStatus_t ret
   check(cublasCreate(handle))
   return <uintptr_t> handle
+
+def destroyCublas():
+  cdef cudaStream_t * stream
+  cdef int i
+  for i in range(len(_cublas_handlers)):
+    check(cublasGetStream(<cublasHandle_t> _cublas_handlers[i], stream))
+    cuDestroyStream(<uintptr_t> stream[0])
+    cublasDestroy(<cublasHandle_t> _cublas_handlers[i])
 
 cdef check(cublasStatus_t status):
     if status != CUBLAS_STATUS_SUCCESS:
@@ -92,11 +105,9 @@ cdef get_handle(idx = 0):
     tmp = createCublashandler()
     # Cast it to a pointer in order to de-reference later
     tmp3 = <cublasHandle_t*> tmp
-    # Dereference the pointer and finally store the value of the de-reference pointer as an integer
+    # Dereference the pointer and finally store the value of the de-referenced pointer as an integer
     _cublas_handlers[idx] = <uintptr_t> tmp3[0]
     check(cublasSetStream(tmp3[0], <cudaStream_t> stream))
-
-
   return _cublas_handlers[idx]
 
 

@@ -503,7 +503,7 @@ cdef extern from "cublas_v2.h":
     cublasStatus_t cublasCreate(cublasHandle_t * handle)
     cublasStatus_t cublasSetStream(cublasHandle_t handle, cudaStream_t stream)
     cublasStatus_t cublasGetStream(cublasHandle_t handle, cudaStream_t *stream)
-    cublasStatus_t cublasDestroy_v2 ( cublasHandle_t handle);
+    cublasStatus_t cublasDestroy ( cublasHandle_t handle);
 
     # ---------------- CUBLAS BLAS-like extension ----------------
     # GEAM
