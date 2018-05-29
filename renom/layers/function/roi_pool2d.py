@@ -9,10 +9,10 @@ import renom.cuda as cu
 
 class roi_pool2d(Node):
 
-    def __new__(cls, x, rois, outh=7, outw=7, spatial_scale=1/16.):
+    def __new__(cls, x, rois, outh=7, outw=7, spatial_scale=1 / 16.):
         ch, h, w = x.shape[1:]
         n_rois = rois.shape[0]
-        return cls.calc_value(x, rois, ch, h, w, n_rois, outh, outw, spatial_scale=1/16.)
+        return cls.calc_value(x, rois, ch, h, w, n_rois, outh, outw, spatial_scale=1 / 16.)
 
     @classmethod
     def _oper_cpu(cls, x, rois, ch, h, w, n_rois, outh, outw, spatial_scale):
@@ -80,8 +80,8 @@ class roi_pool2d(Node):
 
                 stride_h = float(roi_height) / float(self.attrs._outh)
                 stride_w = float(roi_width) / float(self.attrs._outw)
-                for idx_h in range(ymin, ymax+1):
-                    for idx_w in range(xmin, xmax+1):
+                for idx_h in range(ymin, ymax + 1):
+                    for idx_w in range(xmin, xmax + 1):
                         start_w, end_w = roi_pooling_slice_decode(
                             idx_w, stride_w, self.attrs._outw, xmin)
                         start_h, end_h = roi_pooling_slice_decode(
@@ -106,7 +106,7 @@ class roi_pool2d(Node):
 
 
 class RoiPoolBase(object):
-    def __init__(self, outh=7, outw=7, spatial_scale=1/16.):
+    def __init__(self, outh=7, outw=7, spatial_scale=1 / 16.):
         self.outw = outw
         self.outh = outh
         self.spatial_scale = spatial_scale

@@ -1452,7 +1452,7 @@ class GetNthAry(Node):
 
     @classmethod
     def _oper_gpu(cls, arg, i, j):
-        ary = GPUValue(shape=(arg.shape[0], ((arg.shape[1]-(i+1))//j)+1))
+        ary = GPUValue(shape=(arg.shape[0], ((arg.shape[1] - (i + 1)) // j) + 1))
         arg = get_gpu(arg)
         cu_get_every_nth_ary(arg, ary, i, j)
         return ary

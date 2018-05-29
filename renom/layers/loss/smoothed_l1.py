@@ -19,8 +19,8 @@ class smoothed_l1(Node):
         N = float(lhs.shape[0])
         d = lhs - rhs
         abs_d = abs(d)
-        loss = np.sum(np.where(abs_d < delta, 0.5*d*d, delta*(abs_d-0.5*delta)))
-        ret = cls._create_node(loss/N)
+        loss = np.sum(np.where(abs_d < delta, 0.5 * d * d, delta * (abs_d - 0.5 * delta)))
+        ret = cls._create_node(loss / N)
         ret.attrs._delta = delta
         ret.attrs._lhs = lhs
         ret.attrs._rhs = rhs
@@ -34,8 +34,8 @@ class smoothed_l1(Node):
         d = lhs - rhs
         abs_d = abs(d.as_ndarray())
         flag = abs_d < delta
-        loss = cu.cusum(get_gpu(flag*0.5*(d*d)+(1-flag)*(abs_d-0.5*delta)*delta))
-        ret = cls._create_node(loss/N)
+        loss = cu.cusum(get_gpu(flag * 0.5 * (d * d) + (1 - flag) * (abs_d - 0.5 * delta) * delta))
+        ret = cls._create_node(loss / N)
         ret.attrs._delta = delta
         ret.attrs._lhs = lhs
         ret.attrs._rhs = rhs
@@ -47,17 +47,17 @@ class smoothed_l1(Node):
             N = float(self.attrs._lhs.shape[0])
             delta = self.attrs._delta
             mask = abs(self.attrs._d) < delta
-            dx = np.where(mask, self.attrs._d, np.sign(self.attrs._d)*delta)
-            self.attrs._lhs._update_diff(context, dx*dy/N, **kwargs)
+            dx = np.where(mask, self.attrs._d, np.sign(self.attrs._d) * delta)
+            self.attrs._lhs._update_diff(context, dx * dy / N, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._lhs, Node):
             N = float(self.attrs._lhs.shape[0])
             delta = self.attrs._delta
             mask = abs(self.attrs._d) <= delta
-            sign = (self.attrs._d > 0)*2 - 1
-            dx = mask*self.attrs._d + (1 - mask)*sign*delta
-            self.attrs._lhs._update_diff(context, dx*dy/N, **kwargs)
+            sign = (self.attrs._d > 0) * 2 - 1
+            dx = mask * self.attrs._d + (1 - mask) * sign * delta
+            self.attrs._lhs._update_diff(context, dx * dy / N, **kwargs)
 
 
 class SmoothedL1(object):

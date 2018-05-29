@@ -51,18 +51,18 @@ def tuplize(x):
 
 
 def roi_pooling_slice(size, stride, max_size, roi_offset):
-    start = int(np.floor(size*stride))
-    end = int(np.ceil((size+1)*stride))
+    start = int(np.floor(size * stride))
+    end = int(np.ceil((size + 1) * stride))
 
     start = min(max((start + roi_offset), 0), max_size)
     end = min(max((end + roi_offset), 0), max_size)
 
-    return slice(start, end), end-start
+    return slice(start, end), end - start
 
 
 def roi_pooling_slice_decode(size, stride, out_size, roi_offset):
-    start = int(np.floor(float(size - roi_offset)/stride))
-    end = int(np.ceil(float(size - roi_offset + 1)/stride))
+    start = int(np.floor(float(size - roi_offset) / stride))
+    end = int(np.ceil(float(size - roi_offset + 1) / stride))
 
     start = min(max(start, 0), out_size)
     end = min(max(end, 0), out_size)

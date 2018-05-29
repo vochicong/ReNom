@@ -469,7 +469,7 @@ def test_max_pool2d(node, use_gpu):
 
 
 @pytest.mark.parametrize("node, rois", [
-    [Variable(rand((3, 3, 8, 13))*10), Variable(np.array([
+    [Variable(rand((3, 3, 8, 13)) * 10), Variable(np.array([
         [0, 1, 1, 6, 6],
         [2, 6, 2, 7, 11],
         [1, 3, 1, 5, 10],
@@ -1027,6 +1027,7 @@ def test_getitem(node, index, error, use_gpu):
     else:
         compare(func, node, node)
 
+
 @pytest.mark.parametrize("node, x, delta", [
     [Variable(rand((1, 1))), rand((1, 1)), 1],
     [Variable(rand((1, 1))), rand((1, 1)), 3],
@@ -1041,4 +1042,3 @@ def test_smooth_l1(node, x, delta, use_gpu):
     def func(node, x):
         return rm.smoothed_l1(node, x, delta)
     compare(func, node, node, x)
-
