@@ -928,3 +928,20 @@ def test_min(node, axis, use_gpu):
     def func(node):
         return sum(rm.amin(node, axis))
     compare(func, node, node)
+
+
+@pytest.mark.parametrize("node, x, delta", [
+    [Variable(rand((1, 1))), rand((1, 1)), 1],
+    [Variable(rand((1, 1))), rand((1, 1)), 3],
+    [Variable(rand((1, 3))), rand((1, 3)), 1],
+    [Variable(rand((2, 1))), rand((2, 1)), 1],
+    [Variable(rand((1, 1, 1, 2))), rand((1, 1, 1, 2)), 1],
+])
+def test_smooth_l1(node, x, delta, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.smoothed_l1(node, x, delta)
+    compare(func, node, node, x)
+
