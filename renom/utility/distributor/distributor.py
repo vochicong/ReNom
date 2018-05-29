@@ -180,7 +180,7 @@ class GPUDistributor(Distributor):
 
     @staticmethod
     def create_return(batch1, batch2):
-        return Node(batch1), Node(batch2)
+        return batch1, batch2
 
     def batch(self, batch_size, shuffle=True):
         generator = super(GPUDistributor, self).batch(batch_size, shuffle)
