@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from renom.core import precision
+from renom.core import precision, to_value
 
 
 def out_size(size, k, s, p):
@@ -48,3 +48,32 @@ def col2im(col, size, stride, padding):
 
 def tuplize(x):
     return x if isinstance(x, tuple) else (x, x)
+
+
+def roi_pooling_slice(size, stride, max_size, roi_offset):
+    start = int(np.floor(size * stride))
+    end = int(np.ceil((size + 1) * stride))
+
+    start = min(max((start + roi_offset), 0), max_size)
+    end = min(max((end + roi_offset), 0), max_size)
+
+    return slice(start, end), end - start
+
+
+def roi_pooling_slice_decode(size, stride, out_size, roi_offset):
+    start = int(np.floor(float(size - roi_offset) / stride))
+    end = int(np.ceil(float(size - roi_offset + 1) / stride))
+
+    start = min(max(start, 0), out_size)
+    end = min(max(end, 0), out_size)
+    return start, end
+
+
+def region_cordinates(roi, spatial_scale):
+    idx, xmin, ymin, xmax, ymax = to_value(roi)
+    idx = int(idx)
+    xmin = int(round(xmin * spatial_scale))
+    ymin = int(round(ymin * spatial_scale))
+    xmax = int(round(xmax * spatial_scale))
+    ymax = int(round(ymax * spatial_scale))
+    return idx, xmin, ymin, xmax, ymax
