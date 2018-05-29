@@ -104,16 +104,18 @@ To reuse this stream as a C-defined cudaStream_t variable, simply cast the
 returned integer value back to cudaStream_t
 '''
 def cuCreateStream(name = None):
-    return 0
     cdef cudaStream_t stream
     cdef char* cname
     runtime_check(cudaStreamCreateWithFlags( & stream, cudaStreamNonBlocking))
+    #runtime_check(cudaStreamCreate( & stream ))
     if name is not None:
       py_byte_string = name.encode("UTF-8")
       cname = py_byte_string
       nvtxNameCudaStreamA(stream, cname)
     return < uintptr_t > stream
 
+def cuGetStream(myid = None):
+  pass
 
 def cuDestroyStream(uintptr_t stream):
     runtime_check(cudaStreamDestroy(<cudaStream_t> stream))
@@ -231,8 +233,21 @@ cdef void cuMemcpyH2DAsync(void* cpu_ptr, uintptr_t gpu_ptr, int size, uintptr_t
     runtime_check(cudaMemcpyAsync(<void *>gpu_ptr, cpu_ptr, size, cudaMemcpyHostToDevice, <cudaStream_t> stream))
     if pin_size > 0:
       cudaEventRecord(events[using], <cudaStream_t> stream)
+      cudaStreamWaitEvent(NULL, events[using], 0);
       using = (using + 1) % pointers
     return
+
+cdef void cuMemcpyH2Dvar(void* cpu_ptr, uintptr_t gpu_ptr, int size, uintptr_t stream):
+  # cpu to gpu
+  global ptrs, using, events, pointers
+  if pin_size > 0:
+    cpu_ptr = ptrs[using]
+    runtime_check(cudaMemcpyAsync(<void *>gpu_ptr, cpu_ptr, size, cudaMemcpyHostToDevice, <cudaStream_t> stream))
+    cudaEventRecord(events[using], <cudaStream_t> stream)
+    using = (using + 1) % pointers
+  else:
+    runtime_check(cudaMemcpy(<void *>gpu_ptr, cpu_ptr, size, cudaMemcpyHostToDevice))
+  return
 
 
 def cuMemcpyD2HAsync(uintptr_t gpu_ptr, np.ndarray[float, ndim=1, mode="c"] cpu_ptr, int size, int stream=0):
@@ -281,11 +296,11 @@ cdef class GPUHeap(object):
         cdef _VoidPtr ptr = _VoidPtr(buf)
 
         with renom.cuda.use_device(self.device_id):
-            cuMemcpyH2D(ptr.ptr, self.ptr, nbytes)
+            #cuMemcpyH2D(ptr.ptr, self.ptr, nbytes)
             # Async can be called safely, since if the user does not
             # set up all the requirements for Async, it will perform
             # as an ordinairy blocking call
-            #cuMemcpyH2DAsync(ptr.ptr, self.ptr, nbytes, <uintptr_t> self._mystream)
+            cuMemcpyH2Dvar(ptr.ptr, self.ptr, nbytes, <uintptr_t> self._mystream)
 
     cpdef memcpyD2H(self, cpu_ptr, size_t nbytes):
         shape = cpu_ptr.shape

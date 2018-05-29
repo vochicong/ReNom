@@ -80,6 +80,7 @@ cdef extern from "cuda_runtime.h":
     cudaError_t cudaStreamCreateWithFlags(cudaStream_t * pStream, unsigned int flags)
     cudaError_t cudaStreamDestroy(cudaStream_t stream)
     cudaError_t cudaStreamSynchronize(cudaStream_t stream)
+    cudaError_t cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event, unsigned flags)
 
     cudaError_t cudaGetDeviceProperties(cudaDeviceProp * prop, int device)
     cudaError_t cudaGetDeviceCount(int * count)

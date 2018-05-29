@@ -100,14 +100,14 @@ cdef get_handle(idx = 0):
   cdef uintptr_t *tmp2
   cdef uintptr_t tmp
   if not idx in _cublas_handlers:
-    stream = <uintptr_t> cuCreateStream("Cublas Stream #{:d}".format(idx))
+    #stream = <uintptr_t> cuCreateStream("Cublas Stream #{:d}".format(idx))
     # Receive the python object version of the handle
     tmp = createCublashandler()
     # Cast it to a pointer in order to de-reference later
     tmp3 = <cublasHandle_t*> tmp
     # Dereference the pointer and finally store the value of the de-referenced pointer as an integer
     _cublas_handlers[idx] = <uintptr_t> tmp3[0]
-    check(cublasSetStream(tmp3[0], <cudaStream_t> stream))
+    #check(cublasSetStream(tmp3[0], <cudaStream_t> stream))
   return _cublas_handlers[idx]
 
 

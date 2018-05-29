@@ -178,6 +178,10 @@ class GPUDistributor(Distributor):
     def preload_pair(batch1, batch2):
         return GPUDistributor.preload_single(batch1), GPUDistributor.preload_single(batch2)
 
+    @staticmethod
+    def create_return(batch1, batch2):
+        return Node(batch1), Node(batch2)
+
     def batch(self, batch_size, shuffle=True):
         generator = super(GPUDistributor, self).batch(batch_size, shuffle)
         notEmpty = True
@@ -196,7 +200,7 @@ class GPUDistributor(Distributor):
                 b = next(generator)
                 x2, y2 = GPUDistributor.preload_pair(b[0], b[1])
 
-                yield Node(x1), Node(y1)
+                yield GPUDistributor.create_return(x1, y1)
                 # Release currently released values and store the next as
                 # next to be yielded in *1
                 x1, y1 = x2, y2
@@ -206,9 +210,9 @@ class GPUDistributor(Distributor):
                 notEmpty = False
             # Check if there was only a single batch
             if not first:
-                yield Node(x2), Node(y2)
+                yield GPUDistributor.create_return(x2, y2)
             else:
-                yield Node(x1), Node(y1)
+                yield GPUDistributor.create_return(x1, y1)
 
 
 
