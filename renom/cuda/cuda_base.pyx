@@ -56,9 +56,12 @@ cdef int pointers = 2 # How many pinned memory spaces we use
 # This should be called before trying to pin memory
 def initPinnedMemory(np.ndarray batch_arr):
     global pin_size, events, ptrs, pointers
-    cdef size_t new_size = <size_t> batch_arr.descr.itemsize*len(batch_arr)
     cdef int i
-    if not pin_size is new_size:
+    elems = 1
+    for i in range(batch_arr.ndim):
+      elems *= batch_arr.shape[i]
+    cdef size_t new_size = <size_t> batch_arr.descr.itemsize*elems
+    if not (pin_size is new_size):
       if new_size is 0 and pin_size is 0:
         freePinnedMemory()
       elif new_size > 0:
@@ -87,7 +90,11 @@ def freePinnedMemory():
 # previously allocated using initPinnedMemory.
 def pinNumpy(np.ndarray arr):
     global ptrs, using, events, pin_size
-    assert arr.descr.itemsize*len(arr) <= pin_size, "Attempting to insert memory larger than what was made available through initPinnedMemory.\n(Allocated,Requested)({:d},{:d})".format(pin_size,arr.descr.itemsize*len(arr))
+    cdef int i
+    elems = 1
+    for i in range(arr.ndim):
+      elems *= arr.shape[i]
+    assert arr.descr.itemsize*elems <= pin_size, "Attempting to insert memory larger than what was made available through initPinnedMemory.\n(Allocated,Requested)({:d},{:d})".format(pin_size,arr.descr.itemsize*len(arr))
     cdef void * vptr = <void*> arr.data
     cudaEventSynchronize(events[using])
     memcpy(ptrs[using], vptr, pin_size)
@@ -193,7 +200,7 @@ cpdef cuFree(uintptr_t ptr):
 cpdef runtime_check(error):
     if error != cudaSuccess:
         error_msg = cudaGetErrorString(error)
-        raise Exception("CUDA Error: {}".format(error_msg))
+        raise Exception("CUDA Error: #{}\{}".format(error,error_msg))
     return
 
 # cuda runtime check
@@ -233,7 +240,7 @@ cdef void cuMemcpyH2DAsync(void* cpu_ptr, uintptr_t gpu_ptr, int size, uintptr_t
     runtime_check(cudaMemcpyAsync(<void *>gpu_ptr, cpu_ptr, size, cudaMemcpyHostToDevice, <cudaStream_t> stream))
     if pin_size > 0:
       cudaEventRecord(events[using], <cudaStream_t> stream)
-      cudaStreamWaitEvent(NULL, events[using], 0);
+      cudaStreamWaitEvent(NULL, events[using], 0)
       using = (using + 1) % pointers
     return
 
@@ -244,6 +251,7 @@ cdef void cuMemcpyH2Dvar(void* cpu_ptr, uintptr_t gpu_ptr, int size, uintptr_t s
     cpu_ptr = ptrs[using]
     runtime_check(cudaMemcpyAsync(<void *>gpu_ptr, cpu_ptr, size, cudaMemcpyHostToDevice, <cudaStream_t> stream))
     cudaEventRecord(events[using], <cudaStream_t> stream)
+    cudaStreamWaitEvent(NULL, events[using], 0)
     using = (using + 1) % pointers
   else:
     runtime_check(cudaMemcpy(<void *>gpu_ptr, cpu_ptr, size, cudaMemcpyHostToDevice))

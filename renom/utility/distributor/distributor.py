@@ -193,11 +193,13 @@ class GPUDistributor(Distributor):
                     b = next(generator)
                     initPinnedMemory(b[0])
                     x1, y1 = GPUDistributor.preload_pair(b[0], b[1])
+                    b = next(generator)
                     first = False
+                else:
+                    b = next(generator)
 
                 # We continue to preload an extra batch until we are finished
                 # Values yet to be returned are stored in *2
-                b = next(generator)
                 x2, y2 = GPUDistributor.preload_pair(b[0], b[1])
 
                 yield GPUDistributor.create_return(x1, y1)
