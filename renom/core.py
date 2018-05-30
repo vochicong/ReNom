@@ -12,7 +12,6 @@ from renom.cuda.gpuvalue import *
 from .debug_graph import *
 
 
-
 class Grads:
     '''Grads class. This class contains gradients of each Node object.
 
