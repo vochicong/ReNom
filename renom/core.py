@@ -749,25 +749,6 @@ class UnaryOp(Node):
         return ret
 
 
-class Transpose(UnaryOp):
-    @classmethod
-    def _oper_cpu(cls, arg):
-        assert(len(arg.shape) < 3)
-        return arg.T
-
-    @classmethod
-    def _oper_gpu(cls, arg):
-        return get_gpu(arg).T
-
-    def _backward_cpu(self, context, dy, **kwargs):
-        if isinstance(self.attrs._arg, Node):
-            self.attrs._arg._update_diff(context, dy.T, **kwargs)
-
-    def _backward_gpu(self, context, dy, *kwargs):
-        if isinstance(self.attrs._arg, Node):
-            self.attrs._arg._update_diff(context. get_gpu(dy).T, **kwargs)
-
-
 class Pos(UnaryOp):
 
     @classmethod

@@ -21,21 +21,26 @@ def DEBUG_GRAPH_INIT(active):
         ACTIVE_GPU = None
         ACTIVE_NODE = None
 
+
 def GET_ACTIVE_NODE():
     global ACTIVE_NODE
     return ACTIVE_NODE
+
 
 def SET_NODE_DICT(id, val):
     global ACTIVE_NODE
     ACTIVE_NODE[id] = val
 
+
 def GET_ACTIVE_GPU():
     global ACTIVE_GPU
     return ACTIVE_GPU
 
+
 def SET_GPU_DICT(id, val):
     global ACTIVE_GPU
     ACTIVE_GPU[id] = val
+
 
 def DEBUG_GPU_STAT():
     if ACTIVE_GPU is None:
@@ -79,7 +84,7 @@ def DEBUG_NODE_STAT():
     length = collections.Counter()
 
     def walk(o, n):
-        if not hasattr(o,"attrs"):
+        if not hasattr(o, "attrs"):
             length[n + 1] += 1
             return
 
