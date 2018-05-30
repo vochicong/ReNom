@@ -9,6 +9,8 @@ from numbers import Number
 
 from renom.cuda import *
 from renom.cuda.gpuvalue import *
+from .debug_graph import *
+
 
 
 class Grads:
@@ -235,8 +237,8 @@ class Node(np.ndarray):
                 precision().dtype, ret.dtype))
 
         ret.attrs = GraphAttrs()
-        if ACTIVE_NODE is not None:
-            ACTIVE_NODE[id(ret)] = ret
+        if GET_ACTIVE_NODE() is not None:
+            SET_NODE_DICT(id(ret), ret)
         return ret
 
     @classmethod
