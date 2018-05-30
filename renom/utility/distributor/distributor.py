@@ -146,7 +146,6 @@ class NdarrayDistributor(Distributor):
                                data_table=self._data_table)
 
 
-
 class GPUDistributor(Distributor):
 
     '''
@@ -215,7 +214,6 @@ class GPUDistributor(Distributor):
                 yield GPUDistributor.create_return(x2, y2)
             else:
                 yield GPUDistributor.create_return(x1, y1)
-
 
 
 class TimeSeriesDistributor(NdarrayDistributor):

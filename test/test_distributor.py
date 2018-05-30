@@ -7,9 +7,9 @@ from renom.config import precision
 
 
 @pytest.mark.parametrize("data_shape", [
-    (int(1e2),int(1e2)), # Small Data Test
-    (int(1e5),int(1e1)), # Medium Data Test
-    (int(1e8),int(1e0)), # Large Data Test
+    (int(1e2), int(1e2)),  # Small Data Test
+    (int(1e5), int(1e1)),  # Medium Data Test
+    (int(1e8), int(1e0)),  # Large Data Test
 ])
 def test_gpu_distributor(data_shape):
     # Construct the data from numpy
@@ -28,12 +28,12 @@ def test_gpu_distributor(data_shape):
 
     # Construct a data to test against
     # If the resulting data is different from this, an error occured somewhere
-    test_result = np.full(data_shape,3).astype(precision)
+    test_result = np.full(data_shape, 3).astype(precision)
 
     # Create a big pool of data for renom to re-use later, removing
     # potential delays from creating extra memory
-    #pre_data = np.full(data_shape,0)
-    #get_gpu(pre_data)
+    pre_data = np.full(data_shape, 0)
+    get_gpu(pre_data)
 
     # Test the distributor over a normal loop to see if it always produces correct data.
     for e in range(epochs):
@@ -45,5 +45,4 @@ def test_gpu_distributor(data_shape):
             print(Node(batch_y))
             print(result)
             print(test_result)
-            #cuDeviceSynchronize()
-            assert np.allclose(result,test_result), "\n{}".format(np.isclose(result,test_result))
+            assert np.allclose(result, test_result), "\n{}".format(np.isclose(result, test_result))
