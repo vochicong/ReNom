@@ -49,26 +49,26 @@ cdef cudaEvent_t * events # Similar to above with regards to events
 # TODO: Make pin_size always word-sized for increased performance in memcpy
 cdef size_t pin_size = 0 # How much space is designed for each pinned memory location
 cdef int using = 0 # Designates which of the allocated spaces is currently being used
-cdef int pointers = 2 # How many pinned memory spaces we use
+cdef uintptr_t * seenPtrs # Stores a list of pointers that have called pinNumpy
+cdef int numPointers = 2 # How many pinned memory spaces we use
 
 
 # This function initiates the pinned memory space based on a sample batch
 # This should be called before trying to pin memory
 def initPinnedMemory(np.ndarray batch_arr):
-    global pin_size, events, ptrs, pointers
-    cdef int i
-    elems = 1
-    for i in range(batch_arr.ndim):
-      elems *= batch_arr.shape[i]
+    global pin_size, events, ptrs, numPointers, seenPtrs
+    cdef int elems
+    elems = getArrayElements(batch_arr)
     cdef size_t new_size = <size_t> batch_arr.descr.itemsize*elems
     if not (pin_size is new_size):
       if new_size is 0 and pin_size is 0:
         freePinnedMemory()
       elif new_size > 0:
         pin_size = new_size
-        ptrs = <void**> malloc(sizeof(void*)*pointers)
-        events = <cudaEvent_t*> malloc(sizeof(cudaEvent_t)*pointers)
-        for i in range(pointers):
+        ptrs = <void**> malloc(sizeof(void*)*numPointers)
+        events = <cudaEvent_t*> malloc(sizeof(cudaEvent_t)*numPointers)
+        seenPtrs = <uintptr_t*> malloc(sizeof(uintptr_t)*numPointers)
+        for i in range(numPointers):
           runtime_check(cudaMallocHost(&(ptrs[i]), pin_size))
           runtime_check(cudaEventCreate(&(events[i])))
 
@@ -78,27 +78,36 @@ def initPinnedMemory(np.ndarray batch_arr):
 # Pointless right now, as the user closing the program
 # will always free up the allocated memory anyway
 def freePinnedMemory():
-    global ptrs, pin_size, pointers
+    global ptrs, pin_size, numPointers, seenPtrs
+    if pin_size is 0:
+      return
     cdef int i
-    for i in range(pointers):
+    for i in range(numPointers):
       cudaFreeHost(ptrs[i])
     free(ptrs)
     free(events)
+    free(seenPtrs)
     pin_size = 0
+
+cdef getArrayElements(np.ndarr):
+  cdef int i, elems
+  elems = 1
+  for i in range(arr.ndim):
+    elems *= arr.shape[i]
+  return elems
 
 # This function will accept a numpy array and move its data to the spaces
 # previously allocated using initPinnedMemory.
 def pinNumpy(np.ndarray arr):
-    global ptrs, using, events, pin_size
-    cdef int i
-    elems = 1
-    for i in range(arr.ndim):
-      elems *= arr.shape[i]
+    global ptrs, using, events, pin_size, seenPtrs
+    cdef int elems
+    elems = getArrayElements(arr)
     assert arr.descr.itemsize*elems <= pin_size, "Attempting to insert memory larger than what was made available through initPinnedMemory.\n(Allocated,Requested)({:d},{:d})".format(pin_size,arr.descr.itemsize*len(arr))
     cdef void * vptr = <void*> arr.data
     cudaEventSynchronize(events[using])
     memcpy(ptrs[using], vptr, pin_size)
-    #using = (using + 1) % pointers
+    seenPtrs[using] = arr.data
+    #using = (using + 1) % numPointers
     return
 
 '''
@@ -234,25 +243,25 @@ def cuMemcpyD2D(uintptr_t gpu_ptr1, uintptr_t gpu_ptr2, int size):
 
 cdef void cuMemcpyH2DAsync(void* cpu_ptr, uintptr_t gpu_ptr, int size, uintptr_t stream):
     # cpu to gpu
-    global ptrs, using, events, pointers
+    global ptrs, using, events, numPointers
     if pin_size > 0:
       cpu_ptr = ptrs[using]
     runtime_check(cudaMemcpyAsync(<void *>gpu_ptr, cpu_ptr, size, cudaMemcpyHostToDevice, <cudaStream_t> stream))
     if pin_size > 0:
       cudaEventRecord(events[using], <cudaStream_t> stream)
       cudaStreamWaitEvent(NULL, events[using], 0)
-      using = (using + 1) % pointers
+      using = (using + 1) % numPointers
     return
 
 cdef void cuMemcpyH2Dvar(void* cpu_ptr, uintptr_t gpu_ptr, int size, uintptr_t stream):
   # cpu to gpu
-  global ptrs, using, events, pointers
-  if pin_size > 0:
+  global ptrs, using, events, numPointers, seenPtrs
+  if pin_size > 0 and seenPtrs[using] is cpu_ptr:
     cpu_ptr = ptrs[using]
     runtime_check(cudaMemcpyAsync(<void *>gpu_ptr, cpu_ptr, size, cudaMemcpyHostToDevice, <cudaStream_t> stream))
     cudaEventRecord(events[using], <cudaStream_t> stream)
     cudaStreamWaitEvent(NULL, events[using], 0)
-    using = (using + 1) % pointers
+    using = (using + 1) % numPointers
   else:
     runtime_check(cudaMemcpy(<void *>gpu_ptr, cpu_ptr, size, cudaMemcpyHostToDevice))
   return

@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 from renom.core import get_gpu, Node
 from renom.cuda import is_cuda_active
-from renom.cuda.cuda_base import pinNumpy, initPinnedMemory
+from renom.cuda.cuda_base import pinNumpy, initPinnedMemory, freePinnedMemory
 
 
 class Distributor(object):
@@ -214,6 +214,7 @@ class GPUDistributor(Distributor):
                 yield GPUDistributor.create_return(x2, y2)
             else:
                 yield GPUDistributor.create_return(x1, y1)
+        freePinnedMemory()
 
 
 class TimeSeriesDistributor(NdarrayDistributor):
