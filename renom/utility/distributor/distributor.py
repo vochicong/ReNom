@@ -5,7 +5,8 @@ import warnings
 import numpy as np
 from renom.core import get_gpu, Node
 from renom.cuda import is_cuda_active
-from renom.cuda.cuda_base import pinNumpy, initPinnedMemory, freePinnedMemory
+from renom.cuda.cuda_base import pinNumpy, initPinnedMemory, freePinnedMemory, asyncBehaviour, cuDeviceSynchronize
+from renom.config import precision
 
 
 class Distributor(object):
@@ -49,7 +50,7 @@ class Distributor(object):
     def __len__(self):
         return self._data_size
 
-    def batch(self, batch_size, shuffle=True):
+    def batch(self, batch_size, shuffle=True, steps = None):
         '''
         This function returns `minibatch`.
 
@@ -57,13 +58,21 @@ class Distributor(object):
             batch_size (int): Size of batch.
             shuffle (bool): If True is passed, data will be selected randomly.
         '''
+        epoch_step_size = int(np.ceil(self._data_size / batch_size))
+        if steps is None:
+            batchcount = epoch_step_size
+        else:
+            batchcount = steps
+
         if shuffle:
             perm = np.random.permutation(self._data_size)
-            for i in range(int(np.ceil(self._data_size / batch_size))):
+            for s in range(batchcount):
+                i = s % epoch_step_size
                 p = perm[i * batch_size:(i + 1) * batch_size]
                 yield self._data_x[p], self._data_y[p]
         else:
-            for i in range(int(np.ceil(self._data_size / batch_size))):
+            for s in range(batchcount):
+                i = s % epoch_step_size
                 yield self._data_x[i * batch_size:(i + 1) * batch_size], \
                     self._data_y[i * batch_size:(i + 1) * batch_size]
 
@@ -156,22 +165,26 @@ class GPUDistributor(Distributor):
         y (ndarray): Target data.
     '''
 
-    def __init__(self, x, y):
+    def __init__(self, x, y, **kwargs):
         assert is_cuda_active(), "Cuda must be activated to use GPU distributor"
-        super(GPUDistributor, self).__init__(x=x, y=y)
+        super(GPUDistributor, self).__init__(x=x, y=y, data_table=kwargs.get("data_table"))
         assert len(x) == len(y), "Input batches must have same number as output batches"
         self._data_size = len(x)
 
-    def __getitem__(self, index):
-        return super(GPUDistributor, self).__getitem__(self, index)
+    #def __getitem__(self, index):
+    #    return super(GPUDistributor, self).__getitem__(self, index)
 
-    def kfold(self, num=4, overlap=False, shuffle=True):
-        return super(GPUDistributor, self).kfold(self, num, overlap, shuffle)
+    #def kfold(self, num=4, overlap=False, shuffle=True):
+    #    return super(GPUDistributor, self).kfold(self, num, overlap, shuffle)
 
     @staticmethod
     def preload_single(batch):
-        pinNumpy(batch)
-        return get_gpu(batch)
+        with asyncBehaviour():
+            batch = batch.astype(np.dtype(precision))
+            pinNumpy(batch)
+            ret = get_gpu(batch)
+            cuDeviceSynchronize()
+        return ret
 
     @staticmethod
     def preload_pair(batch1, batch2):
@@ -181,8 +194,9 @@ class GPUDistributor(Distributor):
     def create_return(batch1, batch2):
         return batch1, batch2
 
-    def batch(self, batch_size, shuffle=True):
-        generator = super(GPUDistributor, self).batch(batch_size, shuffle)
+    def batch(self, batch_size, shuffle=True, steps = None):
+        #return super(GPUDistributor, self).batch(batch_size, shuffle)
+        generator = super(GPUDistributor, self).batch(batch_size, shuffle, steps)
         notEmpty = True
         first = True
         while(notEmpty):
@@ -190,17 +204,15 @@ class GPUDistributor(Distributor):
                 # On entering, we preload the first two batches
                 if first:
                     b = next(generator)
-                    initPinnedMemory(b[0])
+                    example_batch = b[0] if b[0].size*b[0].itemsize >= b[1].size*b[1].itemsize else b[1]
+                    initPinnedMemory(example_batch)
                     x1, y1 = GPUDistributor.preload_pair(b[0], b[1])
-                    b = next(generator)
                     first = False
-                else:
-                    b = next(generator)
+                b = next(generator)
 
                 # We continue to preload an extra batch until we are finished
                 # Values yet to be returned are stored in *2
                 x2, y2 = GPUDistributor.preload_pair(b[0], b[1])
-
                 yield GPUDistributor.create_return(x1, y1)
                 # Release currently released values and store the next as
                 # next to be yielded in *1
@@ -210,10 +222,10 @@ class GPUDistributor(Distributor):
             except StopIteration:
                 notEmpty = False
             # Check if there was only a single batch
-            if not first:
-                yield GPUDistributor.create_return(x2, y2)
-            else:
-                yield GPUDistributor.create_return(x1, y1)
+        if not first:
+            yield GPUDistributor.create_return(x2, y2)
+        else:
+            yield GPUDistributor.create_return(x1, y1)
         freePinnedMemory()
 
 
