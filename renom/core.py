@@ -635,7 +635,7 @@ class Node(np.ndarray):
 
     def __str__(self):
         self.to_cpu()
-        return np.ndarray.__str__(self)
+        return np.ndarray.__str__(self.as_ndarray())
 
     def __repr__(self):
         self.to_cpu()
@@ -892,7 +892,6 @@ class Add(BinOp):
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._rhs, Node):
             rhs = get_gpu(self.attrs._rhs)
-
             r_dx = cu_broad_cast(rhs, get_gpu(dy))
             self.attrs._rhs._update_diff(context, r_dx, **kwargs)
 

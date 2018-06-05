@@ -113,17 +113,18 @@ cdef pinPointer(void* cpu_ptr, size_t nbytes):
   assert nbytes <= pin_size
   cudaEventSynchronize(events[using])
   memcpy(ptrs[using], cpu_ptr, nbytes)
-
 # This function will accept a numpy array and move its data to the spaces
 # previously allocated using initPinnedMemory.
 def pinNumpy(np.ndarray arr):
     global ptrs, using, events, pin_size
     cdef int elems
     elems = getArrayElements(arr)
-    assert arr.descr.itemsize*elems <= pin_size, "Attempting to insert memory larger than what was made available through initPinnedMemory.\n(Allocated,Requested)({:d},{:d})".format(pin_size,arr.descr.itemsize*len(arr))
+    cdef size_t arr_size = <size_t> arr.descr.itemsize*elems
+    assert arr_size <= pin_size, "Attempting to insert memory larger than what was made available through initPinnedMemory.\n(Allocated,Requested)({:d},{:d})".format(pin_size,arr.descr.itemsize*len(arr))
     cdef void * vptr = <void*> arr.data
     cudaEventSynchronize(events[using])
-    memcpy(ptrs[using], vptr, pin_size)
+    #memcpy(ptrs[using], vptr, pin_size)
+    memcpy(ptrs[using], vptr, arr_size)
     #using = (using + 1) % numPointers
     return
 

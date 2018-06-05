@@ -73,6 +73,9 @@ cdef class TensorDesc(object):
 
         check(cd.cudnnCreateTensorDescriptor(&(self.tensor_desc)))
 
+        # TODO: Add safety checks for tensor parameters as well as
+        # error checking tests
+
         if len(shape) < 5:
             n, c, h, w = list(shape) + [1] * (4 - len(shape))
             check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,
