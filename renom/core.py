@@ -353,6 +353,8 @@ class Node(np.ndarray):
         if isinstance(self, Number):
             return np.array(self, dtype=precision)
         else:
+            if not self.flags['C_CONTIGUOUS']:
+                self = self.copy()
             ret = np.ndarray(shape=self.shape, dtype=self.dtype, buffer=self)
             ret.setflags(write=True)
             return np.array(ret)
