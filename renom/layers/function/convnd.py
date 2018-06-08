@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import numpy as np
-from renom.layers.function.utils import imncol
+from renom.layers.function.utils import imncol, colnim
 from renom.core import Node, Variable, to_value, GPUValue, get_gpu, precision
 from .parameterized import Parametrized
 from renom.utility.initializer import Gaussian
@@ -13,20 +13,33 @@ class convnd(Node):
 
     def __new__(cls, x, w, b, filter=3, stride=1, padding=0):
         in_shape = x.shape[1:]
-        out_shape = [w.shape[0], *[(x.shape[2] + padding * 2 - filter)// stride + 1 for _ in range(len(x.shape[2:]))]]
-        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding)
+        return cls.calc_value(x, w, b, in_shape, filter, stride, padding)
 
     @classmethod
-    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding):
-        col = imncol(to_value(x), out_shape, w, b, stride, padding)
-        return cls._create_node(col)
-        pass
+    def _oper_cpu(cls, x, w, b, in_shape, kernel, stride, padding):
+        col = imncol(to_value(x), w, b, stride, padding)
+        ret = cls._create_node(col)
+        ret.attrs._x = x
+        ret.attrs._w = w
+        ret.attrs._b = b
+        ret.attrs._kernel = kernel
+        ret.attrs._stride = stride
+        ret.attrs._padding = padding
+        return ret
 
     @classmethod
     def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding):
         pass
 
     def _backward_cpu(self, context, dy, **kwargs):
+        print("Backward")
+        print(dy)
+        print(self)
+        print(self.attrs._x)
+        print(self.attrs._w)
+        dx = colnim(dy, self.attrs._w, self.attrs._b, self.attrs._stride)
+        self.attrs._x._update_diff(context, dx)
+        self.attrs._w._update_diff(context, 0)
         pass
 
     def _backward_gpu(self, context, dy, **kwargs):
@@ -70,7 +83,7 @@ class ConvNd(Parametrized):
         Tensor data format is **NCHW**.
     """
 
-    def __init__(self, channel=4, filter=3, padding=0, stride=1, input_size=None, initializer=Gaussian()):
+    def __init__(self, channel=2, filter=3, padding=0, stride=1, input_size=None, initializer=Gaussian()):
         self._padding = padding
         self._stride = stride
         self._kernel = filter
@@ -82,7 +95,6 @@ class ConvNd(Parametrized):
         # The first dimension is to allow different types of uncorrelated images as inputs, such as RGB information.
         # After this dimension, the image data is assumed to be meaningfully correlated.
         self._dims = len(input_size[1:])
-        print(self._dims)
         kern = [self._kernel for _ in range(self._dims)]
         size_f = (self._channel, input_size[0], *kern)
         self.params = {"w": Variable(self._initializer(size_f), auto_update=True),

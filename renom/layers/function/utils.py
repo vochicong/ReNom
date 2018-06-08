@@ -28,46 +28,97 @@ def im2col(img, size, kernel, stride, padding, padWith=0.):
                 :] = img_n[:, :, i:iu:s_h, j:ju:s_w]
     return col
 
-def imncol(img, out_shape, weight, bias, stride, padding, padWith = 0.):
+def imncol(img, weight, bias, stride, padding, padWith = 0.):
     N, in_channels, in_dims = img.shape[0], img.shape[1], img.shape[2:]
+    out_channels = weight.shape[0]
+    assert in_channels is weight.shape[1]
     dimensionality = len(in_dims)
-    out_channels, out_dims = out_shape[0], out_shape[1]
 
-    #print(out_channels[0])
-    if not out_dims is tuple:
-        out_dims = tuple([out_dims])
 
     # Padding asks for (before, after) for each dimension or it generalizes the padding
     pad_tuple = (padding, padding + stride - 1)
     padded_image = np.pad(img, ((0, 0), (0, 0), *[pad_tuple for _ in range(dimensionality)]),
                         mode="constant", constant_values=padWith)
-    col = np.ndarray(([N, out_channels, *[out_dims[0] for _ in range(dimensionality)]]), dtype=precision)
     ret = []
-    print("Weight: {}".format(weight.shape))
     for batch in range(N):
         tmp = []
-        for co in range(out_channels):
-            t = 0
-            for ci in range(in_channels):
-                t += recursive_convolution(img[batch,...],weight[co,...],stride)
-                t += bias[0,co,...]
-            tmp.append(t[0])
+        for out_channel in range(out_channels):
+            tmp2 = 0
+            for in_channel in range(in_channels):
+                tmp2 += recursive_multiplication(img[batch,in_channel],weight[out_channel,in_channel],stride=stride)
+            tmp.append(tmp2)
         ret.append(tmp)
+    ret = np.array(ret)
     return np.array(ret)
 
+def colnim(img, weight, bias, stride):
+    print(img.shape)
+    print(weight.shape)
+    img = img.flatten()[::-1].reshape(*img.shape)
+    ret = []
+    for batch in range(img.shape[0]):
+        tmp2 = 0
+        for out_channel in range(weight.shape[0]):
+            tmp = []
+            for in_channel in range(weight.shape[1]):
+                tmp.append(recursive_multiplication(img[batch,out_channel],weight[out_channel,in_channel],stride=1,offset=stride))
+            tmp2 += np.array(tmp)
+        ret.append(tmp2)
+    ret = np.array(ret)
+    ret = ret.flatten()[::-1].reshape(*ret.shape)
+    return ret
 
-def recursive_convolution(A, B, stride=1):
-
+def recursive_multiplication(A, B, stride=1, offset=0, pre_offset = 0, depth = 0):
     if len(A.shape) is 1:
-        ret =  np.array([np.sum(A[i*stride:i*stride+B.shape[0]]*B) for i in range((A.shape[0]-B.shape[0])//stride+1)])
-        return ret
-    else:
+        offset += pre_offset
+        steps = (A.shape[0]+offset-B.shape[0])//stride+1
         ret = []
-        for i in range(0,(A.shape[0]-B.shape[0])//stride+1):
+        l = len(B)
+        if offset >= l:
+            offset = l-1
+        for o in range(1,offset+1,stride):
+            ret.append(np.sum(A[0:o]*B[l-o:l]))
+        for i in range((stride - offset) % stride, len(A)-len(B)+1, stride):
+            ret.append(np.sum(A[i:i+len(B)]*B))
+        l = len(A)
+        for o in range(1,offset+1,stride):
+            ret.append(np.sum(A[l-1-offset+o:l]*B[0:o]))
+        #ret.append(calc_edge_after(A,B,stride,offset))
+        return np.array(ret)
+    else:
+        if len(A) is 1:
+            return np.array([recursive_multiplication(A[0],B[0],stride,offset,pre_offset,depth+1)])
+        ret = []
+        steps = (A.shape[0]+offset*2-B.shape[0])//stride+1
+
+        l = len(B)
+        if offset > 0:
+            ret.append(recursive_multiplication(A[0:offset],B[l-offset:l],stride,offset-1,pre_offset+1,depth+1))
+            #ret = np.concatenate([ret,recursive_multiplication(A[0:offset],B[l-offset:l],stride,offset-1,pre_offset+1)])
+        ret = np.array(ret)
+        if pre_offset > 0:
+            return ret[0]
+        if len(ret) is 1 and len(ret.shape) > 2:
+            ret = ret[0]
+        for i in range((stride - offset) % stride, len(A)-len(B)+1, stride):
             tmp = 0
             for k in range(B.shape[0]):
-                tmp += recursive_convolution(A[i*stride+k,:], B[k,:], stride)
-            ret.append(tmp)
+                if i+k < len(A)-1:
+                    tmp += np.array(recursive_multiplication(A[i+k,...], B[k,...], stride, offset,pre_offset,depth+1))
+            tmp = tmp.reshape(1,*tmp.shape)
+            if not len(ret) is 0:
+                ret = np.concatenate([ret,tmp])
+            else:
+                ret = tmp
+        l = len(A)
+        tmp = []
+        if offset > 0:
+            tmp.append(recursive_multiplication(A[l-offset:l],B[0:offset],stride,offset-1,pre_offset+1,depth+1))
+            tmp = np.array(tmp)
+            if len(tmp) is 1 and len(tmp.shape) > 2:
+                tmp = tmp[0]
+            ret = np.concatenate([ret,tmp])
+
         return np.array(ret)
 
 

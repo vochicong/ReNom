@@ -25,6 +25,7 @@ from renom.layers.activation.maxout import maxout
 
 from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
+from renom.layers.function.convnd import ConvNd
 from renom.layers.function.deconv2d import Deconv2d
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
 from renom.layers.function.roi_pool2d import RoiPool2d
@@ -435,6 +436,23 @@ def test_conv2d(node, use_gpu):
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
 
+@pytest.mark.parametrize("node", [
+    #Variable(rand((2, 2, 3, 3, 3, 2))),
+    #Variable(rand((2, 3, 4, 5))),
+    Variable(rand((1, 1, 2, 2))),
+    #Variable(rand((1, 1, 1, 1))),
+])
+def test_convnd(node):#, use_gpu):
+    node = Variable(node)
+    #set_cuda_active(use_gpu)
+
+    layer = ConvNd(channel=1,filter=2,stride=2,padding=1)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    #compare(func, layer.params["w"], node)
+    #compare(func, layer.params["b"], node)
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
