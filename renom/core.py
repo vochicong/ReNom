@@ -261,6 +261,7 @@ class Node(np.ndarray):
             elif isinstance(a, dict):
                 q.extend(a.values())
         self._args.extend(a for a in kwargs.values() if isinstance(a, Node))
+
         self._reduce_graph()
         return
 
@@ -759,7 +760,7 @@ class Pos(UnaryOp):
 
     @classmethod
     def _oper_gpu(cls, arg):
-        return +get_gpu(arg.get_gpu())
+        return +get_gpu(arg)
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
@@ -825,6 +826,24 @@ class Invert(UnaryOp):
 
     def _backward_gpu(self, context, dy, **kwargs):
         return self.attrs._backward_cpu(context, dy, **kwargs)
+
+
+class ModelMark(Pos):
+    def __new__(cls, arg, model):
+        ret = super(ModelMark, cls).__new__(cls, arg)
+        ret.modelmark = weakref.ref(model)
+        return ret
+
+    def _reduce_graph(self):
+        return
+
+
+class EnterModel(ModelMark):
+    pass
+
+
+class LeaveModel(ModelMark):
+    pass
 
 
 class BinOp(Node):

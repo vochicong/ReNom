@@ -1,8 +1,10 @@
+import itertools
 import collections
 import weakref
+import renom.core
 
 try:
-    from graphviz import Digraph
+    from graphviz import Digraph, Graph
 except ImportError:
     def plot_graph(n):   # NOQA
         pass
@@ -145,3 +147,210 @@ def _plot_graph(objs):
         add_edge(n)
 
     g.view()
+
+
+
+
+class _Box:
+    def __init__(self, obj):
+        self.nexts = []
+        self.obj = obj
+        self.join = None
+
+    def addnext(self, nextbox):
+        self.nexts.append(nextbox)
+
+    def joinnext(self):
+        model = self.obj.modelmark()
+        for c in self.nexts:
+            if c.obj.modelmark() is model:
+                c.join = self
+
+    def create_node(self, context, graph):
+        if self.join:
+            return
+
+        model = self.obj.modelmark()
+
+        modelinfo = context.get_modelinfo(model)
+        if modelinfo.children:
+            shape='circle'
+            color = 'gray'
+            if isinstance(self.obj, renom.core.EnterModel):
+                label = 'S'
+            else:
+                label = 'E'
+        else:
+            shape = 'box'
+            color = 'white'
+            name = context.get_modelinfo(model).name
+            label = '%s(%s)' % (name, type(model).__name__)
+            color = 'white'
+
+        graph.node(str(id(self.obj)), label=label, shape=shape, style='filled', fillcolor=color, color='black')
+
+
+    def nodelabel(self):
+        if self.join:
+            return str(id(self.join.obj))
+        else:
+            return str(id(self.obj))
+
+
+    def create_edge(self, context):
+        f = self.nodelabel()
+
+        for c in self.nexts:
+            if c.join is self:
+                continue
+            t = c.nodelabel()
+            context.root.graph.edge(f, t)
+
+
+
+
+class _ModelInfo:
+    def __init__(self, parent, name, model):
+        self.parent = parent
+        self.children = weakref.WeakSet()
+        if parent:
+            self.parent.children.add(self)
+
+        self.nodes = []
+
+        self.name = name
+        self.model = model
+        self.graph = None
+
+    def create_graph(self, context):
+        self.graph = Digraph(name='cluster=' + self.name)
+        self.graph.attr(label='%s(%s)' % (self.name, self.model.__class__.__name__),
+            labelloc='top', labeljust='left')
+
+        for node in self.nodes:
+            node.create_node(context, self.graph)
+
+    def addnode(self, node):
+        self.nodes.append(node)
+
+class ModelGraphContext:
+
+    def __init__(self):
+        pass
+        
+    def get_modelinfo(self, model):
+        return self.models.get(id(model))
+
+    def walk_model(self, model):
+        self.models = {}
+
+        models = [(None, 'root', model)]
+
+        while models:
+            parent, name, model = models.pop()
+            p = _ModelInfo(parent, name, model)
+            if not parent:
+                self.root = p
+
+            self.models[id(model)] = p
+
+            models.extend((p, k, v) for k, v in model.get_model_children())
+
+
+    def _getBox(self, node):
+        nodeid = id(node)
+        if nodeid not in self.boxes:
+            modelinfo = self.get_modelinfo(node.modelmark())
+            box = _Box(node)
+            if modelinfo.children:
+                modelinfo.addnode(box)
+            if modelinfo.parent:
+                modelinfo.parent.addnode(box)
+            else:
+                self.root.addnode(box)
+
+            self.boxes[nodeid] = box
+            
+            
+        return self.boxes[nodeid]
+
+    def walk_node(self, node):
+        self.boxes = {}
+        self._walk_node(node, None, set())
+        for box in self.boxes.values():
+            box.joinnext()
+
+    def _walk_node(self, node, nextbox, seen):
+        if not isinstance(node, renom.core.Node):
+            return
+
+        if isinstance(node, renom.core.ModelMark):
+            box = self._getBox(node)
+
+            if nextbox is not None:
+                box.addnext(nextbox)
+
+            nextbox = box
+
+        id_node = id(node)
+        if id_node in seen:
+            return
+        seen.add(id_node)
+
+        for attr in node.attrs.get_attrs():
+            self._walk_node(attr, nextbox, seen)
+
+    def build_subgraph(self):
+
+        # build pathes from root to leaf
+        leafs = []
+        q = collections.deque([(self.root, [])])
+        while q:
+            model, path = q.pop()
+            path = [model,] + path
+            if not model.children:
+                leafs.append(path)
+            else:
+                model.create_graph(self)
+                for c in model.children:
+                    q.append((c, path))
+
+
+#        for c in leafs:
+#            print('-'.join(m.name for m in c))
+
+        # create sub graphs from leaf to root
+        leafs.sort(key=len, reverse=True)
+        seen = set()
+        for leaf in leafs:
+            while len(leaf) >= 2:
+                child = leaf.pop(0)
+                parent = leaf[0]
+                if (child, parent) in seen:
+                    break
+
+                parent.graph.subgraph(child.graph)
+                seen.add((child, parent))
+
+
+        for box in self.boxes.values():
+            box.create_edge(self)
+
+
+    def build(self, nnmodel, value):
+        self.walk_model(nnmodel)
+        self.walk_node(value)
+        self.build_subgraph()
+
+        print(self.root.graph.source)
+        self.root.graph.view()
+#        self.graphs[id(nnmodel)].view()
+#        for g in self.graphs.values():
+#            print("--------------------")
+#            print(g.source)
+
+def DEBUG_MODELGRAPH(nnmodel, value):
+    c = ModelGraphContext()
+    c.build(nnmodel, value)
+
+    
