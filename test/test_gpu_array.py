@@ -795,6 +795,43 @@ def test_gpu_node_convolution2d(a):
     rand((3, 3, 3, 3)),
     rand((1, 3, 9, 9)),
     rand((2, 3, 9, 9)),
+    rand((2, 2, 2, 2,))
+])
+def test_gpu_node_convolutionnd(a):
+    with use_cuda():
+
+        layer = rm.ConvNd(channel=2,filter=1,stride=1,padding=0)
+        #layer.params["w"] = rm.Variable(np.random.rand(32, 3, 3, 3))
+        #layer.params["b"] = rm.Variable(np.random.rand(1, 32, 1, 1))
+
+        g1 = Variable(a)
+        g2 = layer(g1)
+        g3 = rm.sum(g2)
+        g = g3.grad()
+        g_g1 = g.get(layer.params["w"])
+        g_g2 = g.get(layer.params["b"])
+        g_g3 = g.get(g1)
+        g2.to_cpu()
+        g3.to_cpu()
+
+    c2 = layer(g1)
+    c3 = rm.sum(c2)
+    c = c3.grad()
+    c_g1 = c.get(layer.params["w"])
+    c_g2 = c.get(layer.params["b"])
+    c_g3 = g.get(g1)
+
+    close(g2, c2)
+    close(g3, c3)
+    close(c_g1, g_g1)
+    close(c_g2, g_g2)
+    close(c_g3, g_g3)
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a", [
+    rand((3, 3, 3, 3)),
+    rand((1, 3, 9, 9)),
+    rand((2, 3, 9, 9)),
     rand((2, 3, 12, 9))
 ])
 def test_gpu_node_deconvolution2d(a):

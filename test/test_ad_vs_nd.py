@@ -436,23 +436,29 @@ def test_conv2d(node, use_gpu):
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
 
-@pytest.mark.parametrize("node", [
-    #Variable(rand((2, 2, 3, 3, 3, 2))),
-    #Variable(rand((2, 3, 4, 5))),
-    Variable(rand((1, 1, 2, 2))),
-    #Variable(rand((1, 1, 1, 1))),
+@pytest.mark.parametrize("node, error", [
+    #[Variable(rand((1, 1, 3, 3, 3, 3))), True],
+    #[Variable(rand((2, 2, 4, 2))), False],
+    #[Variable(rand((1, 1, 2, 3, 2))), False],
+    [Variable(rand((1, 1, 2, 2))), False],
 ])
-def test_convnd(node):#, use_gpu):
+def test_convnd(node, error, use_gpu):
     node = Variable(node)
     #set_cuda_active(use_gpu)
-
-    layer = ConvNd(channel=1,filter=2,stride=2,padding=1)
+    layer = ConvNd(channel=2,filter=1,stride=1,padding=0)
 
     def func(node):
         return sum(layer(node))
-    compare(func, node, node)
-    #compare(func, layer.params["w"], node)
-    #compare(func, layer.params["b"], node)
+    if error and is_cuda_active():
+        try:
+            func(node)
+            assert False
+        except:
+            pass
+    else:
+        compare(func, node, node)
+        compare(func, layer.params["w"], node)
+        compare(func, layer.params["b"], node)
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),

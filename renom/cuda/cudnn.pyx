@@ -1,4 +1,5 @@
 import contextlib
+cimport numpy as cnp
 import numpy as np
 cimport cudnn as cd
 cimport cython
@@ -69,14 +70,22 @@ cdef class TensorDesc(object):
             strides = <int *>malloc(ndims*cython.sizeof(int))
             if strides is NULL or size is NULL:
                 raise MemoryError()
-            
+
             for i in range(ndims):
                 size[i] = shape[i]
-                strides[i] = np.prod(shape[ndims-i:]) 
-            check(cd.cudnnSetTensorNdDescriptor(self.tensor_desc, data_type(dtype),
-                                                ndims,
-                                                size,
-                                                strides))
+                strides[i] = np.prod(shape[ndims-i:])
+            #check(cd.cudnnSetTensorNdDescriptor(
+            #    self.tensor_desc,
+            #    data_type(dtype),
+            #    ndims,
+            #    size,
+            #    strides))
+            check(cd.cudnnSetTensorNdDescriptorEx(
+              self.tensor_desc,
+              tensor_format,
+              data_type(dtype),
+              ndims,
+              size))
             free(size)
             free(strides)
 
@@ -107,6 +116,37 @@ cdef getTensorDescriptor(desc):
         & ws)
     return n, c, h, w, ns, cs, hs, ws, <int> dtype
 
+
+cdef class ConvolutionNDescriptor:
+    cdef cudnnConvolutionDescriptor_t conv_desc
+
+    def __init__(self, cnp.ndarray padding, cnp.ndarray stride, dtype):
+        cdef int dimensions, pad_h, pad_w, u, v, upscalex, upscaley
+        cdef cudnnConvolutionMode_t mode;
+        dimensions = len(padding)
+        mode = CUDNN_CONVOLUTION;
+        cdef int * padArray = <int *><uintptr_t>padding.data
+        cdef int * strideArray = <int *><uintptr_t>stride.data
+        cdef int * upscaleArray = <int *> malloc(sizeof(int) * dimensions)
+        cdef int i
+        for i in range(dimensions):
+          upscaleArray[i] = 1
+          assert padArray[i] >= 0, "Padding had negative value: {}".format(padArray[i])
+          assert strideArray[i] > 0, "Stride had negative or zero value: {}".format(strideArray[i])
+          assert upscaleArray[i] > 0, "Upscale had negative or zero value: {}".format(upscaleArray[i])
+
+        check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))
+        check(cudnnSetConvolutionNdDescriptor(
+            self.conv_desc, dimensions, padArray, strideArray, upscaleArray, mode, data_type(dtype)))
+        free(upscaleArray)
+
+    def __del__(self):
+        if self.conv_desc:
+            check(cudnnDestroyConvolutionDescriptor(self.conv_desc))
+            self.conv_desc = NULL
+
+    def __int__(self):
+        return <uintptr_t>self.conv_desc
 
 cdef class ConvolutionDescriptor:
     cdef cudnnConvolutionDescriptor_t conv_desc
@@ -225,6 +265,27 @@ def cuPoolingBackward(handle, pool_desc, x, y, dy, dx):
         xDesc.tensor_desc,
         <void *> <uintptr_t> dx._ptr))
 
+cdef class NdFilterDescriptor:
+    cdef cudnnFilterDescriptor_t filter_desc
+
+    def __init__(self, shape, dtype):
+        cdef cudnnFilterDescriptor_t filter_desc
+        cdef int dimensions = len(shape), i
+        cdef int * dimensionArray = <int *> malloc(sizeof(int)*len(shape))
+        for i in range(dimensions):
+          dimensionArray[i] = <int> shape[i]
+
+        check(cudnnCreateFilterDescriptor(&self.filter_desc))
+        check(cudnnSetFilterNdDescriptor(self.filter_desc, data_type(
+            dtype), tensor_format, dimensions, dimensionArray))
+
+    def __del__(self):
+        if self.filter_desc:
+            check(cudnnDestroyFilterDescriptor(self.filter_desc))
+            self.filter_desc= NULL
+
+    def __int__(self):
+        return <uintptr_t>self.filter_desc
 
 cdef class FilterDescriptor:
     cdef cudnnFilterDescriptor_t filter_desc
@@ -414,7 +475,6 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
     cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
     cdef int workSpace = 0
-
     check(cudnnConvolutionBackwardFilter(
         handler,
         alf.ptr,
@@ -429,7 +489,6 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
         bt.ptr,
         <cudnnFilterDescriptor_t> <uintptr_t> filter_desc,
         <void *> <uintptr_t> dw._ptr))
-
     check(cudnnConvolutionBackwardData(
         handler,
         alf.ptr,
@@ -444,7 +503,6 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
         bt.ptr,
         xDesc.tensor_desc,
         <void *> <uintptr_t> dx._ptr))
-
     check(cudnnConvolutionBackwardBias(
         handler,
         alf.ptr,
