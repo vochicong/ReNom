@@ -4,12 +4,15 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
-## ReNom version 2.5.1
+## ReNom version 2.5.2
 - http://renom.jp/rsts/renomdl/main.html
 
 #### Changes from 2.4
 - Adopted CUDA 9.1 and cuDNN 7.1.
 - Improved performance of Adam.
+
+#### 2.5.2
+- Bug fix: The as_ndarray method can be called even if a Node object is not contiguous memory array.
 
 ## Requirements
 
