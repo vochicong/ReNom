@@ -352,7 +352,6 @@ def test_dense(node, use_gpu):
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
 
-
 @pytest.mark.parametrize("node", [
     np.array([[0, ], [1, ]]),
     np.array([[0, ], [1, ], [0, ]]),
@@ -434,6 +433,20 @@ def test_conv2d(node, use_gpu):
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
 
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2, 3, 3))),
+    Variable(rand((2, 3, 4, 5))),
+])
+def test_conv2d_bias(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = Conv2d(channel=3, ignore_bias=True)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
