@@ -144,7 +144,7 @@ def poolnim(original, dy, indices):
             tmp = ret[batch,in_channel]
             tmp.setflags(write=True)
             for i in range(len(indices[batch,in_channel])):
-                ret[tuple([batch,in_channel,*indices[batch,in_channel,i]])] += 1
+                ret[tuple([batch,in_channel,*indices[batch,in_channel,i]])] += dy[batch,in_channel].ravel()[i]
     return ret
 
 def place_pools(img,kernel,stride,offset=0):

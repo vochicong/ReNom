@@ -492,14 +492,13 @@ def test_max_pool2d(node, use_gpu):
     compare(func, node, node)
 
 @pytest.mark.parametrize("node", [
-    #Variable(rand((1, 1, 3, 3, 3, 3))), #This test fails for some reason exactly with seed 10
+    #Variable(rand((1, 1, 3, 3, 3, 3))), #This test fails on CPU for some reason exactly with seed 10
     Variable(rand((3, 2, 4, 5, 2))),
-    Variable(rand((2, 3, 4, 5))),
+    Variable(rand((2, 2, 4, 5))),
 ])
 def test_max_poolNd(node, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
-    #set_cuda_active(True)
     layer = MaxPoolNd(kernel=2)
 
     def func(node):
