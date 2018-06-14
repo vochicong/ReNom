@@ -129,7 +129,15 @@ class Deconv2d(Parametrized):
 
     '''
 
-    def __init__(self, channel=1, filter=3, padding=0, stride=1, input_size=None, ignore_bias=False, initializer=GlorotNormal()):
+    def __init__(self,
+                 channel=1,
+                 filter=3,
+                 padding=0,
+                 stride=1,
+                 input_size=None,
+                 ignore_bias=False,
+                 initializer=GlorotNormal()):
+
         self._padding, self._stride, self._kernel = (tuplize(x) for x in (padding, stride, filter))
         self._channel = channel
         self._initializer = initializer
@@ -140,7 +148,8 @@ class Deconv2d(Parametrized):
         size_f = (input_size[0], self._channel,
                   self._kernel[0], self._kernel[1])
         self.params = {"w": Variable(self._initializer(size_f), auto_update=True),
-                       "b": None if self._ignore_bias else Variable(np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)}
+                       "b": None if self._ignore_bias else
+                       Variable(np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)}
 
     def forward(self, x):
         return deconv2d(x, self.params["w"], self.params["b"],

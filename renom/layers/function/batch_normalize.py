@@ -170,7 +170,14 @@ class BatchNormalize(Parametrized):
 
     SERIALIZED = ('_mov_mean', '_mov_std', '_epsilon', '_mode')
 
-    def __init__(self, input_size=None, momentum=0.99, mode="activation", epsilon=1e-5, ignore_bias=False, initializer=GlorotNormal()):
+    def __init__(self,
+                 input_size=None,
+                 momentum=0.99,
+                 mode="activation",
+                 epsilon=1e-5,
+                 ignore_bias=False,
+                 initializer=GlorotNormal()):
+
         assert momentum > 0, "The value of momentum must be lager than 0."
         self._mov_mean = 0
         self._mov_std = 0
