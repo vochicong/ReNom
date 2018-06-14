@@ -12,18 +12,20 @@ from renom.cuda import cuda as cu
 
 class deconv2d(Node):
 
-    def __new__(cls, x, w, b, filter=3, stride=1, padding=0):
+    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, ignore_bias=False):
         filter, stride, padding = (tuplize(x) for x in (filter, stride, padding))
         in_shape = x.shape[1:]
         out_shape = [w.shape[1], ]
         out_shape.extend(transpose_out_size(in_shape[1:], filter, stride, padding))
-        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding)
+        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, ignore_bias)
 
     @classmethod
-    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding):
+    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, ignore_bias):
         z = np.tensordot(w, x, (0, 1))
         z = np.rollaxis(z, 3)
-        z = col2im(z, out_shape[1:], stride, padding) + b
+        z = col2im(z, out_shape[1:], stride, padding)
+        if not ignore_bias:
+            z += b
         ret = cls._create_node(z)
         ret.attrs._x = x
         ret.attrs._w = w
@@ -35,7 +37,7 @@ class deconv2d(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding):
+    def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, ignore_bias):
         conv_desc = cu.ConvolutionDescriptor(padding, stride, precision)
         filter_desc = cu.FilterDescriptor(w.shape, precision)
         N = x.shape[0]
@@ -43,7 +45,7 @@ class deconv2d(Node):
         z = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, x, z)
-        if b is not None:
+        if not ignore_bias:
             cu.cu_add_bias(get_gpu(b), z)
 
         ret = cls._create_node(z)
@@ -72,14 +74,15 @@ class deconv2d(Node):
             self.attrs._b._update_diff(context, np.sum(dy, (0, 2, 3), keepdims=True), **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
-        dw, db, dx = (get_gpu(g).empty_like_me()
+        dw, db, dx = (get_gpu(g).empty_like_me() if g is not None else None
                       for g in (self.attrs._w, self.attrs._b, self.attrs._x))
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionForward(handle, self.attrs._conv_desc,
                                     self.attrs._filter_desc, dy, self.attrs._w, dx)
             cu.cuConvolutionBackwardFilter(handle, self.attrs._conv_desc,
                                            self.attrs._filter_desc, dy, self.attrs._x, dw)
-            cu.cuConvolutionBackwardBias(handle, dy, db)
+            if db is not None:
+                cu.cuConvolutionBackwardBias(handle, dy, db)
 
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
@@ -126,18 +129,19 @@ class Deconv2d(Parametrized):
 
     '''
 
-    def __init__(self, channel=1, filter=3, padding=0, stride=1, input_size=None, initializer=GlorotNormal()):
+    def __init__(self, channel=1, filter=3, padding=0, stride=1, input_size=None, ignore_bias=False, initializer=GlorotNormal()):
         self._padding, self._stride, self._kernel = (tuplize(x) for x in (padding, stride, filter))
         self._channel = channel
         self._initializer = initializer
+        self._ignore_bias = ignore_bias
         super(Deconv2d, self).__init__(input_size)
 
     def weight_initiallize(self, input_size):
         size_f = (input_size[0], self._channel,
                   self._kernel[0], self._kernel[1])
         self.params = {"w": Variable(self._initializer(size_f), auto_update=True),
-                       "b": Variable(np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)}
+                       "b": None if self._ignore_bias else Variable(np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)}
 
     def forward(self, x):
         return deconv2d(x, self.params["w"], self.params["b"],
-                        self._kernel, self._stride, self._padding)
+                        self._kernel, self._stride, self._padding, self._ignore_bias)
