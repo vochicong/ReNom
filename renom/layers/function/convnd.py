@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import numpy as np
-from renom.layers.function.utils import imncol, colnim, pad_dx, pad_dy, create_mask_array, create_backward_mask, pad_image
+from renom.layers.function.utils import imncol, colnim, pad_dx, create_mask_array, create_backward_mask, pad_image
 from renom.core import Node, Variable, to_value, GPUValue, get_gpu, precision
 from .parameterized import Parametrized
 from renom.utility.initializer import Gaussian
@@ -86,11 +86,11 @@ class convnd(Node):
 
 
 class ConvNd(Parametrized):
-    """2d convolution layer.
+    """Nd convolution layer.
 
     This class creates a convolution filter to be convolved with
     the input tensor.
-    The instance of this class only accepts and outputs 4d tensors.
+    The instance of this class accepts tensors of any dimensionality and produces an output of equal dimensionality as the input
 
     At instantiation, in the case of int input, filter, padding, and stride, the shape will be symmetric.
 
@@ -100,9 +100,9 @@ class ConvNd(Parametrized):
 
     Args:
         channel (int): The dimensionality of the output.
-        filter (tuple,int): Filter size of the convolution kernel.
-        padding (tuple,int): Size of the zero-padding around the image.
-        stride (tuple,int): Stride-size of the convolution.
+        filter int: Filter size of the convolution kernel.
+        padding int: Size of the zero-padding around the image.
+        stride int: Stride-size of the convolution.
         input_size (tuple): Input unit size. This must be a tuple like (Channel, Height, Width).
         initializer (Initializer): Initializer object for weight initialization.
 
@@ -113,13 +113,13 @@ class ConvNd(Parametrized):
         >>> x = np.random.rand(n, c, h, w)
         >>> x.shape
         (10, 3, 32, 32)
-        >>> layer = rm.Conv2d(channel=32)
+        >>> layer = rm.ConvNd(channel=32)
         >>> z = layer(x)
         >>> z.shape
         (10, 32, 30, 30)
 
     Note:
-        Tensor data format is **NCHW**.
+        Tensor data format is **NC(D*)**.
     """
 
     def __init__(self, channel=2, filter=3, padding=0, stride=1, input_size=None, initializer=Gaussian()):
@@ -152,7 +152,6 @@ class ConvNd(Parametrized):
             return convnd(x, self.params["w"], self.params["b"], self._kernel,
                 self._stride, self._padding)
         if self._backward_mask is None:
-            #self._backward_mask = create_mask_array(pad_image(x,self._padding,self._stride)[0,0])
             self._backward_mask = create_mask_array(x[0,0])
             create_backward_mask(x[0,0],self.params["w"][0,0],self._stride[0],self._backward_mask,self._padding[0])
         return convnd(x, self.params["w"], self.params["b"], self._kernel,

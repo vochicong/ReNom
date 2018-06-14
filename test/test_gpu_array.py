@@ -894,6 +894,35 @@ def test_gpu_node_max_pooling(a):
     close(g3, c3)
     close(c_g3, g_g3)
 
+@test_utility.skipgpu
+@pytest.mark.parametrize("a", [
+    rand((3, 3, 3, 3)),
+    rand((1, 3, 9, 9)),
+    rand((2, 3, 9, 9, 4)),
+    rand((2, 3, 12, 4))
+])
+def test_gpu_node_max_poolingNd(a):
+    with use_cuda():
+
+        layer = rm.MaxPoolNd()
+
+        g1 = Variable(a)
+        g2 = layer(g1)
+        g3 = rm.sum(g2)
+        g = g3.grad()
+        g_g3 = g.get(g1)
+        g2.to_cpu()
+        g3.to_cpu()
+
+    c2 = layer(g1)
+    c3 = rm.sum(c2)
+    c3.grad()
+    c_g3 = g.get(g1)
+
+    close(g2, c2)
+    close(g3, c3)
+    close(c_g3, g_g3)
+
 
 @test_utility.skipgpu
 @pytest.mark.parametrize("a", [

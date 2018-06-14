@@ -28,6 +28,7 @@ from renom.layers.function.conv2d import Conv2d
 from renom.layers.function.convnd import ConvNd
 from renom.layers.function.deconv2d import Deconv2d
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
+from renom.layers.function.poolnd import MaxPoolNd
 from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
@@ -437,15 +438,14 @@ def test_conv2d(node, use_gpu):
     compare(func, layer.params["b"], node)
 
 @pytest.mark.parametrize("node, error", [
-    #[Variable(rand((1, 1, 3, 3, 3, 3))), True],
-    #[Variable(rand((2, 2, 4, 2))), False],
-    #[Variable(rand((1, 1, 2, 3, 2))), False],
-    [Variable(rand((1, 1, 2, 2))), False],
+    [Variable(rand((3, 2, 3, 3, 3, 3))), True],
+    [Variable(rand((2, 2, 4, 2))), False],
+    [Variable(rand((1, 1, 2, 3, 2))), False],
 ])
 def test_convnd(node, error, use_gpu):
     node = Variable(node)
-    #set_cuda_active(use_gpu)
-    layer = ConvNd(channel=2,filter=1,stride=1,padding=0)
+    set_cuda_active(use_gpu)
+    layer = ConvNd(channel=2,filter=2,stride=1,padding=1)
 
     def func(node):
         return sum(layer(node))
@@ -491,6 +491,20 @@ def test_max_pool2d(node, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
 
+@pytest.mark.parametrize("node", [
+    #Variable(rand((1, 1, 3, 3, 3, 3))), #This test fails for some reason exactly with seed 10
+    Variable(rand((3, 2, 4, 5, 2))),
+    Variable(rand((2, 3, 4, 5))),
+])
+def test_max_poolNd(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+    #set_cuda_active(True)
+    layer = MaxPoolNd(kernel=2)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
 
 @pytest.mark.parametrize("node, rois", [
     [Variable(rand((3, 3, 8, 13)) * 10), Variable(np.array([

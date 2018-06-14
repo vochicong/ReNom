@@ -94,7 +94,8 @@ def generate_weights(img,original,kernel,mask_array):
 def imncol(img, weight, bias, stride, padding, padWith = 0.):
     N, in_channels, in_dims = img.shape[0], img.shape[1], img.shape[2:]
     out_channels = weight.shape[0]
-    assert in_channels is weight.shape[1]
+    assert in_channels is weight.shape[1], "Number of feature maps is not the same for input and output"
+    assert stride > 0, "Kernel must move with positive increments"
     dimensionality = len(in_dims)
 
     # Padding asks for (before, after) for each dimension or it generalizes the padding
@@ -112,6 +113,67 @@ def imncol(img, weight, bias, stride, padding, padWith = 0.):
         ret.append(tmp)
     ret = np.array(ret)
     return np.array(ret)
+
+def imnpool(img, kernel, stride, padding, padWith = 0):
+    N, in_channels, in_dims = img.shape[0], img.shape[1], img.shape[2:]
+    dimensionality = len(in_dims)
+    assert stride > 0
+
+    pad_tuple = (padding, padding + stride - 1)
+    padded_image = np.pad(img, ((0, 0), (0, 0), *[pad_tuple for _ in range(dimensionality)]),
+                        mode="constant", constant_values=padWith)
+    ret = []
+    indx = []
+    for batch in range(N):
+        tmp = []
+        tmp2 = []
+        for in_channel in range(in_channels):
+            ret2 = place_pools(img[batch,in_channel],kernel,stride)
+            tmp.append(ret2[0])
+            tmp2.append(ret2[1])
+        ret.append(tmp)
+        indx.append(tmp2)
+    ret = np.array(ret)
+    indx = np.array(indx)
+    return ret, indx
+
+def poolnim(original, dy, indices):
+    ret = np.zeros_like(original)
+    for batch in range(original.shape[0]):
+        for in_channel in range(original.shape[1]):
+            tmp = ret[batch,in_channel]
+            tmp.setflags(write=True)
+            for i in range(len(indices[batch,in_channel])):
+                ret[tuple([batch,in_channel,*indices[batch,in_channel,i]])] += 1
+    return ret
+
+def place_pools(img,kernel,stride,offset=0):
+    kernels = []
+    for i in range(len(img.shape)):
+        kernels.append((img.shape[i]-kernel+offset*2)//stride+1)
+    kernels = np.empty(tuple(kernels))
+    indices = []
+
+    for pos in generate_positions(img,stride,offset,min_space=np.array(kernel)-1):
+        kern = calculate_pool(img,kernel,pos)
+        kernels[tuple(np.array(pos)//stride)] = kern[0]
+        indices.append(kern[1])
+    return kernels, indices
+
+def calculate_pool(img,kernel,pos):
+    if len(img.shape) > 1:
+        tmp = []
+        indx = []
+        for i in range(0,kernel):
+            if pos[0]+i < len(img) and pos[0]+i >= 0:
+                ret = calculate_pool(img[pos[0]+i],kernel,pos[1:])
+                tmp.append(ret[0])
+                indx.append(ret[1])
+        arg = np.argmax(tmp,axis=0)
+        return np.array(tmp[arg[0]]), np.append(pos[0] + arg[0],indx[arg[0]])
+    else:
+        img = img[pos[0]:pos[0]+kernel]
+        return np.amax(img,axis=0,keepdims=True), np.argmax([img])+pos[0]
 
 def pad_dx(dx,original):
     ret = np.zeros_like(original)

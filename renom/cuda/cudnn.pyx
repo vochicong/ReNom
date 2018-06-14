@@ -171,6 +171,30 @@ cdef class ConvolutionDescriptor:
     def __int__(self):
         return <uintptr_t>self.conv_desc
 
+cdef class PoolingNDescriptor:
+    cdef cudnnPoolingDescriptor_t pool_desc
+
+    def __init__(self, cnp.ndarray filter, cnp.ndarray padding, cnp.ndarray stride, pool_mode):
+        cdef cudnnPoolingMode_t mode = cudnnPoolingMode_t.CUDNN_POOLING_MAX if pool_mode == 0 else \
+                                            cudnnPoolingMode_t.CUDNN_POOLING_AVERAGE_COUNT_INCLUDE_PADDING
+        cdef cudnnNanPropagation_t nan_prop = cudnnNanPropagation_t.CUDNN_NOT_PROPAGATE_NAN
+
+        cdef int dimensions = len(filter)
+        cdef int * filterArray = <int *><uintptr_t>filter.data
+        cdef int * padArray = <int *><uintptr_t>padding.data
+        cdef int * strideArray = <int *><uintptr_t>stride.data
+
+        check(cudnnCreatePoolingDescriptor(& self.pool_desc))
+        check(cudnnSetPoolingNdDescriptor(
+            self.pool_desc, mode, nan_prop, dimensions, filterArray, padArray, strideArray))
+
+    def __del__(self):
+        if self.conv_desc:
+            check(cudnnDestroyPoolingDescriptor(self.pool_desc))
+            self.pool_desc= NULL
+
+    def __int__(self):
+        return <uintptr_t>self.pool_desc
 
 cdef class PoolingDescriptor:
     cdef cudnnPoolingDescriptor_t pool_desc
