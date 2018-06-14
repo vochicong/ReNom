@@ -23,7 +23,6 @@ class conv2d(Node):
         col = im2col(to_value(x),
                      out_shape[1:], kernel,
                      stride, padding)
-
         value = np.rollaxis(np.tensordot(col, to_value(w),
                                          ([1, 2, 3], [1, 2, 3])), 3, 1)
         if not ignore_bias:

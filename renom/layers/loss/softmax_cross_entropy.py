@@ -5,6 +5,7 @@ import numpy as np
 from renom.core import Node, get_gpu
 from renom.layers.activation import softmax
 from renom.cuda import cuda as cu
+import renom as rm
 
 
 class softmax_cross_entropy(Node):
@@ -30,8 +31,8 @@ class softmax_cross_entropy(Node):
         z = softmax(lhs)
         tmp1 = get_gpu(lhs).empty_like_me()
         cu.cucross_entropy(get_gpu(z), get_gpu(rhs), get_gpu(tmp1))
-        loss = -cu.cusum(get_gpu(tmp1)) / N
-        ret = cls._create_node(loss)
+        loss = -cu.cusum(get_gpu(tmp1))
+        ret = cls._create_node(loss / N)
         ret.attrs._z = z
         ret.attrs._lhs = lhs
         ret.attrs._rhs = rhs

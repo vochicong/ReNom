@@ -13,6 +13,10 @@ except ImportError as e:
     curand_generator = None
     _has_cuda = False
 
+    @contextlib.contextmanager
+    def use_device(device_id):
+        yield
+
 _cuda_is_active = False
 _cuda_is_disabled = False
 
@@ -72,37 +76,34 @@ def disable_cuda(is_disabled=True):
         _cuda_is_disabled = cur
 
 
-@contextlib.contextmanager
-def use_device(device_id):
-    active = is_cuda_active()
-
-    if active:
-        cur = cuGetDevice()
-        cuSetDevice(device_id)  # switch dedice
-
-    try:
-        yield
-    finally:
-        if active:
-            cuSetDevice(cur)   # restore device
-
-
 _CuRandGens = {}
 
 
-def curand_generator(seed=None):
+def _create_curand(seed=None):
     deviceid = cuGetDevice()
     if seed is None:
         seed = seed if seed else np.random.randint(4294967295, size=1)
 
-    if deviceid in _CuRandGens:
-        gen = _CuRandGens[deviceid]
-        gen.set_seed(seed)
-        return gen
-
     ret = CuRandGen(seed)
     _CuRandGens[deviceid] = ret
     return ret
+
+
+def curand_generator(seed=None):
+    deviceid = cuGetDevice()
+    if deviceid not in _CuRandGens:
+        _create_curand()
+
+    gen = _CuRandGens[deviceid]
+    if seed is not None:
+        gen.set_seed(seed)
+    return gen
+
+
+def curand_set_seed(seed):
+    deviceid = cuGetDevice()
+    assert deviceid in _CuRandGens, "Curand not set"
+    _CuRandGens[deviceid].set_seed(seed)
 
 
 def release_mem_pool():

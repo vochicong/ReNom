@@ -43,7 +43,8 @@ class cross_entropy(Node):
             self.attrs._rhs._update_diff(context, -dy * self.attrs._log_lhs, **kwargs)
 
         if isinstance(self.attrs._lhs, Node):
-            self.attrs._lhs._update_diff(context, -dy * self.attrs._rhs / self.attrs._lhs, **kwargs)
+            self.attrs._lhs._update_diff(
+                context, -dy * get_gpu(self.attrs._rhs) / get_gpu(self.attrs._lhs), **kwargs)
 
 
 class CrossEntropy:
