@@ -6,11 +6,15 @@
 #include <thrust/device_ptr.h>
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
+#include <thrust/system/cuda/execution_policy.h>
 
 
 __device__ VALUE_TYPE atomicAdd(VALUE_TYPE *address, const VALUE_TYPE vlaue);
 
 namespace renom{
+
+	void SET_STREAM_NAME(cudaStream_t stream);
+	cudaStream_t GET_STREAM_NAME();
 
 	// Operation
 	enum Operation {MUL, ADD, DIV, RDIV, SUB, POW, RPOW};
@@ -199,7 +203,7 @@ namespace renom{
 
         long long adv_indexes_len;
         long long *adv_indexes;
-        
+
         size_t stride, dest_stride;
     };
 
@@ -221,7 +225,7 @@ namespace renom{
         VALUE_TYPE *dest,
         getitem_slice_infos *info);
 
-    __global__ void cuda_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);        
+    __global__ void cuda_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);
     void thrust_concat_blocks(VALUE_TYPE *a, const size_t nsize, VALUE_TYPE *b, const size_t block_len, const size_t copy_len);
 
     struct leaky_relu_forward_function;
@@ -274,7 +278,7 @@ namespace renom{
             VALUE_TYPE *dot, VALUE_TYPE *dr, VALUE_TYPE *dou, VALUE_TYPE *dwc);
 
     // Binarize
-    void thrust_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b); 
+    void thrust_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b);
     __global__ void cuda_binarize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b);
 
     // Embedding

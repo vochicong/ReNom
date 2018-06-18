@@ -457,7 +457,7 @@ class GPUValue(object):
         return value
 
     def to_gpu(self, value):
-        if value.dtype.type is not self.dtype:
+        if value.dtype is not self.dtype:
             value = value.astype(self.dtype)
 
         assert value.shape == self.shape, "{} {}".format(value.shape, self.shape)

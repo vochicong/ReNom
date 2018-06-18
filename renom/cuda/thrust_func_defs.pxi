@@ -1,5 +1,14 @@
 from libcpp cimport bool
 
+cdef extern from "cuda_runtime.h":
+  ctypedef struct CUevent_st:
+    pass
+  ctypedef struct CUstream_st:
+    pass
+
+  ctypedef CUevent_st * cudaEvent_t
+  ctypedef CUstream_st *  cudaStream_t
+
 cdef extern from * namespace "renom":
     cdef void thrust_negate(VALUE_TYPE* first, VALUE_TYPE *last, VALUE_TYPE *output)
     cdef void thrust_relu_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size)

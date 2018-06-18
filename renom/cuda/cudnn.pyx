@@ -4,7 +4,7 @@ import numpy as np
 cimport cudnn as cd
 cimport cython
 from libc.stdlib cimport malloc, free
-from libc.stdint cimport uintptr_t
+from libc.stdint cimport uintptr_t, intptr_t
 from renom.core import get_gpu
 from renom.config import precision
 from cuda_utils cimport _VoidPtr
@@ -22,6 +22,19 @@ def check(cd.cudnnStatus_t status):
 
 
 _cudnn_handlers = {}
+
+
+def cudnn_set_stream(stream):
+  cdef cudnnHandle_t handle
+
+  device_id = cuda_base.cuGetDevice()
+  if device_id not in _cudnn_handlers:
+      check(cudnnCreate(&handle))
+      _cudnn_handlers[device_id] =  <uintptr_t> handle
+
+  handle = <cudnnHandle_t><uintptr_t> _cudnn_handlers[device_id]
+
+  check(cudnnSetStream(handle, (<cudaStream_t><uintptr_t> stream) ))
 
 @contextlib.contextmanager
 def cudnn_handler():
@@ -61,6 +74,9 @@ cdef class TensorDesc(object):
 
         check(cd.cudnnCreateTensorDescriptor(&(self.tensor_desc)))
 
+        # TODO: Add safety checks for tensor parameters as well as
+        # error checking tests
+
         if len(shape) < 5:
             n, c, h, w = list(shape) + [1] * (4 - len(shape))
             check(cd.cudnnSetTensor4dDescriptor(self.tensor_desc, tensor_format,
@@ -74,6 +90,7 @@ cdef class TensorDesc(object):
             for i in range(ndims):
                 size[i] = shape[i]
                 strides[i] = np.prod(shape[ndims-i:])
+<<<<<<< HEAD
             #check(cd.cudnnSetTensorNdDescriptor(
             #    self.tensor_desc,
             #    data_type(dtype),
@@ -86,6 +103,12 @@ cdef class TensorDesc(object):
               data_type(dtype),
               ndims,
               size))
+=======
+            check(cd.cudnnSetTensorNdDescriptor(self.tensor_desc, data_type(dtype),
+                                                ndims,
+                                                size,
+                                                strides))
+>>>>>>> carl/#23
             free(size)
             free(strides)
 
