@@ -437,15 +437,18 @@ def test_conv2d(node, use_gpu):
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
 
+import benchmarker as bm
+
 @pytest.mark.parametrize("node, error", [
-    [Variable(rand((3, 2, 3, 3, 3, 3))), True],
-    [Variable(rand((2, 2, 4, 2))), False],
-    [Variable(rand((1, 1, 2, 3, 2))), False],
+    #[Variable(rand((1, 1, 3, 3, 3, 3))), True],
+    [Variable(rand((1, 1, 3, 3))), False],
+    #[Variable(rand((2, 3, 2, 3, 2))), False],
 ])
-def test_convnd(node, error, use_gpu):
+def test_convnd(node, error):#, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
-    layer = ConvNd(channel=2,filter=2,stride=1,padding=1)
+    #set_cuda_active(use_gpu)
+    #set_cuda_active(True)
+    layer = ConvNd(channel=1,filter=2,stride=1,padding=0)
 
     def func(node):
         return sum(layer(node))

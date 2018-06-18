@@ -78,19 +78,6 @@ def create_backward_mask(img,kernel,stride,mask_array,padding=0):
                 pass
 
 
-def generate_backwards(img,kernel,mask_array):
-    ret = np.empty_like(mask_array)
-    for p, v in np.ndenumerate(mask_array):
-        ret[p] = v.evaluate(img,kernel)
-    return ret
-
-def generate_weights(img,original,kernel,mask_array):
-    ret = np.zeros_like(kernel)
-    for p, v in np.ndenumerate(mask_array):
-        for w, y in zip(v.weight_positions,v.output_positions):
-            ret[w] += img[y] * original[p]
-    return ret
-
 def imncol(img, weight, bias, stride, padding, padWith = 0.):
     N, in_channels, in_dims = img.shape[0], img.shape[1], img.shape[2:]
     out_channels = weight.shape[0]
@@ -189,10 +176,6 @@ def colnim(img, original, weight, bias, stride,backward_mask):
             tmp = []
             for in_channel in range(weight.shape[1]):
                 tmp.append(generate_backwards(img[batch,out_channel],weight[out_channel,in_channel],backward_mask))
-                #tmp_img = img[batch,out_channel]
-                #tmp_weight = weight[out_channel,in_channel]
-                #tmp.append(place_kernels(img[batch,out_channel],weight[out_channel \
-                #    ,in_channel],stride=1,offset=len(weight[out_channel,in_channel])-1))
             tmp2 += np.array(tmp)
         ret.append(tmp2)
     ret = np.array(ret)
@@ -208,6 +191,19 @@ def colnim(img, original, weight, bias, stride,backward_mask):
     ret2 = np.array(ret2)
 
     return ret, ret2
+
+def generate_backwards(img,kernel,mask_array):
+    ret = np.empty_like(mask_array)
+    for p, v in np.ndenumerate(mask_array):
+        ret[p] = v.evaluate(img,kernel)
+    return ret
+
+def generate_weights(img,original,kernel,mask_array):
+    ret = np.zeros_like(kernel)
+    for p, v in np.ndenumerate(mask_array):
+        for w, y in zip(v.weight_positions,v.output_positions):
+            ret[w] += img[y] * original[p]
+    return ret
 
 def generate_positions(img,stride=1,offset=0,min_space=0):
     pos = []
@@ -235,29 +231,6 @@ def enum_positions(pos_list,index,length,dist,stride,offset,min_space=0):
         pos_list[index] += stride
 
 
-def calculate_kernel(img,kernel,pos):
-    if len(kernel.shape) > 1:
-        tmp = 0
-        for i in range(0,len(kernel)):
-            if pos[0]+i < len(img) and pos[0]+i >= 0:
-                tmp += calculate_kernel(img[pos[0]+i],kernel[i],pos[1:])
-        return tmp
-    else:
-        # We are overlapping from positions beyond the img
-        if pos[0] >= len(img):
-            img = img[pos[0]:len(img)]
-            kernel = kernel[0:-pos[0]]
-        # We are overlapping from positions before the img
-        elif pos[0] < 0:
-            img = img[0:-pos[0]]
-            kernel = kernel[-pos[0]:len(kernel)]
-        # We are inside the image
-        else:
-            img = img[pos[0]:pos[0]+len(kernel)]
-            kernel = kernel[0:len(img)]
-        assert len(img) is len(kernel), "\nimg=\n{}\nkernel=\n{}".format(img,kernel)
-        return np.sum(img*kernel)
-
 def place_kernels(img,kernel,stride,offset):
     kernels = []
     for i in range(len(img.shape)):
@@ -265,7 +238,8 @@ def place_kernels(img,kernel,stride,offset):
     kernels = np.empty(tuple(kernels))
     assert len(kernel) > offset, "{}\{}".format(len(kernel),offset)
     for pos in generate_positions(img,stride,offset,min_space=np.array(kernel.shape)-1):
-        kern = calculate_kernel(img,kernel,pos)
+        slices = [slice(pos[i],pos[i]+kernel.shape[i]) for i in range(len(img.shape))]
+        kern = np.sum(img[slices] * kernel)
         kernels[tuple(np.array(pos)//stride)] = kern
     return kernels
 

@@ -43,8 +43,6 @@ class convnd(Node):
             output_shape.append((x.shape[i+2] + padding[i]*2 - kernel[i])//stride[i]+1)
         y = GPUValue(shape=tuple(output_shape))
 
-
-
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y)
             if b is not None:

@@ -117,9 +117,21 @@ cdef getTensorDescriptor(desc):
     return n, c, h, w, ns, cs, hs, ws, <int> dtype
 
 
-cdef class ConvolutionNDescriptor:
-    cdef cudnnConvolutionDescriptor_t conv_desc
+cdef class BaseConvolutionDescriptor:
+  cdef cudnnConvolutionDescriptor_t conv_desc
 
+  def __init__(self, cnp.ndarray padding, cnp.ndarray stride, dtype):
+      pass
+
+  def __del__(self):
+      if self.conv_desc:
+          check(cudnnDestroyConvolutionDescriptor(self.conv_desc))
+          self.conv_desc = NULL
+
+  def __int__(self):
+      return <uintptr_t>self.conv_desc
+
+cdef class ConvolutionNDescriptor(BaseConvolutionDescriptor):
     def __init__(self, cnp.ndarray padding, cnp.ndarray stride, dtype):
         cdef int dimensions, pad_h, pad_w, u, v, upscalex, upscaley
         cdef cudnnConvolutionMode_t mode;
@@ -140,16 +152,8 @@ cdef class ConvolutionNDescriptor:
             self.conv_desc, dimensions, padArray, strideArray, upscaleArray, mode, data_type(dtype)))
         free(upscaleArray)
 
-    def __del__(self):
-        if self.conv_desc:
-            check(cudnnDestroyConvolutionDescriptor(self.conv_desc))
-            self.conv_desc = NULL
 
-    def __int__(self):
-        return <uintptr_t>self.conv_desc
-
-cdef class ConvolutionDescriptor:
-    cdef cudnnConvolutionDescriptor_t conv_desc
+cdef class ConvolutionDescriptor(BaseConvolutionDescriptor):
 
     def __init__(self, padding, stride, dtype):
         cdef int pad_h, pad_w, u, v, upscalex, upscaley
@@ -162,14 +166,6 @@ cdef class ConvolutionDescriptor:
         check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))
         check(cudnnSetConvolution2dDescriptor_9(
             self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
-
-    def __del__(self):
-        if self.conv_desc:
-            check(cudnnDestroyConvolutionDescriptor(self.conv_desc))
-            self.conv_desc = NULL
-
-    def __int__(self):
-        return <uintptr_t>self.conv_desc
 
 cdef class PoolingNDescriptor:
     cdef cudnnPoolingDescriptor_t pool_desc
@@ -289,8 +285,21 @@ def cuPoolingBackward(handle, pool_desc, x, y, dy, dx):
         xDesc.tensor_desc,
         <void *> <uintptr_t> dx._ptr))
 
-cdef class NdFilterDescriptor:
-    cdef cudnnFilterDescriptor_t filter_desc
+cdef class BaseFilterDescriptor:
+  cdef cudnnFilterDescriptor_t filter_desc
+
+  def __init__(self, shape, dtype):
+      pass
+
+  def __del__(self):
+      if self.filter_desc:
+          check(cudnnDestroyFilterDescriptor(self.filter_desc))
+          self.filter_desc= NULL
+
+  def __int__(self):
+      return <uintptr_t>self.filter_desc
+
+cdef class NdFilterDescriptor(BaseFilterDescriptor):
 
     def __init__(self, shape, dtype):
         cdef cudnnFilterDescriptor_t filter_desc
@@ -303,13 +312,6 @@ cdef class NdFilterDescriptor:
         check(cudnnSetFilterNdDescriptor(self.filter_desc, data_type(
             dtype), tensor_format, dimensions, dimensionArray))
 
-    def __del__(self):
-        if self.filter_desc:
-            check(cudnnDestroyFilterDescriptor(self.filter_desc))
-            self.filter_desc= NULL
-
-    def __int__(self):
-        return <uintptr_t>self.filter_desc
 
 cdef class FilterDescriptor:
     cdef cudnnFilterDescriptor_t filter_desc
