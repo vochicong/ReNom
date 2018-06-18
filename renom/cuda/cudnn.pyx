@@ -90,7 +90,6 @@ cdef class TensorDesc(object):
             for i in range(ndims):
                 size[i] = shape[i]
                 strides[i] = np.prod(shape[ndims-i:])
-<<<<<<< HEAD
             #check(cd.cudnnSetTensorNdDescriptor(
             #    self.tensor_desc,
             #    data_type(dtype),
@@ -103,12 +102,6 @@ cdef class TensorDesc(object):
               data_type(dtype),
               ndims,
               size))
-=======
-            check(cd.cudnnSetTensorNdDescriptor(self.tensor_desc, data_type(dtype),
-                                                ndims,
-                                                size,
-                                                strides))
->>>>>>> carl/#23
             free(size)
             free(strides)
 
