@@ -2,7 +2,7 @@ import renom as rm
 import numpy as np
 import pytest
 from renom.utility.distributor.distributor import *
-from renom.cuda import set_cuda_active, cuDeviceSynchronize
+from renom.cuda import *
 from renom.config import precision
 
 
