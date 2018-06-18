@@ -79,19 +79,31 @@ def disable_cuda(is_disabled=True):
 _CuRandGens = {}
 
 
-def curand_generator(seed=None):
+def _create_curand(seed=None):
     deviceid = cuGetDevice()
     if seed is None:
         seed = seed if seed else np.random.randint(4294967295, size=1)
 
-    if deviceid in _CuRandGens:
-        gen = _CuRandGens[deviceid]
-        gen.set_seed(seed)
-        return gen
-
     ret = CuRandGen(seed)
     _CuRandGens[deviceid] = ret
     return ret
+
+
+def curand_generator(seed=None):
+    deviceid = cuGetDevice()
+    if deviceid not in _CuRandGens:
+        _create_curand()
+
+    gen = _CuRandGens[deviceid]
+    if seed is not None:
+        gen.set_seed(seed)
+    return gen
+
+
+def curand_set_seed(seed):
+    deviceid = cuGetDevice()
+    assert deviceid in _CuRandGens, "Curand not set"
+    _CuRandGens[deviceid].set_seed(seed)
 
 
 def release_mem_pool():

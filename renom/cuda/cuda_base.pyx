@@ -190,8 +190,8 @@ cdef class GPUHeap(object):
 
     def __dealloc__(self):
         cdef cudaError_t err = cudaSetDevice(self.device_id)
-        if err != cudaSuccess:
-            err = cudaFree(<void * >self.ptrp)
+        if err == cudaSuccess:
+            err = cudaFree(<void * >self.ptr)
 
         if err != cudaSuccess:
             print("Error in GPUHeap.__dealloc__():", err, file=sys.stderr)
