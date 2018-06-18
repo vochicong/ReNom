@@ -5,7 +5,7 @@ import warnings
 import numpy as np
 from renom.core import get_gpu, Node
 from renom.cuda import is_cuda_active
-from renom.cuda.cuda_base import pinNumpy, initPinnedMemory, freePinnedMemory, asyncBehaviour, cuDeviceSynchronize
+from renom.cuda.cuda_base import *
 from renom.config import precision
 
 
