@@ -2,10 +2,12 @@ import renom as rm
 import numpy as np
 import pytest
 from renom.utility.distributor.distributor import *
-from renom.cuda import set_cuda_active, cuDeviceSynchronize
+from renom.cuda import *
+import test_utility
 from renom.config import precision
 
 
+@test_utility.skipgpu
 @pytest.mark.parametrize("data_shape", [
     (int(1e2), int(1e2)),  # Small Data Test
     (int(1e5), int(1e1)),  # Medium Data Test
