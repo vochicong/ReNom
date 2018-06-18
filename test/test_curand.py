@@ -4,6 +4,7 @@ from renom.cuda import *
 import pytest
 import test_utility
 
+
 @test_utility.skipgpu
 @pytest.mark.parametrize("generator_type", [
     "rand_normal",
