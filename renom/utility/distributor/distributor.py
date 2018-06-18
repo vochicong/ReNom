@@ -50,7 +50,7 @@ class Distributor(object):
     def __len__(self):
         return self._data_size
 
-    def batch(self, batch_size, shuffle=True, steps = None):
+    def batch(self, batch_size, shuffle=True, steps=None):
         '''
         This function returns `minibatch`.
 
@@ -171,10 +171,10 @@ class GPUDistributor(Distributor):
         assert len(x) == len(y), "Input batches must have same number as output batches"
         self._data_size = len(x)
 
-    #def __getitem__(self, index):
+    # def __getitem__(self, index):
     #    return super(GPUDistributor, self).__getitem__(self, index)
 
-    #def kfold(self, num=4, overlap=False, shuffle=True):
+    # def kfold(self, num=4, overlap=False, shuffle=True):
     #    return super(GPUDistributor, self).kfold(self, num, overlap, shuffle)
 
     @staticmethod
@@ -194,8 +194,8 @@ class GPUDistributor(Distributor):
     def create_return(batch1, batch2):
         return batch1, batch2
 
-    def batch(self, batch_size, shuffle=True, steps = None):
-        #return super(GPUDistributor, self).batch(batch_size, shuffle)
+    def batch(self, batch_size, shuffle=True, steps=None):
+        # return super(GPUDistributor, self).batch(batch_size, shuffle)
         generator = super(GPUDistributor, self).batch(batch_size, shuffle, steps)
         notEmpty = True
         first = True
@@ -204,7 +204,8 @@ class GPUDistributor(Distributor):
                 # On entering, we preload the first two batches
                 if first:
                     b = next(generator)
-                    example_batch = b[0] if b[0].size*b[0].itemsize >= b[1].size*b[1].itemsize else b[1]
+                    example_batch = b[0] if b[0].size * \
+                        b[0].itemsize >= b[1].size * b[1].itemsize else b[1]
                     initPinnedMemory(example_batch)
                     x1, y1 = GPUDistributor.preload_pair(b[0], b[1])
                     first = False
