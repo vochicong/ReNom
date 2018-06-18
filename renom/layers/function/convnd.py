@@ -141,7 +141,9 @@ class ConvNd(Parametrized):
         self._kernel = np.array(kern)
         self._padding = np.array([self._padding for _ in range(self._dims)], dtype=np.int32)
         self._stride = np.array([self._stride for _ in range(self._dims)], dtype=np.int32)
-        size_f = (self._channel, input_size[0], *kern)
+        f_lst = [self._channel, input_size[0]]
+        f_lst.extend(kern)
+        size_f = tuple(f_lst)
         size_b = tuple([1, self._channel] + [1 for _ in range(self._dims)])
 
         self.params = {"w": Variable(self._initializer(size_f), auto_update=True),
@@ -186,7 +188,9 @@ class Conv3d(Parametrized):
         self._kernel = np.array(kern)
         self._padding = np.array([self._padding for _ in range(self._dims)], dtype=np.int32)
         self._stride = np.array([self._stride for _ in range(self._dims)], dtype=np.int32)
-        size_f = (self._channel, input_size[0], *kern)
+        f_lst = [self._channel, input_size[0]]
+        f_lst.extend(kern)
+        size_f = tuple(f_lst)
         size_b = tuple([1, self._channel] + [1 for _ in range(self._dims)])
 
         self.params = {"w": Variable(self._initializer(size_f), auto_update=True),
