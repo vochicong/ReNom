@@ -437,18 +437,20 @@ def test_conv2d(node, use_gpu):
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
 
+
 import benchmarker as bm
+
 
 @pytest.mark.parametrize("node, error", [
     #[Variable(rand((1, 1, 3, 3, 3, 3))), True],
     [Variable(rand((1, 1, 3, 3))), False],
     #[Variable(rand((2, 3, 2, 3, 2))), False],
 ])
-def test_convnd(node, error):#, use_gpu):
+def test_convnd(node, error):  # , use_gpu):
     node = Variable(node)
-    #set_cuda_active(use_gpu)
-    #set_cuda_active(True)
-    layer = ConvNd(channel=1,filter=2,stride=1,padding=0)
+    # set_cuda_active(use_gpu)
+    # set_cuda_active(True)
+    layer = ConvNd(channel=1, filter=2, stride=1, padding=3)
 
     def func(node):
         return sum(layer(node))
@@ -462,6 +464,7 @@ def test_convnd(node, error):#, use_gpu):
         compare(func, node, node)
         compare(func, layer.params["w"], node)
         compare(func, layer.params["b"], node)
+
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
@@ -494,8 +497,9 @@ def test_max_pool2d(node, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
 
+
 @pytest.mark.parametrize("node", [
-    #Variable(rand((1, 1, 3, 3, 3, 3))), #This test fails on CPU for some reason exactly with seed 10
+    # Variable(rand((1, 1, 3, 3, 3, 3))), #This test fails on CPU for some reason exactly with seed 10
     Variable(rand((3, 2, 4, 5, 2))),
     Variable(rand((2, 2, 4, 5))),
 ])
@@ -507,6 +511,7 @@ def test_max_poolNd(node, use_gpu):
     def func(node):
         return sum(layer(node))
     compare(func, node, node)
+
 
 @pytest.mark.parametrize("node, rois", [
     [Variable(rand((3, 3, 8, 13)) * 10), Variable(np.array([

@@ -5,13 +5,14 @@ from renom.core import Node, GPUValue, get_gpu
 from renom.layers.function.utils import imnpool, poolnim
 from renom.cuda import cuda as cu
 
+
 class npool_base(Node):
 
     def __new__(cls, x, kernel=3, stride=1, padding=0):
         in_shape = x.shape[1:]
         out_shape = [x.shape[1], ]
         for i in range(len(x.shape[2:])):
-            out_shape.append((x.shape[i+2] + padding[i]*2 - kernel[i])//stride[i]+1)
+            out_shape.append((x.shape[i + 2] + padding[i] * 2 - kernel[i]) // stride[i] + 1)
         return cls.calc_value(x, in_shape, out_shape, kernel, stride, padding)
 
     def _backward_gpu(self, context, dy, **kwargs):
@@ -20,6 +21,7 @@ class npool_base(Node):
             cu.cuPoolingBackward(handle, self.attrs._pool_desc, self.attrs._x, self, dy, dx)
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
+
 
 class max_poolnd(npool_base):
 
@@ -62,11 +64,15 @@ class NPoolBase:
         self._kernel = kernel
 
     def __call__(self, x):
-        if not isinstance(self._padding,np.ndarray):
-            self._padding = np.array(tuple([self._padding for _ in range(len(x.shape[2:]))]),dtype=np.int32)
-            self._stride = np.array(tuple([self._stride for _ in range(len(x.shape[2:]))]),dtype=np.int32)
-            self._kernel = np.array(tuple([self._kernel for _ in range(len(x.shape[2:]))]),dtype=np.int32)
+        if not isinstance(self._padding, np.ndarray):
+            self._padding = np.array(
+                tuple([self._padding for _ in range(len(x.shape[2:]))]), dtype=np.int32)
+            self._stride = np.array(
+                tuple([self._stride for _ in range(len(x.shape[2:]))]), dtype=np.int32)
+            self._kernel = np.array(
+                tuple([self._kernel for _ in range(len(x.shape[2:]))]), dtype=np.int32)
         return self.forward(x)
+
 
 class MaxPoolNd(NPoolBase):
 

@@ -800,7 +800,7 @@ def test_gpu_node_convolution2d(a):
 def test_gpu_node_convolutionnd(a):
     with use_cuda():
 
-        layer = rm.ConvNd(channel=2,filter=1,stride=1,padding=0)
+        layer = rm.ConvNd(channel=2, filter=1, stride=1, padding=0)
         #layer.params["w"] = rm.Variable(np.random.rand(32, 3, 3, 3))
         #layer.params["b"] = rm.Variable(np.random.rand(1, 32, 1, 1))
 
@@ -826,6 +826,7 @@ def test_gpu_node_convolutionnd(a):
     close(c_g1, g_g1)
     close(c_g2, g_g2)
     close(c_g3, g_g3)
+
 
 @test_utility.skipgpu
 @pytest.mark.parametrize("a", [
@@ -893,6 +894,7 @@ def test_gpu_node_max_pooling(a):
     close(g2, c2)
     close(g3, c3)
     close(c_g3, g_g3)
+
 
 @test_utility.skipgpu
 @pytest.mark.parametrize("a", [

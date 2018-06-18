@@ -806,11 +806,11 @@ def cu_add_bias(bias, gpu_value):
     cdef int size = <int > gpu_value.size
     cdef int wh
     if len(gpu_value.shape) < 5:
-      wh = <int > (gpu_value.shape[2] * gpu_value.shape[3])
+        wh = <int > (gpu_value.shape[2] * gpu_value.shape[3])
     elif len(gpu_value.shape) is 5:
-      wh = <int > (gpu_value.shape[2] * gpu_value.shape[3] * gpu_value.shape[4])
+        wh = <int > (gpu_value.shape[2] * gpu_value.shape[3] * gpu_value.shape[4])
     else:
-      assert False, "cu_add_bias currently supports only 2d or 3d biases"
+        assert False, "cu_add_bias currently supports only 2d or 3d biases"
     cdef int n = <int > gpu_value.shape[0]
     thrust_add_bias(size, n, wh, ptr1, ptr2)
 

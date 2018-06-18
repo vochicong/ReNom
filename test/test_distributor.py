@@ -18,7 +18,7 @@ def test_gpu_distributor(data_shape):
     X = np.arange(np.prod(data_shape)).reshape(*data_shape)
     X = X.astype(precision)
     #Y = (X*2).reshape(*data_shape)
-    Y = np.full(data_shape,0)
+    Y = np.full(data_shape, 0)
     batch_size = (len(X)//100)
     #batch_size = len(X)
     # Set up the distributor and loop parameters
@@ -34,8 +34,7 @@ def test_gpu_distributor(data_shape):
     # Create a big pool of data for renom to re-use later, removing
     # potential delays from creating extra memory
     #pre_data = np.full(data_shape, 0)
-    #get_gpu(pre_data)
-
+    # get_gpu(pre_data)
 
     # Test the distributor over a normal loop to see if it always produces correct data.
     for e in range(epochs):

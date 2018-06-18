@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# encoding: utf-8
+#!/usr / bin / env python
+# encoding: utf - 8
 
 import numpy as np
 from renom.layers.function.utils import imncol, colnim, pad_dx, create_mask_array, create_backward_mask, pad_image
@@ -12,7 +12,7 @@ from renom.cuda import is_cuda_active
 
 class convnd(Node):
 
-    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, mask = None):
+    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, mask=None):
         in_shape = x.shape[1:]
         if mask is None:
             return cls.calc_value(x, w, b, in_shape, filter, stride, padding)
@@ -20,9 +20,9 @@ class convnd(Node):
         return cls.calc_value(x, w, b, in_shape, filter, stride, padding, mask)
 
     @classmethod
-    def _oper_cpu(cls, x, w, b, in_shape, kernel, stride, padding, mask ):
+    def _oper_cpu(cls, x, w, b, in_shape, kernel, stride, padding, mask):
         col = imncol(to_value(x), w, b, stride[0], padding[0])
-        ret = cls._create_node(col+b)
+        ret = cls._create_node(col + b)
         ret.attrs._back_mask = mask
         ret.attrs._x = x
         ret.attrs._w = w
@@ -34,13 +34,12 @@ class convnd(Node):
 
     @classmethod
     def _oper_gpu(cls, x, w, b, in_shape, kernel, stride, padding):
-        N = x.shape[0]
         conv_desc = cu.ConvolutionNDescriptor(padding, stride, precision)
         filter_desc = cu.NdFilterDescriptor(w.shape, precision)
 
         output_shape = [x.shape[0], w.shape[0]]
         for i in range(len(x.shape[2:])):
-            output_shape.append((x.shape[i+2] + padding[i]*2 - kernel[i])//stride[i]+1)
+            output_shape.append((x.shape[i + 2] + padding[i] * 2 - kernel[i]) // stride[i] + 1)
         y = GPUValue(shape=tuple(output_shape))
 
         with cu.cudnn_handler() as handle:
@@ -59,9 +58,11 @@ class convnd(Node):
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        dx, dw = colnim(dy, self.attrs._x, self.attrs._w, self.attrs._b, self.attrs._stride[0], self.attrs._back_mask)
-        dx = pad_dx(dx,self.attrs._x)
-        db = np.sum(dy,axis=tuple([0,]+[i for i in range(2,len(self.attrs._b.shape))]),keepdims=True)
+        dx, dw = colnim(dy, self.attrs._x, self.attrs._w, self.attrs._b,
+                        self.attrs._stride[0], self.attrs._back_mask)
+        dx = pad_dx(dx, self.attrs._x)
+        db = np.sum(dy, axis=tuple(
+            [0, ] + [i for i in range(2, len(self.attrs._b.shape))]), keepdims=True)
         self.attrs._x._update_diff(context, dx)
         self.attrs._w._update_diff(context, dw)
         self.attrs._b._update_diff(context, db)
@@ -88,7 +89,8 @@ class ConvNd(Parametrized):
 
     This class creates a convolution filter to be convolved with
     the input tensor.
-    The instance of this class accepts tensors of any dimensionality and produces an output of equal dimensionality as the input
+    The instance of this class accepts tensors of any dimensionality and produces an output of equal
+    dimensionality as the input
 
     At instantiation, in the case of int input, filter, padding, and stride, the shape will be symmetric.
 
@@ -99,8 +101,8 @@ class ConvNd(Parametrized):
     Args:
         channel (int): The dimensionality of the output.
         filter int: Filter size of the convolution kernel.
-        padding int: Size of the zero-padding around the image.
-        stride int: Stride-size of the convolution.
+        padding int: Size of the zero - padding around the image.
+        stride int: Stride - size of the convolution.
         input_size (tuple): Input unit size. This must be a tuple like (Channel, Height, Width).
         initializer (Initializer): Initializer object for weight initialization.
 
@@ -137,8 +139,8 @@ class ConvNd(Parametrized):
             assert self._dims < 4, "GPU Version currently only supports up to 3 dimensions"
         kern = [self._kernel for _ in range(self._dims)]
         self._kernel = np.array(kern)
-        self._padding = np.array([self._padding for _ in range(self._dims)],dtype=np.int32)
-        self._stride = np.array([self._stride for _ in range(self._dims)],dtype=np.int32)
+        self._padding = np.array([self._padding for _ in range(self._dims)], dtype=np.int32)
+        self._stride = np.array([self._stride for _ in range(self._dims)], dtype=np.int32)
         size_f = (self._channel, input_size[0], *kern)
         size_b = tuple([1, self._channel] + [1 for _ in range(self._dims)])
 
@@ -148,10 +150,11 @@ class ConvNd(Parametrized):
     def forward(self, x):
         if is_cuda_active():
             return convnd(x, self.params["w"], self.params["b"], self._kernel,
-                self._stride, self._padding)
+                          self._stride, self._padding)
         if self._backward_mask is None:
-            self._backward_mask = create_mask_array(x[0,0])
-            create_backward_mask(x[0,0],self.params["w"][0,0],self._stride[0],self._backward_mask,self._padding[0])
+            self._backward_mask = create_mask_array(x[0, 0])
+            create_backward_mask(x[0, 0], self.params["w"][0, 0],
+                                 self._stride[0], self._backward_mask, self._padding[0])
         return convnd(x, self.params["w"], self.params["b"], self._kernel,
                       self._stride, self._padding, self._backward_mask)
 
@@ -181,8 +184,8 @@ class Conv3d(Parametrized):
         assert self._dims < 4, "Conv3D expects up to 3 dimensions"
         kern = [self._kernel for _ in range(self._dims)]
         self._kernel = np.array(kern)
-        self._padding = np.array([self._padding for _ in range(self._dims)],dtype=np.int32)
-        self._stride = np.array([self._stride for _ in range(self._dims)],dtype=np.int32)
+        self._padding = np.array([self._padding for _ in range(self._dims)], dtype=np.int32)
+        self._stride = np.array([self._stride for _ in range(self._dims)], dtype=np.int32)
         size_f = (self._channel, input_size[0], *kern)
         size_b = tuple([1, self._channel] + [1 for _ in range(self._dims)])
 
@@ -192,9 +195,10 @@ class Conv3d(Parametrized):
     def forward(self, x):
         if is_cuda_active():
             return convnd(x, self.params["w"], self.params["b"], self._kernel,
-                self._stride, self._padding)
+                          self._stride, self._padding)
         if self._backward_mask is None:
-            self._backward_mask = create_mask_array(x[0,0])
-            create_backward_mask(x[0,0],self.params["w"][0,0],self._stride[0],self._backward_mask,self._padding[0])
+            self._backward_mask = create_mask_array(x[0, 0])
+            create_backward_mask(x[0, 0], self.params["w"][0, 0],
+                                 self._stride[0], self._backward_mask, self._padding[0])
         return convnd(x, self.params["w"], self.params["b"], self._kernel,
                       self._stride, self._padding, self._backward_mask)
