@@ -10,8 +10,6 @@ if is_cuda_active():
     from renom.cuda.cuda_base import *
 
 
-
-
 class Distributor(object):
     '''Distributor class
     This is the base class of a data distributor.

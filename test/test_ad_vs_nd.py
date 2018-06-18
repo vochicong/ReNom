@@ -438,7 +438,6 @@ def test_conv2d(node, use_gpu):
     compare(func, layer.params["b"], node)
 
 
-
 @pytest.mark.parametrize("node, error", [
     #[Variable(rand((1, 1, 3, 3, 3, 3))), True],
     [Variable(rand((1, 1, 3, 3))), False],

@@ -33,7 +33,7 @@ def pad_image(img, padding, stride, padWith=0.):
     dims = img.shape[2:]
     dimensionality = len(dims)
     pad_tuple = (padding, padding + stride - 1)
-    pad_list = [(0,0), (0,0)]
+    pad_list = [(0, 0), (0, 0)]
     pad_list.extend([pad_tuple for _ in range(dimensionality)])
     padded_image = np.pad(img, tuple(pad_list),
                           mode="constant", constant_values=padWith)
@@ -94,7 +94,7 @@ def imncol(img, weight, bias, stride, padding, padWith=0.):
 
     # Padding asks for (before, after) for each dimension or it generalizes the padding
     pad_tuple = (padding, padding + stride - 1)
-    pad_list = [(0,0), (0,0)]
+    pad_list = [(0, 0), (0, 0)]
     pad_list.extend([pad_tuple for _ in range(dimensionality)])
     padded_image = np.pad(img, tuple(pad_list),
                           mode="constant", constant_values=padWith)
@@ -118,7 +118,7 @@ def imnpool(img, kernel, stride, padding, padWith=0):
     assert stride > 0
 
     pad_tuple = (padding, padding + stride - 1)
-    pad_list = [(0,0), (0,0)]
+    pad_list = [(0, 0), (0, 0)]
     pad_list.extend([pad_tuple for _ in range(dimensionality)])
     padded_image = np.pad(img, tuple(pad_list),
                           mode="constant", constant_values=padWith)
@@ -145,8 +145,8 @@ def poolnim(original, dy, indices):
             tmp = ret[batch, in_channel]
             tmp.setflags(write=True)
             for i in range(len(indices[batch, in_channel])):
-                tmp_list = [batch,in_channel]
-                tmp_list.extend(indices[batch,in_channel, i])
+                tmp_list = [batch, in_channel]
+                tmp_list.extend(indices[batch, in_channel, i])
                 ret[tuple(tmp_list)
                     ] += dy[batch, in_channel].ravel()[i]
     return ret
