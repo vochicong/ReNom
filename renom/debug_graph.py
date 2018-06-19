@@ -152,25 +152,55 @@ def _plot_graph(objs):
 
 
 class _Box:
+    @staticmethod
+    def create(obj):
+        target = obj.modelref()
+        if isinstance(target, renom.Model):
+            return _ModelBox(obj)
+        else:
+            return _Box(obj)
+
     def __init__(self, obj):
-        self.nexts = []
+        self.nexts = set()
         self.obj = obj
         self.join = None
 
     def addnext(self, nextbox):
-        self.nexts.append(nextbox)
+        self.nexts.add(nextbox)
 
     def joinnext(self):
-        model = self.obj.modelmark()
-        for c in self.nexts:
-            if c.obj.modelmark() is model:
-                c.join = self
+        pass
 
+    def nodename(self):
+        if self.join:
+            return str(id(self.join.obj))
+        else:
+            return str(id(self.obj))
+
+    def create_node(self, context, graph):
+        obj = self.obj.modelref()
+
+        shape='diamond'
+        color = 'gray'
+        label = obj.__class__.__name__
+
+        graph.node(str(id(self.obj)), label=label, shape=shape,
+                   style='filled', fillcolor=color, color='black')
+
+    def create_edge(self, context):
+        f = self.nodename()
+        for c in self.nexts:
+            if c.join is self:
+                continue
+            t = c.nodename()
+            context.root.graph.edge(f, t)
+
+class _ModelBox(_Box):
     def create_node(self, context, graph):
         if self.join:
             return
 
-        model = self.obj.modelmark()
+        model = self.obj.modelref()
 
         modelinfo = context.get_modelinfo(model)
         if modelinfo.children:
@@ -187,25 +217,14 @@ class _Box:
             label = '%s(%s)' % (name, type(model).__name__)
             color = 'white'
 
-        graph.node(str(id(self.obj)), label=label, shape=shape, style='filled', fillcolor=color, color='black')
+        graph.node(str(id(self.obj)), label=label, shape=shape,
+                   style='filled', fillcolor=color, color='black')
 
-
-    def nodelabel(self):
-        if self.join:
-            return str(id(self.join.obj))
-        else:
-            return str(id(self.obj))
-
-
-    def create_edge(self, context):
-        f = self.nodelabel()
-
+    def joinnext(self):
+        model = self.obj.modelref()
         for c in self.nexts:
-            if c.join is self:
-                continue
-            t = c.nodelabel()
-            context.root.graph.edge(f, t)
-
+            if c.obj.modelref() is model:
+                c.join = self
 
 
 
@@ -220,6 +239,7 @@ class _ModelInfo:
 
         self.name = name
         self.model = model
+        self.enter = self.leave = None
         self.graph = None
 
     def create_graph(self, context):
@@ -232,6 +252,14 @@ class _ModelInfo:
 
     def addnode(self, node):
         self.nodes.append(node)
+
+    def setbox(self, box):
+        if isinstance(box.obj, renom.core.EnterModel):
+            self.enter = box
+        elif isinstance(box.obj, renom.core.LeaveModel):
+            self.leave = box
+        else:
+            raise ValueError()
 
 class ModelGraphContext:
 
@@ -256,49 +284,85 @@ class ModelGraphContext:
 
             models.extend((p, k, v) for k, v in model.get_model_children())
 
+    def selectmodel(self, node, curmodel):
+        target = node.modelref()
+        modelinfo = self.models.get(id(target))
+        if not modelinfo:
+            if curmodel is not None:
+                modelinfo = self.models.get(id(curmodel.modelref()))
 
-    def _getBox(self, node):
+                if isinstance(curmodel, renom.core.LeaveModel):
+                    modelinfo = modelinfo
+                else:
+                    modelinfo = modelinfo.parent
+        else:
+            if not modelinfo.children:
+                if modelinfo.parent:
+                    modelinfo = modelinfo.parent
+
+        if not modelinfo:
+            modelinfo = self.root
+
+        return modelinfo
+
+    def getbox(self, node, nextbox, curmodel):
         nodeid = id(node)
-        if nodeid not in self.boxes:
-            modelinfo = self.get_modelinfo(node.modelmark())
-            box = _Box(node)
-            if modelinfo.children:
-                modelinfo.addnode(box)
-            if modelinfo.parent:
-                modelinfo.parent.addnode(box)
-            else:
-                self.root.addnode(box)
 
-            self.boxes[nodeid] = box
-            
-            
-        return self.boxes[nodeid]
+        target = node.modelref()
+        modelinfo = self.models.get(id(target))
+        if modelinfo:
+            if isinstance(node, renom.core.EnterModel):
+                if modelinfo.enter:
+                    return modelinfo.enter
+            if isinstance(node, renom.core.LeaveModel):
+                if modelinfo.leave:
+                    return modelinfo.leave
+
+        parentmodel = self.selectmodel(node, curmodel)
+        if parentmodel.children:
+            if nodeid not in self.boxes:
+                box = _Box.create(node)
+                self.boxes[nodeid] = box
+
+                if modelinfo:
+                    modelinfo.setbox(box)
+
+                parentmodel.addnode(box)
+
+            return self.boxes[nodeid]
 
     def walk_node(self, node):
         self.boxes = {}
-        self._walk_node(node, None, set())
+        self._walk_node(node, None, None, set())
         for box in self.boxes.values():
             box.joinnext()
 
-    def _walk_node(self, node, nextbox, seen):
+    def _walk_node(self, node, nextbox, curmodel, seen):
         if not isinstance(node, renom.core.Node):
             return
 
-        if isinstance(node, renom.core.ModelMark):
-            box = self._getBox(node)
+        if isinstance(node, renom.core.Mark):
 
-            if nextbox is not None:
-                box.addnext(nextbox)
+            box = self.getbox(node, nextbox, curmodel)
+            if box:
+                if nextbox is not None:
+                    box.addnext(nextbox)
 
-            nextbox = box
+                nextbox = box
 
         id_node = id(node)
         if id_node in seen:
             return
         seen.add(id_node)
 
+        if not node.attrs:
+            return
+
+        if isinstance(node, renom.core.ModelMark):
+            curmodel = node
+
         for attr in node.attrs.get_attrs():
-            self._walk_node(attr, nextbox, seen)
+            self._walk_node(attr, nextbox, curmodel, seen)
 
     def build_subgraph(self):
 
@@ -314,10 +378,6 @@ class ModelGraphContext:
                 model.create_graph(self)
                 for c in model.children:
                     q.append((c, path))
-
-
-#        for c in leafs:
-#            print('-'.join(m.name for m in c))
 
         # create sub graphs from leaf to root
         leafs.sort(key=len, reverse=True)
@@ -342,15 +402,53 @@ class ModelGraphContext:
         self.walk_node(value)
         self.build_subgraph()
 
-        print(self.root.graph.source)
-        self.root.graph.view()
-#        self.graphs[id(nnmodel)].view()
-#        for g in self.graphs.values():
-#            print("--------------------")
-#            print(g.source)
+        return self.root.graph
 
-def DEBUG_MODELGRAPH(nnmodel, value):
+MODEL_GRAPH = False
+
+def get_model_graph():
+    return MODEL_GRAPH
+
+def SET_MODEL_GRAPH(use):
+    '''Specify if information to build model graph are generated.
+
+    Args:
+        use (bool): True if informations to build model graph are generated.
+
+    Example:
+        >>> import renom as rm
+        >>> import numpy as np
+        >>> x = np.random.rand(1, 3)
+        array([[ 0.11871966  0.48498547  0.7406374 ]])
+        >>> z = rm.softmax(x)
+        softmax([[ 0.23229694  0.33505085  0.43265226]])
+        >>> np.sum(z, axis=1)
+        array([ 1.])
+
+    '''
+
+
+    global MODEL_GRAPH
+    MODEL_GRAPH = use
+
+def BUILD_MODEL_GRAPH(model, value):
+    '''Build model graph. Returns graph object of Graphviz.
+
+    Args:
+        model (Model): Root model object.
+        value: result value of the model
+
+    Example:
+        >>> SET_MODEL_GRAPH(True)
+        >>> model = MNist()
+        >>> value = model(np.random.rand(10, 10))
+        >>> SET_MODEL_GRAPH(False)
+        >>> graph = BUILD_MODEL_GRAPH(model, value)
+        >>> graph.view()
+    '''
+
+
     c = ModelGraphContext()
-    c.build(nnmodel, value)
+    return c.build(model, value)
 
     

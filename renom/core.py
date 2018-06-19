@@ -213,6 +213,8 @@ class Node(np.ndarray):
     _no_backward = False
     _args = ()
 
+    SHOWMARK = False
+
     def __new__(cls, value):
         ret = cls._create_node(value)
         return ret
@@ -238,6 +240,10 @@ class Node(np.ndarray):
         ret.attrs = GraphAttrs()
         if GET_ACTIVE_NODE() is not None:
             SET_NODE_DICT(id(ret), ret)
+
+        if ret.SHOWMARK and get_model_graph():
+            ret = NodeMark(ret, ret)
+
         return ret
 
     @classmethod
@@ -828,22 +834,39 @@ class Invert(UnaryOp):
         return self.attrs._backward_cpu(context, dy, **kwargs)
 
 
-class ModelMark(Pos):
+def showmark(cls):
+    cls.SHOWMARK = True
+    return cls
+
+class Mark(Pos):
     def __new__(cls, arg, model):
-        ret = super(ModelMark, cls).__new__(cls, arg)
-        ret.modelmark = weakref.ref(model)
+        ret = super(Mark, cls).__new__(cls, arg)
+        ret.modelref = weakref.ref(model)
+
         return ret
 
     def _reduce_graph(self):
         return
 
+class NodeMark(Mark):
+    pass
+
+class ModelMark(Mark):
+    pass
 
 class EnterModel(ModelMark):
     pass
-
+#    def __init__(self, *args, **kwargs):
+#        super().__init__(*args, **kwargs)
+#        print('enter', [type(a) for a in args])
+#        import pdb;pdb.set_trace()
 
 class LeaveModel(ModelMark):
     pass
+#    def __init__(self, *args, **kwargs):
+#        super().__init__(*args, **kwargs)
+#        print('leave', [type(a) for a in args])
+#        import pdb;pdb.set_trace()
 
 
 class BinOp(Node):
@@ -1346,7 +1369,6 @@ class ROr(Lshift):
 
 
 class GetItem(BinOp):
-
     @classmethod
     def _oper_cpu(cls, lhs, rhs):
         return np.ndarray.__getitem__(lhs, rhs)

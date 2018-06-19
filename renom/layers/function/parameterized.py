@@ -8,7 +8,7 @@ import inspect
 import weakref
 import copy
 import numpy as np
-from renom.core import Node, Variable, GPUValue, Pos, GET_ACTIVE_NODE, EnterModel, LeaveModel
+from renom.core import Node, Variable, GPUValue, Pos, get_model_graph, EnterModel, LeaveModel
 from renom.operation import sum
 import renom.cuda
 from renom.cuda import use_device, is_cuda_active
@@ -76,13 +76,13 @@ class Model(with_metaclass(ABCMeta, object)):
         self.set_models(_device_id=device_id)
 
     def mark_enter(self, v):
-        if GET_ACTIVE_NODE() is not None:
+        if get_model_graph():
             return EnterModel(v, self)
         else:
             return v
 
     def mark_leave(self, v):
-        if GET_ACTIVE_NODE() is not None:
+        if get_model_graph():
             return LeaveModel(v, self)
         else:
             return v
