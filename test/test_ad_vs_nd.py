@@ -27,6 +27,7 @@ from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
 from renom.layers.function.convnd import ConvNd, Conv3d
 from renom.layers.function.deconv2d import Deconv2d
+from renom.layers.function.deconvnd import DeconvNd
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
 from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd
 from renom.layers.function.roi_pool2d import RoiPool2d
@@ -448,7 +449,7 @@ def test_convnd(node, error):  # , use_gpu):
     node = Variable(np.ones(node.shape))
     # set_cuda_active(use_gpu)
     # set_cuda_active(True)
-    layer = Conv3d(channel=1, filter=2, stride=2)
+    layer = Conv3d(channel=2, filter=2, stride=2)
 
     def func(node):
         return sum(layer(node))
@@ -473,6 +474,22 @@ def test_deconv2d(node, use_gpu):
     set_cuda_active(use_gpu)
 
     layer = Deconv2d(channel=3)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
+    compare(func, layer.params["b"], node)
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((1, 1, 3, 3))),
+])
+def test_deconvnd(node):#, use_gpu):
+    node = Variable(node)
+    #node = Variable(np.ones(node.shape))
+    #set_cuda_active(use_gpu)
+
+    layer = DeconvNd(channel=1,stride=4,filter=2)
 
     def func(node):
         return sum(layer(node))

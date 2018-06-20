@@ -12,16 +12,14 @@ from renom.cuda import is_cuda_active
 
 class convnd(Node):
 
-    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, mask=None):
+    def __new__(cls, x, w, b, filter=3, stride=1, padding=0):
         in_shape = x.shape[1:]
-        if mask is None:
-            return cls.calc_value(x, w, b, in_shape, filter, stride, padding)
+        return cls.calc_value(x, w, b, in_shape, filter, stride, padding)
 
-        return cls.calc_value(x, w, b, in_shape, filter, stride, padding, mask)
 
     @classmethod
     def _oper_cpu(cls, x, w, b, in_shape, kernel, stride, padding):
-        col = imncol(to_value(x), w, b, stride, padding)
+        col = imncol(to_value(x), w, stride, padding)
         ret = cls._create_node(col + b)
         ret.attrs._x = x
         ret.attrs._w = w
@@ -127,7 +125,6 @@ class ConvNd(Parametrized):
         self._kernel = filter
         self._channel = channel
         self._initializer = initializer
-        self._backward_mask = None
         super(ConvNd, self).__init__(input_size)
 
     def weight_initiallize(self, input_size):
@@ -149,15 +146,8 @@ class ConvNd(Parametrized):
                        "b": Variable(np.ones(size_b, dtype=precision), auto_update=True)}
 
     def forward(self, x):
-        if is_cuda_active():
-            return convnd(x, self.params["w"], self.params["b"], self._kernel,
-                          self._stride, self._padding)
-        if self._backward_mask is None:
-            self._backward_mask = create_mask_array(x[0, 0])
-            create_backward_mask(x[0, 0], self.params["w"][0, 0],
-                                 self._stride[0], self._backward_mask, self._padding[0])
         return convnd(x, self.params["w"], self.params["b"], self._kernel,
-                      self._stride, self._padding, self._backward_mask)
+                          self._stride, self._padding)
 
 
 class Conv3d(Parametrized):
@@ -175,7 +165,6 @@ class Conv3d(Parametrized):
         self._kernel = filter
         self._channel = channel
         self._initializer = initializer
-        self._backward_mask = None
         super(Conv3d, self).__init__(input_size)
 
     def weight_initiallize(self, input_size):
