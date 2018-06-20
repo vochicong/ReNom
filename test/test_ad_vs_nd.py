@@ -27,6 +27,7 @@ from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
 from renom.layers.function.convnd import ConvNd, Conv3d
 from renom.layers.function.deconv2d import Deconv2d
+from renom.layers.function.deconvnd import DeconvNd
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
 from renom.layers.function.unpool2d import MaxUnPool2d, AverageUnPool2d
 from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd

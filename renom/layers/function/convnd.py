@@ -172,7 +172,6 @@ class ConvNd(Parametrized):
         return convnd(x, self.params["w"], self.params.get("b", None), self._kernel,
                       self._stride, self._padding)
 
-
 class Conv3d(Parametrized):
 
     '''
