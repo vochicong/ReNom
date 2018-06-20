@@ -27,6 +27,7 @@ from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
 from renom.layers.function.deconv2d import Deconv2d
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
+from renom.layers.function.unpool2d import MaxUnPool2d
 from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
@@ -467,6 +468,21 @@ def test_max_pool2d(node, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
 
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 3, 3, 3))),
+    Variable(rand((2, 3, 4, 5))),
+])
+def test_max_unpool2d(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layerin = MaxPool2d()
+    layerout = MaxUnPool2d()
+
+    def func(node):
+        ret = layerin(node)
+        return sum(layerout(ret))
+    compare(func, node, node)
 
 @pytest.mark.parametrize("node, rois", [
     [Variable(rand((3, 3, 8, 13)) * 10), Variable(np.array([
