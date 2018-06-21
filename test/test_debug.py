@@ -38,6 +38,12 @@ def test_node_clear():
 
 
 def test_graph():
+    try:
+        import graphviz
+    except ImportError:
+        return
+
+
     SET_MODEL_GRAPH(True)
 
     class MNist(R.Model):
