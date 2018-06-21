@@ -468,6 +468,7 @@ def test_max_pool2d(node, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
 
+
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
     Variable(rand((2, 3, 4, 5))),
@@ -483,6 +484,7 @@ def test_max_unpool2d(node, use_gpu):
         ret = layerin(node)
         return sum(layerout(ret))
     compare(func, node, node)
+
 
 @pytest.mark.parametrize("node, rois", [
     [Variable(rand((3, 3, 8, 13)) * 10), Variable(np.array([
@@ -515,6 +517,7 @@ def test_average_pool2d(node, use_gpu):
     def func(node):
         return sum(layer(node))
     compare(func, node, node)
+
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
