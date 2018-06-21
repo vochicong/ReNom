@@ -838,6 +838,7 @@ def showmark(cls):
     cls.SHOWMARK = True
     return cls
 
+
 class Mark(Pos):
     def __new__(cls, arg, model):
         ret = super(Mark, cls).__new__(cls, arg)
@@ -848,11 +849,14 @@ class Mark(Pos):
     def _reduce_graph(self):
         return
 
+
 class NodeMark(Mark):
     pass
 
+
 class ModelMark(Mark):
     pass
+
 
 class EnterModel(ModelMark):
     pass
@@ -860,6 +864,7 @@ class EnterModel(ModelMark):
 #        super().__init__(*args, **kwargs)
 #        print('enter', [type(a) for a in args])
 #        import pdb;pdb.set_trace()
+
 
 class LeaveModel(ModelMark):
     pass

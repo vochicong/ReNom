@@ -432,6 +432,7 @@ class Model(with_metaclass(ABCMeta, object)):
             if isinstance(c, Parametrized):
                 c.truncate()
 
+
 class Sequential(Model):
     """Sequential model.
 
@@ -497,9 +498,6 @@ class Parametrized(Model):
             if not self.params:
                 self.weight_initiallize(x.shape[1:])
             return super(Parametrized, self).__call__(x, *args, **kwargs)
-
-
-
 
     def truncate(self):
         pass

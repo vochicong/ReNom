@@ -4,6 +4,7 @@ import renom as rm
 #from renom.operation import concat, amax
 from renom.core import Node, showmark
 
+
 @showmark
 class maxout(Node):
 

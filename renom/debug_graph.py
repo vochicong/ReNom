@@ -149,8 +149,6 @@ def _plot_graph(objs):
     g.view()
 
 
-
-
 class _Box:
     @staticmethod
     def create(obj):
@@ -180,7 +178,7 @@ class _Box:
     def create_node(self, context, graph):
         obj = self.obj.modelref()
 
-        shape='diamond'
+        shape = 'diamond'
         color = 'gray'
         label = obj.__class__.__name__
 
@@ -195,6 +193,7 @@ class _Box:
             t = c.nodename()
             context.root.graph.edge(f, t)
 
+
 class _ModelBox(_Box):
     def create_node(self, context, graph):
         if self.join:
@@ -204,7 +203,7 @@ class _ModelBox(_Box):
 
         modelinfo = context.get_modelinfo(model)
         if modelinfo.children:
-            shape='circle'
+            shape = 'circle'
             color = 'gray'
             if isinstance(self.obj, renom.core.EnterModel):
                 label = 'S'
@@ -227,7 +226,6 @@ class _ModelBox(_Box):
                 c.join = self
 
 
-
 class _ModelInfo:
     def __init__(self, parent, name, model):
         self.parent = parent
@@ -245,7 +243,7 @@ class _ModelInfo:
     def create_graph(self, context):
         self.graph = Digraph(name='cluster=' + self.name)
         self.graph.attr(label='%s(%s)' % (self.name, self.model.__class__.__name__),
-            labelloc='top', labeljust='left')
+                        labelloc='top', labeljust='left')
 
         for node in self.nodes:
             node.create_node(context, self.graph)
@@ -261,11 +259,12 @@ class _ModelInfo:
         else:
             raise ValueError()
 
+
 class ModelGraphContext:
 
     def __init__(self):
         pass
-        
+
     def get_modelinfo(self, model):
         return self.models.get(id(model))
 
@@ -371,7 +370,7 @@ class ModelGraphContext:
         q = collections.deque([(self.root, [])])
         while q:
             model, path = q.pop()
-            path = [model,] + path
+            path = [model, ] + path
             if not model.children:
                 leafs.append(path)
             else:
@@ -392,10 +391,8 @@ class ModelGraphContext:
                 parent.graph.subgraph(child.graph)
                 seen.add((child, parent))
 
-
         for box in self.boxes.values():
             box.create_edge(self)
-
 
     def build(self, nnmodel, value):
         self.walk_model(nnmodel)
@@ -404,10 +401,13 @@ class ModelGraphContext:
 
         return self.root.graph
 
+
 MODEL_GRAPH = False
+
 
 def get_model_graph():
     return MODEL_GRAPH
+
 
 def SET_MODEL_GRAPH(use):
     '''Specify if information to build model graph are generated.
@@ -427,9 +427,9 @@ def SET_MODEL_GRAPH(use):
 
     '''
 
-
     global MODEL_GRAPH
     MODEL_GRAPH = use
+
 
 def BUILD_MODEL_GRAPH(model, value):
     '''Build model graph. Returns graph object of Graphviz.
@@ -447,8 +447,5 @@ def BUILD_MODEL_GRAPH(model, value):
         >>> graph.view()
     '''
 
-
     c = ModelGraphContext()
     return c.build(model, value)
-
-    
