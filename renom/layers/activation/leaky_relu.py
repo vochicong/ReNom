@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
-from renom.core import UnaryOp, Node, get_gpu
+from renom.core import UnaryOp, Node, get_gpu, showmark
 from renom.operation import where
 from renom.config import precision
 from renom.cuda import cuda as cu
 
 
+@showmark
 class leaky_relu(UnaryOp):
 
     def __new__(cls, arg, slope=0.01):

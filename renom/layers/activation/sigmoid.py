@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import division
 import numpy as np
-from renom.core import UnaryOp, Node, get_gpu
+from renom.core import UnaryOp, Node, get_gpu, showmark
+
 from renom.cuda import cuda as cu
 
 
+@showmark
 class sigmoid(UnaryOp):
 
     @classmethod

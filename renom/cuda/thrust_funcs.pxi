@@ -106,7 +106,29 @@ ctypedef void(*BINOP_FUNC)(
     size_t size, binop_strides * strides)
 
 
+cpdef calc_strides(shape):
+    cdef int shapelen = len(shape)
+    if not shapelen:
+        return []
+    ret = [0] * (shapelen - 1) + [1]
+    cdef int n
+    for n in range(-1, shapelen * -1, -1):
+        ret[n - 1] = shape[n] * ret[n]
+    return ret
+
+
+cpdef calc_int_prod(arr):
+    cdef int arrlen = len(arr)
+    cdef int ret = 1
+
+    cdef int n
+    for i in range(0, arrlen):
+        ret *= arr[i]
+    return ret
+
+
 cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
+
     cuda_base.check_heap_device(lhs, rhs, ret)
 
     if not isinstance(rhs, renom.core.GPUValue):
@@ -121,16 +143,16 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
         strides.lhs_strides[0] = 1
         strides.rhs_strides[0] = 1
     else:
-        ret_strides = [np.prod(ret.shape[i + 1:], dtype='int') for i in range(len(ret.shape))]
+        ret_strides = calc_strides(ret.shape)
 
-        lhs_strides = [np.prod(lhs.shape[i + 1:], dtype='int') for i in range(len(lhs.shape))]
+        lhs_strides = calc_strides(lhs.shape)
         lhs_strides = [0] * (len(ret.shape) - len(lhs.shape)) + lhs_strides
 
         for i, (arg, dest) in enumerate(zip(reversed(lhs.shape), reversed(ret.shape)), 1):
             if arg != dest:
                 lhs_strides[i * -1] = 0
 
-        rhs_strides = [np.prod(rhs.shape[i + 1:], dtype='int') for i in range(len(rhs.shape))]
+        rhs_strides = calc_strides(rhs.shape)
         rhs_strides = [0] * (len(ret.shape) - len(rhs.shape)) + rhs_strides
 
         for i, (arg, dest) in enumerate(zip(reversed(rhs.shape), reversed(ret.shape)), 1):
@@ -146,46 +168,92 @@ cdef bin_operation(BINOP_FUNC func, lhs, rhs, ret):
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > rhs._ptr
     cdef VALUE_TYPE * ptr3 = <VALUE_TYPE * > < uintptr_t > ret._ptr
-    size = np.prod(ret.shape, dtype='int')
+    size = calc_int_prod(ret.shape)
 
     assert strides.size < 6, "Binary operation error. Only tensors that has less than 6dims are accepted. Actual is {} dim tensor.".format(
         strides.size)
+
     func(ptr1, ptr2, ptr3, size, & strides)
+
+
+ctypedef void(*BINOP_FUNC_NUM)(
+    VALUE_TYPE * a, VALUE_TYPE b, VALUE_TYPE * c,
+    size_t size)
+
+
+cdef bin_operation_num(BINOP_FUNC_NUM func, lhs, rhs, ret):
+    cuda_base.check_heap_device(lhs, ret)
+
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > lhs._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > ret._ptr
+    size = calc_int_prod(ret.shape)
+
+    cdef VALUE_TYPE num = rhs
+
+    func(ptr1, num, ptr2, size)
 
 
 def cumul(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_mul, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_mul, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_mul_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cuadd(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_add, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_add, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_add_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cusub(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_sub, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_sub, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_sub_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cudiv(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_div, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_div, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_div_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def curdiv(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_rdiv, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_rdiv, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_rdiv_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cupow(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_pow, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_pow, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_pow_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def curpow(gpu_value1, gpu_value2, gpu_value3):
     cuda_base.check_heap_device(gpu_value1, gpu_value2, gpu_value3)
-    bin_operation(thrust_rpow, gpu_value1, gpu_value2, gpu_value3)
+
+    if isinstance(gpu_value2, renom.core.GPUValue):
+        bin_operation(thrust_rpow, gpu_value1, gpu_value2, gpu_value3)
+    else:
+        bin_operation_num(thrust_rpow_num, gpu_value1, gpu_value2, gpu_value3)
 
 
 def cufill(value, gpu_value):
@@ -220,6 +288,14 @@ def cusqrt(gpu_value1, gpu_value2):
 
     cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_sqrt(ptr1, ptr2, size)
+
+
+def cusign(gpu_value1, gpu_value2):
+    cdef int size = <int > gpu_value1.size
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+    thrust_sign(ptr1, ptr2, size)
 
 
 def cucross_entropy(gpu_value1, gpu_value2, gpu_value3):
@@ -268,6 +344,28 @@ def cumax(value, gpu_value1, gpu_value2=None):
 
     cuda_base.check_heap_device(gpu_value1, gpu_value2)
     thrust_max(v, ptr1, ptr2, size)
+
+
+def curoi_pool2d_forward(rois, x, spatial_scale, channels, height,
+                         width, outh, outw, z, augmax_data):
+    cdef int N = rois.shape[0]
+    cdef VALUE_TYPE * ptr_x = <VALUE_TYPE * > < uintptr_t > x._ptr
+    cdef VALUE_TYPE * ptr_rois = <VALUE_TYPE * > < uintptr_t > rois._ptr
+    cdef VALUE_TYPE * ptr_z = <VALUE_TYPE * > < uintptr_t > z._ptr
+    cdef VALUE_TYPE * ptr_augmax_data = <VALUE_TYPE * > < uintptr_t > augmax_data._ptr
+    thrust_forward_roi_pool2d(N, ptr_x, spatial_scale, channels, height,
+                              width, outh, outw, ptr_rois, ptr_z, ptr_augmax_data)
+
+
+def curoi_pool2d_backward(du, argmax, rois, spatial_scale, ch, h, w, outh, outw, dx):
+    cdef int roi_N = rois.shape[0]
+    cdef int batch_N = dx.shape[0]
+    cdef VALUE_TYPE * ptr_du = <VALUE_TYPE * > < uintptr_t > du._ptr
+    cdef VALUE_TYPE * ptr_argmax = <VALUE_TYPE * > < uintptr_t > argmax._ptr
+    cdef VALUE_TYPE * ptr_rois = <VALUE_TYPE * > < uintptr_t > rois._ptr
+    cdef VALUE_TYPE * ptr_dx = <VALUE_TYPE * > < uintptr_t > dx._ptr
+    thrust_backward_roi_pool2d(roi_N, ptr_du, ptr_argmax, ptr_rois,
+                               spatial_scale, batch_N, ch, h, w, outh, outw, ptr_dx)
 
 
 def culstm_forward_activate(u):
@@ -742,8 +840,94 @@ def cu_add_bias(bias, gpu_value):
     thrust_add_bias(size, n, wh, ptr1, ptr2)
 
 
+def cu_get_fg_ary_forward(ary, fg_ary):
+    N = ary.shape[0] * ary.shape[1] * ary.shape[2] * ary.shape[3] * ary.shape[4]
+    M = ary.shape[3] * ary.shape[4]
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > ary._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > fg_ary._ptr
+    thrust_get_fg_ary_forward(N, M, ptr1, ptr2)
+
+
+def cu_get_fg_ary_backward(du, zero):
+    N = zero.shape[0] * zero.shape[1] * zero.shape[2] * zero.shape[3] * zero.shape[4]
+    M = du.shape[3] * du.shape[4]
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > du._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > zero._ptr
+    thrust_get_fg_ary_forward(N, M, ptr1, ptr2)
+
+
+def cu_get_ith_ary_forward(ary, ith_ary, i):
+    N = ary.size
+    M = ary.size / ary.shape[0]
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > ary._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > ith_ary._ptr
+    thrust_get_ith_ary_forward(N, M, i, ptr1, ptr2)
+
+
+def cu_get_ith_ary_backward(du, zero, i):
+    N = zero.size
+    M = zero.size / zero.shape[0]
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > du._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > zero._ptr
+    thrust_get_ith_ary_forward(N, M, i, ptr1, ptr2)
+
+
+def cu_get_every_nth_ary(ary1, ary2, i, j):
+    N = ary1.shape[0]
+    M = ary1.shape[1]
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > ary1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > ary2._ptr
+    thrust_get_nth_ary(N, M, i, j, ptr1, ptr2)
+
+
+def cu_assign_pred_box(x, y, w, h, ary):
+    N, M = ary.shape
+    cdef VALUE_TYPE * ary_ptr = <VALUE_TYPE * > < uintptr_t > ary._ptr
+    cdef VALUE_TYPE * x_ptr = <VALUE_TYPE * > < uintptr_t > x._ptr
+    cdef VALUE_TYPE * y_ptr = <VALUE_TYPE * > < uintptr_t > y._ptr
+    cdef VALUE_TYPE * h_ptr = <VALUE_TYPE * > < uintptr_t > h._ptr
+    cdef VALUE_TYPE * w_ptr = <VALUE_TYPE * > < uintptr_t > w._ptr
+    thrust_assign_pred_box(N, M, x_ptr, y_ptr, h_ptr, w_ptr, ary_ptr)
+
+
+def cu_pred_ctr(arg, length, ctr, ary):
+    N, M = ary.shape
+    cdef VALUE_TYPE * arg_ptr = <VALUE_TYPE * > < uintptr_t > arg._ptr
+    cdef VALUE_TYPE * length_ptr = <VALUE_TYPE * > < uintptr_t > length._ptr
+    cdef VALUE_TYPE * ctr_ptr = <VALUE_TYPE * > < uintptr_t > ctr._ptr
+    cdef VALUE_TYPE * ary_ptr = <VALUE_TYPE * > < uintptr_t > ary._ptr
+    thrust_pred_ctr(N, M, arg_ptr, length_ptr, ctr_ptr, ary_ptr)
+
+
+def cu_generate_anchors(shifts, base_size, ratios, scales, feat_stride, anchors):
+    K, A, N = anchors.shape
+    scale_size = scales.shape[0]
+    ratio_size = ratios.shape[0]
+    cdef VALUE_TYPE * shifts_ptr = <VALUE_TYPE * > < uintptr_t > shifts._ptr
+    cdef VALUE_TYPE * ratios_ptr = <VALUE_TYPE * > < uintptr_t > ratios._ptr
+    cdef VALUE_TYPE * scales_ptr = <VALUE_TYPE * > < uintptr_t > scales._ptr
+    cdef VALUE_TYPE * anchors_ptr = <VALUE_TYPE * > < uintptr_t > anchors._ptr
+    thrust_generate_anchors(A, K, N, shifts_ptr, ratios_ptr, scales_ptr,
+                            ratio_size, scale_size, feat_stride, base_size, anchors_ptr)
+
+
+def cu_get_ith_bbox(bbox, i, ary):
+    N, M = bbox.shape
+    cdef VALUE_TYPE * bbox_ptr = <VALUE_TYPE * > < uintptr_t > bbox._ptr
+    cdef VALUE_TYPE * ary_ptr = <VALUE_TYPE * > < uintptr_t > ary._ptr
+    thrust_get_ith_bbox(N, M, bbox_ptr, i, ary_ptr)
+
+
+def cu_clip_roi(roi, start, end, step, min_v, max_v, ary):
+    N, M = roi.shape
+    cdef VALUE_TYPE * roi_ptr = <VALUE_TYPE * > < uintptr_t > roi._ptr
+    cdef VALUE_TYPE * ary_ptr = <VALUE_TYPE * > < uintptr_t > ary._ptr
+    thrust_clip_roi(N, M, roi_ptr, start, end, step, min_v, max_v, ary_ptr)
+
+
 def cu_transpose(gpu_value1, axis):
-    strides = [np.prod(gpu_value1.shape[i + 1:], dtype='int') for i in range(len(gpu_value1.shape))]
+    # [np.prod(gpu_value1.shape[i + 1:], dtype='int') for i in range(len(gpu_value1.shape))]
+    strides = calc_strides(gpu_value1.shape)
 
     if not axis:
         axis = tuple(reversed(range(len(gpu_value1.shape))))
@@ -758,11 +942,13 @@ def cu_transpose(gpu_value1, axis):
         src_strides[i] = strides[s]
 
     cdef size_t new_strides[16]
-    for i in range(len(new_shape)):
-        new_strides[i] = np.prod(new_shape[i + 1:], dtype='int')
+
+    s = calc_strides(new_shape)
+    for i in range(len(s)):
+        new_strides[i] = s[i]
 
     cdef VALUE_TYPE * ptr = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
-    size = np.prod(gpu_value1.shape)
+    size = calc_int_prod(gpu_value1.shape)
 
     result = renom.core.GPUValue(shape=new_shape)
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > result._ptr
@@ -836,3 +1022,7 @@ def cu_set_item(value, valuesize, gpu_value1, slices, strides, broadcasted_strid
         infos.broadcasted_strides[i] = b
 
     thrust_setitem(ptr1, valuesize, ptr2, & infos)
+
+
+def cu_nms(bbox, thresh):
+    N = bbox.shape[0]

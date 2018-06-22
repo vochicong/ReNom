@@ -4,11 +4,12 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
-## ReNom version 2.5.0
+## ReNom version 2.5.1
 - http://renom.jp/rsts/renomdl/main.html
 
-#### Changes from 2.4.2
+#### Changes from 2.4
 - Adopted CUDA 9.1 and cuDNN 7.1.
+- Improved performance of Adam.
 
 ## Requirements
 

@@ -45,7 +45,7 @@ def cublas_scal(alpha, gpu_value):
     return
 
 # AXPY
-def cublas_axpy(gpu_value1, gpu_value2):
+cpdef cublas_axpy(gpu_value1, gpu_value2):
     cdef int n = gpu_value1.size
     cdef uintptr_t ptr1 = <uintptr_t>gpu_value1._ptr
     cdef uintptr_t ptr2 = <uintptr_t>gpu_value2._ptr

@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 import renom.cuda
 import renom.core
-from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device, curand_generator
+from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device
 from renom.core import to_value, Variable, get_gpu
 from renom.operation import dot, sum, sqrt, square
 from renom.config import precision
@@ -1673,20 +1673,3 @@ def test_split_err():
 
     with pytest.raises(IndexError):
         g.split(2, 3)
-
-
-@test_utility.skipgpu
-def test_rand():
-    set_cuda_active(True)
-
-    x = get_gpu(np.random.rand(2, 2)).empty_like_me()
-
-    np.random.seed(2)
-    curand_generator().rand_bernoulli(x, 0.5)
-    g1 = x.new_array()
-
-    np.random.seed(2)
-    curand_generator().rand_bernoulli(x, 0.5)
-    g2 = x.new_array()
-
-    assert np.allclose(g1, g2)

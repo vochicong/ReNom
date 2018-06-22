@@ -587,7 +587,7 @@ def read_bndbox_from_ndarray(ndarray, num_class):
             i += 1
         bounding_boxes.append(temp_bndbox)
         onehot_vectors.append(temp_onehot)
-    print("length of bouding_boxes:", len(bounding_boxes))
+    #print("length of bouding_boxes:", len(bounding_boxes))
     return bounding_boxes, onehot_vectors
 
 

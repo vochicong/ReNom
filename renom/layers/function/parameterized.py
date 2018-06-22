@@ -8,7 +8,7 @@ import inspect
 import weakref
 import copy
 import numpy as np
-from renom.core import Node, Variable, GPUValue
+from renom.core import Node, Variable, GPUValue, Pos, get_model_graph, EnterModel, LeaveModel
 from renom.operation import sum
 import renom.cuda
 from renom.cuda import use_device, is_cuda_active
@@ -66,12 +66,26 @@ class Model(with_metaclass(ABCMeta, object)):
     def device_id(self):
         return self._device_id
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self, x, *args, **kwargs):
         with use_device(self._device_id):
-            return self.forward(*args, **kwargs)
+            x = self.mark_enter(x)
+            ret = self.forward(x, *args, **kwargs)
+            return self.mark_leave(ret)
 
     def set_gpu(self, device_id):
         self.set_models(_device_id=device_id)
+
+    def mark_enter(self, v):
+        if get_model_graph():
+            return EnterModel(v, self)
+        else:
+            return v
+
+    def mark_leave(self, v):
+        if get_model_graph():
+            return LeaveModel(v, self)
+        else:
+            return v
 
     @abstractmethod
     def forward(self):
@@ -157,13 +171,24 @@ class Model(with_metaclass(ABCMeta, object)):
         finally:
             self.set_prevent_update(False)
 
+    def get_model_children(self):
+        for k, v in self.__dict__.items():
+            if isinstance(v, Model):
+                yield k, v
+
+    def get_models(self, name):
+        yield name, self
+        for k, v in self.get_model_children():
+            cname = '.'.join([name, k])
+            for c in v.get_models(cname):
+                yield c
+
     def iter_models(self):
         yield self
 
-        for k, v in self.__dict__.items():
-            if isinstance(v, Model):
-                for c in v.iter_models():
-                    yield c
+        for k, v in self.get_model_children():
+            for c in v.iter_models():
+                yield c
 
     def _get_values(self, values):
         if self.params:
@@ -175,11 +200,10 @@ class Model(with_metaclass(ABCMeta, object)):
             if hasattr(self, name):
                 values[2][name] = getattr(self, name)
 
-        for k, v in self.__dict__.items():
-            if isinstance(v, Model):
-                childvalues = ({}, {}, {})
-                v._get_values(childvalues)
-                values[0][k] = childvalues
+        for k, v in self.get_model_children():
+            childvalues = ({}, {}, {})
+            v._get_values(childvalues)
+            values[0][k] = childvalues
 
     def values(self):
         """
@@ -438,7 +462,9 @@ class Sequential(Model):
 
     def __call__(self, x):
         with use_device(self._device_id):
-            return self.forward(x)
+            x = self.mark_enter(x)
+            ret = self.forward(x)
+            return self.mark_leave(ret)
 
     def append(self, layer):
         setattr(self, "l%d" % (len(self._layers)), layer)
