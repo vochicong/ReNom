@@ -31,6 +31,7 @@ from renom.layers.function.deconvnd import DeconvNd
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
 from renom.layers.function.unpool2d import MaxUnPool2d, AverageUnPool2d
 from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd
+from renom.layers.function.unpoolnd import MaxUnPoolNd
 from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
@@ -561,13 +562,29 @@ def test_max_pool2d(node, use_gpu):
     Variable(rand((2, 3, 4, 5)))
 ])
 def test_max_poolnd(node, use_gpu):
-
     node = Variable(node)
     set_cuda_active(use_gpu)
     layer = MaxPoolNd(kernel=2)
 
+
     def func(node):
         return sum(layer(node))
+    compare(func, node, node)
+
+@pytest.mark.parametrize("node", [
+    #Variable(rand((2, 3, 4, 5))),
+    Variable(rand((2, 3, 4, 5)))
+])
+def test_max_unpoolnd(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layerin = MaxPoolNd(kernel=2)
+    layerout = MaxUnPoolNd()
+
+    def func(node):
+        ret = layerin(node)
+        return sum(layerout(ret,ret))
     compare(func, node, node)
 
 
