@@ -58,60 +58,54 @@ def imncol(img, weight, stride, padding, padWith=0.):
             tmp2 = 0
             for in_channel in range(in_channels):
                 tmp2 += place_kernels(padded_image[batch, in_channel],
-                                      weight[out_channel, in_channel], stride=stride, offset=0)
+                                      weight[out_channel, in_channel], stride=stride)
             tmp.append(tmp2)
         ret.append(tmp)
     ret = np.array(ret)
     return np.array(ret)
 
 
-def colnim(img, weight, stride, mode = "normal"):
-    if mode is "weight":
-        ret_shape = tuple([weight.shape[0], weight.shape[1],] + list(np.array(img[0,0].shape) - (np.array(weight[0,0].shape) - 1) * stride))
-    else:
-        ret_shape = tuple([img.shape[0], weight.shape[1],] + list((np.array(img[0,0].shape) - 1) * stride + np.array(weight[0,0].shape)))
+def colnim(img, weight, stride):
     ret = []
     for batch in range(img.shape[0]):
         tmp2 = 0
         for out_channel in range(weight.shape[0]):
             tmp = []
             for in_channel in range(weight.shape[1]):
-                tmp.append(place_back_kernels(img[batch,out_channel],weight[out_channel, in_channel], stride=stride, mode=mode))
+                tmp.append(place_back_kernels(img[batch,out_channel],weight[out_channel, in_channel], stride=stride))
             tmp2 += np.array(tmp)
         ret.append(tmp2)
     ret = np.array(ret)
-    assert ret.shape == ret_shape, "{}/{}".format(ret.shape,ret_shape)
     return ret
 
-def deimncol(img, weight, stride, mode = "normal"):
-    ret_shape = tuple([img.shape[0], weight.shape[1],] + list((np.array(img[0,0].shape) - 1) * stride + np.array(weight[0,0].shape)))
+def colnw(img, weight, stride):
     ret = []
-    for batch in range(img.shape[0]):
+    for out_channel in range(weight.shape[1]):
         tmp2 = 0
-        for out_channel in range(weight.shape[0]):
+        for batch in range(img.shape[0]):
             tmp = []
-            for in_channel in range(weight.shape[1]):
-                tmp.append(place_deconv_kernels(img[batch,out_channel],weight[out_channel, in_channel], stride=stride, mode=mode))
+            for in_channel in range(img.shape[1]):
+                tmp.append(place_overlap_kernels(img[batch,in_channel],weight[batch, out_channel], stride=stride))
             tmp2 += np.array(tmp)
         ret.append(tmp2)
     ret = np.array(ret)
-    assert ret.shape == ret_shape, "{}/{}".format(ret.shape,ret_shape)
     return ret
 
-def place_deconv_kernels(img, kernel, stride=1, offset=0, mode = "normal"):
-    ret_shape = (np.array(img.shape) - 1) * stride + np.array(kernel.shape)
-    ret = np.zeros(ret_shape)
-    itr_img = ret
-    min = np.array(kernel.shape) - 1
-    for pos in generate_positions(itr_img, stride, offset, min_space=min):
-        slices = [slice(pos[i], pos[i] + kernel.shape[i]) for i in range(len(img.shape))]
-        kern = kernel * img[tuple(np.array(pos) // stride)]
-        ret[slices] += kern
+def imnw(img, weight, stride):
+    ret = []
+    for out_channel in range(weight.shape[1]):
+        tmp2 = 0
+        for batch in range(img.shape[0]):
+            tmp = []
+            for in_channel in range(img.shape[1]):
+                tmp.append(place_overlap_back_kernels(img[batch,in_channel],weight[batch, out_channel], stride=stride))
+            tmp2 += np.array(tmp)
+        ret.append(tmp2)
+    ret = np.array(ret)
     return ret
 
 
-
-def place_kernels(img, kernel, stride, offset):
+def place_kernels(img, kernel, stride, offset=0):
     kernels = []
     for i in range(len(img.shape)):
         kernels.append((img.shape[i] - kernel.shape[i] + offset * 2) // stride[i] + 1)
@@ -124,27 +118,41 @@ def place_kernels(img, kernel, stride, offset):
     return kernels
 
 
-def place_back_kernels(img, kernel, stride=1, offset=0, mode = "normal"):
-    if mode is "weight":
-        ret_shape = np.array(img.shape) - (np.array(kernel.shape) - 1) * stride
-        ret = np.zeros(ret_shape)
-        itr_img = img
-        min = np.array(ret.shape) - 1
-    else:
-        ret_shape = (np.array(img.shape) - 1) * stride + np.array(kernel.shape)
-        ret = np.zeros(ret_shape)
-        itr_img = ret
-        min = np.array(kernel.shape) - 1
+def place_back_kernels(img, kernel, stride=1, offset=0):
+    ret_shape = (np.array(img.shape) - 1) * stride + np.array(kernel.shape)
+    ret = np.zeros(ret_shape)
+    itr_img = ret
+    min = np.array(kernel.shape) - 1
     for pos in generate_positions(itr_img, stride, offset, min_space=min):
-        if mode is "weight":
-            slices = [slice(pos[i], pos[i] + ret.shape[i]) for i in range(len(img.shape))]
-            strided_slices = [slice(pos[i]//stride[i], pos[i]//stride[i] + ret.shape[i]) for i in range(len(img.shape))]
-            kern = img[slices] * kernel[strided_slices]
-            ret += kern
-        else:
-            slices = [slice(pos[i], pos[i] + kernel.shape[i]) for i in range(len(img.shape))]
-            kern = kernel * img[tuple(np.array(pos) // stride)]
-            ret[slices] += kern
+        slices = [slice(pos[i], pos[i] + kernel.shape[i]) for i in range(len(img.shape))]
+        kern = kernel * img[tuple(np.array(pos) // stride)]
+        ret[slices] += kern
+    return ret
+
+def place_overlap_kernels(img, kernel, stride=1, offset=0):
+    ret_shape = np.array(img.shape) - (np.array(kernel.shape) - 1) * stride
+    ret = np.zeros(ret_shape)
+    itr_img = img
+    min = np.array(ret.shape) - 1
+    for pos in generate_positions(itr_img, stride, offset, min_space=min):
+        slices = [slice(pos[i], pos[i] + ret.shape[i]) for i in range(len(img.shape))]
+        strided_slices = [slice(pos[i]//stride[i], pos[i]//stride[i] + ret.shape[i]) for i in range(len(img.shape))]
+        #print(ret_shape)
+        #assert img[slices].shape == kernel[strided_slices].shape
+        kern = img[slices] * kernel[tuple(np.array(pos) // stride)]
+        ret += kern
+    return ret
+
+def place_overlap_back_kernels(img, kernel, stride=1, offset=0):
+    ret_shape = np.array(img.shape) - (np.array(kernel.shape) - 1) * stride
+    ret = np.zeros(ret_shape)
+    itr_img = img
+    min = np.array(ret.shape) - 1
+    for pos in generate_positions(itr_img, stride, offset, min_space=min):
+        slices = [slice(pos[i], pos[i] + ret.shape[i]) for i in range(len(img.shape))]
+        strided_slices = [slice(pos[i]//stride[i], pos[i]//stride[i] + ret.shape[i]) for i in range(len(img.shape))]
+        kern = img[slices] * kernel[strided_slices]
+        ret += kern
     return ret
 
 def imnpool(img, kernel, stride, padding, padWith=0, mode = "max"):

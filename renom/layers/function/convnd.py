@@ -2,7 +2,7 @@
 # encoding: utf - 8
 
 import numpy as np
-from renom.layers.function.utils import imncol, colnim, pad_dx, pad_image
+from renom.layers.function.utils import imncol, colnim, pad_dx, pad_image, colnw
 from renom.core import Node, Variable, to_value, GPUValue, get_gpu, precision
 from .parameterized import Parametrized
 from renom.utility.initializer import Gaussian
@@ -56,8 +56,7 @@ class convnd(Node):
 
     def _backward_cpu(self, context, dy, **kwargs):
         dx = colnim(dy, self.attrs._w, self.attrs._stride)
-        print(self.attrs._w.shape)
-        dw = colnim(self.attrs._x, dy, self.attrs._stride, mode = "weight")
+        dw = colnw(self.attrs._x, dy, self.attrs._stride)
         db = np.sum(dy, axis=tuple(
             [0, ] + [i for i in range(2, len(self.attrs._b.shape))]), keepdims=True)
         self.attrs._x._update_diff(context, dx)
@@ -184,8 +183,7 @@ class Conv3d(Parametrized):
         size_f = tuple(f_lst)
         size_b = tuple([1, self._channel] + [1 for _ in range(self._dims)])
 
-        self.params = {#"w": Variable(self._initializer(size_f), auto_update=True),
-                       "w": Variable(np.ones(size_f, dtype=precision), auto_update=True),
+        self.params = {"w": Variable(self._initializer(size_f), auto_update=True),
                        "b": Variable(np.ones(size_b, dtype=precision), auto_update=True)}
 
     def forward(self, x):
