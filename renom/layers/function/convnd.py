@@ -85,6 +85,18 @@ class convnd(Node):
         if isinstance(self.attrs._b, Node):
             self.attrs._b._update_diff(context, db, **kwargs)
 
+def check_input(var, length):
+    if isinstance(var, tuple):
+        assert len(var) is length
+        var = list(var)
+    elif not isinstance(var, np.ndarray):
+        var = np.array(
+            tuple([var for _ in range(length)]), dtype=np.int32)
+    elif not var.dtype == np.int32:
+        var = var.astype(np.int32)
+    assert len(var) is length
+    return var
+
 
 def check_input(var, length):
     if isinstance(var, tuple):

@@ -477,7 +477,7 @@ def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
 @pytest.mark.parametrize("node, error", [
     [Variable(rand((1, 1, 3, 3, 3, 3))), True],
     [Variable(rand((2, 2, 4, 4))), False],
-    [Variable(rand((2, 3, 4, 6, 6))), False],
+    #[Variable(rand((2, 3, 4, 6, 6))), False],
     [Variable(rand((1, 1, 4, 8))), False],
 ])
 def test_convnd(node, error, use_gpu, ignore_bias):

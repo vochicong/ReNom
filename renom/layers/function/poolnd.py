@@ -79,7 +79,6 @@ class average_poolnd(npool_base):
         dx = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, mode="average")
         self.attrs._x._update_diff(context, dx, **kwargs)
 
-
 def check_input(var, length):
     if isinstance(var, tuple):
         assert len(var) is length
@@ -91,7 +90,6 @@ def check_input(var, length):
         var = var.astype(np.int32)
     assert len(var) is length
     return var
-
 
 class NPoolBase:
 
@@ -110,7 +108,6 @@ class NPoolBase:
         self._padding, self._stride, self._kernel = map(
             func, [self._padding, self._stride, self._kernel])
         return self.forward(x)
-
 
 class MaxPoolNd(NPoolBase):
 
