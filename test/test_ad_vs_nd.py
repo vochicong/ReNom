@@ -27,6 +27,7 @@ from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
 from renom.layers.function.deconv2d import Deconv2d
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
+from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
 from renom.layers.function.batch_normalize import BatchNormalize,\
@@ -465,6 +466,24 @@ def test_max_pool2d(node, use_gpu):
     def func(node):
         return sum(layer(node))
     compare(func, node, node)
+
+
+@pytest.mark.parametrize("node, rois", [
+    [Variable(rand((3, 3, 8, 13)) * 10), Variable(np.array([
+        [0, 1, 1, 6, 6],
+        [2, 6, 2, 7, 11],
+        [1, 3, 1, 5, 10],
+        [0, 3, 3, 3, 3]
+    ], dtype=np.float64))]
+])
+def test_roi_pool2d(node, rois,  use_gpu):
+    set_cuda_active(use_gpu)
+    node = Variable(node)
+    layer = RoiPool2d(outh=7, outw=5, spatial_scale=0.6)
+
+    def func(node, rois):
+        return sum(layer(node, rois))
+    compare(func, node, node, rois)
 
 
 @pytest.mark.parametrize("node", [
@@ -974,3 +993,52 @@ def test_min(node, axis, use_gpu, keep_dimensions):
     numpy_min = np.amin(node, axis=axis, keepdims=keep_dimensions)
     assert np.allclose(renom_min, numpy_min, atol=1e-5, rtol=1e-3)
     compare(func, node, node)
+
+
+@pytest.mark.parametrize("node, index, error", [
+    [Variable(rand((2,))), [1, 1], False],
+    [Variable(rand((2,))), [True, False], False],
+    [Variable(rand((2,))), np.array([0, 0]), False],
+    # [Variable(rand((2,))), (True, False), False], TODO: Make this acceptable with gpu.
+    [Variable(rand((2,))), (1, 1), True],
+
+    [Variable(rand((2, 2))), 0, False],
+    [Variable(rand((2, 2))), (0, 1), False],
+    [Variable(rand((2, 2))), (0, slice(None, None, None)), False],
+
+    [Variable(rand((2, 2, 2))), (slice(0, 2), 0, [1, 1]), False],
+    [Variable(rand((2, 2, 2))), ([np.array([0, 0]), [1, 1]]), False],
+    [Variable(rand((2, 2, 4))), ([[0, 0], [1, 1]], slice(0, 1, 2)), False],
+])
+def test_getitem(node, index, error, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(node[index])
+
+    if error:
+        occured = False
+        try:
+            func(node)
+        except:
+            occured = True
+        assert occured
+    else:
+        compare(func, node, node)
+
+
+@pytest.mark.parametrize("node, x, delta", [
+    [Variable(rand((1, 1))), rand((1, 1)), 1],
+    [Variable(rand((1, 1))), rand((1, 1)), 3],
+    [Variable(rand((1, 3))), rand((1, 3)), 1],
+    [Variable(rand((2, 1))), rand((2, 1)), 1],
+    [Variable(rand((1, 1, 1, 2))), rand((1, 1, 1, 2)), 1],
+])
+def test_smooth_l1(node, x, delta, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.smoothed_l1(node, x, delta)
+    compare(func, node, node, x)

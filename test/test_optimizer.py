@@ -7,6 +7,7 @@ from renom.utility.initializer import GlorotNormal
 from renom.cuda import set_cuda_active
 from renom.layers.loss.mean_squared_error import mean_squared_error
 from renom.layers.function.parameterized import Parametrized
+import test_utility
 
 
 class Weighted_test_model(Parametrized):

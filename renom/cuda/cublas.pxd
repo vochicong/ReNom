@@ -1,3 +1,4 @@
+# distutils: language=c++
 
 cdef extern from "cublas.h":
     ctypedef float cuComplex        # Not a collect type.
@@ -551,3 +552,6 @@ cdef extern from "cublas.h":
                                int ldb,
                                cuDoubleComplex * C,
                                int ldc)
+
+
+cpdef cublas_axpy(gpu_value1, gpu_value2)

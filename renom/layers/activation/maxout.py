@@ -2,9 +2,10 @@
 # -*- coding: utf-8 -*-
 import renom as rm
 #from renom.operation import concat, amax
-from renom.core import Node
+from renom.core import Node, showmark
 
 
+@showmark
 class maxout(Node):
 
     def __new__(self, x, slice_size=1, axis=1):

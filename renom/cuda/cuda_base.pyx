@@ -1,8 +1,10 @@
+from __future__ import print_function
+import sys
+import traceback
 import contextlib
 import bisect
 cimport numpy as np
 import numpy as pnp
-from cuda_base import *
 cimport cython
 from numbers import Number
 from libc.stdlib cimport malloc, free
@@ -13,56 +15,72 @@ import collections
 import renom.core
 import renom.cuda
 
+
+@contextlib.contextmanager
+def use_device(device_id):
+    active = renom.cuda.is_cuda_active()
+    cdef int cur
+
+    if active:
+        cur = cuGetDevice()
+        cuSetDevice(device_id)  # switch dedice
+
+    try:
+        yield
+    finally:
+        if active:
+            cuSetDevice(cur)   # restore device
+
 def cuMalloc(uintptr_t nbytes):
     cdef void * p
     runtime_check(cudaMalloc( & p, nbytes))
     return < uintptr_t > p
 
 
-def cuMemset(uintptr_t ptr, int value, size_t size):
+cpdef cuMemset(uintptr_t ptr, int value, size_t size):
     p = <void * >ptr
     runtime_check(cudaMemset(p, value, size))
     return
 
 
-def cuCreateStream():
+cpdef uintptr_t cuCreateStream():
     cdef cudaStream_t stream
     runtime_check(cudaStreamCreate( & stream))
     return < uintptr_t > stream
 
 
-def cuSetDevice(int dev):
+cpdef cuSetDevice(int dev):
     runtime_check(cudaSetDevice(dev))
-    return
 
-def cuGetDevice():
+
+cpdef int cuGetDevice():
     cdef int dev
     runtime_check(cudaGetDevice(&dev))
     return dev
 
-def cuDeviceSynchronize():
+cpdef cuDeviceSynchronize():
     runtime_check(cudaDeviceSynchronize())
 
 
-def cuCreateCtx(device=0):
+cpdef cuCreateCtx(device=0):
     cdef CUcontext ctx
     driver_check(cuCtxCreate( & ctx, 0, device))
     return int(ctx)
 
 
-def cuGetDeviceCxt():
+cpdef cuGetDeviceCxt():
     cdef CUdevice device
     driver_check(cuCtxGetDevice( & device))
     return int(device)
 
 
-def cuGetDeviceCount():
+cpdef cuGetDeviceCount():
     cdef int count
     runtime_check(cudaGetDeviceCount( & count))
     return int(count)
 
 
-def cuGetDeviceProperty(device):
+cpdef cuGetDeviceProperty(device):
     cdef cudaDeviceProp property
     runtime_check(cudaGetDeviceProperties( & property, device))
     property_dict = {
@@ -94,20 +112,20 @@ def cuGetDeviceProperty(device):
     return property_dict
 
 
-def cuFree(uintptr_t ptr):
+cpdef cuFree(uintptr_t ptr):
     p = <void * >ptr
     runtime_check(cudaFree(p))
     return
 
 # cuda runtime check
-def runtime_check(error):
+cpdef runtime_check(error):
     if error != cudaSuccess:
         error_msg = cudaGetErrorString(error)
         raise Exception("CUDA Error: {}".format(error_msg))
     return
 
 # cuda runtime check
-def driver_check(error):
+cpdef driver_check(error):
     cdef char * string
     if error != 0:
         cuGetErrorString(error, < const char**> & string)
@@ -148,7 +166,7 @@ def cuMemcpyD2HAsync(uintptr_t gpu_ptr, np.ndarray[float, ndim=1, mode="c"] cpu_
     return
 
 
-def cuMemcpyD2DAsync(uintptr_t gpu_ptr1, uintptr_t gpu_ptr2, int size, int stream=0):
+cpdef cuMemcpyD2DAsync(uintptr_t gpu_ptr1, uintptr_t gpu_ptr2, int size, int stream=0):
     # gpu to gpu
     runtime_check(cudaMemcpyAsync( < void*>gpu_ptr2, < const void*>gpu_ptr1, size, cudaMemcpyDeviceToDevice, < cudaStream_t > stream))
     return
@@ -161,17 +179,24 @@ def check_heap_device(*heaps):
         raise RuntimeError('Invalid device_id: %s currennt: %s' % (devices, current))
 
 
-class GPUHeap(object):
+cdef class GPUHeap(object):
     def __init__(self, nbytes, ptr, device_id):
         self.ptr = ptr
         self.nbytes = nbytes
-        self.available = False
         self.device_id = device_id
 
     def __int__(self):
         return self.ptr
 
-    def memcpyH2D(self, cpu_ptr, nbytes):
+    def __dealloc__(self):
+        cdef cudaError_t err = cudaSetDevice(self.device_id)
+        if err == cudaSuccess:
+            err = cudaFree(<void * >self.ptr)
+
+        if err != cudaSuccess:
+            print("Error in GPUHeap.__dealloc__():", err, file=sys.stderr)
+
+    cpdef memcpyH2D(self, cpu_ptr, size_t nbytes):
         # todo: this copy is not necessary
         buf = cpu_ptr.ravel()
         cdef _VoidPtr ptr = _VoidPtr(buf)
@@ -179,7 +204,7 @@ class GPUHeap(object):
         with renom.cuda.use_device(self.device_id):
             cuMemcpyH2D(ptr.ptr, self.ptr, nbytes)
 
-    def memcpyD2H(self, cpu_ptr, nbytes):
+    cpdef memcpyD2H(self, cpu_ptr, size_t nbytes):
         shape = cpu_ptr.shape
         cpu_ptr = pnp.reshape(cpu_ptr, -1)
 
@@ -190,12 +215,12 @@ class GPUHeap(object):
 
         pnp.reshape(cpu_ptr, shape)
 
-    def memcpyD2D(self, gpu_ptr, nbytes):
+    cpdef memcpyD2D(self, gpu_ptr, size_t nbytes):
         assert self.device_id == gpu_ptr.device_id
         with renom.cuda.use_device(self.device_id):
             cuMemcpyD2D(self.ptr, gpu_ptr.ptr, nbytes)
 
-    def copy_from(self, other, nbytes):
+    cpdef copy_from(self, other, size_t nbytes):
         cdef void *buf
         cdef int ret
         cdef uintptr_t src, dest
@@ -227,11 +252,8 @@ class GPUHeap(object):
                 finally:
                     free(buf)
 
-    def free(self):
-        with renom.cuda.use_device(self.device_id):
-            cuFree(self.ptr)
 
-class allocator(object):
+cdef class GpuAllocator(object):
 
     def __init__(self):
         self._pool_lists = collections.defaultdict(list)
@@ -241,28 +263,36 @@ class allocator(object):
         device = cuGetDevice()
         return self._pool_lists[device]
 
-    def malloc(self, nbytes):
-        pool = self.getAvailablePool(nbytes)
+    cpdef GPUHeap malloc(self, size_t nbytes):
+        cdef GPUHeap pool = self.getAvailablePool(nbytes)
         if pool is None:
             ptr = cuMalloc(nbytes)
             pool = GPUHeap(nbytes=nbytes, ptr=ptr, device_id=cuGetDevice())
+
         return pool
 
-    def free(self, pool):
-        pool.available = True
-        device_id = pool.device_id
-        index = bisect.bisect(self._pool_lists[device_id], (pool.nbytes,))
-        self._pool_lists[device_id].insert(index, (pool.nbytes, pool))
+    cpdef free(self, GPUHeap pool):
+        if pool.nbytes:
+            device_id = pool.device_id
+            if not getattr(bisect, 'bisect', None):
+                # Python is shutting down
+                return
+            self._pool_lists[device_id]
+            index = bisect.bisect(self._pool_lists[device_id], (pool.nbytes,))
+            self._pool_lists[device_id].insert(index, (pool.nbytes, pool))
 
-    def getAvailablePool(self, size):
+    cpdef GPUHeap getAvailablePool(self, size_t size):
         pool = None
-        min = size
-        max = size * 2 + 4096
+        cdef size_t min = size
+        cdef size_t max = size * 2 + 4096
 
         device = cuGetDevice()
         pools = self._pool_lists[device]
 
-        idx = bisect.bisect_left(pools, (size,))
+        cdef size_t idx = bisect.bisect_left(pools, (size,))
+
+        cdef GPUHeap p
+        cdef size_t i
 
         for i in range(idx, len(pools)):
             _, p = pools[i]
@@ -271,36 +301,33 @@ class allocator(object):
 
             if min <= p.nbytes:
                 pool = p
-                pool.available = False
                 del pools[i]
                 break
 
         return pool
 
-    def release_pool(self, deviceID=None):
-
-        def release(pool_list):
-            available_pools = [p for p in pool_list if p[1].available]
-            for p in available_pools:
-                p[1].free()
-                pool_list.remove(p)
-
+    cpdef release_pool(self, deviceID=None):
         if deviceID is None:
-            for d_id, pools in self._pool_lists.items():
-                release(pools)
+            self._pool_lists = collections.defaultdict(list)
         else:
-            release(self._pool_lists[deviceID])
-          
+            del self._pool_lists[deviceID]
 
-gpu_allocator = allocator()
 
-def _cuSetLimit(limit, value):
+gpu_allocator = GpuAllocator()
+
+cdef GpuAllocator c_gpu_allocator
+c_gpu_allocator = gpu_allocator 
+
+cpdef GpuAllocator get_gpu_allocator():
+    return c_gpu_allocator
+
+
+cpdef _cuSetLimit(limit, value):
     cdef size_t c_value=999;
 
     cuInit(0)
 
     ret = cuCtxGetLimit(&c_value, limit)
-    print(ret, c_value)
 
     cuCtxSetLimit(limit, value)
-    print(value)
+

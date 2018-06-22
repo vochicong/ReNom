@@ -10,6 +10,8 @@ import test_utility
 
 set_cuda_active(True)
 
+from renom.core import DEBUG_GRAPH_INIT
+
 
 class NN(rm.Model):
     def __init__(self):
