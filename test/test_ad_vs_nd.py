@@ -446,13 +446,13 @@ def test_conv2d(node, use_gpu):
 @pytest.mark.parametrize("node, error", [
     #[Variable(rand((1, 1, 3, 3, 3, 3))), True],
     [Variable(rand((2, 2, 4, 4))), False],
-    [Variable(rand((2, 3, 4, 6, 6))), False],
+    #[Variable(rand((2, 3, 4, 6, 6))), False],
     [Variable(rand((1, 1, 4, 8))), False],
 ])
 def test_convnd(node, error, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
-    layer = Conv3d(channel=1, filter=3, stride=1)
+    layer = Conv3d(channel=1, filter=(2,3), stride=1)
 
     def func(node):
         return sum(layer(node))

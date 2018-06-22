@@ -79,6 +79,18 @@ class convnd(Node):
         if isinstance(self.attrs._b, Node):
             self.attrs._b._update_diff(context, db, **kwargs)
 
+def check_input(var, length):
+    if isinstance(var, tuple):
+        assert len(var) is length
+        var = list(var)
+    elif not isinstance(var, np.ndarray):
+        var = np.array(
+            tuple([var for _ in range(length)]), dtype=np.int32)
+    elif not var.dtype == np.int32:
+        var = var.astype(np.int32)
+    assert len(var) is length
+    return var
+
 
 class ConvNd(Parametrized):
     """Nd convolution layer.
@@ -132,12 +144,12 @@ class ConvNd(Parametrized):
         self._dims = len(input_size[1:])
         if is_cuda_active():
             assert self._dims < 4, "GPU Version currently only supports up to 3 dimensions"
-        kern = [self._kernel for _ in range(self._dims)]
-        self._kernel = np.array(kern)
-        self._padding = np.array([self._padding for _ in range(self._dims)], dtype=np.int32)
-        self._stride = np.array([self._stride for _ in range(self._dims)], dtype=np.int32)
+
+        func = lambda var: check_input(var, self._dims)
+        self._kernel, self._padding, self._stride = map(func, [self._kernel, self._padding, self._stride])
+
         f_lst = [self._channel, input_size[0]]
-        f_lst.extend(kern)
+        f_lst.extend(self._kernel)
         size_f = tuple(f_lst)
         size_b = tuple([1, self._channel] + [1 for _ in range(self._dims)])
 
@@ -171,15 +183,11 @@ class Conv3d(Parametrized):
         # After this dimension, the image data is assumed to be meaningfully correlated.
         self._dims = len(input_size[1:])
         assert self._dims < 4, "Conv3D expects up to 3 dimensions"
-        if not isinstance(self._padding, np.ndarray):
-            self._padding = np.array(
-                tuple([self._padding for _ in range(self._dims)]), dtype=np.int32)
-            self._stride = np.array(
-                tuple([self._stride for _ in range(self._dims)]), dtype=np.int32)
-            self._kernel = np.array(
-                tuple([self._kernel for _ in range(self._dims)]), dtype=np.int32)
+        func = lambda var: check_input(var, self._dims)
+        self._kernel, self._padding, self._stride = map(func, [self._kernel, self._padding, self._stride])
+
         f_lst = [self._channel, input_size[0]]
-        f_lst.extend(list(self._kernel))
+        f_lst.extend(self._kernel)
         size_f = tuple(f_lst)
         size_b = tuple([1, self._channel] + [1 for _ in range(self._dims)])
 

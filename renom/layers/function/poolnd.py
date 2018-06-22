@@ -4,6 +4,7 @@ import numpy as np
 from renom.core import Node, GPUValue, get_gpu
 from renom.layers.function.utils import imnpool, poolnim
 from renom.cuda import cuda as cu
+from renom.cuda import is_cuda_active
 
 
 class npool_base(Node):
@@ -77,6 +78,18 @@ class average_poolnd(npool_base):
         dx = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, mode = "average")
         self.attrs._x._update_diff(context, dx, **kwargs)
 
+def check_input(var, length):
+    if isinstance(var, tuple):
+        assert len(var) is length
+        var = list(var)
+    elif not isinstance(var, np.ndarray):
+        var = np.array(
+            tuple([var for _ in range(length)]), dtype=np.int32)
+    elif not var.dtype == np.int32:
+        var = var.astype(np.int32)
+    assert len(var) is length
+    return var
+
 class NPoolBase:
 
     def __init__(self, kernel=3, padding=0, stride=1):
@@ -85,13 +98,11 @@ class NPoolBase:
         self._kernel = kernel
 
     def __call__(self, x):
-        if not isinstance(self._padding, np.ndarray):
-            self._padding = np.array(
-                tuple([self._padding for _ in range(len(x.shape[2:]))]), dtype=np.int32)
-            self._stride = np.array(
-                tuple([self._stride for _ in range(len(x.shape[2:]))]), dtype=np.int32)
-            self._kernel = np.array(
-                tuple([self._kernel for _ in range(len(x.shape[2:]))]), dtype=np.int32)
+        dims = len(x.shape[2:])
+        if is_cuda_active():
+            assert dims < 4, "GPU Version can only handle up to 3 dimensions"
+        func = lambda var: check_input(var, dims)
+        self._padding, self._stride, self._kernel = map(func, [self._padding, self._stride, self._kernel])
         return self.forward(x)
 
 

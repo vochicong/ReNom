@@ -159,9 +159,9 @@ cdef class ConvolutionNDescriptor(BaseConvolutionDescriptor):
         cdef int i
         for i in range(dimensions):
           upscaleArray[i] = 1
-          assert padArray[i] >= 0, "Padding had negative value: {}".format(padArray[i])
-          assert strideArray[i] > 0, "Stride had negative or zero value: {}".format(strideArray[i])
-          assert upscaleArray[i] > 0, "Upscale had negative or zero value: {}".format(upscaleArray[i])
+        #  assert padArray[i] >= 0, "Padding had negative value: {}".format(padArray[i])
+        #  assert strideArray[i] > 0, "Stride had negative or zero value: {}".format(strideArray[i])
+        #  assert upscaleArray[i] > 0, "Upscale had negative or zero value: {}".format(upscaleArray[i])
 
         check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))
         check(cudnnSetConvolutionNdDescriptor(
