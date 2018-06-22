@@ -113,7 +113,10 @@ class Grads:
             ndarray, Node, None: Gradient of given node object.
         '''
         if default is self._omit:
-            return self.variables[id(node)]
+            try:
+                return self.variables[id(node)]
+            except KeyError:
+                raise Exception("Node not found. Ensure that _update_diff was properly called on the node first.")
         else:
             return self.variables.get(id(node), default)
 
