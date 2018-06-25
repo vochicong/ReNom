@@ -1,6 +1,7 @@
 
 import numpy as np
 from renom.layers.function.utils import colnim, imncol, colnw, imnw
+from renom.layers.function.convnd import convnd
 from renom.core import Node, Variable, to_value, GPUValue, get_gpu, precision
 from .parameterized import Parametrized
 from renom.utility.initializer import Gaussian, GlorotNormal
@@ -73,10 +74,11 @@ class deconvnd(Node):
             swapped_y[i,...] = dy[:,i,...]
         for i in range(dx.shape[1]):
             swapped_x[i,...] = prev_x[:,i,...]
+        print("dy=",dy.shape)
+        print("self=",self.shape)
+        print("x=",self.attrs._x.shape)
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionForward(handle, prev_attrs._conv_desc, prev_attrs._filter_desc, get_gpu(dy), self.attrs._w, dx)
-            #x_filter_descriptor = cu.NdFilterDescriptor(self.attrs._x.shape, precision)
-            #cu.cuConvolutionForward(handle, prev_attrs._conv_desc, x_filter_descriptor, get_gpu(dy), get_gpu(self.attrs._x), dw)
             x_filter_descriptor = cu.NdFilterDescriptor(swapped_x.shape, precision)
             cu.cuConvolutionForward(handle, prev_attrs._conv_desc, x_filter_descriptor, swapped_y, swapped_x, swapped_w)
             cu.cuConvolutionBackwardBias(handle, dy, db)
@@ -135,6 +137,38 @@ class DeconvNd(Parametrized):
                        "b": Variable(np.ones(size_b, dtype=precision), auto_update=True)}
 
     def forward(self, x, prev_conv = None):
+        p = x
+        if prev_conv:
+            assert isinstance(prev_conv, convnd)
+        while prev_conv is None:
+            if isinstance(p, convnd) and p.shape == x.shape:
+                prev_conv = p
+            else:
+                try:
+                    if not p.attrs.get_names():
+                        raise Exception("Uninitialized Node")
+                    found = False
+                    for key in p.attrs.get_names():
+                        if key == "_x":
+                            p = p.attrs._x
+                            found = True
+                            break
+                        elif key == "_arg":
+                            p = p.attrs._arg
+                            found = True
+                            break
+                        elif key == "_lhs":
+                            p = p.attrs._lhs
+                            found = True
+                            break
+                        elif key == "_array":
+                            p = p.attrs._array
+                            found = True
+                            break
+                    if not found:
+                        raise Exception("Unrecognized node type")
+                except AttributeError:
+                    raise Exception("Could not find previous 2D max pool")
         if not "w" in self.params:
             self.weight_initiallize(0, prev_conv)
         return deconvnd(x, self.params["w"], self.params["b"],SimpleContainer(prev_conv))
