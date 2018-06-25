@@ -6,6 +6,7 @@ from renom.core import Node, GPUValue, get_gpu
 from renom.layers.function.utils import poolnim
 from renom.cuda import cuda as cu
 from .parameterized import Parametrized
+from renom.layers.function.poolnd import max_poolnd
 from renom.config import precision
 
 class SimpleContainer(object):
@@ -32,13 +33,20 @@ class max_unpoolnd(Node):
             cu.cuPoolingBackward(handle, prev_pool.attrs._pool_desc, prev_pool.attrs._x, x, x, dx)
         ret = cls._create_node(dx)
         ret.attrs._x = x
+        ret.attrs._pool_desc = prev_pool.attrs._pool_desc
+
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
         self.attrs._x._update_diff(context, dy, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
-        self.attrs._x._update_diff(context, dy, **kwargs)
+        print("Going Back Pool")
+        pool_desc = self.attrs._pool_desc
+        y = GPUValue(shape=self.attrs._x.shape)
+        with cu.cudnn_handler() as handle:
+            cu.cuPoolingForward(handle, pool_desc, dy, y)
+        self.attrs._x._update_diff(context, y, **kwargs)
 
 
 class avg_unpool2d(Node):
@@ -49,7 +57,39 @@ class MaxUnPoolNd:
     def __init__(self):
         pass
 
-    def __call__(self, x, prev_pool):
+    def __call__(self, x, prev_pool = None):
+        p = x
+        if prev_pool:
+            assert isinstance(prev_pool, max_poolnd)
+        while prev_pool is None:
+            if isinstance(p, max_poolnd) and p.shape == x.shape:
+                prev_pool = p
+            else:
+                try:
+                    if not p.attrs.get_names():
+                        raise Exception("Uninitialized Node")
+                    found = False
+                    for key in p.attrs.get_names():
+                        if key == "_x":
+                            p = p.attrs._x
+                            found = True
+                            break
+                        elif key == "_arg":
+                            p = p.attrs._arg
+                            found = True
+                            break
+                        elif key == "_lhs":
+                            p = p.attrs._lhs
+                            found = True
+                            break
+                        elif key == "_array":
+                            p = p.attrs._array
+                            found = True
+                            break
+                    if not found:
+                        raise Exception("Unrecognized node type")
+                except AttributeError:
+                    raise Exception("Could not find previous 2D max pool")
         return self.forward(x, prev_pool)
 
     def forward(self, x, prev_pool):
