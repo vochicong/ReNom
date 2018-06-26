@@ -14,8 +14,8 @@ class SimpleContainer(object):
 
 class deconvnd(Node):
 
-    def __new__(cls, x, w, b, prev_conv):
-        return cls.calc_value(x, w, b, prev_conv._item)
+    def __new__(cls, x, w, b, kernel, stride, padding):
+        return cls.calc_value(x, w, b, kernel, stride, padding)
 
     @classmethod
     def _oper_cpu(cls, x, w, b, prev_conv):
@@ -28,15 +28,16 @@ class deconvnd(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, w, b, prev_conv):
-        dx = get_gpu(prev_conv.attrs._x).empty_like_me()
+    def _oper_gpu(cls, x, w, b, kernel, stride, padding):
+        back_shape = (np.array(x.shape[2:]) - 1) * np.array(stride) + np.array(kernel) - 2 * np.array(padding)
+        back_shape = [x.shape[0], w.shape[1],] + (list(back_shape))
+        dx = GPUValue(shape=back_shape)
+        conv_desc = cu.ConvolutionNDescriptor(padding, stride, precision)
+        filter_desc = cu.NdFilterDescriptor(w.shape, precision)
 
-        #with cu.cudnn_handler() as handle:
-        #    cu.cuConvolutionBackward(handle, self.attrs._conv_desc, self.attrs._filter_desc,
-        #                             self.attrs._x, self.attrs._w, dy, dw, db, dx, **kwargs)
 
         with cu.cudnn_handler() as handle:
-            cu.cuConvolutionBackwardData(handle, prev_conv.attrs._conv_desc, prev_conv.attrs._filter_desc,
+            cu.cuConvolutionBackwardData(handle, conv_desc, filter_desc,
                 get_gpu(w), get_gpu(x), dx)
             cu.cu_add_bias(get_gpu(b), dx)
 
@@ -44,7 +45,8 @@ class deconvnd(Node):
         ret.attrs._x = x
         ret.attrs._w = w
         ret.attrs._b = b
-        ret.attrs._prev = prev_conv
+        ret.attrs._conv_desc = conv_desc
+        ret.attrs._filter_desc = filter_desc
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
@@ -58,8 +60,9 @@ class deconvnd(Node):
         self.attrs._b._update_diff(context, db, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
+        conv_desc = self.attrs._conv_desc
+        filter_desc = self.attrs._filter_desc
         dy = get_gpu(dy)
-        prev_attrs = self.attrs._prev.attrs
         prev_x = self.attrs._x
         dx = get_gpu(self.attrs._x).empty_like_me()
         dw = get_gpu(self.attrs._w).empty_like_me()
@@ -74,19 +77,28 @@ class deconvnd(Node):
             swapped_y[i,...] = dy[:,i,...]
         for i in range(dx.shape[1]):
             swapped_x[i,...] = prev_x[:,i,...]
-        print("dy=",dy.shape)
-        print("self=",self.shape)
-        print("x=",self.attrs._x.shape)
         with cu.cudnn_handler() as handle:
-            cu.cuConvolutionForward(handle, prev_attrs._conv_desc, prev_attrs._filter_desc, get_gpu(dy), self.attrs._w, dx)
+            cu.cuConvolutionForward(handle, conv_desc, filter_desc, get_gpu(dy), self.attrs._w, dx)
             x_filter_descriptor = cu.NdFilterDescriptor(swapped_x.shape, precision)
-            cu.cuConvolutionForward(handle, prev_attrs._conv_desc, x_filter_descriptor, swapped_y, swapped_x, swapped_w)
+            cu.cuConvolutionForward(handle, conv_desc, x_filter_descriptor, swapped_y, swapped_x, swapped_w)
             cu.cuConvolutionBackwardBias(handle, dy, db)
         for i in range(dw.shape[1]):
             dw[i,...] = swapped_w[:,i,...]
         self.attrs._x._update_diff(context, dx, **kwargs)
         self.attrs._w._update_diff(context, dw, **kwargs)
         self.attrs._b._update_diff(context, db, **kwargs)
+
+def check_input(var, length):
+    if isinstance(var, tuple):
+        assert len(var) is length
+        var = list(var)
+    elif not isinstance(var, np.ndarray):
+        var = np.array(
+            tuple([var for _ in range(length)]), dtype=np.int32)
+    elif not var.dtype == np.int32:
+        var = var.astype(np.int32)
+    assert len(var) is length
+    return var
 
 class DeconvNd(Parametrized):
     '''2d convolution layer.
@@ -123,52 +135,26 @@ class DeconvNd(Parametrized):
 
     '''
 
-    def __init__(self, initializer=Gaussian()):
+    def __init__(self, channel=2, filter=3, padding=0, stride=1, input_size=None, initializer=Gaussian()):
+        self._channel = channel
+        self._filter = filter
+        self._padding = padding
+        self._stride = stride
         self._initializer = initializer
-        super(DeconvNd, self).__init__()
+        super(DeconvNd, self).__init__(input_size)
 
     def weight_initiallize(self, input_size, prev_conv = None):
-        if prev_conv is None:
-            return
-        size_f = prev_conv.attrs._w.shape
-        size_b = np.array([1 for _ in range(len(size_f))])
-        size_b[1] = prev_conv.attrs._x.shape[1]
+        self._dims = len(input_size[1:])
+        assert self._dims < 4, "Conv3D expects up to 3 dimensions"
+        func = lambda var: check_input(var, self._dims)
+        self._filter, self._padding, self._stride = map(func, [self._filter, self._padding, self._stride])
+
+        f_lst = [input_size[0], self._channel]
+        f_lst.extend(self._filter)
+        size_f = tuple(f_lst)
+        size_b = tuple([1, self._channel] + [1 for _ in range(self._dims)])
         self.params = {"w": Variable(self._initializer(size_f), auto_update=True),
                        "b": Variable(np.ones(size_b, dtype=precision), auto_update=True)}
 
     def forward(self, x, prev_conv = None):
-        p = x
-        if prev_conv:
-            assert isinstance(prev_conv, convnd)
-        while prev_conv is None:
-            if isinstance(p, convnd) and p.shape == x.shape:
-                prev_conv = p
-            else:
-                try:
-                    if not p.attrs.get_names():
-                        raise Exception("Uninitialized Node")
-                    found = False
-                    for key in p.attrs.get_names():
-                        if key == "_x":
-                            p = p.attrs._x
-                            found = True
-                            break
-                        elif key == "_arg":
-                            p = p.attrs._arg
-                            found = True
-                            break
-                        elif key == "_lhs":
-                            p = p.attrs._lhs
-                            found = True
-                            break
-                        elif key == "_array":
-                            p = p.attrs._array
-                            found = True
-                            break
-                    if not found:
-                        raise Exception("Unrecognized node type")
-                except AttributeError:
-                    raise Exception("Could not find previous 2D max pool")
-        if not "w" in self.params:
-            self.weight_initiallize(0, prev_conv)
-        return deconvnd(x, self.params["w"], self.params["b"],SimpleContainer(prev_conv))
+        return deconvnd(x, self.params["w"], self.params["b"], self._filter, self._stride, self._padding)
