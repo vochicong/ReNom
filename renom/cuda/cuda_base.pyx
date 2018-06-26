@@ -160,6 +160,8 @@ def cuGetStream(myid = None):
 def cuDestroyStream(uintptr_t stream):
     runtime_check(cudaStreamDestroy(<cudaStream_t> stream))
 
+def cuResetDevice():
+  runtime_check(cudaDeviceReset())
 
 def cuSetDevice(int dev):
     runtime_check(cudaSetDevice(dev))
