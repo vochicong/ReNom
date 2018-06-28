@@ -1,8 +1,10 @@
+import itertools
 import collections
 import weakref
+import renom.core
 
 try:
-    from graphviz import Digraph
+    from graphviz import Digraph, Graph
 except ImportError:
     def plot_graph(n):   # NOQA
         pass
@@ -145,3 +147,305 @@ def _plot_graph(objs):
         add_edge(n)
 
     g.view()
+
+
+class _Box:
+    @staticmethod
+    def create(obj):
+        target = obj.modelref()
+        if isinstance(target, renom.Model):
+            return _ModelBox(obj)
+        else:
+            return _Box(obj)
+
+    def __init__(self, obj):
+        self.nexts = set()
+        self.obj = obj
+        self.join = None
+
+    def addnext(self, nextbox):
+        self.nexts.add(nextbox)
+
+    def joinnext(self):
+        pass
+
+    def nodename(self):
+        if self.join:
+            return str(id(self.join.obj))
+        else:
+            return str(id(self.obj))
+
+    def create_node(self, context, graph):
+        obj = self.obj.modelref()
+
+        shape = 'diamond'
+        color = 'gray'
+        label = obj.__class__.__name__
+
+        graph.node(str(id(self.obj)), label=label, shape=shape,
+                   style='filled', fillcolor=color, color='black')
+
+    def create_edge(self, context):
+        f = self.nodename()
+        for c in self.nexts:
+            if c.join is self:
+                continue
+            t = c.nodename()
+            context.root.graph.edge(f, t)
+
+
+class _ModelBox(_Box):
+    def create_node(self, context, graph):
+        if self.join:
+            return
+
+        model = self.obj.modelref()
+
+        modelinfo = context.get_modelinfo(model)
+        if modelinfo.children:
+            shape = 'circle'
+            color = 'gray'
+            if isinstance(self.obj, renom.core.EnterModel):
+                label = 'S'
+            else:
+                label = 'E'
+        else:
+            shape = 'box'
+            color = 'white'
+            name = context.get_modelinfo(model).name
+            label = '%s(%s)' % (name, type(model).__name__)
+            color = 'white'
+
+        graph.node(str(id(self.obj)), label=label, shape=shape,
+                   style='filled', fillcolor=color, color='black')
+
+    def joinnext(self):
+        model = self.obj.modelref()
+        for c in self.nexts:
+            if c.obj.modelref() is model:
+                c.join = self
+
+
+class _ModelInfo:
+    def __init__(self, parent, name, model):
+        self.parent = parent
+        self.children = weakref.WeakSet()
+        if parent:
+            self.parent.children.add(self)
+
+        self.nodes = []
+
+        self.name = name
+        self.model = model
+        self.enter = self.leave = None
+        self.graph = None
+
+    def create_graph(self, context):
+        self.graph = Digraph(name='cluster=' + self.name)
+        self.graph.attr(label='%s(%s)' % (self.name, self.model.__class__.__name__),
+                        labelloc='top', labeljust='left')
+
+        for node in self.nodes:
+            node.create_node(context, self.graph)
+
+    def addnode(self, node):
+        self.nodes.append(node)
+
+    def setbox(self, box):
+        if isinstance(box.obj, renom.core.EnterModel):
+            self.enter = box
+        elif isinstance(box.obj, renom.core.LeaveModel):
+            self.leave = box
+        else:
+            raise ValueError()
+
+
+class ModelGraphContext:
+
+    def __init__(self):
+        pass
+
+    def get_modelinfo(self, model):
+        return self.models.get(id(model))
+
+    def walk_model(self, model):
+        self.models = {}
+
+        models = [(None, 'root', model)]
+
+        while models:
+            parent, name, model = models.pop()
+            p = _ModelInfo(parent, name, model)
+            if not parent:
+                self.root = p
+
+            self.models[id(model)] = p
+
+            models.extend((p, k, v) for k, v in model.get_model_children())
+
+    def selectmodel(self, node, curmodel):
+        target = node.modelref()
+        modelinfo = self.models.get(id(target))
+        if not modelinfo:
+            if curmodel is not None:
+                modelinfo = self.models.get(id(curmodel.modelref()))
+
+                if isinstance(curmodel, renom.core.LeaveModel):
+                    modelinfo = modelinfo
+                else:
+                    modelinfo = modelinfo.parent
+        else:
+            if not modelinfo.children:
+                if modelinfo.parent:
+                    modelinfo = modelinfo.parent
+
+        if not modelinfo:
+            modelinfo = self.root
+
+        return modelinfo
+
+    def getbox(self, node, nextbox, curmodel):
+        nodeid = id(node)
+
+        target = node.modelref()
+        modelinfo = self.models.get(id(target))
+        if modelinfo:
+            if isinstance(node, renom.core.EnterModel):
+                if modelinfo.enter:
+                    return modelinfo.enter
+            if isinstance(node, renom.core.LeaveModel):
+                if modelinfo.leave:
+                    return modelinfo.leave
+
+        parentmodel = self.selectmodel(node, curmodel)
+        if parentmodel.children:
+            if nodeid not in self.boxes:
+                box = _Box.create(node)
+                self.boxes[nodeid] = box
+
+                if modelinfo:
+                    modelinfo.setbox(box)
+
+                parentmodel.addnode(box)
+
+            return self.boxes[nodeid]
+
+    def walk_node(self, node):
+        self.boxes = {}
+        self._walk_node(node, None, None, set())
+        for box in self.boxes.values():
+            box.joinnext()
+
+    def _walk_node(self, node, nextbox, curmodel, seen):
+        if not isinstance(node, renom.core.Node):
+            return
+
+        if isinstance(node, renom.core.Mark):
+
+            box = self.getbox(node, nextbox, curmodel)
+            if box:
+                if nextbox is not None:
+                    box.addnext(nextbox)
+
+                nextbox = box
+
+        id_node = id(node)
+        if id_node in seen:
+            return
+        seen.add(id_node)
+
+        if not node.attrs:
+            return
+
+        if isinstance(node, renom.core.ModelMark):
+            curmodel = node
+
+        for attr in node.attrs.get_attrs():
+            self._walk_node(attr, nextbox, curmodel, seen)
+
+    def build_subgraph(self):
+
+        # build pathes from root to leaf
+        leafs = []
+        q = collections.deque([(self.root, [])])
+        while q:
+            model, path = q.pop()
+            path = [model, ] + path
+            if not model.children:
+                leafs.append(path)
+            else:
+                model.create_graph(self)
+                for c in model.children:
+                    q.append((c, path))
+
+        # create sub graphs from leaf to root
+        leafs.sort(key=len, reverse=True)
+        seen = set()
+        for leaf in leafs:
+            while len(leaf) >= 2:
+                child = leaf.pop(0)
+                parent = leaf[0]
+                if (child, parent) in seen:
+                    break
+
+                parent.graph.subgraph(child.graph)
+                seen.add((child, parent))
+
+        for box in self.boxes.values():
+            box.create_edge(self)
+
+    def build(self, nnmodel, value):
+        self.walk_model(nnmodel)
+        self.walk_node(value)
+        self.build_subgraph()
+
+        return self.root.graph
+
+
+MODEL_GRAPH = False
+
+
+def get_model_graph():
+    return MODEL_GRAPH
+
+
+def SET_MODEL_GRAPH(use):
+    '''Specify if information to build model graph are generated.
+
+    Args:
+        use (bool): True if informations to build model graph are generated.
+
+    Example:
+        >>> import renom as rm
+        >>> import numpy as np
+        >>> x = np.random.rand(1, 3)
+        array([[ 0.11871966  0.48498547  0.7406374 ]])
+        >>> z = rm.softmax(x)
+        softmax([[ 0.23229694  0.33505085  0.43265226]])
+        >>> np.sum(z, axis=1)
+        array([ 1.])
+
+    '''
+
+    global MODEL_GRAPH
+    MODEL_GRAPH = use
+
+
+def BUILD_MODEL_GRAPH(model, value):
+    '''Build model graph. Returns graph object of Graphviz.
+
+    Args:
+        model (Model): Root model object.
+        value: result value of the model
+
+    Example:
+        >>> SET_MODEL_GRAPH(True)
+        >>> model = MNist()
+        >>> value = model(np.random.rand(10, 10))
+        >>> SET_MODEL_GRAPH(False)
+        >>> graph = BUILD_MODEL_GRAPH(model, value)
+        >>> graph.view()
+    '''
+
+    c = ModelGraphContext()
+    return c.build(model, value)

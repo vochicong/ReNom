@@ -2,7 +2,7 @@
 from __future__ import print_function, division
 
 import numpy as np
-from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshape, Amin, Amax
+from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshape, Amin, Amax, showmark
 from renom.config import precision
 
 try:
@@ -154,6 +154,7 @@ class dot(BinOp):
             self.attrs._rhs._update_diff(context, rdx, **kwargs)
 
 
+@showmark
 class concat(Node):
     """
     Join a sequence of arrays along specified axis.

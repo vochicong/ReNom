@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
-from renom.core import UnaryOp, Node, get_gpu
+from renom.core import UnaryOp, Node, get_gpu, showmark
 from renom.cuda import cuda as cu
 
 
+@showmark
 class softmax(UnaryOp):
 
     @classmethod
