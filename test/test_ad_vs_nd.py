@@ -354,6 +354,23 @@ def test_dense(node, use_gpu):
     compare(func, layer.params["b"], node)
 
 @pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1, 2))),
+])
+def test_dense_ignore_bias(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = Dense(output_size=2, ignore_bias=True)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
+    assert layer.params['b'] is None
+
+@pytest.mark.parametrize("node", [
     np.array([[0, ], [1, ]]),
     np.array([[0, ], [1, ], [0, ]]),
 ])
@@ -366,7 +383,6 @@ def test_embedding(node, use_gpu):
     def func(node):
         return sum(layer(node))
     compare(func, layer.params["w"], node)
-
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 1))),
@@ -385,6 +401,22 @@ def test_batch_normalize(node, use_gpu):
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
 
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 1))),
+    Variable(rand((2, 2))),
+    Variable(rand((20, 2))),
+])
+def test_batch_normalize_ignore_bias(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = BatchNormalize(ignore_bias=True)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
+    assert layer.params['b'] is None
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2, 3, 3))),
@@ -438,7 +470,7 @@ def test_conv2d(node, use_gpu):
     Variable(rand((2, 2, 3, 3))),
     Variable(rand((2, 3, 4, 5))),
 ])
-def test_conv2d_bias(node, use_gpu):
+def test_conv2d_ignore_bias(node, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
@@ -448,6 +480,7 @@ def test_conv2d_bias(node, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
     compare(func, layer.params["w"], node)
+    assert layer.params['b'] is None
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
@@ -465,6 +498,21 @@ def test_deconv2d(node, use_gpu):
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
 
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 3, 3, 3))),
+    Variable(rand((2, 3, 4, 5))),
+])
+def test_deconv2d_ignore_bias(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = Deconv2d(channel=3, ignore_bias=True)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
+    assert layer.params['b'] is None
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
@@ -577,6 +625,30 @@ def test_lstm(node, use_gpu):
     for k in layer1.params.keys():
         compare(func, layer1.params[k], node)
 
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1, 2))),
+])
+def test_lstm_ignore_bias(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer1 = Lstm(output_size=4, ignore_bias=True)
+
+    def func(node):
+        loss = 0
+        for _ in range(3):
+            loss += sum(layer1(node))
+        layer1.truncate()
+        return loss
+
+    compare(func, node, node)
+    for k in layer1.params.keys():
+        if k is 'b':
+            assert layer1.params[k] is None
+        else:
+            compare(func, layer1.params[k], node)
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
@@ -623,6 +695,30 @@ def test_peepholelstm(node, use_gpu):
     for k in layer1.params.keys():
         compare(func, layer1.params[k], node)
 
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1, 2))),
+])
+def test_peepholelstm_ignore_bias(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer1 = rm.PeepholeLstm(output_size=4, ignore_bias=True)
+
+    def func(node):
+        loss = 0
+        for _ in range(3):
+            loss += sum(layer1(node))
+        layer1.truncate()
+        return loss
+
+    compare(func, node, node)
+    for k in layer1.params.keys():
+        if k is 'b':
+            assert layer1.params['b'] is None
+        else:
+            compare(func, layer1.params[k], node)
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
