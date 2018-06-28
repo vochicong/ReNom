@@ -32,6 +32,7 @@ from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
 from renom.layers.function.batch_normalize import BatchNormalize,\
     BATCH_NORMALIZE_FEATUREMAP
+from renom.layers.function.layernormalization import LayerNormalization
 from renom.layers.function.lrn import Lrn
 from test_utility import auto_diff, numeric_diff
 
@@ -385,6 +386,19 @@ def test_batch_normalize(node, use_gpu):
     compare(func, node, node)
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((1,5))),
+])
+def test_layer_normalize(node):
+    node = Variable(node * 100)
+
+    layer = LayerNormalization()#gain=1e+8)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["gain"], node)
 
 
 @pytest.mark.parametrize("node", [
