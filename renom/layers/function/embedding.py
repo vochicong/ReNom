@@ -9,7 +9,6 @@ from renom.utility.initializer import GlorotNormal
 from renom.cuda import cuda as cu
 
 
-
 class embedding(Node):
 
     def __new__(cls, x, w):
