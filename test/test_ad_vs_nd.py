@@ -573,18 +573,24 @@ def test_max_poolnd(node, use_gpu):
 
 @pytest.mark.parametrize("node", [
     #Variable(rand((2, 3, 4, 5))),
-    Variable(rand((2, 3, 4, 5)))
+    Variable(rand((1, 1, 2, 2)))
 ])
-def test_max_unpoolnd(node, use_gpu):
+def test_max_unpoolnd(node):#, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    #set_cuda_active(use_gpu)
+    set_cuda_active(True)
 
     layerin = MaxPoolNd(kernel=2)
     layerout = MaxUnPoolNd()
 
     def func(node):
         ret = layerin(node)
-        return sum(layerout(ret,ret))
+        print(node)
+        print(ret)
+        ret = layerout(ret,ret)
+        print(ret)
+        assert False
+        return sum(layerout(ret))
     compare(func, node, node)
 
 
