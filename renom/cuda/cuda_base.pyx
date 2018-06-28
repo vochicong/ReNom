@@ -235,7 +235,7 @@ cpdef cuFree(uintptr_t ptr):
 cpdef runtime_check(error):
     if error != cudaSuccess:
         error_msg = cudaGetErrorString(error)
-        raise Exception("CUDA Error: #{}\{}".format(error,error_msg))
+        raise Exception("CUDA Error: #{}|||{}".format(error,error_msg))
     return
 
 # cuda runtime check
@@ -372,7 +372,8 @@ cdef class GPUHeap(object):
             # Async can be called safely, since if the user does not
             # set up all the requirements for Async, it will perform
             # as an ordinairy blocking call
-            cuMemcpyH2Dvar(ptr.ptr, self.ptr, nbytes, <uintptr_t> self._mystream)
+            cuMemcpyH2D(ptr.ptr, self.ptr, nbytes)
+            #cuMemcpyH2Dvar(ptr.ptr, self.ptr, nbytes, <uintptr_t> self._mystream)
 
     cpdef memcpyD2H(self, cpu_ptr, size_t nbytes):
         shape = cpu_ptr.shape

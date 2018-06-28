@@ -39,7 +39,8 @@ class deconvnd(Node):
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionBackwardData(handle, conv_desc, filter_desc,
                 get_gpu(w), get_gpu(x), dx)
-            cu.cu_add_bias(get_gpu(b), dx)
+            #cu.cu_add_bias(get_gpu(b), dx)
+
 
         ret = cls._create_node(dx)
         ret.attrs._x = x
@@ -84,9 +85,10 @@ class deconvnd(Node):
             cu.cuConvolutionBackwardBias(handle, dy, db)
         for i in range(dw.shape[1]):
             dw[i,...] = swapped_w[:,i,...]
-        self.attrs._x._update_diff(context, dx, **kwargs)
+        if isinstance(self.attrs._x, Node):
+            self.attrs._x._update_diff(context, dx, **kwargs)
         self.attrs._w._update_diff(context, dw, **kwargs)
-        self.attrs._b._update_diff(context, db, **kwargs)
+        #self.attrs._b._update_diff(context, db, **kwargs)
 
 def check_input(var, length):
     if isinstance(var, tuple):
