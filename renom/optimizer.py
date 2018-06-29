@@ -86,6 +86,23 @@ class Sgd(Optimizer):
         self._params = {}
 
 
+class ClampedSgd(Sgd):
+    def __init__(self, lr=0.1, momentum=0.4, minimum=-1e4, maximum=+1e4):
+        super(ClampedSgd, self).__init__(lr=lr, momentum=momentum)
+        self._minimum = minimum
+        self._maximum = maximum
+
+    def _get_cpu(self, dy, node):
+        ret = super(ClampedSgd, self)._get_cpu(dy, node)
+        ret = np.clip(ret, self._minimum, self._maximum)
+        return ret
+
+    def _get_gpu(self, dy, node):
+        ret = super(ClampedSgd, self)._get_gpu(dy, node)
+        ret = cu.cu_clip(get_gpu(ret), self._minimum, self._maximum)
+        return ret
+
+
 class Adagrad(Optimizer):
     '''Adaptive gradient algorithm. [Adagrad]_
 

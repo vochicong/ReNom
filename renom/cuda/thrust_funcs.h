@@ -325,5 +325,8 @@ namespace renom{
 
     void thrust_clip_roi(int N, int M, VALUE_TYPE *roi_ptr, int start, int end, int step, int min_v, int max_v, VALUE_TYPE *ary_ptr);
     __global__ void cuda_clip_roi(int N, int M, VALUE_TYPE *roi_ptr, int start, int end, int step, int min_v, int max_v, VALUE_TYPE *ary_ptr);
+
+		void thrust_clip(int elem, VALUE_TYPE *array, VALUE_TYPE max, VALUE_TYPE min);
+		__global__ void cuda_clip(int elem, VALUE_TYPE *array, VALUE_TYPE max, VALUE_TYPE min);
 }
 #endif

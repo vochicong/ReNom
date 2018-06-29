@@ -1374,7 +1374,7 @@ namespace renom{
     }
 
 
-    __global__ void cuda_backward_roi_pool2d(int N, VALUE_TYPE *du ,VALUE_TYPE *argmax, VALUE_TYPE *rois, float spatial_scale, 
+    __global__ void cuda_backward_roi_pool2d(int N, VALUE_TYPE *du ,VALUE_TYPE *argmax, VALUE_TYPE *rois, float spatial_scale,
                                             int batch_N, int channels, int height, int width, int outh, int outw, VALUE_TYPE *dx)
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -1790,7 +1790,7 @@ namespace renom{
         cuda_optimizer_adam<<<ceil(Elems/256.0), 256>>>(Elems, learning_rate, dy, eps, gamma, gamma_orig, beta, beta_orig, min, flug, u, r, ndy);
       }
     }
-    
+
     __global__ void cuda_get_fg_ary_forward(int N, int M, VALUE_TYPE *ptr1, VALUE_TYPE *ptr2){
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
         if (idx >= N) return;
@@ -1948,5 +1948,18 @@ namespace renom{
     void thrust_clip_roi(int N, int M, VALUE_TYPE *roi_ptr, int start, int end, int step, int min_v, int max_v, VALUE_TYPE *ary_ptr)
     {
         cuda_clip_roi <<<ceil(N*M/256.0), 256.0>>>(N, M, roi_ptr, start, end, step, min_v, max_v, ary_ptr);
+    }
+
+    __global__ void cuda_clip(int elem, VALUE_TYPE * array, VALUE_TYPE max, VALUE_TYPE min)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx>=elem) return;
+      if (array[idx] < min) array[idx] = min;
+      if (array[idx] > max) array[idx] = max;
+    }
+
+    void thrust_clip(int elem, VALUE_TYPE * array, VALUE_TYPE max, VALUE_TYPE min)
+    {
+      cuda_clip<<<ceil(elem/256.0), 256.0>>>(elem, array, max, min);
     }
 }
