@@ -29,15 +29,17 @@ def activation_diff(x):
 
 
 class peephole_lstm(Node):
-    def __new__(cls, x, pz, ps, w, wr, wc, b):
-        return cls.calc_value(x, pz, ps, w, wr, wc, b)
+    def __new__(cls, x, pz, ps, w, wr, wc, b, ignore_bias=False):
+        return cls.calc_value(x, pz, ps, w, wr, wc, b, ignore_bias)
 
     @classmethod
-    def _oper_cpu(cls, x, pz, ps, w, wr, wc, b):
+    def _oper_cpu(cls, x, pz, ps, w, wr, wc, b, ignore_bias):
         s = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if ps is None else ps
         z = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if pz is None else pz
 
-        u = np.dot(x, w) + np.dot(z, wr) + b
+        u = np.dot(x, w) + np.dot(z, wr)
+        if not ignore_bias:
+            u += b
         m = u.shape[1] // 4
         u, gate_u = np.split(u, [m, ], axis=1)
         u = tanh(u)
@@ -68,7 +70,7 @@ class peephole_lstm(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, pz, ps, w, wr, wc, b):
+    def _oper_gpu(cls, x, pz, ps, w, wr, wc, b, ignore_bias):
         if ps is None:
             s_p = GPUValue(shape=(x.shape[0], w.shape[1] // 4)).zeros_like_me()
             z_p = s_p.zeros_like_me()
@@ -76,7 +78,10 @@ class peephole_lstm(Node):
             s_p, z_p = map(get_gpu, (ps, pz))
 
         s = s_p.empty_like_me()
-        u = get_gpu(op.dot(x, w) + op.dot(z_p, wr) + b)
+        u = op.dot(x, w) + op.dot(z_p, wr)
+        if not ignore_bias:
+            u += b
+        u = get_gpu(u)
         z = z_p.zeros_like_me()
         cu.cupeepholelstm_forward(u, get_gpu(wc), s_p, s, z)
 
@@ -252,8 +257,9 @@ class PeepholeLstm(Parametrized):
         Learning Precise Timing with LSTM Recurrent Networks
     '''
 
-    def __init__(self, output_size, input_size=None, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal()):
         self._size_o = output_size
+        self._ignore_bias = ignore_bias
         self._initializer = initializer
         super(PeepholeLstm, self).__init__(input_size)
 
@@ -266,7 +272,7 @@ class PeepholeLstm(Parametrized):
             "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True),
             "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True),
             "wc": Variable(self._initializer((1, size_o * 3)), auto_update=True),
-            "b": Variable(bias, auto_update=True),
+            "b": None if self._ignore_bias else Variable(bias, auto_update=True),
         }
 
     def forward(self, x):
@@ -275,7 +281,8 @@ class PeepholeLstm(Parametrized):
                             self.params.w,
                             self.params.wr,
                             self.params.wc,
-                            self.params.b)
+                            self.params.b,
+                            self._ignore_bias)
         self._z = ret
         self._state = getattr(ret.attrs, '_state', None)
         return ret
