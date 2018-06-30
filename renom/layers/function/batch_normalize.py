@@ -61,7 +61,7 @@ class batch_normalize(Node):
             axs = 0
 
         if ignore_bias:
-            b = np.zeros(w.shape[0])
+            b = get_gpu(w).zeros_like_me()
 
         y, mean, sq_var = (get_gpu(g).empty_like_me() for g in (x, w, w))
         mov_m = get_gpu(mov_m)
