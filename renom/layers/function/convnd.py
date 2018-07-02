@@ -16,7 +16,6 @@ class convnd(Node):
         in_shape = x.shape[1:]
         return cls.calc_value(x, w, b, in_shape, filter, stride, padding)
 
-
     @classmethod
     def _oper_cpu(cls, x, w, b, in_shape, kernel, stride, padding):
         col = imncol(to_value(x), w, stride, padding)
@@ -78,6 +77,7 @@ class convnd(Node):
 
         if isinstance(self.attrs._b, Node):
             self.attrs._b._update_diff(context, db, **kwargs)
+
 
 def check_input(var, length):
     if isinstance(var, tuple):
@@ -145,8 +145,10 @@ class ConvNd(Parametrized):
         if is_cuda_active():
             assert self._dims < 4, "GPU Version currently only supports up to 3 dimensions"
 
-        func = lambda var: check_input(var, self._dims)
-        self._kernel, self._padding, self._stride = map(func, [self._kernel, self._padding, self._stride])
+        def func(var):
+            return check_input(var, self._dims)
+        self._kernel, self._padding, self._stride = map(
+            func, [self._kernel, self._padding, self._stride])
 
         f_lst = [self._channel, input_size[0]]
         f_lst.extend(self._kernel)
@@ -158,7 +160,7 @@ class ConvNd(Parametrized):
 
     def forward(self, x):
         return convnd(x, self.params["w"], self.params["b"], self._kernel,
-                          self._stride, self._padding)
+                      self._stride, self._padding)
 
 
 class Conv3d(Parametrized):
@@ -183,8 +185,11 @@ class Conv3d(Parametrized):
         # After this dimension, the image data is assumed to be meaningfully correlated.
         self._dims = len(input_size[1:])
         assert self._dims < 4, "Conv3D expects up to 3 dimensions"
-        func = lambda var: check_input(var, self._dims)
-        self._kernel, self._padding, self._stride = map(func, [self._kernel, self._padding, self._stride])
+
+        def func(var):
+            return check_input(var, self._dims)
+        self._kernel, self._padding, self._stride = map(
+            func, [self._kernel, self._padding, self._stride])
 
         f_lst = [self._channel, input_size[0]]
         f_lst.extend(self._kernel)
@@ -196,4 +201,4 @@ class Conv3d(Parametrized):
 
     def forward(self, x):
         return convnd(x, self.params["w"], self.params["b"], self._kernel,
-                            self._stride, self._padding)
+                      self._stride, self._padding)

@@ -23,8 +23,8 @@ class npool_base(Node):
 class max_poolnd(npool_base):
 
     @classmethod
-    def _oper_cpu(cls, x,kernel, stride, padding):
-        result = imnpool(x, kernel, stride, padding, mode = "max")
+    def _oper_cpu(cls, x, kernel, stride, padding):
+        result = imnpool(x, kernel, stride, padding, mode="max")
         ret = cls._create_node(result)
         ret.attrs._x = x
         ret.attrs._kernel = kernel
@@ -37,7 +37,7 @@ class max_poolnd(npool_base):
         N = x.shape[0]
         pool_desc = cu.PoolingNDescriptor(karnel, padding, stride, pool_mode=0)
         out_shape = (np.array(x.shape[2:]) - np.array(karnel)) // np.array(stride) + 1
-        y = GPUValue(shape=tuple([N,x.shape[1] ] + list(out_shape)))
+        y = GPUValue(shape=tuple([N, x.shape[1]] + list(out_shape)))
         with cu.cudnn_handler() as handle:
             cu.cuPoolingForward(handle, pool_desc, x, y)
         ret = cls._create_node(y)
@@ -46,14 +46,15 @@ class max_poolnd(npool_base):
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        result = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, mode = "max")
+        result = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, mode="max")
         self.attrs._x._update_diff(context, result, **kwargs)
+
 
 class average_poolnd(npool_base):
 
     @classmethod
     def _oper_cpu(cls, x, kernel, stride, padding):
-        result = imnpool(x, kernel, stride, padding, mode = "average")
+        result = imnpool(x, kernel, stride, padding, mode="average")
         ret = cls._create_node(result)
         ret.attrs._x = x
         ret.attrs._kernel = kernel
@@ -66,7 +67,7 @@ class average_poolnd(npool_base):
         N = x.shape[0]
         pool_desc = cu.PoolingNDescriptor(karnel, padding, stride, pool_mode=1)
         out_shape = (np.array(x.shape[2:]) - np.array(karnel)) // np.array(stride) + 1
-        y = GPUValue(shape=tuple([N,x.shape[1] ] + list(out_shape)))
+        y = GPUValue(shape=tuple([N, x.shape[1]] + list(out_shape)))
         with cu.cudnn_handler() as handle:
             cu.cuPoolingForward(handle, pool_desc, x, y)
         ret = cls._create_node(y)
@@ -75,8 +76,9 @@ class average_poolnd(npool_base):
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        dx = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, mode = "average")
+        dx = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, mode="average")
         self.attrs._x._update_diff(context, dx, **kwargs)
+
 
 def check_input(var, length):
     if isinstance(var, tuple):
@@ -90,6 +92,7 @@ def check_input(var, length):
     assert len(var) is length
     return var
 
+
 class NPoolBase:
 
     def __init__(self, kernel=3, padding=0, stride=1):
@@ -101,8 +104,11 @@ class NPoolBase:
         dims = len(x.shape[2:])
         if is_cuda_active():
             assert dims < 4, "GPU Version can only handle up to 3 dimensions"
-        func = lambda var: check_input(var, dims)
-        self._padding, self._stride, self._kernel = map(func, [self._padding, self._stride, self._kernel])
+
+        def func(var):
+            return check_input(var, dims)
+        self._padding, self._stride, self._kernel = map(
+            func, [self._padding, self._stride, self._kernel])
         return self.forward(x)
 
 
@@ -110,6 +116,7 @@ class MaxPoolNd(NPoolBase):
 
     def forward(self, x):
         return max_poolnd(x, self._kernel, self._stride, self._padding)
+
 
 class AveragePoolNd(NPoolBase):
 
