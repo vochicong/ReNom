@@ -346,17 +346,20 @@ def test_softmax(node, x, use_gpu):
     Variable(rand((2, 1))),
     Variable(rand((1, 2))),
 ])
-def test_dense(node, use_gpu):
+def test_dense(node, use_gpu, ignore_bias):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
-    layer = Dense(output_size=2)
+    layer = Dense(output_size=2, ignore_bias=ignore_bias)
 
     def func(node):
         return sum(layer(node))
     compare(func, node, node)
     compare(func, layer.params["w"], node)
-    compare(func, layer.params["b"], node)
+    try:
+        compare(func, layer.params["b"], node)
+    except KeyError:
+        assert ignore_bias
 
 
 @pytest.mark.parametrize("node", [
@@ -379,17 +382,20 @@ def test_embedding(node, use_gpu):
     Variable(rand((2, 2))),
     Variable(rand((20, 2))),
 ])
-def test_batch_normalize(node, use_gpu):
+def test_batch_normalize(node, use_gpu, ignore_bias):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
-    layer = BatchNormalize()
+    layer = BatchNormalize(ignore_bias=ignore_bias)
 
     def func(node):
         return sum(layer(node))
     compare(func, node, node)
     compare(func, layer.params["w"], node)
-    compare(func, layer.params["b"], node)
+    try:
+        compare(func, layer.params["b"], node)
+    except KeyError:
+        assert ignore_bias
 
 
 @pytest.mark.parametrize("node", [
@@ -428,17 +434,20 @@ def test_batch_normalize_featurewise(node, use_gpu):
     Variable(rand((2, 2, 3, 3))),
     Variable(rand((2, 3, 4, 5))),
 ])
-def test_conv2d(node, use_gpu):
+def test_conv2d(node, use_gpu, ignore_bias):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
-    layer = Conv2d(channel=3)
+    layer = Conv2d(channel=3, ignore_bias=ignore_bias)
 
     def func(node):
         return sum(layer(node))
     compare(func, node, node)
     compare(func, layer.params["w"], node)
-    compare(func, layer.params["b"], node)
+    try:
+        compare(func, layer.params["b"], node)
+    except KeyError:
+        assert ignore_bias
 
 
 @pytest.mark.parametrize("node, error", [
@@ -470,17 +479,21 @@ def test_convnd(node, error, use_gpu):
     Variable(rand((2, 3, 3, 3))),
     Variable(rand((2, 3, 4, 5))),
 ])
-def test_deconv2d(node, use_gpu):
+def test_deconv2d(node, use_gpu, ignore_bias):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
-    layer = Deconv2d(channel=3)
+    layer = Deconv2d(channel=3, ignore_bias=ignore_bias)
 
     def func(node):
         return sum(layer(node))
     compare(func, node, node)
     compare(func, layer.params["w"], node)
-    compare(func, layer.params["b"], node)
+
+    try:
+        compare(func, layer.params["b"], node)
+    except KeyError:
+        assert ignore_bias
 
 
 @pytest.mark.parametrize("node", [
@@ -607,11 +620,11 @@ def test_spatial_dropout(node, seed, use_gpu):
     Variable(rand((2, 1))),
     Variable(rand((1, 2))),
 ])
-def test_lstm(node, use_gpu):
+def test_lstm(node, use_gpu, ignore_bias):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
-    layer1 = Lstm(output_size=4)
+    layer1 = Lstm(output_size=4, ignore_bias=ignore_bias)
 
     def func(node):
         loss = 0
@@ -622,7 +635,10 @@ def test_lstm(node, use_gpu):
 
     compare(func, node, node)
     for k in layer1.params.keys():
-        compare(func, layer1.params[k], node)
+        try:
+            compare(func, layer1.params[k], node)
+        except KeyError:
+            assert ignore_bias
 
 
 @pytest.mark.parametrize("node", [
@@ -653,11 +669,11 @@ def test_lstm_temporal_connection(node, use_gpu):
     Variable(rand((2, 1))),
     Variable(rand((1, 2))),
 ])
-def test_peepholelstm(node, use_gpu):
+def test_peepholelstm(node, use_gpu, ignore_bias):
     node = Variable(node)
     set_cuda_active(use_gpu)
 
-    layer1 = rm.PeepholeLstm(output_size=4)
+    layer1 = rm.PeepholeLstm(output_size=4, ignore_bias=ignore_bias)
 
     def func(node):
         loss = 0
@@ -668,7 +684,10 @@ def test_peepholelstm(node, use_gpu):
 
     compare(func, node, node)
     for k in layer1.params.keys():
-        compare(func, layer1.params[k], node)
+        try:
+            compare(func, layer1.params[k], node)
+        except KeyError:
+            assert ignore_bias
 
 
 @pytest.mark.parametrize("node", [

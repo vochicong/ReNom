@@ -15,7 +15,6 @@ from renom.config import precision
 ])
 def test_gpu_distributor(data_shape):
     # Construct the data from numpy
-    print("Started Test")
     X = np.full(data_shape, 1)
     X = np.arange(np.prod(data_shape)).reshape(*data_shape)
     X = X.astype(precision)
@@ -25,6 +24,7 @@ def test_gpu_distributor(data_shape):
     #batch_size = len(X)
     # Set up the distributor and loop parameters
     set_cuda_active(True)
+    print(is_cuda_active())
     data_distributor = GPUDistributor(x=X, y=Y)
     epochs = 3
 

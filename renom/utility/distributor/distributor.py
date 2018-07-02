@@ -6,8 +6,7 @@ import numpy as np
 from renom.core import get_gpu, Node
 from renom.cuda import is_cuda_active
 from renom.config import precision
-if is_cuda_active():
-    from renom.cuda.cuda_base import *
+import renom.cuda.cuda_base as cuda_base
 
 
 class Distributor(object):
@@ -180,11 +179,11 @@ class GPUDistributor(Distributor):
 
     @staticmethod
     def preload_single(batch):
-        with asyncBehaviour():
+        with cuda_base.asyncBehaviour():
             batch = batch.astype(np.dtype(precision))
-            pinNumpy(batch)
+            cuda_base.pinNumpy(batch)
             ret = get_gpu(batch)
-            cuDeviceSynchronize()
+            cuda_base.cuDeviceSynchronize()
         return ret
 
     @staticmethod
@@ -207,7 +206,7 @@ class GPUDistributor(Distributor):
                     b = next(generator)
                     example_batch = b[0] if b[0].size * \
                         b[0].itemsize >= b[1].size * b[1].itemsize else b[1]
-                    initPinnedMemory(example_batch)
+                    cuda_base.initPinnedMemory(example_batch)
                     x1, y1 = GPUDistributor.preload_pair(b[0], b[1])
                     first = False
                 b = next(generator)
@@ -228,7 +227,7 @@ class GPUDistributor(Distributor):
             yield GPUDistributor.create_return(x2, y2)
         else:
             yield GPUDistributor.create_return(x1, y1)
-        freePinnedMemory()
+        cuda_base.freePinnedMemory()
 
 
 class TimeSeriesDistributor(NdarrayDistributor):
