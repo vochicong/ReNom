@@ -27,10 +27,8 @@ from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
 from renom.layers.function.convnd import ConvNd, Conv3d
 from renom.layers.function.deconv2d import Deconv2d
-from renom.layers.function.deconvnd import DeconvNd
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
 from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd
-from renom.layers.function.unpoolnd import MaxUnPoolNd
 from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
@@ -444,15 +442,15 @@ def test_conv2d(node, use_gpu):
 
 
 @pytest.mark.parametrize("node, error", [
-    #[Variable(rand((1, 1, 3, 3, 3, 3))), True],
+    [Variable(rand((1, 1, 3, 3, 3, 3))), True],
     [Variable(rand((2, 2, 4, 4))), False],
-    #[Variable(rand((2, 3, 4, 6, 6))), False],
+    [Variable(rand((2, 3, 4, 6, 6))), False],
     [Variable(rand((1, 1, 4, 8))), False],
 ])
 def test_convnd(node, error, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
-    layer = Conv3d(channel=1, filter=(2,3), stride=1)
+    layer = ConvNd(channel=1, filter=3, stride=1)
 
     def func(node):
         return sum(layer(node))
@@ -484,24 +482,6 @@ def test_deconv2d(node, use_gpu):
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
 
-@pytest.mark.parametrize("node", [
-    Variable(rand((2, 2, 2, 2, 2))),
-])
-def test_deconvnd(node, use_gpu):
-    node = Variable(node)
-    set_cuda_active(use_gpu)
-
-    layerin = ConvNd(channel=2,filter=2)
-    layerout = DeconvNd()
-
-    def func(node):
-        ret = layerin(node)
-        return sum(layerout(ret,ret))
-    func(node)
-    compare(func, node, node)
-    compare(func, layerout.params["w"], node)
-    compare(func, layerout.params["b"], node)
-
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
@@ -519,43 +499,18 @@ def test_max_pool2d(node, use_gpu):
 
 
 @pytest.mark.parametrize("node", [
-    # Variable(rand((1, 1, 3, 3, 3, 3))), #This test fails on CPU for some reason exactly with seed 10
-    #Variable(rand((3, 2, 4, 5, 2))),
-    #Variable(rand((2, 2, 3, 3))),
+    Variable(rand((3, 2, 4, 5, 2))),
+    Variable(rand((2, 2, 3, 3))),
     Variable(rand((2, 3, 4, 5)))
 ])
 def test_max_poolnd(node, use_gpu):
-
 
     node = Variable(node)
     set_cuda_active(use_gpu)
     layer = MaxPoolNd(kernel=2)
 
-
     def func(node):
         return sum(layer(node))
-    compare(func, node, node)
-
-@pytest.mark.parametrize("node", [
-    #Variable(rand((2, 3, 4, 5))),
-    Variable(rand((1, 1, 2, 2)))
-])
-def test_max_unpoolnd(node):#, use_gpu):
-    node = Variable(node)
-    #set_cuda_active(use_gpu)
-    set_cuda_active(True)
-
-    layerin = MaxPoolNd(kernel=2)
-    layerout = MaxUnPoolNd()
-
-    def func(node):
-        ret = layerin(node)
-        print(node)
-        print(ret)
-        ret = layerout(ret,ret)
-        print(ret)
-        assert False
-        return sum(layerout(ret))
     compare(func, node, node)
 
 
@@ -590,6 +545,7 @@ def test_average_pool2d(node, use_gpu):
     def func(node):
         return sum(layer(node))
     compare(func, node, node)
+
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2, 3, 3, 3))),
