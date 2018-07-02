@@ -85,6 +85,7 @@ class convnd(Node):
         if isinstance(self.attrs._b, Node):
             self.attrs._b._update_diff(context, db, **kwargs)
 
+
 def check_input(var, length):
     if isinstance(var, tuple):
         assert len(var) is length

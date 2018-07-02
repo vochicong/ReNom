@@ -85,6 +85,7 @@ def colnim(img, weight, stride):
     ret = np.array(ret)
     return ret
 
+
 def colnw(img, weight, stride):
     ret = []
     for out_channel in range(weight.shape[1]):
@@ -98,6 +99,7 @@ def colnw(img, weight, stride):
         ret.append(tmp2)
     ret = np.array(ret)
     return ret
+
 
 def imnw(img, weight, stride):
     ret = []
@@ -136,6 +138,7 @@ def place_back_kernels(img, kernel, stride=1, offset=0):
         kern = kernel * img[tuple(np.array(pos) // stride)]
         ret[slices] += kern
     return ret
+
 
 def place_overlap_kernels(img, kernel, stride=1, offset=0):
     ret_shape = np.array(img.shape) - (np.array(kernel.shape) - 1) * stride
