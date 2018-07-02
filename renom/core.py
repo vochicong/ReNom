@@ -116,7 +116,8 @@ class Grads:
             try:
                 return self.variables[id(node)]
             except KeyError:
-                raise Exception("Node not found. Ensure that _update_diff was properly called on the node first.")
+                raise Exception(
+                    "Node not found. Ensure that _update_diff was properly called on the node first.")
         else:
             return self.variables.get(id(node), default)
 

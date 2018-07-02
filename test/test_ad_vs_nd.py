@@ -353,7 +353,7 @@ def test_dense(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
 
@@ -389,7 +389,7 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
 
@@ -441,7 +441,7 @@ def test_conv2d(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
 
@@ -462,7 +462,7 @@ def test_deconv2d(node, use_gpu, ignore_bias):
 
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
 
@@ -577,7 +577,7 @@ def test_lstm(node, use_gpu, ignore_bias):
     for k in layer1.params.keys():
         try:
             compare(func, layer1.params[k], node)
-        except KeyError:
+        except Exception:
             assert ignore_bias
 
 
@@ -626,7 +626,7 @@ def test_peepholelstm(node, use_gpu, ignore_bias):
     for k in layer1.params.keys():
         try:
             compare(func, layer1.params[k], node)
-        except KeyError:
+        except Exception:
             assert ignore_bias
 
 
