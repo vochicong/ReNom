@@ -27,11 +27,9 @@ from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
 from renom.layers.function.convnd import ConvNd, Conv3d
 from renom.layers.function.deconv2d import Deconv2d
-from renom.layers.function.deconvnd import DeconvNd
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
 from renom.layers.function.unpool2d import MaxUnPool2d, AverageUnPool2d
 from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd
-from renom.layers.function.unpoolnd import MaxUnPoolNd
 from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
@@ -477,7 +475,7 @@ def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
 @pytest.mark.parametrize("node, error", [
     [Variable(rand((1, 1, 3, 3, 3, 3))), True],
     [Variable(rand((2, 2, 4, 4))), False],
-    #[Variable(rand((2, 3, 4, 6, 6))), False],
+    [Variable(rand((2, 3, 4, 6, 6))), False],
     [Variable(rand((1, 1, 4, 8))), False],
 ])
 def test_convnd(node, error, use_gpu, ignore_bias):
@@ -566,31 +564,8 @@ def test_max_poolnd(node, use_gpu):
     set_cuda_active(use_gpu)
     layer = MaxPoolNd(kernel=2)
 
-
     def func(node):
         return sum(layer(node))
-    compare(func, node, node)
-
-@pytest.mark.parametrize("node", [
-    #Variable(rand((2, 3, 4, 5))),
-    Variable(rand((1, 1, 2, 2)))
-])
-def test_max_unpoolnd(node):#, use_gpu):
-    node = Variable(node)
-    #set_cuda_active(use_gpu)
-    set_cuda_active(True)
-
-    layerin = MaxPoolNd(kernel=2)
-    layerout = MaxUnPoolNd()
-
-    def func(node):
-        ret = layerin(node)
-        print(node)
-        print(ret)
-        ret = layerout(ret,ret)
-        print(ret)
-        assert False
-        return sum(layerout(ret))
     compare(func, node, node)
 
 
