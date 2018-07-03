@@ -393,18 +393,23 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
     except KeyError:
         assert ignore_bias
 
-@pytest.mark.parametrize("node", [
-    Variable(rand((1,5))),
-])
-def test_layer_normalize(node):
-    node = Variable(node * 100)
 
-    layer = LayerNormalization()#gain=1e+8)
+@pytest.mark.parametrize("node", [
+    Variable(rand((20, 2))),
+    Variable(rand((2, 5))),
+    Variable(rand((3, 14))),
+])
+def test_layer_normalize(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = LayerNormalization(gain=1)
 
     def func(node):
         return sum(layer(node))
     compare(func, node, node)
     compare(func, layer.params["gain"], node)
+    compare(func, layer.params["bias"], node)
 
 
 @pytest.mark.parametrize("node", [
