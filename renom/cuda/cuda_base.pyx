@@ -355,6 +355,7 @@ cdef class GPUHeap(object):
 
     def __dealloc__(self):
         # Python functions should be avoided as far as we can
+<<<<<<< HEAD
 
         cdef int cur
         cdef cudaError_t err
@@ -365,6 +366,18 @@ cdef class GPUHeap(object):
             if err == cudaSuccess:
                 err = cudaFree(<void * >self.ptr)
 
+=======
+
+        cdef int cur
+        cdef cudaError_t err
+
+        cudaGetDevice(&cur)
+        try:
+            err = cudaSetDevice(self.device_id)
+            if err == cudaSuccess:
+                err = cudaFree(<void * >self.ptr)
+
+>>>>>>> 805f9d1... device_id should be restored
             if err != cudaSuccess:
                 print("Error in GPUHeap.__dealloc__():", err, file=sys.stderr)
         finally:
