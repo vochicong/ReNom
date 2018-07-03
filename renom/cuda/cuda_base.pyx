@@ -189,12 +189,21 @@ cdef class GPUHeap(object):
         return self.ptr
 
     def __dealloc__(self):
-        cdef cudaError_t err = cudaSetDevice(self.device_id)
-        if err == cudaSuccess:
-            err = cudaFree(<void * >self.ptr)
+        # Python functions should be avoided as far as we can
 
-        if err != cudaSuccess:
-            print("Error in GPUHeap.__dealloc__():", err, file=sys.stderr)
+        cdef int cur
+        cdef cudaError_t err
+
+        cudaGetDevice(&cur)
+        try:
+            err = cudaSetDevice(self.device_id)
+            if err == cudaSuccess:
+                err = cudaFree(<void * >self.ptr)
+
+            if err != cudaSuccess:
+                print("Error in GPUHeap.__dealloc__():", err, file=sys.stderr)
+        finally:
+            cudaSetDevice(cur)
 
     cpdef memcpyH2D(self, cpu_ptr, size_t nbytes):
         # todo: this copy is not necessary
