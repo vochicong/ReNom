@@ -20,7 +20,7 @@ def test_gpu_distributor(data_shape):
     X = X.astype(precision)
     #Y = (X*2).reshape(*data_shape)
     Y = np.full(data_shape, 0)
-    batch_size = (len(X)//100)
+    batch_size = (len(X) // 100)
     #batch_size = len(X)
     # Set up the distributor and loop parameters
     set_cuda_active(True)
@@ -42,7 +42,8 @@ def test_gpu_distributor(data_shape):
     for e in range(epochs):
         i = 0
         for batch_x, batch_y in data_distributor.batch(batch_size, shuffle=False):
-            test_result = X[i*batch_size:(i+1)*batch_size]+Y[i*batch_size:(i+1)*batch_size]
+            test_result = X[i * batch_size:(i + 1) * batch_size] + \
+                Y[i * batch_size:(i + 1) * batch_size]
             result = Node(batch_x + batch_y)
             result.to_cpu()
             result = result.as_ndarray()
