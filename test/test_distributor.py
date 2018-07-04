@@ -1,7 +1,6 @@
 import renom as rm
 import numpy as np
 import pytest
-from renom.utility.distributor.distributor import *
 from renom.cuda import *
 import test_utility
 from renom.config import precision
@@ -14,6 +13,7 @@ from renom.config import precision
     (int(1e8), int(1e0)),  # Large Data Test
 ])
 def test_gpu_distributor(data_shape):
+    from renom.utility.distributor.distributor import GPUDistributor
     # Construct the data from numpy
     X = np.full(data_shape, 1)
     X = np.arange(np.prod(data_shape)).reshape(*data_shape)
@@ -44,7 +44,7 @@ def test_gpu_distributor(data_shape):
         for batch_x, batch_y in data_distributor.batch(batch_size, shuffle=False):
             test_result = X[i * batch_size:(i + 1) * batch_size] + \
                 Y[i * batch_size:(i + 1) * batch_size]
-            result = Node(batch_x + batch_y)
+            result = rm.Node(batch_x + batch_y)
             result.to_cpu()
             result = result.as_ndarray()
             assert np.allclose(result, test_result), "\n{}".format(np.isclose(result, test_result))
