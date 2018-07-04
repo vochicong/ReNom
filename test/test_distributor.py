@@ -44,7 +44,11 @@ def test_gpu_distributor(data_shape):
         for batch_x, batch_y in data_distributor.batch(batch_size, shuffle=False):
             test_result = X[i * batch_size:(i + 1) * batch_size] + \
                 Y[i * batch_size:(i + 1) * batch_size]
+<<<<<<< HEAD
             result = rm.Node(batch_x + batch_y)
+=======
+            result = Node(batch_x + batch_y)
+>>>>>>> de04894... flake8
             result.to_cpu()
             result = result.as_ndarray()
             assert np.allclose(result, test_result), "\n{}".format(np.isclose(result, test_result))
