@@ -7,6 +7,11 @@ from renom.core import get_gpu, Node
 from renom.cuda import is_cuda_active
 from renom.config import precision
 
+try:
+    import renom.cuda.cuda_base as cuda_base
+except:
+    cuda_base = None
+
 
 class Distributor(object):
     '''Distributor class
@@ -165,8 +170,7 @@ class GPUDistributor(Distributor):
     '''
 
     def __init__(self, x, y, **kwargs):
-        assert is_cuda_active(), "Cuda must be activated to use GPU distributor"
-        import renom.cuda.cuda_base as cuda_base
+        assert is_cuda_active() and cuda_base is not None, "Cuda must be activated to use GPU distributor"
         super(GPUDistributor, self).__init__(x=x, y=y, data_table=kwargs.get("data_table"))
         assert len(x) == len(y), "Input batches must have same number as output batches"
         self._data_size = len(x)
