@@ -21,14 +21,14 @@ def get_gen_distribution(x, mu=None, sigma=None):
 
 
 def get_mu(x):
-    _ax = tuple([r for r in range(1,len(x.shape[1:])+1)])
+    _ax = tuple([r for r in range(1, len(x.shape[1:]) + 1)])
     H = np.prod(x.shape[1:])
     sum = np.sum(x, axis=_ax, keepdims=True)
     return sum / H
 
 
 def get_sigma(x, mu=None):
-    _ax = tuple([r for r in range(1,len(x.shape[1:])+1)])
+    _ax = tuple([r for r in range(1, len(x.shape[1:]) + 1)])
     H = np.prod(x.shape[1:])
     if mu is None:
         mu = get_mu(x)
@@ -42,7 +42,7 @@ def get_mu_diff(x):
 
 
 def get_sigma_diff(x):
-    _ax = tuple([r for r in range(1,len(x.shape[1:])+1)])
+    _ax = tuple([r for r in range(1, len(x.shape[1:]) + 1)])
     H = np.prod(x.shape[1:])
     mu = get_mu(x)
     sigma = get_sigma(x, mu)
@@ -56,7 +56,8 @@ class layernorm(Node):
 
     @classmethod
     def _oper_cpu(cls, x, gain, bias):
-        assert len(x.shape) is 2 or len(x.shape) is 4, "Currently only normalizes for dense and 2d convolutional networks."
+        assert len(x.shape) is 2 or len(x.shape) is 4, \
+            "Currently only normalizes for dense and 2d convolutional networks."
         mu = get_mu(x)
         sigma = get_sigma(x, mu) + 1e-5
         normalized = (x - mu) / sigma
@@ -69,16 +70,35 @@ class layernorm(Node):
         ret.attrs._bias = bias
         return ret
 
+    def _backward_cpu(self, context, dy, **kwargs):
+        x = self.attrs._x
+        mu = self.attrs._mu
+        sigma = self.attrs._sigma
+        gain = self.attrs._gain
+        sigma_diff = get_sigma_diff(x)
+        mu_diff = get_mu_diff(x)
+        _ax = tuple([r for r in range(1, len(x.shape[1:]) + 1)])
+        dx = dy / sigma \
+            - sigma_diff * np.sum(x * dy, axis=_ax, keepdims=True) / np.power(sigma, 2) \
+            - np.sum(mu_diff * dy, axis=_ax, keepdims=True) / sigma \
+            + sigma_diff * np.sum(dy, axis=_ax, keepdims=True) * mu / np.power(sigma, 2)
+        dx *= gain
+        if isinstance(x, Node):
+            self.attrs._x._update_diff(context, dx, **kwargs)
+        self.attrs._gain._update_diff(context, np.sum(
+            self.attrs._normalized * dy, axis=0, keepdims=True), **kwargs)
+        self.attrs._bias._update_diff(context, np.sum(dy, axis=0, keepdims=True), **kwargs)
+
     @classmethod
     def _oper_gpu(cls, x, gain, bias):
-        assert len(x.shape) is 2 or len(x.shape) is 4, "Currently only normalizes for dense and 2d convolutional networks."
+        assert len(x.shape) is 2 or len(x.shape) is 4, \
+            "Currently only normalizes for dense and 2d convolutional networks."
         _x, _gain, _bias = map(get_gpu, [x, gain, bias])
-        _ax = tuple([r for r in range(1,len(x.shape[1:])+1)])
+        _ax = tuple([r for r in range(1, len(x.shape[1:]) + 1)])
         H = np.prod(x.shape[1:])
-        fit_shape = tuple([x.shape[0],] + [1 for _ in range(len(x.shape[1:]))])
-        sum1 = op.sum(_x, axis=_ax).reshape(fit_shape)
+        sum1 = op.sum(_x, axis=_ax, keepdims=True)
         mu = get_gpu(sum1 / H)
-        sum2 = op.sum((_x - mu) ** 2, axis=_ax).reshape(fit_shape)
+        sum2 = op.sum((_x - mu) ** 2, axis=_ax, keepdims=True)
         sigma = op.sqrt(sum2 / H) + 1e-5
         normalized = (_x - mu) / get_gpu(sigma)
         ret = cls._create_node(normalized * _gain + _bias)
@@ -90,23 +110,6 @@ class layernorm(Node):
         ret.attrs._normalized = normalized
         return ret
 
-    def _backward_cpu(self, context, dy, **kwargs):
-        x = self.attrs._x
-        mu = self.attrs._mu
-        sigma = self.attrs._sigma
-        gain = self.attrs._gain
-        sigma_diff = get_sigma_diff(x)
-        mu_diff = get_mu_diff(x)
-        dx = dy / sigma - sigma_diff * np.sum(x * dy, axis=1, keepdims=True) / np.power(sigma, 2) - np.sum(
-            mu_diff * dy, axis=1, keepdims=True) / sigma + sigma_diff * \
-            np.sum(dy, axis=1, keepdims=True) * mu / np.power(sigma, 2)
-        dx *= gain
-        if isinstance(x, Node):
-            self.attrs._x._update_diff(context, dx, **kwargs)
-        self.attrs._gain._update_diff(context, np.sum(
-            self.attrs._normalized * dy, axis=0, keepdims=True), **kwargs)
-        self.attrs._bias._update_diff(context, np.sum(dy, axis=0, keepdims=True), **kwargs)
-
     def _backward_gpu(self, context, dy, **kwargs):
         dx = get_gpu(self.attrs._x).zeros_like_me()
         H = self.attrs._x.shape[1]
@@ -115,15 +118,15 @@ class layernorm(Node):
         sigma = get_gpu(self.attrs._sigma)
         gain = get_gpu(self.attrs._gain)
         dy = get_gpu(dy)
-        _ax = tuple([r for r in range(1,len(x.shape[1:])+1)])
+        _ax = tuple([r for r in range(1, len(x.shape[1:]) + 1)])
         H = np.prod(x.shape[1:])
-        fit_shape = tuple([x.shape[0],] + [1 for _ in range(len(x.shape[1:]))])
-        assert False
         mu_diff = get_gpu(get_mu_diff(x))
-        sigma_diff = 1 / (2 * sigma) * ((2 * x + H * (2 * mu / H) - get_gpu(2 * (op.sum(x, axis=_ax).reshape(fit_shape) / H + mu)) ) / H)
-        dx = get_gpu(dy / sigma) - get_gpu(sigma_diff * get_gpu(op.sum(x * dy, axis=_ax).reshape(fit_shape)) / (sigma ** 2)) - get_gpu(get_gpu(op.sum(
-            mu_diff * dy, axis=_ax).reshape(fit_shape)) / sigma) + get_gpu(sigma_diff * \
-            get_gpu(op.sum(dy, axis=_ax).reshape(fit_shape)) * mu / (sigma ** 2))
+        sigma_diff = get_gpu(1 / (2 * sigma) * ((2 * x + H * (2 * mu / H) -
+                                                 get_gpu(2 * (op.sum(x, axis=_ax, keepdims=True) / H + mu))) / H))
+        dx = get_gpu(dy / sigma) \
+            - get_gpu(sigma_diff * get_gpu(op.sum(1 * dy, axis=_ax, keepdims=True)) / (sigma ** 2)) \
+            - get_gpu(get_gpu(op.sum(mu_diff * dy, axis=_ax, keepdims=True)) / sigma) \
+            + get_gpu(sigma_diff * get_gpu(op.sum(dy, axis=_ax, keepdims=True)) * mu / (sigma ** 2))
         dx *= gain
         self.attrs._x._update_diff(context, dx, **kwargs)
         self.attrs._gain._update_diff(context, cu.cusum(
@@ -160,10 +163,10 @@ class LayerNormalization(Parametrized):
         self._bias = bias
 
     def weight_initiallize(self, input_size):
-        sz = input_size[0]
+        sz = tuple(input_size)
         self.params = {
-            "gain": Variable(np.array([[self._gain for _ in range(sz)]]), auto_update=True),
-            "bias": Variable(np.array([[self._bias for _ in range(sz)]]), auto_update=True)}
+            "gain": Variable(np.ones(sz) * self._gain, auto_update=True),
+            "bias": Variable(np.ones(sz) * self._bias, auto_update=True)}
 
     def forward(self, x):
         return layernorm(x, self.params["gain"], self.params["bias"])

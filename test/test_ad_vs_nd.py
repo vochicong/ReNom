@@ -403,14 +403,14 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
 
 
 @pytest.mark.parametrize("node", [
-    Variable(rand((2, 2, 3, 2))),
+    Variable(rand((1, 2, 4, 3))),
     Variable(rand((2, 5))),
     Variable(rand((20, 2))),
     Variable(rand((3, 14))),
     Variable(rand((2, 4)))
 ])
-def test_layer_normalize(node , use_gpu):
-    node = Variable(node)
+def test_layer_normalize(node, use_gpu):
+    node = Variable(node*50)
     set_cuda_active(use_gpu)
 
     layer = LayerNormalization()
@@ -426,7 +426,7 @@ def test_layer_normalize(node , use_gpu):
     a = 1e-5
     r = 1e-3
     if use_gpu:
-        a = 1e-0
+        a = 1e+2
         r = 1e-3
     compare(func, node, node, atol=a, rtol=r)
     compare(func, layer.params["gain"], node)
