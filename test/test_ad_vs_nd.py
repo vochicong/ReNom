@@ -819,14 +819,18 @@ def test_abs(node, use_gpu):
     [Variable(rand((1, 2))), 0],
     [Variable(rand((2, 1))), 1],
     [Variable(rand((1,))), 0],
+    [Variable(rand((2, 3, 4, 5))), (1, 2, 3)],
 ])
 def test_sum(node, axis, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
+    result = sum(node, axis=axis, keepdims=True)
+    assert len(result.shape) == len(node.shape)
 
-    def func(node):
-        return sum(sum(node, axis=axis))
-    compare(func, node, node)
+    def func(node, keepdims):
+        return sum(sum(node, axis=axis, keepdims=keepdims))
+    compare(func, node, node, True)
+    compare(func, node, node, False)
 
 
 @pytest.mark.parametrize("node", [
