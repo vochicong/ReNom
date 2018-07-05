@@ -165,7 +165,6 @@ class Grads:
                     if id(node) in self.variables:
                         self.update_node(node, opt)
 
-
 def to_value(array):
     if isinstance(array, Node):
         array.to_cpu()
