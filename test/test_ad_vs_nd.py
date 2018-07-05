@@ -64,13 +64,21 @@ def onehot(shape):
     return ret
 
 
-def compare(func, node, *args):
+def compare(func, node, *args, **kwargs):
+    if 'atol' in kwargs:
+        atol = kwargs['atol']
+    else:
+        atol = 1e-5
+    if 'rtol' in kwargs:
+        rtol = kwargs['rtol']
+    else:
+        rtol = 1e-3
     ad = auto_diff(func, node, *args)
     nd = numeric_diff(func, node, *args)
     print("ad = \n{}".format(ad))
     print("nd = \n{}".format(nd))
     print("difference = \n{}".format(ad - nd))
-    assert np.allclose(ad, nd, atol=1e-5, rtol=1e-3)
+    assert np.allclose(ad, nd, atol=atol, rtol=rtol)
 
 
 @pytest.mark.parametrize("node, x, raise_error", [
@@ -402,16 +410,19 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
 ])
 def test_layer_normalize(node , use_gpu):
     node = Variable(node)
+    set_cuda_active(use_gpu)
 
     layer = LayerNormalization()
     layer2 = Dense(4)
 
     def func(node):
         return sum(layer2(layer(node)))
+    a = 1e-5
+    r = 1e-3
     if use_gpu:
-        layer(node)
-    else:
-        compare(func, node, node)
+        a = 1e-0
+        r = 1e-3
+    compare(func, node, node, atol=a, rtol=r)
     compare(func, layer.params["gain"], node)
     compare(func, layer.params["bias"], node)
 

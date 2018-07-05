@@ -1,4 +1,5 @@
 
+from __future__ import division
 import numpy as np
 from renom.cuda import cuda as cu
 from renom.core import Node, Variable
@@ -110,9 +111,7 @@ class layernorm(Node):
         gain = get_gpu(self.attrs._gain)
         dy = get_gpu(dy)
         mu_diff = get_gpu(get_mu_diff(x))
-
         sigma_diff = 1 / (2 * sigma) * ((2 * x + H * (2 * mu / H) - get_gpu(2 * (op.sum(x, axis=1).reshape(-1,1) / H + mu)) ) / H)
-
         dx = get_gpu(dy / sigma) - get_gpu(sigma_diff * get_gpu(op.sum(x * dy, axis=1).reshape(-1,1)) / (sigma ** 2)) - get_gpu(get_gpu(op.sum(
             mu_diff * dy, axis=1).reshape(-1,1)) / sigma) + get_gpu(sigma_diff * \
             get_gpu(op.sum(dy, axis=1).reshape(-1,1)) * mu / (sigma ** 2))
