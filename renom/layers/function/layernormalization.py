@@ -21,29 +21,32 @@ def get_gen_distribution(x, mu=None, sigma=None):
 
 
 def get_mu(x):
-    H = x.shape[1]
-    sum = np.sum(x, axis=1, keepdims=True)
+    _ax = tuple([r for r in range(1,len(x.shape[1:])+1)])
+    H = np.prod(x.shape[1:])
+    sum = np.sum(x, axis=_ax, keepdims=True)
     return sum / H
 
 
 def get_sigma(x, mu=None):
+    _ax = tuple([r for r in range(1,len(x.shape[1:])+1)])
+    H = np.prod(x.shape[1:])
     if mu is None:
         mu = get_mu(x)
-    H = x.shape[1]
-    sum = np.sum(np.power(x - mu, 2), axis=1, keepdims=True)
+    sum = np.sum(np.power(x - mu, 2), axis=_ax, keepdims=True)
     return np.sqrt(sum / H)
 
 
 def get_mu_diff(x):
-    H = x.shape[1]
+    H = np.prod(x.shape[1:])
     return 1 / H
 
 
 def get_sigma_diff(x):
-    H = x.shape[1]
+    _ax = tuple([r for r in range(1,len(x.shape[1:])+1)])
+    H = np.prod(x.shape[1:])
     mu = get_mu(x)
     sigma = get_sigma(x, mu)
-    inside = (2 * x + H * (2 * mu / H) - 2 * (np.sum(x, axis=1, keepdims=True) / H + mu)) / H
+    inside = (2 * x + H * (2 * mu / H) - 2 * (np.sum(x, axis=_ax, keepdims=True) / H + mu)) / H
     return 1 / (2 * sigma) * inside
 
 
@@ -53,7 +56,7 @@ class layernorm(Node):
 
     @classmethod
     def _oper_cpu(cls, x, gain, bias):
-        assert len(x.shape) is 2, "Currently only normalizes for dense networks."
+        assert len(x.shape) is 2 or len(x.shape) is 4, "Currently only normalizes for dense and 2d convolutional networks."
         mu = get_mu(x)
         sigma = get_sigma(x, mu) + 1e-5
         normalized = (x - mu) / sigma
@@ -68,12 +71,14 @@ class layernorm(Node):
 
     @classmethod
     def _oper_gpu(cls, x, gain, bias):
-        assert len(x.shape) is 2, "Currently only normalizes for dense networks."
+        assert len(x.shape) is 2 or len(x.shape) is 4, "Currently only normalizes for dense and 2d convolutional networks."
         _x, _gain, _bias = map(get_gpu, [x, gain, bias])
-        H = x.shape[1]
-        sum1 = op.sum(_x, axis=1).reshape(-1, 1)
+        _ax = tuple([r for r in range(1,len(x.shape[1:])+1)])
+        H = np.prod(x.shape[1:])
+        fit_shape = tuple([x.shape[0],] + [1 for _ in range(len(x.shape[1:]))])
+        sum1 = op.sum(_x, axis=_ax).reshape(fit_shape)
         mu = get_gpu(sum1 / H)
-        sum2 = op.sum((_x - mu) ** 2, axis=1).reshape(-1,1)
+        sum2 = op.sum((_x - mu) ** 2, axis=_ax).reshape(fit_shape)
         sigma = op.sqrt(sum2 / H) + 1e-5
         normalized = (_x - mu) / get_gpu(sigma)
         ret = cls._create_node(normalized * _gain + _bias)
@@ -110,11 +115,15 @@ class layernorm(Node):
         sigma = get_gpu(self.attrs._sigma)
         gain = get_gpu(self.attrs._gain)
         dy = get_gpu(dy)
+        _ax = tuple([r for r in range(1,len(x.shape[1:])+1)])
+        H = np.prod(x.shape[1:])
+        fit_shape = tuple([x.shape[0],] + [1 for _ in range(len(x.shape[1:]))])
+        assert False
         mu_diff = get_gpu(get_mu_diff(x))
-        sigma_diff = 1 / (2 * sigma) * ((2 * x + H * (2 * mu / H) - get_gpu(2 * (op.sum(x, axis=1).reshape(-1,1) / H + mu)) ) / H)
-        dx = get_gpu(dy / sigma) - get_gpu(sigma_diff * get_gpu(op.sum(x * dy, axis=1).reshape(-1,1)) / (sigma ** 2)) - get_gpu(get_gpu(op.sum(
-            mu_diff * dy, axis=1).reshape(-1,1)) / sigma) + get_gpu(sigma_diff * \
-            get_gpu(op.sum(dy, axis=1).reshape(-1,1)) * mu / (sigma ** 2))
+        sigma_diff = 1 / (2 * sigma) * ((2 * x + H * (2 * mu / H) - get_gpu(2 * (op.sum(x, axis=_ax).reshape(fit_shape) / H + mu)) ) / H)
+        dx = get_gpu(dy / sigma) - get_gpu(sigma_diff * get_gpu(op.sum(x * dy, axis=_ax).reshape(fit_shape)) / (sigma ** 2)) - get_gpu(get_gpu(op.sum(
+            mu_diff * dy, axis=_ax).reshape(fit_shape)) / sigma) + get_gpu(sigma_diff * \
+            get_gpu(op.sum(dy, axis=_ax).reshape(fit_shape)) * mu / (sigma ** 2))
         dx *= gain
         self.attrs._x._update_diff(context, dx, **kwargs)
         self.attrs._gain._update_diff(context, cu.cusum(

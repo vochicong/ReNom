@@ -403,6 +403,7 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
 
 
 @pytest.mark.parametrize("node", [
+    Variable(rand((2, 2, 3, 2))),
     Variable(rand((2, 5))),
     Variable(rand((20, 2))),
     Variable(rand((3, 14))),
@@ -414,9 +415,14 @@ def test_layer_normalize(node , use_gpu):
 
     layer = LayerNormalization()
     layer2 = Dense(4)
+    layer3 = Conv2d(channel=3)
 
     def func(node):
-        return sum(layer2(layer(node)))
+        ret = layer(node)
+        if len(ret.shape) > 2:
+            return sum(layer3(ret))
+        else:
+            return sum(layer2(ret))
     a = 1e-5
     r = 1e-3
     if use_gpu:
