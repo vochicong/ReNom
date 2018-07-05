@@ -269,7 +269,6 @@ def queryDeviceProperties():
       props.asyncEngineCount
     ))
 
-
 cdef cuMemcpyD2H(uintptr_t gpu_ptr, void *cpu_ptr, int size):
     # gpu to cpu
     runtime_check(cudaMemcpy(cpu_ptr, <void *>gpu_ptr, size, cudaMemcpyDeviceToHost))

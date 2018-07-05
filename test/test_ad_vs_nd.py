@@ -536,7 +536,16 @@ def test_deconv2d_with_dilation(node, size, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
     compare(func, layer.params["w"], node)
+<<<<<<< HEAD
     compare(func, layer.params["b"], node)
+=======
+
+    try:
+        compare(func, layer.params["b"], node)
+    except KeyError:
+        assert ignore_bias
+
+>>>>>>> a0b4ba3... fix conflict
 
 
 @pytest.mark.parametrize("node", [
