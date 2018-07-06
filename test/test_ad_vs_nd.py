@@ -426,7 +426,7 @@ def test_layer_normalize(node, use_gpu):
     a = 1e-5
     r = 1e-3
     if use_gpu:
-        a = 1e+2
+        a = 1e-2
         r = 1e-3
     compare(func, node, node, atol=a, rtol=r)
     compare(func, layer.params["gain"], node)

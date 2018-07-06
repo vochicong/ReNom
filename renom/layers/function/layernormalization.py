@@ -70,24 +70,6 @@ class layernorm(Node):
         ret.attrs._bias = bias
         return ret
 
-    def _backward_cpu(self, context, dy, **kwargs):
-        x = self.attrs._x
-        mu = self.attrs._mu
-        sigma = self.attrs._sigma
-        gain = self.attrs._gain
-        sigma_diff = get_sigma_diff(x)
-        mu_diff = get_mu_diff(x)
-        _ax = tuple([r for r in range(1, len(x.shape[1:]) + 1)])
-        dx = dy / sigma \
-            - sigma_diff * np.sum(x * dy, axis=_ax, keepdims=True) / np.power(sigma, 2) \
-            - np.sum(mu_diff * dy, axis=_ax, keepdims=True) / sigma \
-            + sigma_diff * np.sum(dy, axis=_ax, keepdims=True) * mu / np.power(sigma, 2)
-        dx *= gain
-        if isinstance(x, Node):
-            self.attrs._x._update_diff(context, dx, **kwargs)
-        self.attrs._gain._update_diff(context, np.sum(
-            self.attrs._normalized * dy, axis=0, keepdims=True), **kwargs)
-        self.attrs._bias._update_diff(context, np.sum(dy, axis=0, keepdims=True), **kwargs)
 
     @classmethod
     def _oper_gpu(cls, x, gain, bias):
@@ -110,6 +92,25 @@ class layernorm(Node):
         ret.attrs._normalized = normalized
         return ret
 
+    def _backward_cpu(self, context, dy, **kwargs):
+        x = self.attrs._x
+        mu = self.attrs._mu
+        sigma = self.attrs._sigma
+        gain = self.attrs._gain
+        sigma_diff = get_sigma_diff(x)
+        mu_diff = get_mu_diff(x)
+        _ax = tuple([r for r in range(1, len(x.shape[1:]) + 1)])
+        dx = dy / sigma \
+            - sigma_diff * np.sum(x * dy, axis=_ax, keepdims=True) / np.power(sigma, 2) \
+            - np.sum(mu_diff * dy, axis=_ax, keepdims=True) / sigma \
+            + sigma_diff * np.sum(dy, axis=_ax, keepdims=True) * mu / np.power(sigma, 2)
+        dx *= gain
+        if isinstance(self.attrs._x, Node):
+            self.attrs._x._update_diff(context, dx, **kwargs)
+        self.attrs._gain._update_diff(context, np.sum(
+            self.attrs._normalized * dy, axis=0, keepdims=True), **kwargs)
+        self.attrs._bias._update_diff(context, np.sum(dy, axis=0, keepdims=True), **kwargs)
+
     def _backward_gpu(self, context, dy, **kwargs):
         dx = get_gpu(self.attrs._x).zeros_like_me()
         H = self.attrs._x.shape[1]
@@ -124,11 +125,12 @@ class layernorm(Node):
         sigma_diff = get_gpu(1 / (2 * sigma) * ((2 * x + H * (2 * mu / H) -
                                                  get_gpu(2 * (op.sum(x, axis=_ax, keepdims=True) / H + mu))) / H))
         dx = get_gpu(dy / sigma) \
-            - get_gpu(sigma_diff * get_gpu(op.sum(1 * dy, axis=_ax, keepdims=True)) / (sigma ** 2)) \
+            - get_gpu(sigma_diff * get_gpu(op.sum(x * dy, axis=_ax, keepdims=True)) / (sigma ** 2)) \
             - get_gpu(get_gpu(op.sum(mu_diff * dy, axis=_ax, keepdims=True)) / sigma) \
             + get_gpu(sigma_diff * get_gpu(op.sum(dy, axis=_ax, keepdims=True)) * mu / (sigma ** 2))
         dx *= gain
-        self.attrs._x._update_diff(context, dx, **kwargs)
+        if isinstance(self.attrs._x, Node):
+            self.attrs._x._update_diff(context, dx, **kwargs)
         self.attrs._gain._update_diff(context, cu.cusum(
             self.attrs._normalized * get_gpu(dy), axis=0, keepdims=True), **kwargs)
         self.attrs._bias._update_diff(context, cu.cusum(
