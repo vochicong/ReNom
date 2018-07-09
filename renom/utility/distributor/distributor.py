@@ -4,10 +4,13 @@ from __future__ import division
 import warnings
 import numpy as np
 from renom.core import get_gpu, Node
-from renom.cuda import is_cuda_active
+from renom.cuda import has_cuda, is_cuda_active
 from renom.config import precision
-if is_cuda_active():
-    from renom.cuda.cuda_base import *
+if has_cuda():
+    import renom.cuda.cuda_base as cu
+    cuda_imported = True
+else:
+    cuda_imported = False
 
 
 
@@ -169,6 +172,8 @@ class GPUDistributor(Distributor):
     '''
 
     def __init__(self, x, y, **kwargs):
+        if not cuda_imported:
+            raise ImportError("Failed to import cuda during distributor.py import, cannot launch GPUDistributor.")
         assert is_cuda_active(), "Cuda must be activated to use GPU distributor"
         super(GPUDistributor, self).__init__(x=x, y=y, data_table=kwargs.get("data_table"))
         assert len(x) == len(y), "Input batches must have same number as output batches"
@@ -182,11 +187,11 @@ class GPUDistributor(Distributor):
 
     @staticmethod
     def preload_single(batch):
-        with asyncBehaviour():
+        with cu.asyncBehaviour():
             batch = batch.astype(np.dtype(precision))
-            pinNumpy(batch)
+            cu.pinNumpy(batch)
             ret = get_gpu(batch)
-            cuDeviceSynchronize()
+            cu.cuDeviceSynchronize()
         return ret
 
     @staticmethod
@@ -209,7 +214,7 @@ class GPUDistributor(Distributor):
                     b = next(generator)
                     example_batch = b[0] if b[0].size * \
                         b[0].itemsize >= b[1].size * b[1].itemsize else b[1]
-                    initPinnedMemory(example_batch)
+                    cu.initPinnedMemory(example_batch)
                     x1, y1 = GPUDistributor.preload_pair(b[0], b[1])
                     first = False
                 b = next(generator)
@@ -230,7 +235,7 @@ class GPUDistributor(Distributor):
             yield GPUDistributor.create_return(x2, y2)
         else:
             yield GPUDistributor.create_return(x1, y1)
-        freePinnedMemory()
+        cu.freePinnedMemory()
 
 
 class TimeSeriesDistributor(NdarrayDistributor):
