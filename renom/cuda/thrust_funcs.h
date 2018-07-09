@@ -6,11 +6,15 @@
 #include <thrust/device_ptr.h>
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
+#include <thrust/system/cuda/execution_policy.h>
 
 
 __device__ VALUE_TYPE atomicAdd(VALUE_TYPE *address, const VALUE_TYPE vlaue);
 
 namespace renom{
+
+	void SET_STREAM_NAME(cudaStream_t stream);
+	cudaStream_t GET_STREAM_NAME();
 
 	// Operation
 	enum Operation {MUL, ADD, DIV, RDIV, SUB, POW, RPOW};
