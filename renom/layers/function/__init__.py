@@ -14,3 +14,4 @@ from .unpool2d import MaxUnPool2d, max_unpool2d
 from .lstm import Lstm as Lstm
 from .embedding import embedding, Embedding
 from .roi_pool2d import roi_pool2d, RoiPool2d
+from .l2_norm import l2_norm, L2Norm
