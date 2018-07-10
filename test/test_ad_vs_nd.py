@@ -32,6 +32,7 @@ from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd
 from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
+from renom.layers.function.weightnormalization import WeightNormalization
 from renom.layers.function.batch_normalize import BatchNormalize,\
     BATCH_NORMALIZE_FEATUREMAP
 from renom.layers.function.lrn import Lrn
@@ -69,8 +70,6 @@ def compare(func, node, *args):
     ad = auto_diff(func, node, *args)
     nd = numeric_diff(func, node, *args)
     diff = ad - nd
-    if isinstance(ad, np.ndarray):
-        diff = diff.astype(np.int)
     print("ad = \n{}".format(ad))
     print("nd = \n{}".format(nd))
     print("difference = \n{}".format(diff))
@@ -397,6 +396,22 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
     except Exception:
         assert ignore_bias
 
+@pytest.mark.parametrize("node", [
+    Variable(rand((2,3))),
+    Variable(rand((7,9))),
+    Variable(rand((8,4))),
+])
+def test_weight_normalize(node):
+    node = Variable(node)
+
+    layer = WeightNormalization(4)
+
+    def func(node):
+        return sum(layer(node))
+
+    compare(func, node, node)
+    compare(func, layer.params["gain"], node)
+    compare(func, layer.params["w"], node)
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2, 3, 3))),
