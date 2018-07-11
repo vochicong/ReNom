@@ -762,6 +762,19 @@ def test_softmax_cross_entropy(node, x, use_gpu):
         return rm.softmax_cross_entropy(node, x)
     compare(func, node, node, x)
 
+@pytest.mark.parametrize("node, x", [
+    [Variable(rand((2, 2))), onehot((2, 2))],
+    [Variable(rand((2, 3))), onehot((2, 3))],
+    [Variable(rand((1, 2))), onehot((1, 2))],
+    [Variable(rand((2, 2, 3, 3))), onehot((2, 2, 3, 3))],
+])
+def test_softmax_cross_entropy_no_reduce(node, x, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.sum(rm.softmax_cross_entropy(node, x, reduce_sum=False))
+    compare(func, node, node, x)
 
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 1))), Variable(randInteger((1, 1)))],
@@ -774,6 +787,19 @@ def test_sigmoid_cross_entropy(node, x, use_gpu):
     def func(node, x):
         return rm.sigmoid_cross_entropy(node, x)
     compare(func, node, node, x)
+
+@pytest.mark.parametrize("node, x", [
+    [Variable(rand((1, 1))), Variable(randInteger((1, 1)))],
+    [Variable(rand((2, 1))), Variable(randInteger((2, 1)))],
+])
+def test_sigmoid_cross_entropy_no_reduce(node, x, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.sum(rm.sigmoid_cross_entropy(node, x, reduce_sum=False))
+    compare(func, node, node, x)
+
 
 
 @pytest.mark.parametrize("node, x", [
@@ -790,6 +816,19 @@ def test_mean_squared_error(node, x, use_gpu):
         return rm.mean_squared_error(node, x)
     compare(func, node, node, x)
 
+@pytest.mark.parametrize("node, x", [
+    [Variable(rand((1, 1))), rand((1, 1))],
+    [Variable(rand((1, 3))), rand((1, 3))],
+    [Variable(rand((2, 1))), rand((2, 1))],
+    [Variable(rand((1, 1, 1, 2))), rand((1, 1, 1, 2))],
+])
+def test_mean_squared_error_no_reduce(node, x, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.sum(rm.mean_squared_error(node, x, reduce_sum=False))
+    compare(func, node, node, x)
 
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 2))), Variable(randInteger((1, 2)))],
@@ -803,6 +842,17 @@ def test_cross_entropy(node, x, use_gpu):
         return rm.cross_entropy(node, x)
     compare(func, node, node, x)
 
+@pytest.mark.parametrize("node, x", [
+    [Variable(rand((1, 2))), Variable(randInteger((1, 2)))],
+    [Variable(rand((2, 2))), Variable(randInteger((2, 2)))],
+])
+def test_cross_entropy_no_reduce(node, x, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.sum(rm.cross_entropy(node, x, reduce_sum=False))
+    compare(func, node, node, x)
 
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((2, 2))), Variable(rand((2, 2)))],
@@ -1159,4 +1209,19 @@ def test_smooth_l1(node, x, delta, use_gpu):
 
     def func(node, x):
         return rm.smoothed_l1(node, x, delta)
+    compare(func, node, node, x)
+
+@pytest.mark.parametrize("node, x, delta", [
+    [Variable(rand((1, 1))), rand((1, 1)), 1],
+    [Variable(rand((1, 1))), rand((1, 1)), 3],
+    [Variable(rand((1, 3))), rand((1, 3)), 1],
+    [Variable(rand((2, 1))), rand((2, 1)), 1],
+    [Variable(rand((1, 1, 1, 2))), rand((1, 1, 1, 2)), 1],
+])
+def test_smooth_l1_no_reduce(node, x, delta, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.sum(rm.smoothed_l1(node, x, delta, reduce_sum=False))
     compare(func, node, node, x)

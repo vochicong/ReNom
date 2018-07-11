@@ -9,17 +9,20 @@ from renom.operation import where
 
 
 class smoothed_l1(Node):
-    def __new__(cls, lhs, rhs, delta=1.0):
+    def __new__(cls, lhs, rhs, delta=1.0, reduce_sum=True):
         assert rhs.ndim > 1, "Input arrays must have no less than 2 dimension."
-        return cls.calc_value(lhs, rhs, delta)
+        return cls.calc_value(lhs, rhs, delta, reduce_sum)
 
     @classmethod
-    def _oper_cpu(cls, lhs, rhs, delta):
+    def _oper_cpu(cls, lhs, rhs, delta, reduce_sum):
         assert rhs.ndim > 1, "Input arrays must have no less than 2 dimension."
         N = float(lhs.shape[0])
         d = lhs - rhs
         abs_d = abs(d)
-        loss = np.sum(np.where(abs_d < delta, 0.5 * d * d, delta * (abs_d - 0.5 * delta)))
+        if reduce_sum:
+            loss = np.sum(np.where(abs_d < delta, 0.5 * d * d, delta * (abs_d - 0.5 * delta)))
+        else:
+            loss = np.where(abs_d < delta, 0.5 * d * d, delta * (abs_d - 0.5 * delta))
         ret = cls._create_node(loss / N)
         ret.attrs._delta = delta
         ret.attrs._lhs = lhs
@@ -28,13 +31,16 @@ class smoothed_l1(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, lhs, rhs, delta):
+    def _oper_gpu(cls, lhs, rhs, delta, reduce_sum):
         assert rhs.ndim > 1, "Input arrays must have no less than 2 dimension."
         N = float(lhs.shape[0])
         d = lhs - rhs
         abs_d = abs(d.as_ndarray())
         flag = abs_d < delta
-        loss = cu.cusum(get_gpu(flag * 0.5 * (d * d) + (1 - flag) * (abs_d - 0.5 * delta) * delta))
+        if reduce_sum:
+            loss = cu.cusum(get_gpu(flag * 0.5 * (d * d) + (1 - flag) * (abs_d - 0.5 * delta) * delta))
+        else:
+            loss = get_gpu(flag * 0.5 * (d * d) + (1 - flag) * (abs_d - 0.5 * delta) * delta)
         ret = cls._create_node(loss / N)
         ret.attrs._delta = delta
         ret.attrs._lhs = lhs
@@ -61,8 +67,9 @@ class smoothed_l1(Node):
 
 
 class SmoothedL1(object):
-    def __init__(self, delta):
+    def __init__(self, delta, reduce_sum=True):
         self._delta = delta
+        self._reduce_sum = reduce_sum
 
     def __call__(self, x, y):
-        return smoothed_l1(x, y, self._delta)
+        return smoothed_l1(x, y, self._delta, self._reduce_sum)
