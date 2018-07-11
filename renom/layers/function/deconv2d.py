@@ -12,20 +12,21 @@ from renom.cuda import cuda as cu
 
 class deconv2d(Node):
 
-    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, dilation=1, ignore_bias=False):
-        filter, stride, padding, dilation = (tuplize(x) for x in (filter, stride, padding, dilation))
+    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, dilation=1):
+        filter, stride, padding, dilation = (tuplize(x)
+                                             for x in (filter, stride, padding, dilation))
 
         in_shape = x.shape[1:]
         out_shape = [w.shape[1], ]
         out_shape.extend(transpose_out_size(in_shape[1:], filter, stride, padding, dilation))
-        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, dilation, ignore_bias)
+        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, dilation)
 
     @classmethod
-    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation,ignore_bias):
+    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation):
         z = np.tensordot(w, x, (0, 1))
         z = np.rollaxis(z, 3)
         z = col2im(z, out_shape[1:], stride, padding, dilation)
-        if not ignore_bias:
+        if b is not None:
             z += b
         ret = cls._create_node(z)
         ret.attrs._x = x
@@ -39,15 +40,16 @@ class deconv2d(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation, ignore_bias):
+    def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation):
         conv_desc = cu.ConvolutionDescriptor(padding, stride, dilation, precision)
         filter_desc = cu.FilterDescriptor(w.shape, precision)
         N = x.shape[0]
         # TODO: dirty code
         z = GPUValue(shape=tuple([N, ] + list(out_shape)))
+
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, x, z)
-        if not ignore_bias:
+        if b is not None:
             cu.cu_add_bias(get_gpu(b), z)
 
         ret = cls._create_node(z)
@@ -94,6 +96,7 @@ class deconv2d(Node):
 
         if isinstance(self.attrs._b, Node):
             self.attrs._b._update_diff(context, db, **kwargs)
+
 
 class Deconv2d(Parametrized):
     '''2d convolution layer.
@@ -150,10 +153,11 @@ class Deconv2d(Parametrized):
     def weight_initiallize(self, input_size):
         size_f = (input_size[0], self._channel,
                   self._kernel[0], self._kernel[1])
-        self.params = {"w": Variable(self._initializer(size_f), auto_update=True),
-                       "b": None if self._ignore_bias else
-                       Variable(np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)}
+        self.params = {"w": Variable(self._initializer(size_f), auto_update=True)}
+        if not self._ignore_bias:
+            self.params["b"] = Variable(
+                np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)
 
     def forward(self, x):
-        return deconv2d(x, self.params["w"], self.params["b"],
-                self._kernel, self._stride, self._padding, self._dilation, self._ignore_bias)
+        return deconv2d(x, self.params["w"], self.params.get("b"),
+                        self._kernel, self._stride, self._padding, self._dilation)

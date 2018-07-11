@@ -449,6 +449,7 @@ def test_conv2d(node, use_gpu, ignore_bias):
     except Exception:
         assert ignore_bias
 
+
 @pytest.mark.parametrize("node, size, raise_error", [
     [Variable(rand((2, 2, 5, 6))), 2, False],
     [Variable(rand((2, 2, 7, 8))), 3, False],
@@ -470,20 +471,22 @@ def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
     except:
         assert raise_error
 
+
 @pytest.mark.parametrize("node, error", [
     [Variable(rand((1, 1, 3, 3, 3, 3))), True],
     [Variable(rand((2, 2, 4, 4))), False],
     [Variable(rand((2, 3, 4, 6, 6))), False],
     [Variable(rand((1, 1, 4, 8))), False],
 ])
-def test_convnd(node, error, use_gpu):
+def test_convnd(node, error, use_gpu, ignore_bias):
     node = Variable(node)
     set_cuda_active(use_gpu)
-    layer = ConvNd(channel=1, filter=3, stride=1)
+    layer = ConvNd(channel=1, filter=3, stride=1, ignore_bias=ignore_bias)
 
     def func(node):
         return sum(layer(node))
     if error and is_cuda_active():
+        # CuDNN can manage tensor dim < 6.
         try:
             func(node)
             assert False
@@ -492,7 +495,10 @@ def test_convnd(node, error, use_gpu):
     else:
         compare(func, node, node)
         compare(func, layer.params["w"], node)
-        compare(func, layer.params["b"], node)
+        try:
+            compare(func, layer.params["b"], node)
+        except Exception:
+            assert ignore_bias
 
 
 @pytest.mark.parametrize("node", [
@@ -515,6 +521,7 @@ def test_deconv2d(node, use_gpu, ignore_bias):
     except Exception:
         assert ignore_bias
 
+
 @pytest.mark.parametrize("node, size", [
     [Variable(rand((2, 3, 3, 3))), 2],
     [Variable(rand((2, 3, 4, 5))), 3],
@@ -530,6 +537,7 @@ def test_deconv2d_with_dilation(node, size, use_gpu):
     compare(func, node, node)
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
+
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
