@@ -25,8 +25,10 @@ from renom.layers.activation.maxout import maxout
 
 from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
+from renom.layers.function.convnd import ConvNd, Conv3d
 from renom.layers.function.deconv2d import Deconv2d
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
+from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd
 from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
@@ -66,9 +68,12 @@ def onehot(shape):
 def compare(func, node, *args):
     ad = auto_diff(func, node, *args)
     nd = numeric_diff(func, node, *args)
+    diff = ad - nd
+    if isinstance(ad, np.ndarray):
+        diff = diff.astype(np.int)
     print("ad = \n{}".format(ad))
     print("nd = \n{}".format(nd))
-    print("difference = \n{}".format(ad - nd))
+    print("difference = \n{}".format(diff))
     assert np.allclose(ad, nd, atol=1e-5, rtol=1e-3)
 
 
@@ -353,7 +358,7 @@ def test_dense(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
 
@@ -389,7 +394,7 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
 
@@ -441,8 +446,53 @@ def test_conv2d(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
+
+@pytest.mark.parametrize("node, size, raise_error", [
+    [Variable(rand((2, 2, 5, 6))), 2, False],
+    [Variable(rand((2, 2, 7, 8))), 3, False],
+    [Variable(rand((2, 3, 3, 3))), 2, True],
+])
+def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = Conv2d(channel=3, dilation=size)
+
+    def func(node):
+        return sum(layer(node))
+    try:
+        compare(func, node, node)
+        compare(func, layer.params["w"], node)
+        compare(func, layer.params["b"], node)
+        assert not raise_error
+    except:
+        assert raise_error
+
+@pytest.mark.parametrize("node, error", [
+    [Variable(rand((1, 1, 3, 3, 3, 3))), True],
+    [Variable(rand((2, 2, 4, 4))), False],
+    [Variable(rand((2, 3, 4, 6, 6))), False],
+    [Variable(rand((1, 1, 4, 8))), False],
+])
+def test_convnd(node, error, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+    layer = ConvNd(channel=1, filter=3, stride=1)
+
+    def func(node):
+        return sum(layer(node))
+    if error and is_cuda_active():
+        try:
+            func(node)
+            assert False
+        except:
+            pass
+    else:
+        compare(func, node, node)
+        compare(func, layer.params["w"], node)
+        compare(func, layer.params["b"], node)
 
 
 @pytest.mark.parametrize("node", [
@@ -462,9 +512,24 @@ def test_deconv2d(node, use_gpu, ignore_bias):
 
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
+@pytest.mark.parametrize("node, size", [
+    [Variable(rand((2, 3, 3, 3))), 2],
+    [Variable(rand((2, 3, 4, 5))), 3],
+])
+def test_deconv2d_with_dilation(node, size, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = Deconv2d(channel=3, dilation=size)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
+    compare(func, layer.params["b"], node)
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
@@ -475,6 +540,22 @@ def test_max_pool2d(node, use_gpu):
     set_cuda_active(use_gpu)
 
     layer = MaxPool2d()
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((3, 2, 4, 5, 2))),
+    Variable(rand((2, 2, 3, 3))),
+    Variable(rand((2, 3, 4, 5)))
+])
+def test_max_poolnd(node, use_gpu):
+
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+    layer = MaxPoolNd(kernel=2)
 
     def func(node):
         return sum(layer(node))
@@ -508,6 +589,20 @@ def test_average_pool2d(node, use_gpu):
     set_cuda_active(use_gpu)
 
     layer = AveragePool2d()
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2, 3, 3, 3))),
+    Variable(rand((2, 3, 4, 5))),
+])
+def test_average_poolnd(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+    layer = AveragePoolNd()
 
     def func(node):
         return sum(layer(node))
@@ -577,7 +672,7 @@ def test_lstm(node, use_gpu, ignore_bias):
     for k in layer1.params.keys():
         try:
             compare(func, layer1.params[k], node)
-        except KeyError:
+        except Exception:
             assert ignore_bias
 
 
@@ -626,7 +721,7 @@ def test_peepholelstm(node, use_gpu, ignore_bias):
     for k in layer1.params.keys():
         try:
             compare(func, layer1.params[k], node)
-        except KeyError:
+        except Exception:
             assert ignore_bias
 
 
@@ -779,14 +874,18 @@ def test_abs(node, use_gpu):
     [Variable(rand((1, 2))), 0],
     [Variable(rand((2, 1))), 1],
     [Variable(rand((1,))), 0],
+    [Variable(rand((2, 3, 4, 5))), (1, 2, 3)],
 ])
 def test_sum(node, axis, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
+    result = sum(node, axis=axis, keepdims=True)
+    assert len(result.shape) == len(node.shape)
 
-    def func(node):
-        return sum(sum(node, axis=axis))
-    compare(func, node, node)
+    def func(node, keepdims):
+        return sum(sum(node, axis=axis, keepdims=keepdims))
+    compare(func, node, node, True)
+    compare(func, node, node, False)
 
 
 @pytest.mark.parametrize("node", [

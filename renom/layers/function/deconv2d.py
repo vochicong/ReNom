@@ -12,18 +12,19 @@ from renom.cuda import cuda as cu
 
 class deconv2d(Node):
 
-    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, ignore_bias=False):
-        filter, stride, padding = (tuplize(x) for x in (filter, stride, padding))
+    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, dilation=1, ignore_bias=False):
+        filter, stride, padding, dilation = (tuplize(x) for x in (filter, stride, padding, dilation))
+
         in_shape = x.shape[1:]
         out_shape = [w.shape[1], ]
-        out_shape.extend(transpose_out_size(in_shape[1:], filter, stride, padding))
-        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, ignore_bias)
+        out_shape.extend(transpose_out_size(in_shape[1:], filter, stride, padding, dilation))
+        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, dilation, ignore_bias)
 
     @classmethod
-    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, ignore_bias):
+    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation,ignore_bias):
         z = np.tensordot(w, x, (0, 1))
         z = np.rollaxis(z, 3)
-        z = col2im(z, out_shape[1:], stride, padding)
+        z = col2im(z, out_shape[1:], stride, padding, dilation)
         if not ignore_bias:
             z += b
         ret = cls._create_node(z)
@@ -34,11 +35,12 @@ class deconv2d(Node):
         ret.attrs._kernel = kernel
         ret.attrs._stride = stride
         ret.attrs._padding = padding
+        ret.attrs._dilation = dilation
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, ignore_bias):
-        conv_desc = cu.ConvolutionDescriptor(padding, stride, precision)
+    def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation, ignore_bias):
+        conv_desc = cu.ConvolutionDescriptor(padding, stride, dilation, precision)
         filter_desc = cu.FilterDescriptor(w.shape, precision)
         N = x.shape[0]
         # TODO: dirty code
@@ -59,7 +61,7 @@ class deconv2d(Node):
     def _backward_cpu(self, context, dy, **kwargs):
 
         col = im2col(dy, self.attrs._in_shape[1:], self.attrs._kernel,
-                     self.attrs._stride, self.attrs._padding)
+                     self.attrs._stride, self.attrs._padding, self.attrs._dilation)
 
         if isinstance(self.attrs._x, Node):
             dx = np.tensordot(col, self.attrs._w, ([1, 2, 3], [1, 2, 3]))
@@ -92,7 +94,6 @@ class deconv2d(Node):
 
         if isinstance(self.attrs._b, Node):
             self.attrs._b._update_diff(context, db, **kwargs)
-
 
 class Deconv2d(Parametrized):
     '''2d convolution layer.
@@ -134,11 +135,13 @@ class Deconv2d(Parametrized):
                  filter=3,
                  padding=0,
                  stride=1,
+                 dilation=1,
                  input_size=None,
                  ignore_bias=False,
                  initializer=GlorotNormal()):
 
-        self._padding, self._stride, self._kernel = (tuplize(x) for x in (padding, stride, filter))
+        self._padding, self._stride, self._kernel, self._dilation = (tuplize(x)
+                                                                     for x in (padding, stride, filter, dilation))
         self._channel = channel
         self._initializer = initializer
         self._ignore_bias = ignore_bias
@@ -153,4 +156,4 @@ class Deconv2d(Parametrized):
 
     def forward(self, x):
         return deconv2d(x, self.params["w"], self.params["b"],
-                        self._kernel, self._stride, self._padding, self._ignore_bias)
+                self._kernel, self._stride, self._padding, self._dilation, self._ignore_bias)

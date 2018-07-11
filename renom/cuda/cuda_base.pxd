@@ -200,6 +200,7 @@ cdef extern from "cuda_runtime.h":
     #cudaError_t cudaMallocHost(void ** ptr, size_t size, unsigned int flags)
     cudaError_t cudaSetDevice(int size)
     cudaError_t cudaGetDevice(int *device)
+    cudaError_t cudaDeviceReset()
     cudaError_t cudaDeviceSynchronize()
     cudaError_t cudaFree(void * ptr)
     const char * cudaGetErrorString(cudaError_t erorr)
@@ -246,6 +247,7 @@ cdef class GPUHeap(object):
     cdef public size_t ptr
     cdef public size_t nbytes
     cdef public int device_id
+    cdef public int refcount
 
     cpdef memcpyH2D(self, cpu_ptr, size_t nbytes)
     cpdef memcpyD2H(self, cpu_ptr, size_t nbytes)

@@ -1,5 +1,5 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
+#!/usr / bin / env python
+# -*- coding: utf - 8 -*-
 from __future__ import division
 import warnings
 import numpy as np
@@ -13,6 +13,10 @@ else:
     cuda_imported = False
 
 
+try:
+    import renom.cuda.cuda_base as cuda_base
+except:
+    cuda_base = None
 
 
 class Distributor(object):
@@ -227,7 +231,7 @@ class GPUDistributor(Distributor):
                 # next to be yielded in *1
                 x1, y1 = x2, y2
 
-            # When kicked out of the loop, return the last pre-loaded values
+            # When kicked out of the loop, return the last pre - loaded values
             except StopIteration:
                 notEmpty = False
             # Check if there was only a single batch
