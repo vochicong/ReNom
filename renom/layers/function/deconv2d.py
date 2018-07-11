@@ -21,7 +21,7 @@ class deconv2d(Node):
         return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, dilation, ignore_bias)
 
     @classmethod
-    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation,ignore_bias):
+    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation, ignore_bias):
         z = np.tensordot(w, x, (0, 1))
         z = np.rollaxis(z, 3)
         z = col2im(z, out_shape[1:], stride, padding, dilation)
@@ -156,4 +156,4 @@ class Deconv2d(Parametrized):
 
     def forward(self, x):
         return deconv2d(x, self.params["w"], self.params["b"],
-                self._kernel, self._stride, self._padding, self._dilation, self._ignore_bias)
+                        self._kernel, self._stride, self._padding, self._dilation, self._ignore_bias)
