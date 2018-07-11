@@ -9,20 +9,26 @@ from renom.cuda import cuda as cu
 class mean_squared_error(BinOp):
 
     @classmethod
-    def _oper_cpu(cls, lhs, rhs):
+    def _oper_cpu(cls, lhs, rhs, reduce_sum=True):
         assert len(rhs.shape) > 1, "Input arrays must have no less than 2 dimension."
         N = len(lhs)
-        return np.sum((lhs - rhs) ** 2) / (N * 2)
+        if reduce_sum:
+            return np.sum((lhs - rhs) ** 2) / (N * 2)
+        else:
+            return (lhs - rhs) ** 2 / (N * 2)
 
     @classmethod
-    def _oper_gpu(cls, lhs, rhs):
+    def _oper_gpu(cls, lhs, rhs, reduce_sum=True):
         assert len(rhs.shape) > 1, "Input arrays must have no less than 2 dimension."
         N = len(lhs)
-        return cu.cusum(get_gpu((get_gpu(lhs) - get_gpu(rhs)) ** 2)) / (N * 2)
+        if reduce_sum:
+            return cu.cusum((get_gpu(lhs) - get_gpu(rhs)) ** 2) / (N * 2)
+        else:
+            return ((get_gpu(lhs) - get_gpu(rhs)) ** 2) / (N * 2)
 
     def _backward_cpu(self, context, dy, **kwargs):
-        sub = self.attrs._lhs - self.attrs._rhs
         if isinstance(self.attrs._lhs, Node):
+            sub = self.attrs._lhs - self.attrs._rhs
             N = len(self.attrs._lhs)
             self.attrs._lhs._update_diff(context, sub * dy / N, **kwargs)
 
@@ -63,5 +69,5 @@ class MeanSquaredError(object):
 
     """
 
-    def __call__(self, x, y):
-        return mean_squared_error(x, y)
+    def __call__(self, x, y, reduce_sum=True):
+        return mean_squared_error(x, y, reduce_sum=reduce_sum)

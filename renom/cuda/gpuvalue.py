@@ -376,7 +376,7 @@ class GPUValue(object):
             self.dtype = np.dtype(dtype)
 
         self.itemsize = self.dtype.itemsize
-        self.size = (calc_int_prod(self.shape) if self.shape else 1) or 1
+        self.size = (calc_int_prod(self.shape) if self.shape else 1)
         self.nbytes = self.size * self.itemsize
 
         self._ptr = ptr

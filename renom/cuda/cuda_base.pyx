@@ -160,6 +160,8 @@ def cuGetStream(myid = None):
 def cuDestroyStream(uintptr_t stream):
     runtime_check(cudaStreamDestroy(<cudaStream_t> stream))
 
+def cuResetDevice():
+  runtime_check(cudaDeviceReset())
 
 def cuSetDevice(int dev):
     runtime_check(cudaSetDevice(dev))
@@ -233,7 +235,7 @@ cpdef cuFree(uintptr_t ptr):
 cpdef runtime_check(error):
     if error != cudaSuccess:
         error_msg = cudaGetErrorString(error)
-        raise Exception("CUDA Error: #{}\{}".format(error,error_msg))
+        raise Exception("CUDA Error: #{}|||{}".format(error,error_msg))
     return
 
 # cuda runtime check
@@ -352,12 +354,21 @@ cdef class GPUHeap(object):
         return self.ptr
 
     def __dealloc__(self):
-        cdef cudaError_t err = cudaSetDevice(self.device_id)
-        if err == cudaSuccess:
-            err = cudaFree(<void * >self.ptr)
+        # Python functions should be avoided as far as we can
 
-        if err != cudaSuccess:
-            print("Error in GPUHeap.__dealloc__():", err, file=sys.stderr)
+        cdef int cur
+        cdef cudaError_t err
+
+        cudaGetDevice(&cur)
+        try:
+            err = cudaSetDevice(self.device_id)
+            if err == cudaSuccess:
+                err = cudaFree(<void * >self.ptr)
+
+            if err != cudaSuccess:
+                print("Error in GPUHeap.__dealloc__():", err, file=sys.stderr)
+        finally:
+            cudaSetDevice(cur)
 
     cpdef memcpyH2D(self, cpu_ptr, size_t nbytes):
         # todo: this copy is not necessary
@@ -370,7 +381,8 @@ cdef class GPUHeap(object):
             # Async can be called safely, since if the user does not
             # set up all the requirements for Async, it will perform
             # as an ordinairy blocking call
-            cuMemcpyH2Dvar(ptr.ptr, self.ptr, nbytes, <uintptr_t> self._mystream)
+            cuMemcpyH2D(ptr.ptr, self.ptr, nbytes)
+            #cuMemcpyH2Dvar(ptr.ptr, self.ptr, nbytes, <uintptr_t> self._mystream)
 
     cpdef memcpyD2H(self, cpu_ptr, size_t nbytes):
         shape = cpu_ptr.shape

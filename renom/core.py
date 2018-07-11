@@ -113,7 +113,11 @@ class Grads:
             ndarray, Node, None: Gradient of given node object.
         '''
         if default is self._omit:
-            return self.variables[id(node)]
+            try:
+                return self.variables[id(node)]
+            except KeyError:
+                raise Exception(
+                    "Node not found. Ensure that _update_diff was properly called on the node first.")
         else:
             return self.variables.get(id(node), default)
 
@@ -192,6 +196,9 @@ class GraphAttrs(object):
             return self.v__attrs[name]
         except KeyError:
             raise AttributeError('%r has no attribute %r' % (self, name))
+
+    def get(self, key, default=None):
+        return self.v__attrs.get(key, default)
 
 
 class Node(np.ndarray):
