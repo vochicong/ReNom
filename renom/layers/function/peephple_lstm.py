@@ -37,7 +37,10 @@ class peephole_lstm(Node):
         s = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if ps is None else ps
         z = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if pz is None else pz
 
-        u = np.dot(x, w) + np.dot(z, wr) + b
+        u = np.dot(x, w) + np.dot(z, wr)
+        if b is not None:
+            u += b
+
         m = u.shape[1] // 4
         u, gate_u = np.split(u, [m, ], axis=1)
         u = tanh(u)
@@ -76,7 +79,11 @@ class peephole_lstm(Node):
             s_p, z_p = map(get_gpu, (ps, pz))
 
         s = s_p.empty_like_me()
-        u = get_gpu(op.dot(x, w) + op.dot(z_p, wr) + b)
+        u = op.dot(x, w) + op.dot(z_p, wr)
+        if b is not None:
+            u += b
+
+        u = get_gpu(u)
         z = z_p.zeros_like_me()
         cu.cupeepholelstm_forward(u, get_gpu(wc), s_p, s, z)
 
@@ -110,7 +117,7 @@ class peephole_lstm(Node):
         gd = gate_diff(gated)
         ps = self.attrs._pstate
 
-        pfg = getattr(self.attrs, "_pfgate", np.zeros_like(self))
+        pfg = self.attrs.get("_pfgate", np.zeros_like(self))
 
         dot = context.restore(w, np.zeros((n, m), dtype=dy.dtype))
         drt = context.restore(wr, np.zeros((n, m * 4), dtype=dy.dtype))
@@ -166,7 +173,7 @@ class peephole_lstm(Node):
 
         dot = context.restore(w, get_gpu(dy).zeros_like_me())
         drt = context.restore(wr, get_gpu(u).zeros_like_me())
-        pfg = getattr(self.attrs, "_pfgate", get_gpu(u).zeros_like_me())
+        pfg = self.attrs.get("_pfgate", get_gpu(u).zeros_like_me())
 
         dr = get_gpu(drt).empty_like_me()
         dwc = GPUValue(shape=(n, m * 3))
@@ -252,8 +259,9 @@ class PeepholeLstm(Parametrized):
         Learning Precise Timing with LSTM Recurrent Networks
     '''
 
-    def __init__(self, output_size, input_size=None, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal()):
         self._size_o = output_size
+        self._ignore_bias = ignore_bias
         self._initializer = initializer
         super(PeepholeLstm, self).__init__(input_size)
 
@@ -265,19 +273,19 @@ class PeepholeLstm(Parametrized):
         self.params = {
             "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True),
             "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True),
-            "wc": Variable(self._initializer((1, size_o * 3)), auto_update=True),
-            "b": Variable(bias, auto_update=True),
-        }
+            "wc": Variable(self._initializer((1, size_o * 3)), auto_update=True)}
+        if not self._ignore_bias:
+            self.params["b"] = Variable(bias, auto_update=True)
 
     def forward(self, x):
-        ret = peephole_lstm(x, getattr(self, "_z", None),
-                            getattr(self, "_state", None),
+        ret = peephole_lstm(x, self.__dict__.get("_z", None),
+                            self.__dict__.get("_state", None),
                             self.params.w,
                             self.params.wr,
                             self.params.wc,
-                            self.params.b)
+                            self.params.get("b", None))
         self._z = ret
-        self._state = getattr(ret.attrs, '_state', None)
+        self._state = ret.attrs.get('_state', None)
         return ret
 
     def truncate(self):

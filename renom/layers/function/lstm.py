@@ -37,7 +37,9 @@ class lstm(Node):
         s = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if ps is None else ps
         z = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if pz is None else pz
 
-        u = dot(x, w) + dot(z, wr) + b
+        u = dot(x, w) + dot(z, wr)
+        if b is not None:
+            u += b
         m = u.shape[1] // 4
         u, gated = np.split(u, [m, ], axis=1)
         u = tanh(u)
@@ -74,7 +76,9 @@ class lstm(Node):
             s_p = ps
             z_p = get_gpu(pz)
 
-        u = dot(x, w) + dot(z_p, wr) + b
+        u = dot(x, w) + dot(z_p, wr)
+        if b is not None:
+            u += b
 
         z = get_gpu(z_p).empty_like_me()
         state = get_gpu(s_p).empty_like_me()
@@ -115,7 +119,7 @@ class lstm(Node):
         drt = context.restore(wr, np.zeros((n, m * 4), dtype=dy.dtype))
         dou = context.restore(w, np.zeros((n, m), dtype=dy.dtype))
 
-        pfg = getattr(self.attrs, "_pfgate", np.zeros_like(self))
+        pfg = self.attrs.get("_pfgate", np.zeros_like(self))
 
         e = dy
 
@@ -158,7 +162,7 @@ class lstm(Node):
 
         drt = context.restore(wr, get_gpu(u).zeros_like_me())
         dou = context.restore(w, get_gpu(dy).zeros_like_me())
-        pfg = getattr(self.attrs, "_pfgate", get_gpu(u).zeros_like_me())
+        pfg = self.attrs.get("_pfgate", get_gpu(u).zeros_like_me())
 
         e = get_gpu(dy)
 
@@ -237,8 +241,9 @@ class Lstm(Parametrized):
     .. [4] Learning Precise Timing with LSTM Recurrent Networks
     '''
 
-    def __init__(self, output_size, input_size=None, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal()):
         self._size_o = output_size
+        self._ignore_bias = ignore_bias
         self._initializer = initializer
         super(Lstm, self).__init__(input_size)
 
@@ -249,18 +254,18 @@ class Lstm(Parametrized):
         bias[:, size_o:size_o * 2] = 1
         self.params = {
             "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True),
-            "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True),
-            "b": Variable(bias, auto_update=True),
-        }
+            "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True)}
+        if self._ignore_bias:
+            self.params["b"] = Variable(bias, auto_update=True)
 
     def forward(self, x):
-        ret = lstm(x, getattr(self, "_z", None),
-                   getattr(self, "_state", None),
+        ret = lstm(x, self.__dict__.get("_z", None),
+                   self.__dict__.get("_state", None),
                    self.params.w,
                    self.params.wr,
-                   self.params.b)
+                   self.params.get("b", None))
         self._z = ret
-        self._state = getattr(ret.attrs, '_state', None)
+        self._state = ret.attrs.get('_state', None)
         return ret
 
     def truncate(self):

@@ -113,7 +113,11 @@ class Grads:
             ndarray, Node, None: Gradient of given node object.
         '''
         if default is self._omit:
-            return self.variables[id(node)]
+            try:
+                return self.variables[id(node)]
+            except KeyError:
+                raise Exception(
+                    "Node not found. Ensure that _update_diff was properly called on the node first.")
         else:
             return self.variables.get(id(node), default)
 
@@ -193,6 +197,9 @@ class GraphAttrs(object):
         except KeyError:
             raise AttributeError('%r has no attribute %r' % (self, name))
 
+    def get(self, key, default=None):
+        return self.v__attrs.get(key, default)
+
 
 class Node(np.ndarray):
     '''This is the base class of all operation function.
@@ -212,6 +219,8 @@ class Node(np.ndarray):
     _auto_update = False
     _no_backward = False
     _args = ()
+
+    SHOWMARK = False
 
     def __new__(cls, value):
         ret = cls._create_node(value)
@@ -238,6 +247,10 @@ class Node(np.ndarray):
         ret.attrs = GraphAttrs()
         if GET_ACTIVE_NODE() is not None:
             SET_NODE_DICT(id(ret), ret)
+
+        if ret.SHOWMARK and get_model_graph():
+            ret = NodeMark(ret, ret)
+
         return ret
 
     @classmethod
@@ -261,6 +274,7 @@ class Node(np.ndarray):
             elif isinstance(a, dict):
                 q.extend(a.values())
         self._args.extend(a for a in kwargs.values() if isinstance(a, Node))
+
         self._reduce_graph()
         return
 
@@ -354,7 +368,7 @@ class Node(np.ndarray):
             return np.array(self, dtype=precision)
         else:
             if not self.flags['C_CONTIGUOUS']:
-                self = self.copy()
+                self = np.ascontiguousarray(self)
             ret = np.ndarray(shape=self.shape, dtype=self.dtype, buffer=self)
             ret.setflags(write=True)
             return np.array(ret)
@@ -637,7 +651,7 @@ class Node(np.ndarray):
 
     def __str__(self):
         self.to_cpu()
-        return np.ndarray.__str__(self)
+        return np.ndarray.__str__(self.as_ndarray())
 
     def __repr__(self):
         self.to_cpu()
@@ -759,7 +773,7 @@ class Pos(UnaryOp):
 
     @classmethod
     def _oper_gpu(cls, arg):
-        return +get_gpu(arg.get_gpu())
+        return +get_gpu(arg)
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
@@ -825,6 +839,46 @@ class Invert(UnaryOp):
 
     def _backward_gpu(self, context, dy, **kwargs):
         return self.attrs._backward_cpu(context, dy, **kwargs)
+
+
+def showmark(cls):
+    cls.SHOWMARK = True
+    return cls
+
+
+class Mark(Pos):
+    def __new__(cls, arg, model):
+        ret = super(Mark, cls).__new__(cls, arg)
+        ret.modelref = weakref.ref(model)
+
+        return ret
+
+    def _reduce_graph(self):
+        return
+
+
+class NodeMark(Mark):
+    pass
+
+
+class ModelMark(Mark):
+    pass
+
+
+class EnterModel(ModelMark):
+    pass
+#    def __init__(self, *args, **kwargs):
+#        super().__init__(*args, **kwargs)
+#        print('enter', [type(a) for a in args])
+#        import pdb;pdb.set_trace()
+
+
+class LeaveModel(ModelMark):
+    pass
+#    def __init__(self, *args, **kwargs):
+#        super().__init__(*args, **kwargs)
+#        print('leave', [type(a) for a in args])
+#        import pdb;pdb.set_trace()
 
 
 class BinOp(Node):
@@ -894,7 +948,6 @@ class Add(BinOp):
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._rhs, Node):
             rhs = get_gpu(self.attrs._rhs)
-
             r_dx = cu_broad_cast(rhs, get_gpu(dy))
             self.attrs._rhs._update_diff(context, r_dx, **kwargs)
 
@@ -1327,7 +1380,6 @@ class ROr(Lshift):
 
 
 class GetItem(BinOp):
-
     @classmethod
     def _oper_cpu(cls, lhs, rhs):
         return np.ndarray.__getitem__(lhs, rhs)

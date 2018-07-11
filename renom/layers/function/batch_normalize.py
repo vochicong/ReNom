@@ -35,7 +35,9 @@ class batch_normalize(Node):
 
         sq_var = 1.0 / np.sqrt(var + epsilon)
         xh = (to_value(x) - mean) * sq_var
-        z = to_value(w) * xh + to_value(b)
+        z = to_value(w) * xh
+        if b is not None:
+            z += to_value(b)
 
         ret = cls._create_node(z)
         ret.attrs._axs = axs
@@ -57,6 +59,9 @@ class batch_normalize(Node):
             axs = 1
         else:
             axs = 0
+
+        if b is None:
+            b = get_gpu(w).zeros_like_me()
 
         y, mean, sq_var = (get_gpu(g).empty_like_me() for g in (x, w, w))
         mov_m = get_gpu(mov_m)
@@ -165,7 +170,14 @@ class BatchNormalize(Parametrized):
 
     SERIALIZED = ('_mov_mean', '_mov_std', '_epsilon', '_mode')
 
-    def __init__(self, input_size=None, momentum=0.99, mode="activation", epsilon=1e-5, initializer=GlorotNormal()):
+    def __init__(self,
+                 input_size=None,
+                 momentum=0.99,
+                 mode="activation",
+                 epsilon=1e-5,
+                 ignore_bias=False,
+                 initializer=GlorotNormal()):
+
         assert momentum > 0, "The value of momentum must be lager than 0."
         self._mov_mean = 0
         self._mov_std = 0
@@ -173,6 +185,7 @@ class BatchNormalize(Parametrized):
         self._momentum = momentum
         self._mode = mode_dict.get(mode, BATCH_NORMALIZE_ELEMENTWISE)
         self.inference = False
+        self._ignore_bias = ignore_bias
         self._initializer = initializer
         super(BatchNormalize, self).__init__(input_size)
 
@@ -182,20 +195,20 @@ class BatchNormalize(Parametrized):
         if self._mode == BATCH_NORMALIZE_FEATUREMAP and len(size_i) > 2:
             size_i[2] = 1
             size_i[3] = 1
-        self.params = {
-            "w": Variable(self._initializer(size_i).astype(precision), auto_update=True),
-            "b": Variable(np.zeros(size_i, dtype=precision), auto_update=True)}
+        self.params = {"w": Variable(self._initializer(size_i).astype(precision), auto_update=True)}
+        if not self._ignore_bias:
+            self.params["b"] = Variable(np.zeros(size_i, dtype=precision), auto_update=True)
 
     def forward(self, x):
         ret = batch_normalize(x,
                               self.params["w"],
-                              self.params["b"],
+                              self.params.get("b", None),
                               self._momentum,
                               self._mov_mean,
                               self._mov_std,
                               self.inference,
                               self._mode,
                               self._epsilon)
-        self._mov_mean = getattr(ret.attrs, "_mov_m", self._mov_mean)
-        self._mov_std = getattr(ret.attrs, "_mov_v", self._mov_std)
+        self._mov_mean = ret.attrs.get("_mov_m", self._mov_mean)
+        self._mov_std = ret.attrs.get("_mov_v", self._mov_std)
         return ret
