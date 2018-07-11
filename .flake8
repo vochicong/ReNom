@@ -25,5 +25,7 @@ ignore =
     F403,
     # F405 may be undefine
     F405
+    # W503 Line break before binary operator
+    W503
 
 exclude=test/*

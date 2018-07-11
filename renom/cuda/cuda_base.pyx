@@ -345,6 +345,9 @@ cdef class GPUHeap(object):
         self.ptr = ptr
         self.nbytes = nbytes
         self.device_id = device_id
+        # The GPUHeap sets its refcount to 0, as it does not personally know if it is
+        # to be owned during creation. Refcount is instead managed in GPUValue.
+        self.refcount = 0
         # The stream is decided by the allocator and given to all subsequently
         # constructed GPUHeaps. All Memcpy operations will occur on the same
         # stream.
