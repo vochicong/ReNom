@@ -197,6 +197,9 @@ class GraphAttrs(object):
         except KeyError:
             raise AttributeError('%r has no attribute %r' % (self, name))
 
+    def get(self, key, default=None):
+        return self.v__attrs.get(key, default)
+
 
 class Node(np.ndarray):
     '''This is the base class of all operation function.

@@ -28,6 +28,7 @@ from renom.layers.function.conv2d import Conv2d
 from renom.layers.function.convnd import ConvNd, Conv3d
 from renom.layers.function.deconv2d import Deconv2d
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
+from renom.layers.function.unpool2d import MaxUnPool2d, AverageUnPool2d
 from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd
 from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
@@ -69,8 +70,6 @@ def compare(func, node, *args):
     ad = auto_diff(func, node, *args)
     nd = numeric_diff(func, node, *args)
     diff = ad - nd
-    if isinstance(ad, np.ndarray):
-        diff = diff.astype(np.int)
     print("ad = \n{}".format(ad))
     print("nd = \n{}".format(nd))
     print("difference = \n{}".format(diff))
@@ -449,6 +448,7 @@ def test_conv2d(node, use_gpu, ignore_bias):
     except Exception:
         assert ignore_bias
 
+
 @pytest.mark.parametrize("node, size, raise_error", [
     [Variable(rand((2, 2, 5, 6))), 2, False],
     [Variable(rand((2, 2, 7, 8))), 3, False],
@@ -470,20 +470,22 @@ def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
     except:
         assert raise_error
 
+
 @pytest.mark.parametrize("node, error", [
     [Variable(rand((1, 1, 3, 3, 3, 3))), True],
     [Variable(rand((2, 2, 4, 4))), False],
     [Variable(rand((2, 3, 4, 6, 6))), False],
     [Variable(rand((1, 1, 4, 8))), False],
 ])
-def test_convnd(node, error, use_gpu):
+def test_convnd(node, error, use_gpu, ignore_bias):
     node = Variable(node)
     set_cuda_active(use_gpu)
-    layer = ConvNd(channel=1, filter=3, stride=1)
+    layer = ConvNd(channel=1, filter=3, stride=1, ignore_bias=ignore_bias)
 
     def func(node):
         return sum(layer(node))
     if error and is_cuda_active():
+        # CuDNN can manage tensor dim < 6.
         try:
             func(node)
             assert False
@@ -492,7 +494,10 @@ def test_convnd(node, error, use_gpu):
     else:
         compare(func, node, node)
         compare(func, layer.params["w"], node)
-        compare(func, layer.params["b"], node)
+        try:
+            compare(func, layer.params["b"], node)
+        except Exception:
+            assert ignore_bias
 
 
 @pytest.mark.parametrize("node", [
@@ -515,6 +520,7 @@ def test_deconv2d(node, use_gpu, ignore_bias):
     except Exception:
         assert ignore_bias
 
+
 @pytest.mark.parametrize("node, size", [
     [Variable(rand((2, 3, 3, 3))), 2],
     [Variable(rand((2, 3, 4, 5))), 3],
@@ -530,6 +536,7 @@ def test_deconv2d_with_dilation(node, size, use_gpu):
     compare(func, node, node)
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
+
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
@@ -762,6 +769,7 @@ def test_softmax_cross_entropy(node, x, use_gpu):
         return rm.softmax_cross_entropy(node, x)
     compare(func, node, node, x)
 
+
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((2, 2))), onehot((2, 2))],
     [Variable(rand((2, 3))), onehot((2, 3))],
@@ -776,6 +784,7 @@ def test_softmax_cross_entropy_no_reduce(node, x, use_gpu):
         return rm.sum(rm.softmax_cross_entropy(node, x, reduce_sum=False))
     compare(func, node, node, x)
 
+
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 1))), Variable(randInteger((1, 1)))],
     [Variable(rand((2, 1))), Variable(randInteger((2, 1)))],
@@ -788,6 +797,7 @@ def test_sigmoid_cross_entropy(node, x, use_gpu):
         return rm.sigmoid_cross_entropy(node, x)
     compare(func, node, node, x)
 
+
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 1))), Variable(randInteger((1, 1)))],
     [Variable(rand((2, 1))), Variable(randInteger((2, 1)))],
@@ -799,7 +809,6 @@ def test_sigmoid_cross_entropy_no_reduce(node, x, use_gpu):
     def func(node, x):
         return rm.sum(rm.sigmoid_cross_entropy(node, x, reduce_sum=False))
     compare(func, node, node, x)
-
 
 
 @pytest.mark.parametrize("node, x", [
@@ -816,6 +825,7 @@ def test_mean_squared_error(node, x, use_gpu):
         return rm.mean_squared_error(node, x)
     compare(func, node, node, x)
 
+
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 1))), rand((1, 1))],
     [Variable(rand((1, 3))), rand((1, 3))],
@@ -830,6 +840,7 @@ def test_mean_squared_error_no_reduce(node, x, use_gpu):
         return rm.sum(rm.mean_squared_error(node, x, reduce_sum=False))
     compare(func, node, node, x)
 
+
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 2))), Variable(randInteger((1, 2)))],
     [Variable(rand((2, 2))), Variable(randInteger((2, 2)))],
@@ -842,6 +853,7 @@ def test_cross_entropy(node, x, use_gpu):
         return rm.cross_entropy(node, x)
     compare(func, node, node, x)
 
+
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 2))), Variable(randInteger((1, 2)))],
     [Variable(rand((2, 2))), Variable(randInteger((2, 2)))],
@@ -853,6 +865,7 @@ def test_cross_entropy_no_reduce(node, x, use_gpu):
     def func(node, x):
         return rm.sum(rm.cross_entropy(node, x, reduce_sum=False))
     compare(func, node, node, x)
+
 
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((2, 2))), Variable(rand((2, 2)))],
@@ -1210,6 +1223,7 @@ def test_smooth_l1(node, x, delta, use_gpu):
     def func(node, x):
         return rm.smoothed_l1(node, x, delta)
     compare(func, node, node, x)
+
 
 @pytest.mark.parametrize("node, x, delta", [
     [Variable(rand((1, 1))), rand((1, 1)), 1],
