@@ -396,22 +396,26 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
     except Exception:
         assert ignore_bias
 
+
 @pytest.mark.parametrize("node", [
-    Variable(rand((2,3))),
-    Variable(rand((7,9))),
-    Variable(rand((8,4))),
+    Variable(rand((2, 3))),
+    Variable(rand((7, 9))),
+    Variable(rand((8, 4))),
 ])
-def test_weight_normalize(node):
+def test_weight_normalize(node, use_gpu):
     node = Variable(node)
+    set_cuda_active(use_gpu)
 
     layer = WeightNormalization(4)
+    layer2 = Dense(3)  # This is important to ensure that dy is properly transferred backwards
 
     def func(node):
-        return sum(layer(node))
+        return sum(layer2(layer(node)))
 
     compare(func, node, node)
     compare(func, layer.params["gain"], node)
     compare(func, layer.params["w"], node)
+
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2, 3, 3))),
@@ -464,6 +468,7 @@ def test_conv2d(node, use_gpu, ignore_bias):
     except Exception:
         assert ignore_bias
 
+
 @pytest.mark.parametrize("node, size, raise_error", [
     [Variable(rand((2, 2, 5, 6))), 2, False],
     [Variable(rand((2, 2, 7, 8))), 3, False],
@@ -484,6 +489,7 @@ def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
         assert not raise_error
     except:
         assert raise_error
+
 
 @pytest.mark.parametrize("node, error", [
     [Variable(rand((1, 1, 3, 3, 3, 3))), True],
@@ -530,6 +536,7 @@ def test_deconv2d(node, use_gpu, ignore_bias):
     except Exception:
         assert ignore_bias
 
+
 @pytest.mark.parametrize("node, size", [
     [Variable(rand((2, 3, 3, 3))), 2],
     [Variable(rand((2, 3, 4, 5))), 3],
@@ -545,6 +552,7 @@ def test_deconv2d_with_dilation(node, size, use_gpu):
     compare(func, node, node)
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
+
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
@@ -585,7 +593,7 @@ def test_max_poolnd(node, use_gpu):
         [0, 3, 3, 3, 3]
     ], dtype=np.float64))]
 ])
-def test_roi_pool2d(node, rois,  use_gpu):
+def test_roi_pool2d(node, rois, use_gpu):
     set_cuda_active(use_gpu)
     node = Variable(node)
     layer = RoiPool2d(outh=7, outw=5, spatial_scale=0.6)

@@ -8,8 +8,10 @@ import renom.utility.initializer as init
 from .parameterized import Parametrized
 from renom.cuda.gpuvalue import *
 
+
 def normalized_form(x):
-    return op.sqrt(op.sum(op.square(x),keepdims=True))
+    return op.sqrt(op.sum(op.square(x), keepdims=True))
+
 
 class weightnorm(Node):
     def __new__(cls, x, weight, gain, bias):
@@ -17,8 +19,8 @@ class weightnorm(Node):
 
     @classmethod
     def _oper_cpu(cls, x, weight, gain, bias):
-        assert len(x.shape) is 2 or len(x.shape) is 4, \
-            "Currently only normalizes for dense and 2d convolutional networks."
+        assert len(x.shape) is 2, \
+            "Currently only normalizes for dense networks."
         w = weight / normalized_form(weight) * gain
         ret = cls._create_node(op.dot(x, w) + bias)
         ret.attrs._x = x
@@ -28,14 +30,12 @@ class weightnorm(Node):
         ret.attrs._bias = bias
         return ret
 
-
     @classmethod
     def _oper_gpu(cls, x, weight, gain, bias):
-        assert False
-        assert len(x.shape) is 2 or len(x.shape) is 4, \
-            "Currently only normalizes for dense and 2d convolutional networks."
+        assert len(x.shape) is 2, \
+            "Currently only normalizes for dense networks."
         w = get_gpu(weight) / normalized_form(get_gpu(weight)) * get_gpu(gain)
-        ret = cls._create_node(op.dot(x, w) + get_gpu(bias))
+        ret = cls._create_node(get_gpu(op.dot(get_gpu(x), w) + get_gpu(bias)))
         ret.attrs._x = x
         ret.attrs._w = w
         ret.attrs._weight = weight
@@ -52,7 +52,8 @@ class weightnorm(Node):
         normal_dw = op.dot(x.T, dy)
         w_normed = normalized_form(weight)
         dgain = normal_dw * weight / w_normed
-        dw = (1 / w_normed * normal_dw - op.sum(weight * normal_dw,keepdims=True) * weight / (op.square(w_normed) * w_normed))*gain
+        dw = (1 / w_normed * normal_dw - op.sum(weight * normal_dw, keepdims=True) *
+              weight / (op.square(w_normed) * w_normed)) * gain
         db = np.ones_like(dy)
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
@@ -61,16 +62,17 @@ class weightnorm(Node):
         self.attrs._bias._update_diff(context, np.sum(db, axis=0, keepdims=True), **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
-        assert False
         x = get_gpu(self.attrs._x)
         w = get_gpu(self.attrs._w)
         gain = get_gpu(self.attrs._gain)
         weight = get_gpu(self.attrs._weight)
-        dx = op.dot(dy, w.T)
-        normal_dw = op.dot(x.T, dy)
-        w_normed = normalized_form(weight)
+        dx = get_gpu(op.dot(dy, w.T))
+        normal_dw = get_gpu(op.dot(x.T, dy))
+        w_normed = get_gpu(normalized_form(weight))
         dgain = normal_dw * weight / w_normed
-        dw = (get_gpu(1 / w_normed * normal_dw) )#- get_gpu(op.sum(weight * normal_dw,keepdims=True) * weight / (op.square(w_normed) * w_normed)))*gain
+        dw = (get_gpu(1 / w_normed * normal_dw) -
+              get_gpu(get_gpu(op.sum(get_gpu(weight * normal_dw), keepdims=True)) *
+              weight / (get_gpu(op.square(w_normed)) * w_normed))) * gain
         db = get_gpu(self.attrs._bias).ones_like_me()
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)

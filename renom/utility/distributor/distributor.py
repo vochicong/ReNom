@@ -9,7 +9,7 @@ from renom.config import precision
 
 try:
     import renom.cuda.cuda_base as cuda_base
-except:
+except ImportError:
     cuda_base = None
 
 
