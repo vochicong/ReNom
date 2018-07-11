@@ -22,7 +22,7 @@ class mean_squared_error(BinOp):
         assert len(rhs.shape) > 1, "Input arrays must have no less than 2 dimension."
         N = len(lhs)
         if reduce_sum:
-            return cu.cusum(get_gpu((get_gpu(lhs) - get_gpu(rhs)) ** 2)) / (N * 2)
+            return cu.cusum((get_gpu(lhs) - get_gpu(rhs)) ** 2) / (N * 2)
         else:
             return ((get_gpu(lhs) - get_gpu(rhs)) ** 2) / (N * 2)
 
