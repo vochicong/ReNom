@@ -2,7 +2,7 @@
 from __future__ import print_function, division
 
 import numpy as np
-from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshape, Amin, Amax
+from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshape, Amin, Amax, showmark
 from renom.config import precision
 
 try:
@@ -57,19 +57,19 @@ class sum(Node):
     '''
 
     @classmethod
-    def _oper_cpu(cls, arg, axis=None):
-        return np.sum(arg, axis=axis, keepdims=True)
+    def _oper_cpu(cls, arg, axis=None, keepdims=False):
+        return np.sum(arg, axis=axis, keepdims=keepdims)
 
     @classmethod
-    def _oper_gpu(cls, arg, axis=None):
-        return cusum(get_gpu(arg), axis=axis, keepdims=True)
+    def _oper_gpu(cls, arg, axis=None, keepdims=False):
+        return cusum(get_gpu(arg), axis=axis, keepdims=keepdims)
 
-    def __new__(cls, arg, axis=None):
-        assert not hasattr(axis, "__getitem__"), "The argument axis only accepts integer."
-        value = cls.calc_value(arg, axis)
+    def __new__(cls, arg, axis=None, keepdims=False):
+        value = cls.calc_value(arg, axis, keepdims=keepdims)
         ret = super(sum, cls).__new__(cls, value)
         ret.attrs._axis = axis
         ret.attrs._arg = arg
+        ret.attrs._keep = keepdims
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
@@ -79,7 +79,16 @@ class sum(Node):
             if axis is None or axis == 0:
                 dx = np.ones_like(arg) * dy
             else:
-                dx = np.ones_like(arg) * np.expand_dims(dy, axis)
+                if not self.attrs._keep:
+                    if isinstance(axis, int):
+                        expanded = np.expand_dims(dy, axis)
+                    else:
+                        expanded = dy
+                        for ax in axis:
+                            expanded = np.expand_dims(expanded, ax)
+                    dx = np.ones_like(arg) * expanded
+                else:
+                    dx = np.ones_like(arg) * dy
             arg._update_diff(context, dx, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
@@ -90,7 +99,16 @@ class sum(Node):
                 dx = get_gpu(arg).ones_like_me() * get_gpu(dy)
             else:
                 dy = get_gpu(dy).new_array()
-                dx = np.ones(arg.shape, dtype=arg.dtype) * np.expand_dims(dy, axis=axis)
+                if not self.attrs._keep:
+                    if isinstance(axis, int):
+                        expanded = np.expand_dims(dy, axis)
+                    else:
+                        expanded = dy
+                        for ax in axis:
+                            expanded = np.expand_dims(expanded, ax)
+                    dx = np.ones_like(arg, dtype=arg.dtype) * expanded
+                else:
+                    dx = np.ones_like(arg, dtype=arg.dtype) * dy
             arg._update_diff(context, get_gpu(dx), **kwargs)
 
 
@@ -154,6 +172,7 @@ class dot(BinOp):
             self.attrs._rhs._update_diff(context, rdx, **kwargs)
 
 
+@showmark
 class concat(Node):
     """
     Join a sequence of arrays along specified axis.

@@ -3,6 +3,8 @@ import os
 from setuptools import find_packages, setup, Extension
 
 from Cython.Distutils import build_ext as orig_build_ext
+from Cython.Build import cythonize
+
 from distutils.command.build_clib import build_clib
 from distutils.dep_util import newer_group
 import distutils.dist
@@ -165,7 +167,7 @@ def setup_cuda():
     ext_base = Extension('renom.cuda.cuda_base',
                          sources=['renom/cuda/cuda_base.pyx'],
                          depends=cuda_depends,
-                         libraries=['cublas', 'cuda', 'cudart'],
+                         libraries=['cublas', 'cuda', 'cudart', 'nvToolsExt'],
                          library_dirs=libraries,
                          language='c++',
                          include_dirs=includes,
@@ -225,6 +227,15 @@ def setup_cuda():
                                   include_dirs=includes,
                                   )
 
+    ext_gpuvalue = Extension('renom.cuda.gpuvalue',
+                             sources=['renom/cuda/gpuvalue.py'],
+                             depends=cuda_depends,
+                             libraries=['cublas', 'cuda', 'cudart'],
+                             library_dirs=libraries,
+                             language='c++',
+                             include_dirs=includes,
+                             )
+
     global ext_modules, cuda_sources
 
     ext_modules = [ext_base,
@@ -233,7 +244,9 @@ def setup_cuda():
                    ext_cudnn,
                    ext_curand,
                    ext_thrust_float,
-                   ext_thrust_double]
+                   ext_thrust_double,
+                   ext_gpuvalue,
+                   ]
 
     cuda_sources = [('cuda_misc_a',
                      {'sources': [
@@ -260,4 +273,4 @@ setup(
     name='renom',
     packages=find_packages(),
     include_dirs=[numpy.get_include()],
-    version='2.5.0')
+    version='2.5.1')

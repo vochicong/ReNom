@@ -7,7 +7,7 @@ import numpy as np
 import pytest
 import renom.cuda
 import renom.core
-from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device, curand_generator
+from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device
 from renom.core import to_value, Variable, get_gpu
 from renom.operation import dot, sum, sqrt, square
 from renom.config import precision
@@ -828,6 +828,44 @@ def test_gpu_node_convolution2d(a):
     rand((3, 3, 3, 3)),
     rand((1, 3, 9, 9)),
     rand((2, 3, 9, 9)),
+    rand((2, 2, 2, 2,))
+])
+def test_gpu_node_convolutionnd(a):
+    with use_cuda():
+
+        layer = rm.ConvNd(channel=2, filter=1, stride=1, padding=0)
+        #layer.params["w"] = rm.Variable(np.random.rand(32, 3, 3, 3))
+        #layer.params["b"] = rm.Variable(np.random.rand(1, 32, 1, 1))
+
+        g1 = Variable(a)
+        g2 = layer(g1)
+        g3 = rm.sum(g2)
+        g = g3.grad()
+        g_g1 = g.get(layer.params["w"])
+        g_g2 = g.get(layer.params["b"])
+        g_g3 = g.get(g1)
+        g2.to_cpu()
+        g3.to_cpu()
+
+    c2 = layer(g1)
+    c3 = rm.sum(c2)
+    c = c3.grad()
+    c_g1 = c.get(layer.params["w"])
+    c_g2 = c.get(layer.params["b"])
+    c_g3 = g.get(g1)
+
+    close(g2, c2)
+    close(g3, c3)
+    close(c_g1, g_g1)
+    close(c_g2, g_g2)
+    close(c_g3, g_g3)
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a", [
+    rand((3, 3, 3, 3)),
+    rand((1, 3, 9, 9)),
+    rand((2, 3, 9, 9)),
     rand((2, 3, 12, 9))
 ])
 def test_gpu_node_deconvolution2d(a):
@@ -872,6 +910,36 @@ def test_gpu_node_max_pooling(a):
     with use_cuda():
 
         layer = rm.MaxPool2d()
+
+        g1 = Variable(a)
+        g2 = layer(g1)
+        g3 = rm.sum(g2)
+        g = g3.grad()
+        g_g3 = g.get(g1)
+        g2.to_cpu()
+        g3.to_cpu()
+
+    c2 = layer(g1)
+    c3 = rm.sum(c2)
+    c3.grad()
+    c_g3 = g.get(g1)
+
+    close(g2, c2)
+    close(g3, c3)
+    close(c_g3, g_g3)
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a", [
+    rand((3, 3, 3, 3)),
+    rand((1, 3, 9, 9)),
+    rand((2, 3, 9, 9, 4)),
+    rand((2, 3, 12, 4))
+])
+def test_gpu_node_max_poolingNd(a):
+    with use_cuda():
+
+        layer = rm.MaxPoolNd()
 
         g1 = Variable(a)
         g2 = layer(g1)
@@ -1673,20 +1741,3 @@ def test_split_err():
 
     with pytest.raises(IndexError):
         g.split(2, 3)
-
-
-@test_utility.skipgpu
-def test_rand():
-    set_cuda_active(True)
-
-    x = get_gpu(np.random.rand(2, 2)).empty_like_me()
-
-    np.random.seed(2)
-    curand_generator().rand_bernoulli(x, 0.5)
-    g1 = x.new_array()
-
-    np.random.seed(2)
-    curand_generator().rand_bernoulli(x, 0.5)
-    g2 = x.new_array()
-
-    assert np.allclose(g1, g2)
