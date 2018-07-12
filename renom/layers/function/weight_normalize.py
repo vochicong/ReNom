@@ -82,26 +82,32 @@ class weight_normalize(Node):
 
 
 class WeightNormalize(Parametrized):
-    ''' Layer Normalization Model [1]
-    Applies a shift to a standard bell curve formation for each input unit.
-    The resultant bell curve can be transformed with the gain/bias parameters, displacing the mean with the bias
-    or the variance with gain.
+    ''' Weight Normalization Model [weight_norm]_
+    A modification to the normal dense layer model, where the weight is normalized and multiplied
+    by a trainable gain factor.
+
+    The weight in this form is parameterized by the form:
+        w = v / ||v|| * gain
+
+    Note that in this version, gain is taken linear on the input s giving:
+        gain = s.
+    The original paper suggests a potential gain parameterization by taking the
+    exponential value of s instead:
+        gain = exp(s)
+
+    There might be support for this later.
 
     Example:
         >>> import numpy as np
         >>> import renom as rm
         >>> x = np.random.rand(2,3)
-        >>> layer = rm.WeightNormalize(bias=0)
-        >>> x
-        array([[0.5833913 , 0.39715111, 0.19503325],
-               [0.74007066, 0.34642472, 0.57293373]])
+        >>> layer = rm.WeightNormalization(4)
         >>> layer(x)
-        layernorm([[ 0.12076415,  0.00333703, -0.12410118],
-                   [ 0.11587134, -0.12813905,  0.01226771]])
+        weight_normalize([[1.00133252, 1.00713646, 0.98452991, 1.0043143],
+                    [0.983392 , 1.01545942, 0.99134618, 1.01834679]],
+                    dtype=float32)
 
-
-
-    .. [1] https://arxiv.org/pdf/1607.06450.pdf
+    .. [weight_norm] https://arxiv.org/abs/1602.07868
     '''
 
     def __init__(self, units, gain=0.1, initializer=init.GlorotNormal(), input_size=None):
