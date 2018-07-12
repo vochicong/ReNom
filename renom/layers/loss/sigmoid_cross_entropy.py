@@ -8,12 +8,12 @@ from renom.cuda import cuda as cu
 
 class sigmoid_cross_entropy(Node):
 
-    def __new__(cls, lhs, rhs):
+    def __new__(cls, lhs, rhs, reduce_sum=True):
         assert rhs.ndim > 1, "Input arrays must have no less than 2 dimension."
-        return cls.calc_value(lhs, rhs)
+        return cls.calc_value(lhs, rhs, reduce_sum=reduce_sum)
 
     @classmethod
-    def _oper_cpu(cls, lhs, rhs):
+    def _oper_cpu(cls, lhs, rhs, reduce_sum):
         N = len(lhs)
         z = 1. / (1. + np.exp(to_value(-lhs)))
         loss = -np.sum(to_value(rhs) * np.log(z + 1e-8) +
@@ -25,7 +25,7 @@ class sigmoid_cross_entropy(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, lhs, rhs):
+    def _oper_gpu(cls, lhs, rhs, reduce_sum):
         N = len(lhs)
         z = get_gpu(lhs).empty_like_me()
         tmp1 = get_gpu(lhs).empty_like_me()
@@ -33,7 +33,10 @@ class sigmoid_cross_entropy(Node):
         cu.cusigmoid(get_gpu(lhs), z)
         cu.cucross_entropy(get_gpu(z), get_gpu(rhs), tmp1)
         cu.cucross_entropy(get_gpu(-z + 1.), get_gpu(-rhs + 1.), tmp2)
-        loss = cu.cusum(-(tmp1 + tmp2)) / N
+        if reduce_sum:
+            loss = cu.cusum(-(tmp1 + tmp2)) / N
+        else:
+            loss = -(tmp1 + tmp2) / N
         ret = cls._create_node(loss)
         ret.attrs._z = z
         ret.attrs._lhs = lhs
@@ -70,5 +73,5 @@ class SigmoidCrossEntropy:
 
     """
 
-    def __call__(self, lhs, rhs):
-        return sigmoid_cross_entropy(lhs, rhs)
+    def __call__(self, lhs, rhs, reduce_sum=True):
+        return sigmoid_cross_entropy(lhs, rhs, reduce_sum=reduce_sum)

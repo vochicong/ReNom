@@ -29,16 +29,16 @@ def activation_diff(x):
 
 
 class lstm(Node):
-    def __new__(cls, x, pz, ps, w, wr, b, ignore_bias=False):
-        return cls.calc_value(x, pz, ps, w, wr, b, ignore_bias)
+    def __new__(cls, x, pz, ps, w, wr, b):
+        return cls.calc_value(x, pz, ps, w, wr, b)
 
     @classmethod
-    def _oper_cpu(cls, x, pz, ps, w, wr, b, ignore_bias):
+    def _oper_cpu(cls, x, pz, ps, w, wr, b):
         s = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if ps is None else ps
         z = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if pz is None else pz
 
         u = dot(x, w) + dot(z, wr)
-        if not ignore_bias:
+        if b is not None:
             u += b
         m = u.shape[1] // 4
         u, gated = np.split(u, [m, ], axis=1)
@@ -67,7 +67,7 @@ class lstm(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, pz, ps, w, wr, b, ignore_bias):
+    def _oper_gpu(cls, x, pz, ps, w, wr, b):
         if ps is None:
             tmp = GPUValue(shape=(x.shape[0], w.shape[1] // 4))
             s_p = tmp.zeros_like_me()
@@ -77,7 +77,7 @@ class lstm(Node):
             z_p = get_gpu(pz)
 
         u = dot(x, w) + dot(z_p, wr)
-        if not ignore_bias:
+        if b is not None:
             u += b
 
         z = get_gpu(z_p).empty_like_me()
@@ -87,6 +87,7 @@ class lstm(Node):
         cu.culstm_forward(get_gpu(u), get_gpu(state), get_gpu(s_p), get_gpu(z))
 
         ret = cls._create_node(z)
+
         ret.attrs._x = x
         ret.attrs._w = w
         ret.attrs._wr = wr
@@ -119,7 +120,7 @@ class lstm(Node):
         drt = context.restore(wr, np.zeros((n, m * 4), dtype=dy.dtype))
         dou = context.restore(w, np.zeros((n, m), dtype=dy.dtype))
 
-        pfg = getattr(self.attrs, "_pfgate", np.zeros_like(self))
+        pfg = self.attrs.get("_pfgate", np.zeros_like(self))
 
         e = dy
 
@@ -152,6 +153,7 @@ class lstm(Node):
             self.attrs._pz._update_diff(context, np.dot(dr, wr.T))
 
     def _backward_gpu(self, context, dy, **kwargs):
+
         w = self.attrs._w
         wr = self.attrs._wr
         b = self.attrs._b
@@ -162,11 +164,12 @@ class lstm(Node):
 
         drt = context.restore(wr, get_gpu(u).zeros_like_me())
         dou = context.restore(w, get_gpu(dy).zeros_like_me())
-        pfg = getattr(self.attrs, "_pfgate", get_gpu(u).zeros_like_me())
+        pfg = self.attrs.get("_pfgate", get_gpu(u).zeros_like_me())
 
         e = get_gpu(dy)
 
         dr, dou_n = (get_gpu(a).empty_like_me() for a in (drt, dou))
+
         cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n)))
 
         dx = dot(dr, w.T)
@@ -254,19 +257,18 @@ class Lstm(Parametrized):
         bias[:, size_o:size_o * 2] = 1
         self.params = {
             "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True),
-            "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True),
-            "b": None if self._ignore_bias else Variable(bias, auto_update=True),
-        }
+            "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True)}
+        if self._ignore_bias:
+            self.params["b"] = Variable(bias, auto_update=True)
 
     def forward(self, x):
-        ret = lstm(x, getattr(self, "_z", None),
-                   getattr(self, "_state", None),
+        ret = lstm(x, self.__dict__.get("_z", None),
+                   self.__dict__.get("_state", None),
                    self.params.w,
                    self.params.wr,
-                   self.params.b,
-                   self._ignore_bias)
+                   self.params.get("b", None))
         self._z = ret
-        self._state = getattr(ret.attrs, '_state', None)
+        self._state = ret.attrs.get('_state', None)
         return ret
 
     def truncate(self):

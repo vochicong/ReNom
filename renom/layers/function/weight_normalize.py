@@ -13,7 +13,7 @@ def normalized_form(x):
     return op.sqrt(op.sum(op.square(x), keepdims=True))
 
 
-class weightnorm(Node):
+class weight_normalize(Node):
     def __new__(cls, x, weight, gain, bias):
         return cls.calc_value(x, weight, gain, bias)
 
@@ -72,7 +72,7 @@ class weightnorm(Node):
         dgain = normal_dw * weight / w_normed
         dw = (get_gpu(1 / w_normed * normal_dw) -
               get_gpu(get_gpu(op.sum(get_gpu(weight * normal_dw), keepdims=True)) *
-              weight / (get_gpu(op.square(w_normed)) * w_normed))) * gain
+                      weight / (get_gpu(op.square(w_normed)) * w_normed))) * gain
         db = get_gpu(self.attrs._bias).ones_like_me()
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
@@ -81,7 +81,7 @@ class weightnorm(Node):
         self.attrs._bias._update_diff(context, op.sum(db, axis=0, keepdims=True), **kwargs)
 
 
-class WeightNormalization(Parametrized):
+class WeightNormalize(Parametrized):
     ''' Layer Normalization Model [1]
     Applies a shift to a standard bell curve formation for each input unit.
     The resultant bell curve can be transformed with the gain/bias parameters, displacing the mean with the bias
@@ -91,7 +91,7 @@ class WeightNormalization(Parametrized):
         >>> import numpy as np
         >>> import renom as rm
         >>> x = np.random.rand(2,3)
-        >>> layer = rm.LayerNormalization(bias=0)
+        >>> layer = rm.WeightNormalize(bias=0)
         >>> x
         array([[0.5833913 , 0.39715111, 0.19503325],
                [0.74007066, 0.34642472, 0.57293373]])
@@ -105,7 +105,7 @@ class WeightNormalization(Parametrized):
     '''
 
     def __init__(self, units, gain=0.1, initializer=init.GlorotNormal(), input_size=None):
-        super(WeightNormalization, self).__init__(input_size)
+        super(WeightNormalize, self).__init__(input_size)
         self._units = units
         self._gain = gain
         self._initializer = initializer
@@ -117,4 +117,4 @@ class WeightNormalization(Parametrized):
             "bias": Variable(np.ones((1, self._units)), auto_update=True)}
 
     def forward(self, x):
-        return weightnorm(x, self.params["w"], self.params["gain"], self.params["bias"])
+        return weight_normalize(x, self.params["w"], self.params["gain"], self.params["bias"])
