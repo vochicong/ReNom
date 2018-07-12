@@ -111,6 +111,7 @@ class NPoolBase:
             func, [self._padding, self._stride, self._kernel])
         return self.forward(x)
 
+
 class MaxPoolNd(NPoolBase):
 
     def forward(self, x):
