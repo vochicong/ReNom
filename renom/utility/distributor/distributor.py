@@ -13,7 +13,6 @@ if has_cuda():
 else:
     cuda_imported = False
 
-
 class Distributor(object):
     '''Distributor class
     This is the base class of a data distributor.
@@ -24,9 +23,7 @@ class Distributor(object):
         path (string): Path to data.
 
     >>> import numpy as np
-    >>> from renom.utility.distributor.distributor import NdarrayDistributor
-    >>> x = np.random.randn(100, 100)
-    >>> y = np.random.randn(100, 1)
+    >>> from renom.utility.distributor.distributor import NdarrayDistributor >>> x = np.random.randn(100, 100) >>> y = np.random.randn(100, 1)
     >>> distributor = NdarrayDistributor(x, y)
     >>> batch_x, batch_y = distributor.batch(10).next()
     >>> batch_x.shape
