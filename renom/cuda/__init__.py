@@ -37,7 +37,7 @@ def is_cuda_active():
     """Checks whether CUDA is activated.
 
     Returns:
-        True if cuda is active.
+        (bool): True if cuda is active.
     """
     return _cuda_is_active and has_cuda() and not _cuda_is_disabled
 
@@ -46,7 +46,7 @@ def has_cuda():
     """This method checks cuda libraries are available.
 
     Returns:
-        True if cuda is correctly set.
+        (bool): True if cuda is correctly set.
     """
     return _has_cuda
 
@@ -101,6 +101,28 @@ def curand_generator(seed=None):
 
 
 def curand_set_seed(seed):
+    """Set a seed to curand random number generator.
+    The curand generator is used when cuda is activated.
+
+    Args:
+        seed(int): Seed.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> from renom.cuda import set_cuda_active, curand_set_seed
+        >>> set_cuda_active(True)
+        >>> a = rm.Variable(np.arange(4).reshape(2, 2))
+        >>> curand_set_seed(1)
+        >>> print(rm.dropout(a))
+        [[ 0.  0.]
+         [ 4.  0.]]
+        >>> curand_set_seed(1)
+        >>> print(rm.dropout(a)) # Same result will be returned.
+        [[ 0.  0.]
+         [ 4.  0.]]
+
+    """
     deviceid = cuGetDevice()
     assert deviceid in _CuRandGens, "Curand not set"
     _CuRandGens[deviceid].set_seed(seed)
@@ -108,6 +130,16 @@ def curand_set_seed(seed):
 
 def release_mem_pool():
     """This function releases GPU memory pool.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> from renom.cuda import set_cuda_active, release_mem_pool
+        >>> set_cuda_active(True)
+        >>> a = rm.Variable(np.arange(4).reshape(2, 2))
+        >>> a.to_gpu()
+        >>> a = None
+        >>> release_mem_pool() # The data of array `a` will be released.
     """
     if gpu_allocator:
         gpu_allocator.release_pool()

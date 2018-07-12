@@ -93,16 +93,18 @@ class average_unpool2d(Node):
 class MaxUnPool2d:
     '''Max unpooling function.
     Unpools an input in a network where a previous pooling has occured.
-    Note the input shape requirement:
-        x.shape == previous_pool.shape
-
-    The output shape will be:
-        ret.shape == previous_pool.input.shape
 
     Args:
         x (Node, np.ndarray):           The input to the unpooling method
         prev_pool (max_pool2d, None):   The previous pool to be unpooled. In the case of none,
                                         the model searches through the history for the previous layer.
+
+    Note:
+        The input shape requirement:
+        ``x.shape == previous_pool.shape``
+
+        The output shape will be:
+        ``ret.shape == previous_pool.input.shape``
 
     '''
 
@@ -134,16 +136,18 @@ class MaxUnPool2d:
 class AverageUnPool2d:
     '''Average unpooling function.
     Unpools an input in a network where a previous pooling has occured.
-    Note the input shape requirement:
-        x.shape == previous_pool.shape
-
-    The output shape will be:
-        ret.shape == previous_pool.input.shape
 
     Args:
         x (Node, np.ndarray):           The input to the unpooling method
         prev_pool (average_pool2d, None):   The previous pool to be unpooled. In the case of none,
                                         the model searches through the history for the previous layer.
+
+    Note: 
+        The input shape requirement:
+        ``x.shape == previous_pool.shape``
+
+        The output shape will be:
+        ``ret.shape == previous_pool.input.shape``
 
     '''
 

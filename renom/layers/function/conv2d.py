@@ -119,7 +119,9 @@ class Conv2d(Parametrized):
         filter (tuple,int): Filter size of the convolution kernel.
         padding (tuple,int): Size of the zero-padding around the image.
         stride (tuple,int): Stride-size of the convolution.
+        dilation(tupe, int): Dilation of the convolution.
         input_size (tuple): Input unit size. This must be a tuple like (Channel, Height, Width).
+        ignore_bias (bool): If `True` is given, bias will not be added.
         initializer (Initializer): Initializer object for weight initialization.
 
     Example:
@@ -143,8 +145,8 @@ class Conv2d(Parametrized):
                  filter=3,
                  padding=0,
                  stride=1,
-                 input_size=None,
                  dilation=1,
+                 input_size=None,
                  ignore_bias=False,
                  initializer=GlorotNormal()):
         self._padding, self._stride, self._kernel, self._dilation = (tuplize(x)

@@ -59,10 +59,10 @@ class Embedding(Parametrized):
 
     The difference between dense layer and embedding layer is bellow.
 
-    | [Dense layer]
+    | **[Dense layer]**
     |  data -> onehot encoding -> onehot data -> dense layer -> embedded data
 
-    | [Embedding layer]
+    | **[Embedding layer]**
     |  data -> embedding layer -> embedded data
 
     Args:
