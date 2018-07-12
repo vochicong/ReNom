@@ -12,7 +12,7 @@ skipmultigpu = pytest.mark.skipif(
     not cuda.has_cuda() or (cuda.cuGetDeviceCount() < 2),
     reason="Number of gpu card is less than 2.")
 
-np.random.seed(10)
+np.random.seed(2017)
 
 eps = np.sqrt(np.finfo(np.float32).eps)
 

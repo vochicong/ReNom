@@ -11,21 +11,24 @@ from renom.cuda import cuda as cu
 
 class conv2d(Node):
 
-    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, ignore_bias=False):
-        filter, stride, padding = (tuplize(x) for x in (filter, stride, padding))
+    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, dilation=1):
+        filter, stride, padding, dilation = (tuplize(x)
+                                             for x in (filter, stride, padding, dilation))
+
         in_shape = x.shape[1:]
         out_shape = [w.shape[0]]
-        out_shape.extend(out_size(x.shape[2:], filter, stride, padding))
-        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, ignore_bias)
+        out_shape.extend(out_size(x.shape[2:], filter, stride, padding, dilation))
+        assert [o > 0 for o in out_shape], 'The input shape must be larger than the kernel size'
+        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, dilation)
 
     @classmethod
-    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, ignore_bias):
+    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation):
         col = im2col(to_value(x),
                      out_shape[1:], kernel,
-                     stride, padding)
+                     stride, padding, dilation)
         value = np.rollaxis(np.tensordot(col, to_value(w),
                                          ([1, 2, 3], [1, 2, 3])), 3, 1)
-        if not ignore_bias:
+        if b is not None:
             value += b
         ret = cls._create_node(value)
         ret.attrs._col = col
@@ -37,18 +40,19 @@ class conv2d(Node):
         ret.attrs._kernel = kernel
         ret.attrs._stride = stride
         ret.attrs._padding = padding
+        ret.attrs._dilation = dilation
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, ignore_bias):
+    def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation):
         N = x.shape[0]
-        conv_desc = cu.ConvolutionDescriptor(padding, stride, precision)
+        conv_desc = cu.ConvolutionDescriptor(padding, stride, dilation, precision)
         filter_desc = cu.FilterDescriptor(w.shape, precision)
 
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y)
-            if not ignore_bias:
+            if b is not None:
                 cu.cu_add_bias(get_gpu(b), y)
 
         # assert type(x) is not np.ndarray
@@ -68,7 +72,7 @@ class conv2d(Node):
             dx = np.tensordot(self.attrs._w, dy, (0, 1))
             dx = np.rollaxis(dx, 3)
             dx = col2im(dx, self.attrs._in_shape[1:],
-                        self.attrs._stride, self.attrs._padding)
+                        self.attrs._stride, self.attrs._padding, self.attrs._dilation)
             self.attrs._x._update_diff(context, dx, **kwargs)
 
         if isinstance(self.attrs._w, Node):
@@ -140,9 +144,11 @@ class Conv2d(Parametrized):
                  padding=0,
                  stride=1,
                  input_size=None,
+                 dilation=1,
                  ignore_bias=False,
                  initializer=GlorotNormal()):
-        self._padding, self._stride, self._kernel = (tuplize(x) for x in (padding, stride, filter))
+        self._padding, self._stride, self._kernel, self._dilation = (tuplize(x)
+                                                                     for x in (padding, stride, filter, dilation))
         self._channel = channel
         self._ignore_bias = ignore_bias
         self._initializer = initializer
@@ -151,10 +157,11 @@ class Conv2d(Parametrized):
     def weight_initiallize(self, input_size):
         size_f = (self._channel, input_size[0],
                   self._kernel[0], self._kernel[1])
-        self.params = {"w": Variable(self._initializer(size_f), auto_update=True),
-                       "b": None if self._ignore_bias else
-                       Variable(np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)}
+        self.params = {"w": Variable(self._initializer(size_f), auto_update=True)}
+        if not self._ignore_bias:
+            self.params["b"] = Variable(
+                np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)
 
     def forward(self, x):
-        return conv2d(x, self.params["w"], self.params["b"], self._kernel,
-                      self._stride, self._padding, self._ignore_bias)
+        return conv2d(x, self.params.w, self.params.get("b", None), self._kernel,
+                      self._stride, self._padding, self._dilation)

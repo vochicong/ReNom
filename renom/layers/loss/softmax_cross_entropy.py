@@ -10,15 +10,18 @@ import renom as rm
 
 class softmax_cross_entropy(Node):
 
-    def __new__(cls, lhs, rhs):
-        assert rhs.ndim > 1, "Input arrays must have no less than 2 dimension."
-        return cls.calc_value(lhs, rhs)
+    def __new__(cls, lhs, rhs, reduce_sum=True):
+        assert len(rhs.shape) > 1, "Input arrays must have no less than 2 dimension."
+        return cls.calc_value(lhs, rhs, reduce_sum=reduce_sum)
 
     @classmethod
-    def _oper_cpu(cls, lhs, rhs):
+    def _oper_cpu(cls, lhs, rhs, reduce_sum):
         N = len(lhs)
         z = softmax(lhs)
-        loss = -np.sum(rhs * np.log(z + 1e-8)) / N
+        if reduce_sum:
+            loss = -np.sum(rhs * np.log(z + 1e-8)) / N
+        else:
+            loss = -rhs * np.log(z + 1e-8) / N
         ret = cls._create_node(loss)
         ret.attrs._z = z
         ret.attrs._lhs = lhs
@@ -26,12 +29,15 @@ class softmax_cross_entropy(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, lhs, rhs):
+    def _oper_gpu(cls, lhs, rhs, reduce_sum):
         N = lhs.shape[0]
         z = softmax(lhs)
         tmp1 = get_gpu(lhs).empty_like_me()
         cu.cucross_entropy(get_gpu(z), get_gpu(rhs), get_gpu(tmp1))
-        loss = -cu.cusum(get_gpu(tmp1))
+        if reduce_sum:
+            loss = -cu.cusum(get_gpu(tmp1))
+        else:
+            loss = -get_gpu(tmp1)
         ret = cls._create_node(loss / N)
         ret.attrs._z = z
         ret.attrs._lhs = lhs
@@ -67,5 +73,5 @@ class SoftmaxCrossEntropy(object):
         AssertionError: An assertion error will be raised if the given tensor dimension is less than 2.
     """
 
-    def __call__(self, lhs, rhs):
-        return softmax_cross_entropy(lhs, rhs)
+    def __call__(self, lhs, rhs, reduce_sum=True):
+        return softmax_cross_entropy(lhs, rhs, reduce_sum=reduce_sum)
