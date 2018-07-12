@@ -11,7 +11,7 @@ import renom as rm
 class softmax_cross_entropy(Node):
 
     def __new__(cls, lhs, rhs):
-        assert rhs.ndim > 1, "Input arrays must have no less than 2 dimension."
+        assert len(rhs.shape) > 1, "Input arrays must have no less than 2 dimension."
         return cls.calc_value(lhs, rhs)
 
     @classmethod

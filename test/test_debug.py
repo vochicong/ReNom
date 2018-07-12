@@ -43,7 +43,6 @@ def test_graph():
     except ImportError:
         return
 
-
     SET_MODEL_GRAPH(True)
 
     class MNist(R.Model):

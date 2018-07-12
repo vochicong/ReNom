@@ -12,7 +12,6 @@ from .parameterized import Parametrized
 from renom.cuda import cuda as cu
 
 
-
 def gate(x):
     return 1. / (1. + np.exp(-x))
 
@@ -30,15 +29,17 @@ def activation_diff(x):
 
 
 class lstm(Node):
-    def __new__(cls, x, pz, ps, w, wr, b):
-        return cls.calc_value(x, pz, ps, w, wr, b)
+    def __new__(cls, x, pz, ps, w, wr, b, ignore_bias=False):
+        return cls.calc_value(x, pz, ps, w, wr, b, ignore_bias)
 
     @classmethod
-    def _oper_cpu(cls, x, pz, ps, w, wr, b):
+    def _oper_cpu(cls, x, pz, ps, w, wr, b, ignore_bias):
         s = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if ps is None else ps
         z = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if pz is None else pz
 
-        u = dot(x, w) + dot(z, wr) + b
+        u = dot(x, w) + dot(z, wr)
+        if not ignore_bias:
+            u += b
         m = u.shape[1] // 4
         u, gated = np.split(u, [m, ], axis=1)
         u = tanh(u)
@@ -66,8 +67,7 @@ class lstm(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, pz, ps, w, wr, b):
-
+    def _oper_gpu(cls, x, pz, ps, w, wr, b, ignore_bias):
         if ps is None:
             tmp = GPUValue(shape=(x.shape[0], w.shape[1] // 4))
             s_p = tmp.zeros_like_me()
@@ -76,9 +76,9 @@ class lstm(Node):
             s_p = ps
             z_p = get_gpu(pz)
 
-
-
-        u = dot(x, w) + dot(z_p, wr) + b
+        u = dot(x, w) + dot(z_p, wr)
+        if not ignore_bias:
+            u += b
 
         z = get_gpu(z_p).empty_like_me()
         state = get_gpu(s_p).empty_like_me()
@@ -170,14 +170,12 @@ class lstm(Node):
 
         dr, dou_n = (get_gpu(a).empty_like_me() for a in (drt, dou))
 
-
         cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n)))
 
         dx = dot(dr, w.T)
 
         context.store(wr, dr)
         context.store(w, dou_n)
-
 
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx)
@@ -246,8 +244,9 @@ class Lstm(Parametrized):
     .. [4] Learning Precise Timing with LSTM Recurrent Networks
     '''
 
-    def __init__(self, output_size, input_size=None, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal()):
         self._size_o = output_size
+        self._ignore_bias = ignore_bias
         self._initializer = initializer
         super(Lstm, self).__init__(input_size)
 
@@ -259,7 +258,7 @@ class Lstm(Parametrized):
         self.params = {
             "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True),
             "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True),
-            "b": Variable(bias, auto_update=True),
+            "b": None if self._ignore_bias else Variable(bias, auto_update=True),
         }
 
     def forward(self, x):
@@ -267,7 +266,8 @@ class Lstm(Parametrized):
                    getattr(self, "_state", None),
                    self.params.w,
                    self.params.wr,
-                   self.params.b)
+                   self.params.b,
+                   self._ignore_bias)
         self._z = ret
         self._state = getattr(ret.attrs, '_state', None)
         return ret
