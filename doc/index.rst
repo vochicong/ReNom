@@ -14,5 +14,3 @@ ReNom version 2.5.1
     rsts/api/main
     rsts/change_history/main
     rsts/license/main
-    old-versions/index
-

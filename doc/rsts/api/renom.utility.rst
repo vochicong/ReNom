@@ -23,7 +23,7 @@ renom.utility.distributor.distributor
 -------------------------------------
 
 .. automodule:: renom.utility.distributor.distributor
-    :members:
+    :members: GPUDistributor, NdarrayDistributor, Distributor
 
 renom.utility.distributor.imageloader
 -------------------------------------
