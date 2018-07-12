@@ -4,6 +4,8 @@ from .conv2d import Conv2d
 from .convnd import ConvNd, Conv3d
 from .poolnd import MaxPoolNd
 from .batch_normalize import BatchNormalize
+from .layer_normalize import LayerNormalize
+from .weight_normalize import WeightNormalize
 from .peephple_lstm import PeepholeLstm
 from .pool2d import MaxPool2d, max_pool2d, AveragePool2d, average_pool2d
 from .dropout import Dropout, SpatialDropout, dropout, spatial_dropout
