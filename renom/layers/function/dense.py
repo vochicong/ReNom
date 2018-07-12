@@ -21,6 +21,7 @@ class Dense(Parametrized):
     Args:
         output_size (int): Output unit size.
         input_size (int): Input unit size.
+        ignore_bias (bool): If True is given, bias will not be added.
         initializer (Initializer): Initializer object for weight initialization.
 
     Example:

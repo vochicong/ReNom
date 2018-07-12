@@ -166,17 +166,15 @@ class gru(Node):
         u = self.attrs._u
         hminus = self.attrs._pz
         ABC = self.attrs._ABC
-        y = dy
 
         dx = get_gpu(x).empty_like_me()
-        yc = get_gpu(dy).empty_like_me()
         db = get_gpu(b).empty_like_me()
         yconc = get_gpu(ABC).empty_like_me()
         du = get_gpu(u).empty_like_me()
         dpz = get_gpu(hminus).empty_like_me()
         dxx = get_gpu(x).empty_like_me()
 
-        cu.cugru_backward(get_gpu(ABC), get_gpu(y), yconc, get_gpu(u),
+        cu.cugru_backward(get_gpu(ABC), get_gpu(dy), yconc, get_gpu(u),
                           get_gpu(hminus), db, du, dpz, dxx)
         # Calculate dx
 

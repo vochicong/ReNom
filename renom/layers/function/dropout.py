@@ -85,7 +85,7 @@ class spatial_dropout(dropout):
 
 
 class Dropout(Model):
-    """Applies Dropout [2]_ to the input.
+    """Applies Dropout [dropout]_ to the input.
 
     Dropout function randomly selects a fraction (specified by dropout_ratio) of
     the data sets them to zero.
@@ -116,7 +116,7 @@ class Dropout(Model):
                  [ 0.        ,  1.20190084],
                  [ 0.12551689,  0.39880058]], dtype=float32)
 
-    .. [2] Hinton, Geoffrey E.; Srivastava, Nitish; Krizhevsky, Alex; Sutskever, Ilya; Salakhutdinov, Ruslan R. (2012).
+    .. [dropout] Hinton, Geoffrey E.; Srivastava, Nitish; Krizhevsky, Alex; Sutskever, Ilya; Salakhutdinov, Ruslan R. (2012).
         Improving neural networks by preventing co-adaptation of feature detectors
 
     """

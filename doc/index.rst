@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-ReNom version 2.5.1
+ReNom version 2.6.0
 =================
 
 .. toctree::
@@ -14,5 +14,3 @@ ReNom version 2.5.1
     rsts/api/main
     rsts/change_history/main
     rsts/license/main
-    old-versions/index
-

@@ -116,7 +116,9 @@ class Deconv2d(Parametrized):
         filter (tuple,int): Filter size to witch used as convolution kernel.
         padding (tuple,int): Pad around image by 0 according to this size.
         stride (tuple,int): Specifying the strides of the convolution.
+        dilation (tuple, int): Dilation of the convolution.
         input_size (tuple): Input unit size. This must be a tuple like (Channel, Height, Width).
+        ignore_bias (bool): If True is given, bias will not be added.
         initializer (Initializer): Initializer object for weight initialization.
 
     Example:

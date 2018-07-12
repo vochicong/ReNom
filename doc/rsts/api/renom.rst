@@ -3,12 +3,10 @@ renom
 
 .. automodule:: renom.config
     :members:
-    :show-inheritance:
 
 .. automodule:: renom.core
-    :members:
+    :members: Grads, Node, Variable
     :show-inheritance:
 
 .. automodule:: renom.operation
     :members:
-    :show-inheritance:

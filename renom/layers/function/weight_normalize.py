@@ -54,12 +54,21 @@ class weight_normalize(Node):
         dgain = normal_dw * weight / w_normed
         dw = (1 / w_normed * normal_dw - op.sum(weight * normal_dw, keepdims=True) *
               weight / (op.square(w_normed) * w_normed)) * gain
-        db = np.ones_like(dy)
+
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
-        self.attrs._gain._update_diff(context, np.sum(dgain, axis=0, keepdims=True), **kwargs)
-        self.attrs._weight._update_diff(context, dw, **kwargs)
-        self.attrs._bias._update_diff(context, np.sum(db, axis=0, keepdims=True), **kwargs)
+
+        if isinstance(self.attrs._gain, Node):
+            self.attrs._gain._update_diff(context,
+                                          np.sum(dgain, axis=0, keepdims=True), **kwargs)
+
+        if isinstance(self.attrs._weight, Node):
+            self.attrs._weight._update_diff(context, dw, **kwargs)
+
+        if isinstance(self.attrs._bias, Node):
+            db = dy
+            self.attrs._bias._update_diff(context,
+                                          np.sum(db, axis=0, keepdims=True), **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         x = get_gpu(self.attrs._x)
@@ -70,15 +79,24 @@ class weight_normalize(Node):
         normal_dw = get_gpu(op.dot(x.T, dy))
         w_normed = get_gpu(normalized_form(weight))
         dgain = normal_dw * weight / w_normed
-        dw = (get_gpu(1 / w_normed * normal_dw) -
-              get_gpu(get_gpu(op.sum(get_gpu(weight * normal_dw), keepdims=True)) *
-                      weight / (get_gpu(op.square(w_normed)) * w_normed))) * gain
-        db = get_gpu(self.attrs._bias).ones_like_me()
+
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
-        self.attrs._gain._update_diff(context, op.sum(dgain, axis=0, keepdims=True), **kwargs)
-        self.attrs._weight._update_diff(context, dw, **kwargs)
-        self.attrs._bias._update_diff(context, op.sum(db, axis=0, keepdims=True), **kwargs)
+
+        if isinstance(self.attrs._gain, Node):
+            self.attrs._gain._update_diff(context,
+                                          op.sum(dgain, axis=0, keepdims=True), **kwargs)
+
+        if isinstance(self.attrs._weight, Node):
+            dw = (get_gpu(1 / w_normed * normal_dw) -
+                  get_gpu(get_gpu(op.sum(get_gpu(weight * normal_dw), keepdims=True)) *
+                          weight / (get_gpu(op.square(w_normed)) * w_normed))) * gain
+            self.attrs._weight._update_diff(context, dw, **kwargs)
+
+        if isinstance(self.attrs._bias, Node):
+            db = get_gpu(dy)
+            self.attrs._bias._update_diff(context,
+                                          op.sum(db, axis=0, keepdims=True), **kwargs)
 
 
 class WeightNormalize(Parametrized):

@@ -17,11 +17,14 @@ except ImportError:
 
 
 def reshape(array, shape):
-    """This function reshapes matrix shape.
+    """This function reshapes array.
 
     Args:
-        array (Variable): Input array.
+        array (Node): Input array.
         shape (tuple): Shape.
+
+    Returns:
+        (Node): Reshaped array.
 
     Example:
         >>> import renom as rm
@@ -43,8 +46,12 @@ class sum(Node):
     sum along specified axis.
 
     Args:
-        array (Variable): Input array.
+        array (Node): Input array.
         axis (int): Summing up along this axis.
+        keepdims (bool): If this is True, dimension will not be reduced.
+
+    Returns:
+        (Node): Summed array.
 
     Example:
         >>> import numpy as np
@@ -117,8 +124,11 @@ class dot(BinOp):
     This function executes dot product of the two matrixes.
 
     Args:
-        lhs (Variable,ndarray): Input array.
-        rhs (Variable,ndarray): Input array.
+        lhs (Node,ndarray): Input array.
+        rhs (Node,ndarray): Input array.
+
+    Returns:
+        (Node): Multiplied array.
 
     Example:
         >>> import numpy as np
@@ -178,8 +188,11 @@ class concat(Node):
     Join a sequence of arrays along specified axis.
 
     Args:
-        args (*Variable, tuple): Input arrays or tuple of input arrays.
+        args (Node, List of Node): Input arrays or tuple of input arrays.
         axis (int): Concatenation will be performed along this axis. Default value is 1.
+
+    Returns:
+        (Node): Concatenated array.
 
     Example:
         >>> import numpy as np
@@ -254,9 +267,12 @@ class where(Node):
     Return elements, either from a or b, depending on condition.
 
     Args:
-        condition (Variable,ndarray): Condition array.
-        a (Variable,ndarray): Input array.
-        b (Variable,ndarray): Input array.
+        condition (Node, ndarray): Condition array.
+        a (Node, ndarray): Input array.
+        b (Node, ndarray): Input array.
+
+    Returns:
+        (Node): Conditioned array.
 
     Example:
         >>> import numpy as np
@@ -319,7 +335,10 @@ class sqrt(UnaryOp):
     Square root operation.
 
     Args:
-        arg (Variable,ndarray): Input array.
+        arg (Node,ndarray): Input array.
+
+    Returns:
+       (Node): Square root of input array.
 
     Example:
         >>> import numpy as np
@@ -357,6 +376,16 @@ class sqrt(UnaryOp):
 
 
 class square(UnaryOp):
+    """Square operation.
+
+    Args:
+        arg (Node, ndarray): Input array.
+
+    Returns:
+        (Node): Squared array.
+
+    """
+
     @classmethod
     def _oper_cpu(cls, arg):
         return arg * arg
@@ -383,7 +412,10 @@ class log(UnaryOp):
     Log operation.
 
     Args:
-        arg (Variable,ndarray): Input array.
+        arg (Node,ndarray): Input array.
+
+    Returns:
+        (Node): Logarithm of input array.
     """
 
     @classmethod
@@ -410,7 +442,10 @@ class exp(UnaryOp):
     Exponential operation.
 
     Args:
-        arg (Variable,ndarray): Input array.
+        arg (Node, ndarray): Input array.
+
+    Returns:
+        (Node): Exponential of input array.
     """
 
     @classmethod
@@ -433,8 +468,73 @@ class exp(UnaryOp):
 
 
 class amin(Amin):
+    """Returns min value or array of given array.
+    You can specify the axis which the operation will be performed for.
+
+    Args:
+        arg (Node, ndarray): Input matrix.
+        axis (int): Perform calculation along this argument.
+        keepdims (bool): If `Ture` is passed, dimensions will not be reduced.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> # Forward Calculation
+        >>> a = np.arange(4).reshape(2, 2)
+        >>> a
+        [[0 1]
+         [2 3]]
+        >>> rm.amin(a, axis=1)
+        [ 0.  2.]
+        >>>
+        >>> rm.amin(a, axis=0)
+        [ 0.  1.]
+        >>> rm.amin(a, axis=0, keepdims=True)
+        [[ 0.  1.]]
+        >>>
+        >>> # Calculation of differentiation
+        >>> va = rm.Variable(a)
+        >>> out = rm.amin(va)
+        >>> grad = out.grad()
+        >>> grad.get(va) # Getting the gradient of 'va'.
+        [[ 1.,  0.],
+         [ 0.,  0.]]
+
+    """
     pass
 
 
 class amax(Amax):
+    """Returns max value or array of given array.
+    You can specify the axis which the operation will be performed for.
+
+    Args:
+        arg (Node, ndarray): Input matrix.
+        axis (int): Perform calculation along this argument.
+        keepdims (bool): If `Ture` is passed, dimensions will not be reduced.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> # Forward Calculation
+        >>> a = np.arange(4).reshape(2, 2)
+        >>> a
+        [[0 1]
+         [2 3]]
+        >>> rm.amax(a, axis=1)
+        [ 1.  3.]
+        >>>
+        >>> rm.amax(a, axis=0)
+        [ 2.  3.]
+        >>> rm.amax(a, axis=0, keepdims=True)
+        [[ 2.  3.]]
+        >>>
+        >>> # Calculation of differentiation
+        >>> va = rm.Variable(a)
+        >>> out = rm.amax(va)
+        >>> grad = out.grad()
+        >>> grad.get(va) # Getting the gradient of 'va'.
+        [[ 0.,  0.],
+         [ 0.,  1.]]
+    """
     pass

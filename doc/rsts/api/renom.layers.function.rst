@@ -2,49 +2,49 @@ renom.layers.function
 =====================
 
 .. automodule:: renom.layers.function.batch_normalize
-    :members:
+    :members: BatchNormalize
 
 .. automodule:: renom.layers.function.conv2d
-    :members:
+    :members: Conv2d
 
 .. automodule:: renom.layers.function.deconv2d
-    :members:
+    :members: Deconv2d
 
 .. automodule:: renom.layers.function.dense
-    :members:
+    :members: Dense
 
 .. automodule:: renom.layers.function.dropout
-    :members:
+    :members: Dropout, SpatialDropout
 
 .. automodule:: renom.layers.function.embedding
-    :members:
+    :members: Embedding
 
 .. automodule:: renom.layers.function.flatten
-    :members:
+    :members: Flatten
 
 .. automodule:: renom.layers.function.gru
-    :members:
-
-.. automodule:: renom.layers.function.lambda
-    :members:
+    :members: Gru
 
 .. automodule:: renom.layers.function.lrn
-    :members:
+    :members: Lrn
+
+.. automodule:: renom.layers.function.layer_normalize
+    :members: LayerNormalize
+
+.. automodule:: renom.layers.function.weight_normalize
+    :members: WeightNormalize
 
 .. automodule:: renom.layers.function.lstm
-    :members:
+    :members: Lstm
 
 .. automodule:: renom.layers.function.parameterized
-    :members:
+    :members: Model, Sequential
 
 .. automodule:: renom.layers.function.pool2d
-    :members:
+    :members: MaxPool2d, AveragePool2d
 
 .. automodule:: renom.layers.function.unpool2d
-    :members:
-
-.. automodule:: renom.layers.function.upconv2d
-    :members:
+    :members: MaxUnPool2d, AverageUnPool2d
 
 .. automodule:: renom.layers.function.utils
     :members:
