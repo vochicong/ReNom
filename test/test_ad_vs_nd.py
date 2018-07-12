@@ -36,6 +36,7 @@ from renom.layers.function.lstm import Lstm
 from renom.layers.function.gru import Gru
 from renom.layers.function.batch_normalize import BatchNormalize,\
     BATCH_NORMALIZE_FEATUREMAP
+from renom.layers.function.layer_normalize import LayerNormalize
 from renom.layers.function.lrn import Lrn
 from test_utility import auto_diff, numeric_diff
 
@@ -67,14 +68,22 @@ def onehot(shape):
     return ret
 
 
-def compare(func, node, *args):
+def compare(func, node, *args, **kwargs):
+    if 'atol' in kwargs:
+        atol = kwargs['atol']
+    else:
+        atol = 1e-5
+    if 'rtol' in kwargs:
+        rtol = kwargs['rtol']
+    else:
+        rtol = 1e-3
     ad = auto_diff(func, node, *args)
     nd = numeric_diff(func, node, *args)
     diff = ad - nd
     print("ad = \n{}".format(ad))
     print("nd = \n{}".format(nd))
-    print("difference = \n{}".format(diff))
-    assert np.allclose(ad, nd, atol=1e-5, rtol=1e-3)
+    print("difference = \n{}".format(ad - nd))
+    assert np.allclose(ad, nd, atol=atol, rtol=rtol)
 
 
 @pytest.mark.parametrize("node, x, raise_error", [
@@ -399,6 +408,37 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
 
 
 @pytest.mark.parametrize("node", [
+    Variable(rand((1, 2, 4, 3))),
+    Variable(rand((2, 5))),
+    Variable(rand((20, 2))),
+    Variable(rand((3, 14))),
+    Variable(rand((2, 4)))
+])
+def test_layer_normalize(node, use_gpu):
+    node = Variable(node*50)
+    set_cuda_active(use_gpu)
+
+    layer = LayerNormalize()
+    layer2 = Dense(4)
+    layer3 = Conv2d(channel=3)
+
+    def func(node):
+        ret = layer(node)
+        if len(ret.shape) > 2:
+            return sum(layer3(ret))
+        else:
+            return sum(layer2(ret))
+    a = 1e-5
+    r = 1e-3
+    if use_gpu:
+        a = 1e-2
+        r = 1e-3
+    compare(func, node, node, atol=a, rtol=r)
+    compare(func, layer.params["gain"], node)
+    compare(func, layer.params["bias"], node)
+
+
+@pytest.mark.parametrize("node", [
     Variable(rand((2, 2, 3, 3))),
     Variable(rand((2, 3, 4, 5))),
 ])
@@ -555,9 +595,9 @@ def test_max_pool2d(node, use_gpu):
 
 
 @pytest.mark.parametrize("node", [
-    Variable(rand((3, 2, 4, 5, 2))),
-    Variable(rand((2, 2, 3, 3))),
-    Variable(rand((2, 3, 4, 5)))
+    Variable(10*rand((3, 2, 4, 5, 2))),
+    Variable(10*rand((2, 2, 3, 3))),
+    Variable(10*rand((2, 3, 4, 5)))
 ])
 def test_max_poolnd(node, use_gpu):
 
