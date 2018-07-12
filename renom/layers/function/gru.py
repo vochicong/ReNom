@@ -201,191 +201,41 @@ class gru(Node):
         self.attrs._u._update_diff(context, du)
         if isinstance(self.attrs._pz, Node):
             self.attrs._pz._update_diff(context, dpz)
-        #
-        #print(
-        #assert False
-'''
-    def _backward_gpu(self, context, dy, **kwargs):
-
-        #print ('Current depth is: {:d}'.format(self._count))
-
-
-        x =         get_gpu(self.attrs._x)
-        w_z =       get_gpu(self.attrs._w_z)
-        w_r =       get_gpu(self.attrs._w_r)
-        w_h =       get_gpu(self.attrs._w_h)
-        A =         get_gpu(self.attrs._A)
-        B =         get_gpu(self.attrs._B)
-        C =         get_gpu(self.attrs._C)
-        u_z =       get_gpu(self.attrs._u_z)
-        u_h =       get_gpu(self.attrs._u_h)
-        u_r =       get_gpu(self.attrs._u_r)
-        hminus =    get_gpu(self.attrs._pz)
-
-        y = get_gpu(dy)
-
-        #A = get_gpu(A)
-        #cu.cugru_backward(A)
-        #dA = A
-
-        dA = get_gpu(sigmoid_diff(A))
-        dB = get_gpu(sigmoid_diff(B))
-        dC = get_gpu(tanh_diff(C))
-
-        # Calculate dx
-        dx_z = get_gpu(dot(y * dA, w_z.T))
-        dx_r = get_gpu(dot(y * dB * dC * u_h * hminus, w_r.T))
-        dx_h = get_gpu(dot(y * dC, w_h.T))
-        dx = dx_z + dx_r + dx_h
-        v = self._create_node(dx)
-
-        # Calculate dw
-        dw_z = dot(x.T, y * dA)
-        dw_r = dot(x.T, y * dB * dC * u_h * hminus)
-        dw_h = dot(x.T, y * dC)
-        dw = concat([dw_z, dw_r, dw_h], axis=1)
-
-        # Calculate db
-        db_z = sum(y * dA, axis=0)  # , keepdims=True)
-        db_r = sum(y * dB * dC * u_h * hminus, axis=0)  # , keepdims=True)
-        db_h = sum(y * dC, axis=0)  # , keepdims=True)
-        db = concat([db_z, db_r, db_h], axis=1)
-        #print ('Updating b with: {},{},{}'.format(db_z,db_r,db_h))
-
-        du_z = sum(dA * hminus * y, axis=0)  # , keepdims=True)
-        du_r = sum(y * dC * dB * u_h * hminus * hminus, axis=0)  # , keepdims=True)
-        du_h = sum(sigmoid(B) * dC * y * hminus, axis=0)  # , keepdims=True)
-        du = concat([du_z, du_r, du_h], axis=1)
-
-        pz_z = y * dA * u_z
-        pz_r = y * dC * dB * u_h * hminus * u_r
-        pz_h = y * dC * get_gpu(sigmoid(B)) * u_h
-
-        dpz = pz_z + pz_r + pz_h
-        v = self._create_node(dpz)
-
-
-
-        self.attrs._x._update_diff(context, dx)
-        self.attrs._w._update_diff(context, dw)
-        self.attrs._b._update_diff(context, db)
-        self.attrs._u._update_diff(context, du)
-        if isinstance(self.attrs._pz, Node):
-            self.attrs._pz._update_diff(context, dpz)
-'''
-'''
-Basic Implementations
-
-    @classmethod
-    def _oper_gpu(cls, x, pz, w, u, b):
-
-        # Initialize Variables
-        m = w.shape[1] // 3
-        w_z, w_r, w_h = get_gpu(w).split([m, m * 2, ], axis=1)
-        b_z, b_r, b_h = get_gpu(b).split([m, m * 2, ], axis=1)
-        u_z, u_r, u_h = get_gpu(u).split([m, m * 2, ], axis=1)
-        hminus = Variable(np.zeros((x.shape[0], w.shape[1] // 3), dtype=precision)) if pz is None else pz
-        hminus.to_gpu()
-        x.to_gpu()
-        # Perform Forward Calcuations
-        A = dot(x, w_z) + hminus._gpu * u_z + b_z
-        B = dot(x, w_r) + u_r * hminus._gpu + b_r
-        sigB = sigmoid(B)
-        C = dot(x, w_h) + sigB * u_h * hminus._gpu + b_h
-        h = sigmoid(A) + tanh(C)
-        h.to_cpu()
-
-        # Store Variables for Graph
-        ret = cls._create_node(h)
-        ret.attrs._x = x
-        ret.attrs._w = w
-        ret.attrs._w_z = w_z
-        ret.attrs._w_r = w_r
-        ret.attrs._w_h = w_h
-        ret.attrs._b = b
-        ret.attrs._b_z = b_z
-        ret.attrs._b_r = b_r
-        ret.attrs._b_h = b_h
-        ret.attrs._u = u
-        ret.attrs._u_z = u_z
-        ret.attrs._u_h = u_h
-        ret.attrs._u_r = u_r
-        ret.attrs._pz = hminus
-        ret.attrs._A = A
-        ret.attrs._B = B
-        ret.attrs._C = C
-        ret.attrs._sigB = sigB
-
-        return ret
-
-    def _backward_gpu(self, context, dy, **kwargs):
-
-        #print ('Current depth is: {:d}'.format(self._count))
-
-        x =         get_gpu(self.attrs._x)
-        w_z =       get_gpu(self.attrs._w_z)
-        w_r =       get_gpu(self.attrs._w_r)
-        w_h =       get_gpu(self.attrs._w_h)
-        A =         get_gpu(self.attrs._A)
-        B =         get_gpu(self.attrs._B)
-        C =         get_gpu(self.attrs._C)
-        u_z =       get_gpu(self.attrs._u_z)
-        u_h =       get_gpu(self.attrs._u_h)
-        u_r =       get_gpu(self.attrs._u_r)
-        hminus =    get_gpu(self.attrs._pz)
-
-        y = get_gpu(dy)
-
-        #A = get_gpu(A)
-        #cu.cugru_backward(A)
-        #dA = A
-        dA = get_gpu(sigmoid_diff(A))
-        dB = get_gpu(sigmoid_diff(B))
-        dC = get_gpu(tanh_diff(C))
-
-        # Calculate dx
-        dx_z = get_gpu(dot(y * dA, w_z.T))
-        dx_r = get_gpu(dot(y * dB * dC * u_h * hminus, w_r.T))
-        dx_h = get_gpu(dot(y * dC, w_h.T))
-        dx = dx_z + dx_r + dx_h
-        v = self._create_node(dx)
-
-        # Calculate dw
-        dw_z = dot(x.T, y * dA)
-        dw_r = dot(x.T, y * dB * dC * u_h * hminus)
-        dw_h = dot(x.T, y * dC)
-        dw = concat([dw_z, dw_r, dw_h], axis=1)
-
-        # Calculate db
-        db_z = sum(y * dA, axis=0)  # , keepdims=True)
-        db_r = sum(y * dB * dC * u_h * hminus, axis=0)  # , keepdims=True)
-        db_h = sum(y * dC, axis=0)  # , keepdims=True)
-        db = concat([db_z, db_r, db_h], axis=1)
-        #print ('Updating b with: {},{},{}'.format(db_z,db_r,db_h))
-
-        du_z = sum(dA * hminus * y, axis=0)  # , keepdims=True)
-        du_r = sum(y * dC * dB * u_h * hminus * hminus, axis=0)  # , keepdims=True)
-        du_h = sum(sigmoid(B) * dC * y * hminus, axis=0)  # , keepdims=True)
-        du = concat([du_z, du_r, du_h], axis=1)
-
-        pz_z = y * dA * u_z
-        pz_r = y * dC * dB * u_h * hminus * u_r
-        pz_h = y * dC * get_gpu(sigmoid(B)) * u_h
-
-        dpz = pz_z + pz_r + pz_h
-        v = self._create_node(dpz)
-
-
-        self.attrs._x._update_diff(context, dx)
-        self.attrs._w._update_diff(context, dw)
-        self.attrs._b._update_diff(context, db)
-        self.attrs._u._update_diff(context, du)
-        if isinstance(self.attrs._pz, Node):
-            self.attrs._pz._update_diff(context, dpz)
-'''
 
 
 class Gru(Parametrized):
+    '''
+    Gated Recurrent Unit
+
+    An LSTM-like RNN unit, which simplifies the LSTM unit by not including a memory core.
+    This simplifies learning of the unit and reduces computational complexity, as the GRU only
+    performs requires 3 input gates, compared to the 4 required by the LSTM.
+
+    args:
+        output_size (int): Output unit size.
+        input_size (int): Input unit size.
+        initializer (Initializer): Initializer object for weight initialization.
+
+    example:
+        In [1]: import numpy as np
+        In [2]: import renom as rm
+        In [3]: n, d, t = (2, 3, 4)
+        In [4]: x = rm.Variable(np.random.rand(n,d))
+        In [5]: layer = rm.Gru(2)
+        In [6]: z = 0
+        In [7]: for i in range(t):
+        ...:     z += rm.sum(layer(x))
+        ...:
+        In [8]: grad = z.grad()
+        In [9]: grad.get(x)
+        Out[9]:
+        Add([[-8.89559174, -0.58861321, -4.67931843],
+        [-7.27466679, -0.45286781, -3.81758523]], dtype=float32)
+        In [10]: layer.truncate()
+
+
+    https://arxiv.org/pdf/1409.1259.pdf
+    '''
 
     def __init__(self, output_size, input_size=None, initializer=GlorotNormal()):
         self._size_o = output_size
@@ -395,8 +245,7 @@ class Gru(Parametrized):
     def weight_initiallize(self, size_i):
         size_i = size_i[0]
         size_o = self._size_o
-        bias = np.zeros((1, size_o * 3), dtype=precision)
-        bias[:, :] = 1
+        bias = np.ones((1, size_o * 3), dtype=precision)
         # At this point, all connected units in the same layer will use the SAME weights
         self.params = {
             "w": Variable(self._initializer((size_i, size_o * 3)), auto_update=True),
@@ -415,32 +264,3 @@ class Gru(Parametrized):
     def truncate(self):
         """Truncates temporal connection."""
         self._z = None
-
-# Encapsulates a single unit in a ReNom model
-
-
-class GruSimpleUnit(Parametrized):
-
-    def __init__(self, output_size, input_size=None, initializer=GlorotNormal()):
-        self._size_o = output_size
-        self._initializer = initializer
-        super(GruSimpleUnit, self).__init__(input_size)
-
-    def weight_initiallize(self, size_i):
-        size_i = size_i[0]
-        size_o = self._size_o
-        bias = np.zeros((1, size_o * 3), dtype=precision)
-        bias[:, :] = 1
-        # At this point, all connected units in the same layer will use the SAME weights
-        self.params = {
-            "w": Variable(self._initializer((size_i, size_o * 3)), auto_update=True),
-            "u": Variable(self._initializer((1, size_o * 3)), auto_update=True),
-            "b": Variable(bias, auto_update=True),
-        }
-
-    def forward(self, x, pz=None):
-        ret = gru(x, pz,
-                  self.params.w,
-                  self.params.u,
-                  self.params.b)
-        return ret
