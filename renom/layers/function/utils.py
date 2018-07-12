@@ -126,7 +126,8 @@ def place_kernels(img, kernel, stride, offset=0):
         slices = [slice(pos[i], pos[i] + kernel.shape[i]) for i in range(len(img.shape))]
         kern = np.sum(img[slices] * kernel)
         kernels[tuple(np.array(pos) // stride)] = kern
-    return kernels 
+    return kernels
+
 
 def place_back_kernels(img, kernel, stride=1, offset=0):
     ret_shape = (np.array(img.shape) - 1) * stride + np.array(kernel.shape)
