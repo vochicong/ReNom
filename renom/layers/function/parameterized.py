@@ -535,6 +535,7 @@ class Parametrized(Model):
     def __call__(self, x, *args, **kwargs):
         with use_device(self._device_id):
             if not self.params:
+                assert len(x.shape) > 1, "Input must be at least of 2 dimensions."
                 self.weight_initiallize(x.shape[1:])
             return super(Parametrized, self).__call__(x, *args, **kwargs)
 

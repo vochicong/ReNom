@@ -87,6 +87,7 @@ class lstm(Node):
         cu.culstm_forward(get_gpu(u), get_gpu(state), get_gpu(s_p), get_gpu(z))
 
         ret = cls._create_node(z)
+
         ret.attrs._x = x
         ret.attrs._w = w
         ret.attrs._wr = wr
@@ -152,6 +153,7 @@ class lstm(Node):
             self.attrs._pz._update_diff(context, np.dot(dr, wr.T))
 
     def _backward_gpu(self, context, dy, **kwargs):
+
         w = self.attrs._w
         wr = self.attrs._wr
         b = self.attrs._b
@@ -167,6 +169,7 @@ class lstm(Node):
         e = get_gpu(dy)
 
         dr, dou_n = (get_gpu(a).empty_like_me() for a in (drt, dou))
+
         cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n)))
 
         dx = dot(dr, w.T)
