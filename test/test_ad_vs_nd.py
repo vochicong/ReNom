@@ -33,6 +33,7 @@ from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd
 from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
+from renom.layers.function.gru import Gru
 from renom.layers.function.batch_normalize import BatchNormalize,\
     BATCH_NORMALIZE_FEATUREMAP
 from renom.layers.function.lrn import Lrn
@@ -660,7 +661,7 @@ def test_spatial_dropout(node, seed, use_gpu):
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
     Variable(rand((2, 1))),
-    Variable(rand((1, 2))),
+    Variable(rand((30, 30))),
 ])
 def test_lstm(node, use_gpu, ignore_bias):
     node = Variable(node)
@@ -671,11 +672,36 @@ def test_lstm(node, use_gpu, ignore_bias):
     def func(node):
         loss = 0
         for _ in range(3):
-            loss += sum(layer1(node))
+            loss = sum(layer1(node))
         layer1.truncate()
         return loss
 
     compare(func, node, node)
+    for k in layer1.params.keys():
+        compare(func, layer1.params[k], node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1, 2))),
+    Variable(rand((30, 30))),
+])
+def test_gru(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer1 = Gru(output_size=30)
+
+    def func(node):
+        loss = 0
+        for _ in range(3):
+            loss = sum(layer1(node))
+        layer1.truncate()
+        return loss
+
+    compare(func, node, node)
+    func(node)
     for k in layer1.params.keys():
         try:
             compare(func, layer1.params[k], node)
