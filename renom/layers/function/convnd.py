@@ -159,6 +159,10 @@ class ConvNd(Parametrized):
         self._kernel, self._padding, self._stride = map(
             func, [self._kernel, self._padding, self._stride])
 
+        assert all([s >= min(self._kernel) for s in input_size[1:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than kernel size.".format(
+                input_size[1:])
+
         f_lst = [self._channel, input_size[0]]
         f_lst.extend(self._kernel)
         size_f = tuple(f_lst)
@@ -169,6 +173,12 @@ class ConvNd(Parametrized):
             self.params["b"] = Variable(np.ones(size_b, dtype=precision), auto_update=True)
 
     def forward(self, x):
+        assert len(
+            x.shape) > 2, "The dimension of input array must be grater than 3. Actual dim is {}".format(x.ndim)
+        assert all([s >= min(self._kernel) for s in x.shape[2:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than kernel size.".format(
+                x.shape[2:])
+
         return convnd(x, self.params["w"], self.params.get("b", None), self._kernel,
                       self._stride, self._padding)
 
@@ -203,6 +213,10 @@ class Conv3d(Parametrized):
         self._kernel, self._padding, self._stride = map(
             func, [self._kernel, self._padding, self._stride])
 
+        assert all([s >= min(self._kernel) for s in input_size[1:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than kernel size.".format(
+                input_size[1:])
+
         f_lst = [self._channel, input_size[0]]
         f_lst.extend(self._kernel)
         size_f = tuple(f_lst)
@@ -213,5 +227,9 @@ class Conv3d(Parametrized):
             self.params["b"] = Variable(np.ones(size_b, dtype=precision), auto_update=True)
 
     def forward(self, x):
+        assert len(x.shape) == 5, "The dimension of input array must be 5. Actual dim is {}".format(x.ndim)
+        assert all([s >= min(self._kernel) for s in x.shape[2:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than kernel size.".format(
+                x.shape[2:])
         return convnd(x, self.params["w"], self.params.get("b", None), self._kernel,
                       self._stride, self._padding)

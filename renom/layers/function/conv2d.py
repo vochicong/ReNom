@@ -18,7 +18,6 @@ class conv2d(Node):
         in_shape = x.shape[1:]
         out_shape = [w.shape[0]]
         out_shape.extend(out_size(x.shape[2:], filter, stride, padding, dilation))
-        assert [o > 0 for o in out_shape], 'The input shape must be larger than the kernel size'
         return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, dilation)
 
     @classmethod
@@ -159,11 +158,17 @@ class Conv2d(Parametrized):
     def weight_initiallize(self, input_size):
         size_f = (self._channel, input_size[0],
                   self._kernel[0], self._kernel[1])
+        assert all([s >= min(self._kernel) for s in input_size[1:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than kernel size.".format(input_size[1:])
         self.params = {"w": Variable(self._initializer(size_f), auto_update=True)}
         if not self._ignore_bias:
             self.params["b"] = Variable(
                 np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)
 
     def forward(self, x):
+        assert len(x.shape) == 4, "The dimension of input array must be 4. Actual dim is {}".format(x.ndim)
+        assert all([s >= min(self._kernel) for s in x.shape[2:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than kernel size.".format(
+                x.shape[2:])
         return conv2d(x, self.params.w, self.params.get("b", None), self._kernel,
                       self._stride, self._padding, self._dilation)
