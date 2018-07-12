@@ -28,6 +28,12 @@ renom.layers.function
 .. automodule:: renom.layers.function.lrn
     :members: Lrn
 
+.. automodule:: renom.layers.function.layer_normalize
+    :members: LayerNormalize
+
+.. automodule:: renom.layers.function.weight_normalize
+    :members: WeightNormalize
+
 .. automodule:: renom.layers.function.lstm
     :members: Lstm
 
