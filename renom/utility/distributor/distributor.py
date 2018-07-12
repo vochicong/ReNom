@@ -13,6 +13,7 @@ if has_cuda():
 else:
     cuda_imported = False
 
+
 class Distributor(object):
     '''Distributor class
     This is the base class of a data distributor.

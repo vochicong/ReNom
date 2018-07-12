@@ -560,6 +560,7 @@ def test_max_pool2d(node, use_gpu):
     Variable(rand((2, 3, 4, 5)))
 ])
 def test_max_poolnd(node, use_gpu):
+
     node = Variable(node)
     set_cuda_active(use_gpu)
     layer = MaxPoolNd(kernel=2)
