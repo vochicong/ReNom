@@ -7,9 +7,9 @@ Changes 2.5 => 2.6
 
 3. Added argument `reduce_sum` to all loss function class. As example, see MeanSquaredError class. :py:meth:`renom.layers.loss.mean_squared_error.MeanSquaredError`.
 
-4. Added ``Weight Normalization``. 
+4. Added ``Weight Normalize``. See :py:meth:`renom.layers.function.weight_normalize.WeightNormalize`
 
-5. Added ``Layer Normalization``.
+5. Added ``Layer Normalize``. See :py:meth:`renom.layers.function.layer_normalize.LayerNormalize`
 
 6. Added ``GPUDistributor``. See :py:meth:`renom.utility.distributor.distributor.GPUDistributor`
 
