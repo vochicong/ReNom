@@ -74,6 +74,10 @@ class ClippedMeanSquaredError:
         x (ndarray,Node): Input data.
         y (ndarray,Node): Target data.
         clip (float,tuple): Clipping threshold.
+        reduce_sum (bool): If True is given, the result array will be summed up and returns scalar value.
+
+    Returns:
+        (Node, ndarray): Clipping mean squared error.
 
     Raises:
         AssertionError: An assertion error will be raised if the given tensor dimension is less than 2.

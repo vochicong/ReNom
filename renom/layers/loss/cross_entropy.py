@@ -67,6 +67,10 @@ class CrossEntropy:
     Args:
         x (ndarray,Node): Input array.
         y (ndarray,Node): Target array.
+        reduce_sum (bool): If True is given, the result array will be summed up and returns scalar value.
+
+    Returns:
+        (Node, ndarray): Cross entropy error.
 
     Raises:
         AssertionError: An assertion error will be raised if the given tensor dimension is less than 2.
@@ -81,7 +85,10 @@ class CrossEntropy:
         ((1, 2), (1, 2))
         >>> loss = rm.cross_entropy(x, y)
         >>> print(loss)
-        cross_entropy(0.6931471824645996)
+        [0.6931471824645996]
+        >>> loss = rm.cross_entropy(x, y, reduce_sum=False)
+        >>> print(loss)
+        [[0.          0.69314718]]
 
     """
 
