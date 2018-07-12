@@ -4,12 +4,23 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
-## ReNom version 2.5.1
+## ReNom version 2.6.0
 - http://renom.jp/rsts/renomdl/main.html
 
-#### Changes from 2.4
-- Adopted CUDA 9.1 and cuDNN 7.1.
-- Improved performance of Adam.
+#### Changes from 2.5
+
+Please refer to `changes` at renom.jp.
+
+- Improved performance.
+- Add argument `ignore_bias` to all parametrized class.
+- Add argument `reduce_sum` to all loss function class.
+- Add `Weight Normalize`.
+- Add `Layer Normalize`.
+- Add `GPUDistributor`.
+- Add `Gru`.
+- Add `Convlution 3d, nd`.
+- Add `Max, Avg Pooling 3d, nd`.
+- Add `Unpooling 2d`.
 
 ## Requirements
 
@@ -46,7 +57,7 @@ Please be sure that the environment variable CUDA_HOME is set correctly.
 Example:
 
 	$ echo $CUDA_HOME
-	/usr/local/cuda-8.0
+	/usr/local/cuda-9.1
 	
 
 ## Precision
@@ -57,7 +68,7 @@ calculations are performed with float64.
 Default case, the precision is float32.
 
 ## Limit of tensor dimension size.
-In ReNom version 2.4, only tensors that have less than 6 dimension size can be operated.
+In ReNom version >= 2.4, only tensors that have less than 6 dimension size can be operated.
 
 
 ## License

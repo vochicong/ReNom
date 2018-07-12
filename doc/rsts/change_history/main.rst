@@ -14,3 +14,14 @@ Changes 2.5 => 2.6
 6. Added ``GPUDistributor``. See :py:meth:`renom.utility.distributor.distributor.GPUDistributor`
 
 7. Added ``Gru``. See :py:meth:`renom.layers.function.gru.Gru`
+
+8. Added ``Conv3d``.
+
+9. Added ``ConvNd``.
+
+10. Added ``Pool3d``.
+
+11. Added ``PoolNd``.
+
+12. Added ``Unpool2d``
+

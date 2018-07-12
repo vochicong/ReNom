@@ -7,6 +7,9 @@ renom.layers.function
 .. automodule:: renom.layers.function.conv2d
     :members: Conv2d
 
+.. automodule:: renom.layers.function.convnd
+    :members: Conv3d, ConvNd
+
 .. automodule:: renom.layers.function.deconv2d
     :members: Deconv2d
 
@@ -37,14 +40,18 @@ renom.layers.function
 .. automodule:: renom.layers.function.lstm
     :members: Lstm
 
+.. automodule:: renom.layers.function.peephole_lstm
+    :members: PeepholeLstm
+
 .. automodule:: renom.layers.function.parameterized
     :members: Model, Sequential
 
 .. automodule:: renom.layers.function.pool2d
     :members: MaxPool2d, AveragePool2d
 
+.. automodule:: renom.layers.function.poolnd
+    :members: MaxPoolNd, AveragePoolNd
+
 .. automodule:: renom.layers.function.unpool2d
     :members: MaxUnPool2d, AverageUnPool2d
 
-.. automodule:: renom.layers.function.utils
-    :members:
