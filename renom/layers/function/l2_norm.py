@@ -51,7 +51,28 @@ class l2_norm(Node):
                                        get_gpu(rm.sum(dl.as_ndarray(), axis=(0, 2, 3), keepdims=True)), **kwargs)
 
 class L2Norm(Parametrized):
-    def __init__(self, scale, input_size=None):
+    """ L2 Normalziation function [1]
+    This layer is used to change the scale of feature maps by using L2 Normalization.
+
+    Args:
+        scale: Feature map is scaled to this value. Defaults to 20.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> x = np.random.rand(2, 1, 2, 2)
+        >>> layer = rm.L2Norm(20)
+        >>> z = layer(x)
+        >>> z
+        >>> l2_norm([[[[19.99999765, 19.99999749],
+            [19.9999743 , 19.99999749]]],
+            [[[19.99999764, 19.99998478],
+            [19.99999547, 19.9999974 ]]]])
+
+    .. [1] Wei Liu, Andrew Rabinovich, Alexander C. Berg. ParseNet: Looking Wider to See Better
+
+    """
+    def __init__(self, scale=20, input_size=None):
         self.scale = scale
         super(L2Norm, self).__init__(input_size)
 
