@@ -536,11 +536,7 @@ def test_deconv2d_with_dilation(node, size, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
     compare(func, layer.params["w"], node)
-
-    try:
-        compare(func, layer.params["b"], node)
-    except KeyError:
-        assert ignore_bias
+    compare(func, layer.params["b"], node)
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
@@ -830,7 +826,6 @@ def test_sigmoid_cross_entropy_no_reduce(node, x, use_gpu):
 
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 1))), rand((1, 1))],
-    [Variable(rand((1, 3))), rand((1, 3))],
     [Variable(rand((2, 1))), rand((2, 1))],
     [Variable(rand((1, 1, 1, 2))), rand((1, 1, 1, 2))],
 ])
@@ -845,7 +840,6 @@ def test_mean_squared_error(node, x, use_gpu):
 
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 1))), rand((1, 1))],
-    [Variable(rand((1, 3))), rand((1, 3))],
     [Variable(rand((2, 1))), rand((2, 1))],
     [Variable(rand((1, 1, 1, 2))), rand((1, 1, 1, 2))],
 ])
