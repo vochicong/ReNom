@@ -12,3 +12,5 @@ Changes 2.5 => 2.6
 5. Added ``Layer Normalization``.
 
 6. Added ``GPUDistributor``. See :py:meth:`renom.utility.distributor.distributor.GPUDistributor`
+
+7. Added ``Gru``. See :py:meth:`renom.layers.function.gru.Gru`

@@ -23,10 +23,7 @@ renom.layers.function
     :members: Flatten
 
 .. automodule:: renom.layers.function.gru
-    :members:
-
-.. automodule:: renom.layers.function.lambda
-    :members:
+    :members: Gru
 
 .. automodule:: renom.layers.function.lrn
     :members: Lrn
