@@ -12,6 +12,7 @@ Documents are available on the ReNom.jp web site.
 Please refer to `changes` at renom.jp.
 
 - Improved performance.
+- Add function `curand_set_seed` to determine the curand random number generator's seed.
 - Add argument `ignore_bias` to all parametrized class.
 - Add argument `reduce_sum` to all loss function class.
 - Add `Weight Normalize`.
