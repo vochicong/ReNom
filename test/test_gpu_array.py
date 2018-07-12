@@ -1043,7 +1043,7 @@ def test_gpu_layer_normalize(a):
 
     g1 = Variable(a)
 
-    layer = rm.LayerNormalization()
+    layer = rm.LayerNormalize()
 
     g2 = layer(g1)
     g3 = rm.sum(g2)
