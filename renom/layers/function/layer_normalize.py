@@ -104,11 +104,16 @@ class layer_normalize(Node):
             - np.sum(mu_diff * dy, axis=_ax, keepdims=True) / sigma \
             + sigma_diff * np.sum(dy, axis=_ax, keepdims=True) * mu / np.power(sigma, 2)
         dx *= gain
+
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
-        self.attrs._gain._update_diff(context, np.sum(
-            self.attrs._normalized * dy, axis=0, keepdims=True), **kwargs)
-        self.attrs._bias._update_diff(context, np.sum(dy, axis=0, keepdims=True), **kwargs)
+
+        if isinstance(self.attrs._gain, Node):
+            self.attrs._gain._update_diff(context, np.sum(
+                self.attrs._normalized * dy, axis=0, keepdims=True), **kwargs)
+
+        if isinstance(self.attrs._bias, Node):
+            self.attrs._bias._update_diff(context, np.sum(dy, axis=0, keepdims=True), **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         dx = get_gpu(self.attrs._x).zeros_like_me()
@@ -130,10 +135,14 @@ class layer_normalize(Node):
         dx *= gain
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
-        self.attrs._gain._update_diff(context, cu.cusum(
-            self.attrs._normalized * get_gpu(dy), axis=0, keepdims=True), **kwargs)
-        self.attrs._bias._update_diff(context, cu.cusum(
-            get_gpu(dy), axis=0, keepdims=True), **kwargs)
+
+        if isinstance(self.attrs._gain, Node):
+            self.attrs._gain._update_diff(context, cu.cusum(
+                self.attrs._normalized * get_gpu(dy), axis=0, keepdims=True), **kwargs)
+
+        if isinstance(self.attrs._bias, Node):
+            self.attrs._bias._update_diff(context, cu.cusum(
+                get_gpu(dy), axis=0, keepdims=True), **kwargs)
 
 
 class LayerNormalize(Parametrized):
@@ -153,8 +162,6 @@ class LayerNormalize(Parametrized):
         >>> layer(x)
         layer_normalize([[ 0.12076415,  0.00333703, -0.12410118],
                    [ 0.11587134, -0.12813905,  0.01226771]])
-
-
 
     .. [1] https://arxiv.org/pdf/1607.06450.pdf
     '''
