@@ -9,20 +9,26 @@ from renom.cuda import cuda as cu
 class mean_squared_error(BinOp):
 
     @classmethod
-    def _oper_cpu(cls, lhs, rhs):
+    def _oper_cpu(cls, lhs, rhs, reduce_sum=True):
         assert len(rhs.shape) > 1, "Input arrays must have no less than 2 dimension."
         N = len(lhs)
-        return np.sum((lhs - rhs) ** 2) / (N * 2)
+        if reduce_sum:
+            return np.sum((lhs - rhs) ** 2) / (N * 2)
+        else:
+            return (lhs - rhs) ** 2 / (N * 2)
 
     @classmethod
-    def _oper_gpu(cls, lhs, rhs):
+    def _oper_gpu(cls, lhs, rhs, reduce_sum=True):
         assert len(rhs.shape) > 1, "Input arrays must have no less than 2 dimension."
         N = len(lhs)
-        return cu.cusum(get_gpu((get_gpu(lhs) - get_gpu(rhs)) ** 2)) / (N * 2)
+        if reduce_sum:
+            return cu.cusum((get_gpu(lhs) - get_gpu(rhs)) ** 2) / (N * 2)
+        else:
+            return ((get_gpu(lhs) - get_gpu(rhs)) ** 2) / (N * 2)
 
     def _backward_cpu(self, context, dy, **kwargs):
-        sub = self.attrs._lhs - self.attrs._rhs
         if isinstance(self.attrs._lhs, Node):
+            sub = self.attrs._lhs - self.attrs._rhs
             N = len(self.attrs._lhs)
             self.attrs._lhs._update_diff(context, sub * dy / N, **kwargs)
 
@@ -40,11 +46,21 @@ class MeanSquaredError(object):
     .. math::
         E(x) = \\frac{1}{2N}\sum_{n}^{N}\sum_{k}^{K}(x_{nk}-y_{nk})^2
 
+
+    In the case of the argument `reduce_sum` is False, this class will not perform summation.
+
+    .. math::
+        E(x) = \\frac{1}{2N}(x_{nk}-y_{nk})^2
+
     :math:`N` is batch size.
 
     Args:
         x (ndarray,Node): Input array.
         y (ndarray,Node): Target array.
+        reduce_sum (bool): If True is given, the result array will be summed up and returns scalar value.
+
+    Returns:
+        (Node, ndarray): Mean squared error.
 
     Raises:
         AssertionError: An assertion error will be raised if the given tensor dimension is less than 2.
@@ -59,9 +75,12 @@ class MeanSquaredError(object):
         ((1, 2), (1, 2))
         >>> loss = rm.mean_squared_error(x, y)
         >>> print(loss)
-        mean_squared_error(4.0)
+        [4.]
+        >>> loss = rm.mean_squared_error(x, y, reduce_sum=False)
+        >>> print(loss)
+        [[ 2.  2.]]
 
     """
 
-    def __call__(self, x, y):
-        return mean_squared_error(x, y)
+    def __call__(self, x, y, reduce_sum=True):
+        return mean_squared_error(x, y, reduce_sum=reduce_sum)

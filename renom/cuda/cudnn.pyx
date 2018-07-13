@@ -501,8 +501,12 @@ def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):
 
 
 def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
-    x, w, dy, dw, db, dx = map(get_gpu, [x, w, dy, dw, db, dx])
-    cuda_base.check_heap_device(x, w, dy, dw, db, dx)
+    x, w, dy, dw, dx = map(get_gpu, [x, w, dy, dw, dx])
+    if db is None:
+        cuda_base.check_heap_device(x, w, dy, dw, dx)
+    else:
+        db = get_gpu(db)
+        cuda_base.check_heap_device(x, w, dy, dw, db, dx)
 
     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
@@ -510,7 +514,11 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
     cdef TensorDesc dyDesc = TensorDesc(dy.shape, dtype=dy.dtype)
-    cdef TensorDesc dbDesc = TensorDesc(db.shape, dtype=db.dtype)
+    cdef TensorDesc dbDesc
+
+    if db is not None:
+        dbDesc = TensorDesc(db.shape, dtype=db.dtype)
+
     cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
     cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
     cdef int workSpace = 0
@@ -542,14 +550,16 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
         bt.ptr,
         xDesc.tensor_desc,
         <void *> <uintptr_t> dx._ptr))
-    check(cudnnConvolutionBackwardBias(
-        handler,
-        alf.ptr,
-        dyDesc.tensor_desc,
-        <const void *> <uintptr_t> dy._ptr,
-        bt.ptr,
-        dbDesc.tensor_desc,
-        <void *> <uintptr_t> db._ptr))
+
+    if db is not None:
+        check(cudnnConvolutionBackwardBias(
+            handler,
+            alf.ptr,
+            dyDesc.tensor_desc,
+            <const void *> <uintptr_t> dy._ptr,
+            bt.ptr,
+            dbDesc.tensor_desc,
+            <void *> <uintptr_t> db._ptr))
 
 
 def cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, dy, dx):

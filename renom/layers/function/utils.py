@@ -5,7 +5,8 @@ from renom.core import precision, to_value
 
 def out_size(size, k, s, p, d=(1, 1)):
     return ((np.array(size) + np.array(p) * 2 - np.array(k) - (np.array(k) - 1) *
-            (np.array(d) - 1)) // np.array(s) + 1).astype(np.int)
+             (np.array(d) - 1)) // np.array(s) + 1).astype(np.int)
+
 
 def transpose_out_size(size, k, s, p, d=(1, 1)):
     return (np.array(s) * (np.array(size) - 1) + np.array(k) + (np.array(k) - 1) *

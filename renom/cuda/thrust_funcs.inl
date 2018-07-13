@@ -1197,7 +1197,6 @@ namespace renom{
         thrust::transform(thrust::cuda::par.on(GET_STREAM_NAME()), dev_a, dev_a+size, dev_b, dev_b, sign_function());
     };
 
-
 	// Cross entropy
 	struct cross_entropy_function
 	{
@@ -1671,6 +1670,119 @@ namespace renom{
             cuda_backward_peephole_lstm <<<ceil((N*M/4)/256.0), 256, 0, GET_STREAM_NAME()>>> \
                 (N, M/4, u, prestate, state, prefg, wc, dy, drt, dot, dr, dou, dwc);
         }
+    }
+
+
+
+
+    __global__ void cuda_forward_gru(int H, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
+                                      VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      int ypos = idx / M;
+      int xpos = idx - ypos * M;
+      if (idx < M * H) {
+        ABC[xpos + ypos*Y] = input[xpos + ypos*Y] + hminus[xpos + ypos*M] * u[xpos];
+        ABC[xpos+M + ypos*Y] = input[xpos+M + ypos*Y] + hminus[xpos + ypos*M] * u[xpos+M];
+        ABC[xpos+M*2 + ypos*Y] = input[xpos+M*2 + ypos*Y] + hminus[xpos + ypos*M] * u[xpos+M*2] * (1.0/(1.0+exp(-ABC[xpos+M + ypos*Y])));
+        h[xpos + ypos*M] = (1.0/(1.0+exp(-ABC[xpos + ypos*Y]))) + tanh(ABC[xpos+M*2 + ypos*Y]);
+      }
+    }
+
+
+
+    /*
+
+    __global__ void cuda_forward_gru(int H, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
+                                      VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx < M) {
+        for (int i = 0; i < H; i++) {
+          ABC[idx + i*Y] = input[idx + i*Y] + hminus[idx + i*M] * u[idx];
+          ABC[idx+M + i*Y] = input[idx+M + i*Y] + hminus[idx + i*M] * u[idx+M]; //input[idx+M*2 + i*Y] +
+          ABC[idx+M*2 + i*Y] = input[idx+M*2 + i*Y] + hminus[idx + i*M] * u[idx+M*2] * (1.0/(1.0+exp(-ABC[idx+M + i*Y])));
+          h[idx + i*M] = (1.0/(1.0+exp(-ABC[idx + i*Y]))) + tanh(ABC[idx+M*2 + i*Y]);
+        }
+      }
+    }
+
+    */
+
+    void thrust_forward_gru(int X, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus, VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
+    {
+      int elements = X*Y;
+      cuda_forward_gru <<<elements/256+1,256>>> (X,Y,M,input,hminus,u,ABC,h);
+    }
+
+    __global__ void cuda_backward_gru(int H, int W, int M, int V, VALUE_TYPE *ABC, VALUE_TYPE *y, \
+                                      VALUE_TYPE *yc, VALUE_TYPE *u, VALUE_TYPE *hminus, \
+                                      VALUE_TYPE *db, VALUE_TYPE *du, VALUE_TYPE *pz, VALUE_TYPE *dx)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+
+
+      if (idx < M) {
+        db[idx] = 0;
+        db[idx+M] = 0;
+        db[idx+M*2] = 0;
+        du[idx] = 0;
+        du[idx+M] = 0;
+        du[idx+M*2] = 0;
+
+        for (int i = 0; i < H; i++) {
+          yc[idx + i * W] = y[idx + i * M] * (1.0 / (1.0+exp(-ABC[idx + i * W]))) * (1 - (1.0 / (1.0+exp(-ABC[idx + i * W]))));
+          yc[idx+M*2 + i * W] = y[idx + i * M] * (1.0 - tanh(-ABC[idx+M*2 + i * W]) * tanh(-ABC[idx+M*2 + i * W]));
+          yc[idx+M + i * W] = (1.0 / (1.0+exp(-ABC[idx+M + i * W]))) * (1 - (1.0 / (1.0+exp(-ABC[idx+M + i * W])))) \
+                              * hminus[idx + i * M] * u[idx+M*2] * yc[idx+M*2 + i * W];
+
+
+          db[idx] += yc[idx + i * W];
+          db[idx+M] += yc[idx + i * W +M];
+          db[idx+M*2] += yc[idx + i * W+M*2];
+
+
+          du[idx] += yc[idx + i * W] * hminus[idx + i * M];
+          du[idx+M] += yc[idx + i * W +M] * hminus[idx + i * M];
+          du[idx+M*2] += yc[idx + i * W+M*2] * hminus[idx + i * M] * (1.0 / (1.0+exp(-ABC[idx+M + i * W])));
+
+          pz[idx+M*i] =   yc[idx + i * W] * u[idx+M*0] + \
+                      yc[idx + i * W +M] * u[idx+M*1] + \
+                      yc[idx + i * W+M*2] * u[idx+M*2] * (1.0 / (1.0+exp(-ABC[idx+M + i * W])));
+
+        }
+      }
+    }
+
+    // Not implemented yet
+
+    __global__ void cuda_db_gru(int H, int W, int M, VALUE_TYPE *yc, VALUE_TYPE *db) {
+
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx < M) {
+        db[idx] = 0;
+        db[idx+M] = 0;
+        db[idx+M*2] = 0;
+        for (int i = H / 2; i > 0; i >>= 1) {
+          for (int j = 0; j < i; j++) {
+            yc[idx + j*W] += yc[idx + j*W + i*W];
+            yc[idx + j*W+M] += yc[idx + j*W + i*W +M];
+            yc[idx + j*W+M*2] += yc[idx + j*W + i*W+M*2];
+          }
+        }
+        db[idx] += yc[idx ];
+        db[idx+M] += yc[idx  +M];
+        db[idx+M*2] += yc[idx +M*2];
+      }
+    }
+
+    void thrust_backward_gru(int H, int W, int M, int V, VALUE_TYPE *ABC, VALUE_TYPE *y, VALUE_TYPE *yc, VALUE_TYPE *u, \
+      VALUE_TYPE *hminus, VALUE_TYPE *db, VALUE_TYPE *du, VALUE_TYPE *pz, VALUE_TYPE *dx)
+    {
+      int elements = H * W;
+      cuda_backward_gru <<<elements/256+1,256>>> (H, W, M, V, ABC, y, yc, u, hminus, db, du, pz, dx);
+
     }
 
     // Binalize

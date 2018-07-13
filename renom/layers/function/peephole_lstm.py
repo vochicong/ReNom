@@ -29,17 +29,18 @@ def activation_diff(x):
 
 
 class peephole_lstm(Node):
-    def __new__(cls, x, pz, ps, w, wr, wc, b, ignore_bias=False):
-        return cls.calc_value(x, pz, ps, w, wr, wc, b, ignore_bias)
+    def __new__(cls, x, pz, ps, w, wr, wc, b):
+        return cls.calc_value(x, pz, ps, w, wr, wc, b)
 
     @classmethod
-    def _oper_cpu(cls, x, pz, ps, w, wr, wc, b, ignore_bias):
+    def _oper_cpu(cls, x, pz, ps, w, wr, wc, b):
         s = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if ps is None else ps
         z = np.zeros((x.shape[0], w.shape[1] // 4), dtype=precision) if pz is None else pz
 
         u = np.dot(x, w) + np.dot(z, wr)
-        if not ignore_bias:
+        if b is not None:
             u += b
+
         m = u.shape[1] // 4
         u, gate_u = np.split(u, [m, ], axis=1)
         u = tanh(u)
@@ -70,7 +71,7 @@ class peephole_lstm(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, pz, ps, w, wr, wc, b, ignore_bias):
+    def _oper_gpu(cls, x, pz, ps, w, wr, wc, b):
         if ps is None:
             s_p = GPUValue(shape=(x.shape[0], w.shape[1] // 4)).zeros_like_me()
             z_p = s_p.zeros_like_me()
@@ -79,8 +80,9 @@ class peephole_lstm(Node):
 
         s = s_p.empty_like_me()
         u = op.dot(x, w) + op.dot(z_p, wr)
-        if not ignore_bias:
+        if b is not None:
             u += b
+
         u = get_gpu(u)
         z = z_p.zeros_like_me()
         cu.cupeepholelstm_forward(u, get_gpu(wc), s_p, s, z)
@@ -115,7 +117,7 @@ class peephole_lstm(Node):
         gd = gate_diff(gated)
         ps = self.attrs._pstate
 
-        pfg = getattr(self.attrs, "_pfgate", np.zeros_like(self))
+        pfg = self.attrs.get("_pfgate", np.zeros_like(self))
 
         dot = context.restore(w, np.zeros((n, m), dtype=dy.dtype))
         drt = context.restore(wr, np.zeros((n, m * 4), dtype=dy.dtype))
@@ -171,7 +173,7 @@ class peephole_lstm(Node):
 
         dot = context.restore(w, get_gpu(dy).zeros_like_me())
         drt = context.restore(wr, get_gpu(u).zeros_like_me())
-        pfg = getattr(self.attrs, "_pfgate", get_gpu(u).zeros_like_me())
+        pfg = self.attrs.get("_pfgate", get_gpu(u).zeros_like_me())
 
         dr = get_gpu(drt).empty_like_me()
         dwc = GPUValue(shape=(n, m * 3))
@@ -242,7 +244,7 @@ class PeepholeLstm(Parametrized):
         >>>
         >>> n, d, t = (2, 3, 4)
         >>> x = rm.Variable(np.random.rand(n, d))
-        >>> layer = rm.Lstm(2)
+        >>> layer = rm.PeepholeLstm(2)
         >>> z = 0
         >>> for i in range(t):
         ...     z += rm.sum(layer(x))
@@ -271,20 +273,19 @@ class PeepholeLstm(Parametrized):
         self.params = {
             "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True),
             "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True),
-            "wc": Variable(self._initializer((1, size_o * 3)), auto_update=True),
-            "b": None if self._ignore_bias else Variable(bias, auto_update=True),
-        }
+            "wc": Variable(self._initializer((1, size_o * 3)), auto_update=True)}
+        if not self._ignore_bias:
+            self.params["b"] = Variable(bias, auto_update=True)
 
     def forward(self, x):
-        ret = peephole_lstm(x, getattr(self, "_z", None),
-                            getattr(self, "_state", None),
+        ret = peephole_lstm(x, self.__dict__.get("_z", None),
+                            self.__dict__.get("_state", None),
                             self.params.w,
                             self.params.wr,
                             self.params.wc,
-                            self.params.b,
-                            self._ignore_bias)
+                            self.params.get("b", None))
         self._z = ret
-        self._state = getattr(ret.attrs, '_state', None)
+        self._state = ret.attrs.get('_state', None)
         return ret
 
     def truncate(self):

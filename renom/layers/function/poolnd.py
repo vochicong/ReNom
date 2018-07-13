@@ -109,6 +109,12 @@ class NPoolBase:
             return check_input(var, dims)
         self._padding, self._stride, self._kernel = map(
             func, [self._padding, self._stride, self._kernel])
+
+        assert len(
+            x.shape) >= 3, "The dimension of input array must be greater than 3. Actual dim is {}".format(x.ndim)
+        assert all([s > 0 for s in x.shape[2:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
+                x.shape)
         return self.forward(x)
 
 class Pool3Base(NPoolBase):
