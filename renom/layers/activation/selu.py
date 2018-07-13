@@ -51,7 +51,7 @@ class selu(UnaryOp):
 
 class Selu:
 
-    '''The scaled exponential linear unit [3]_ activation
+    '''The scaled exponential linear unit [selu]_ activation
     function is described by the following formula:
 
         :math:`a = 1.6732632423543772848170429916717`
@@ -74,7 +74,7 @@ class Selu:
         >>> activation(x)
         selu([ 1.05070102, -1.11133075])
 
-    .. [3] Günter Klambauer, Thomas Unterthiner, Andreas Mayr, Sepp Hochreiter.
+    .. [selu] Günter Klambauer, Thomas Unterthiner, Andreas Mayr, Sepp Hochreiter.
         Self-Normalizing Neural Networks.
         Learning (cs.LG); Machine Learning
     '''

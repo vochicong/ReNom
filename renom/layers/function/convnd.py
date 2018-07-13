@@ -152,12 +152,16 @@ class ConvNd(Parametrized):
         # After this dimension, the image data is assumed to be meaningfully correlated.
         self._dims = len(input_size[1:])
         if is_cuda_active():
-            assert self._dims < 4, "GPU Version currently only supports up to 3 dimensions"
+            assert self._dims < 4, "GPU Version currently only supports 2 and 3 dimensions"
 
         def func(var):
             return check_input(var, self._dims)
         self._kernel, self._padding, self._stride = map(
             func, [self._kernel, self._padding, self._stride])
+
+        assert all([s > 0 for s in input_size[1:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
+                input_size[1:])
 
         f_lst = [self._channel, input_size[0]]
         f_lst.extend(self._kernel)
@@ -169,6 +173,12 @@ class ConvNd(Parametrized):
             self.params["b"] = Variable(np.ones(size_b, dtype=precision), auto_update=True)
 
     def forward(self, x):
+        assert len(
+            x.shape) > 2, "The dimension of input array must be grater than 3. Actual dim is {}".format(x.ndim)
+        assert all([s > 0 for s in x.shape[2:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
+                x.shape)
+
         return convnd(x, self.params["w"], self.params.get("b", None), self._kernel,
                       self._stride, self._padding)
 
@@ -196,12 +206,16 @@ class Conv3d(Parametrized):
         # The first dimension is to allow different types of uncorrelated images as inputs, such as RGB information.
         # After this dimension, the image data is assumed to be meaningfully correlated.
         self._dims = len(input_size[1:])
-        assert self._dims < 4, "Conv3D expects up to 3 dimensions"
+        assert self._dims == 3, "Conv3D expects 3 dimensions"
 
         def func(var):
             return check_input(var, self._dims)
         self._kernel, self._padding, self._stride = map(
             func, [self._kernel, self._padding, self._stride])
+
+        assert all([s >= min(self._kernel) for s in input_size[1:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
+                input_size[1:])
 
         f_lst = [self._channel, input_size[0]]
         f_lst.extend(self._kernel)
@@ -213,5 +227,9 @@ class Conv3d(Parametrized):
             self.params["b"] = Variable(np.ones(size_b, dtype=precision), auto_update=True)
 
     def forward(self, x):
+        assert len(x.shape) == 5, "The dimension of input array must be 5. Actual dim is {}".format(x.ndim)
+        assert all([s >= min(self._kernel) for s in x.shape[2:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
+                x.shape)
         return convnd(x, self.params["w"], self.params.get("b", None), self._kernel,
                       self._stride, self._padding)

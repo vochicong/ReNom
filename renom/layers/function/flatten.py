@@ -22,6 +22,12 @@ class Flatten:
         (3, 3, 32, 32)
         >>> z.shape
         (3, 3072)
+
+        >>> # Use as a instance.
+        >>> layer = rm.Flatten()
+        >>> z = layer(x)
+        >>> z.shape
+        (3, 3072)
     """
 
     def __call__(self, x):

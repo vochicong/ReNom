@@ -165,6 +165,45 @@ class Model(with_metaclass(ABCMeta, object)):
 
     @contextmanager
     def prevent_update(self):
+        """This context manager can controls that whether model's weight parameter be updated.
+
+        Example: 
+            >>> import numpy as np
+            >>> import renom as rm
+            >>> model = rm.Sequential([
+            ...     rm.Dense(1)
+            ... ])
+            >>> x = np.random.rand(2, 2)
+            >>> y = np.random.rand(2, 1)
+            >>> 
+            >>> with model.train():
+            ...     loss = rm.mean_squared_error(model(x), y)
+            >>> 
+            >>> print("Before", model[0].params.w)
+            Before
+             [[ 0.03417877]
+             [-0.29819158]]
+            >>> loss.grad().update()
+            >>> print("Updated", model[0].params.w)
+            Updated
+             [[ 0.526793  ]
+             [ 0.00882804]]
+            >>>
+            >>>     
+            >>> print("Before", model[0].params.w)
+            Before
+             [[ 0.526793  ]
+             [ 0.00882804]]
+            >>>
+            >>> # Performs update inside the context manager.
+            >>> with model.prevent_update():
+            ...     loss.grad().update()
+            >>> print("Not updated", model[0].params.w)
+            Not updated
+             [[ 0.526793  ]
+             [ 0.00882804]]
+
+        """
         self.set_prevent_update(True)
         try:
             yield self
@@ -496,6 +535,7 @@ class Parametrized(Model):
     def __call__(self, x, *args, **kwargs):
         with use_device(self._device_id):
             if not self.params:
+                assert len(x.shape) > 1, "Input must be at least of 2 dimensions."
                 self.weight_initiallize(x.shape[1:])
             return super(Parametrized, self).__call__(x, *args, **kwargs)
 

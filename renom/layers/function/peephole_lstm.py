@@ -244,7 +244,7 @@ class PeepholeLstm(Parametrized):
         >>>
         >>> n, d, t = (2, 3, 4)
         >>> x = rm.Variable(np.random.rand(n, d))
-        >>> layer = rm.Lstm(2)
+        >>> layer = rm.PeepholeLstm(2)
         >>> z = 0
         >>> for i in range(t):
         ...     z += rm.sum(layer(x))

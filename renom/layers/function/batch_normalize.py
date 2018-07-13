@@ -126,7 +126,7 @@ class batch_normalize(Node):
 
 
 class BatchNormalize(Parametrized):
-    """Batch normalization function [1]_.
+    """Batch normalization function [bn]_.
     This layer accelerates learning speed with reducing internal covariate shift
     and allow us to set high learning rate.
 
@@ -149,6 +149,7 @@ class BatchNormalize(Parametrized):
         momentum (float): Momentum coefficient for the moving average.
         mode (str): 'activation'  or 'feature'.
         epsilon (float): Small number added to avoid division by zero.
+        ignore_bias (bool): If `True` is given, bias will not be added.
         initializer (Initializer): Initializer object for weight initialization.
 
     Example:
@@ -163,7 +164,7 @@ class BatchNormalize(Parametrized):
                          [-0.00887055, -0.01459344],
                          [ 0.05934474,  0.00987731]], dtype=float32)
 
-    .. [1] Sergey Ioffe, Christian Szegedy. Batch Normalization:
+    .. [bn] Sergey Ioffe, Christian Szegedy. Batch Normalization:
         Accelerating Deep Network Training by Reducing Internal Covariate Shift(2015)
 
     """
