@@ -136,9 +136,6 @@ cdef getTensorDescriptor(desc):
 cdef class BaseConvolutionDescriptor:
   cdef cudnnConvolutionDescriptor_t conv_desc
 
-  def __init__(self, cnp.ndarray padding, cnp.ndarray stride, dtype):
-      pass
-
   def __del__(self):
       if self.conv_desc:
           check(cudnnDestroyConvolutionDescriptor(self.conv_desc))
@@ -171,13 +168,13 @@ cdef class ConvolutionNDescriptor(BaseConvolutionDescriptor):
 
 cdef class ConvolutionDescriptor(BaseConvolutionDescriptor):
 
-    def __init__(self, padding, stride, dtype):
+    def __init__(self, padding, stride, dilation, dtype):
         cdef int pad_h, pad_w, u, v, upscalex, upscaley
         cdef cudnnConvolutionMode_t mode;
         mode = CUDNN_CONVOLUTION;
         pad_h, pad_w = padding
         u, v = stride
-        upscalex, upscaley = 1, 1
+        upscalex, upscaley = dilation
 
         check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))
         check(cudnnSetConvolution2dDescriptor_9(

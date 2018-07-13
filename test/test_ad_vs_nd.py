@@ -358,7 +358,7 @@ def test_dense(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
 
@@ -394,7 +394,7 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
 
@@ -446,9 +446,29 @@ def test_conv2d(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
+@pytest.mark.parametrize("node, size, raise_error", [
+    [Variable(rand((2, 2, 5, 6))), 2, False],
+    [Variable(rand((2, 2, 7, 8))), 3, False],
+    [Variable(rand((2, 3, 3, 3))), 2, True],
+])
+def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = Conv2d(channel=3, dilation=size)
+
+    def func(node):
+        return sum(layer(node))
+    try:
+        compare(func, node, node)
+        compare(func, layer.params["w"], node)
+        compare(func, layer.params["b"], node)
+        assert not raise_error
+    except:
+        assert raise_error
 
 @pytest.mark.parametrize("node, error", [
     [Variable(rand((1, 1, 3, 3, 3, 3))), True],
@@ -492,9 +512,24 @@ def test_deconv2d(node, use_gpu, ignore_bias):
 
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
+@pytest.mark.parametrize("node, size", [
+    [Variable(rand((2, 3, 3, 3))), 2],
+    [Variable(rand((2, 3, 4, 5))), 3],
+])
+def test_deconv2d_with_dilation(node, size, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = Deconv2d(channel=3, dilation=size)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
+    compare(func, layer.params["b"], node)
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
@@ -637,7 +672,7 @@ def test_lstm(node, use_gpu, ignore_bias):
     for k in layer1.params.keys():
         try:
             compare(func, layer1.params[k], node)
-        except KeyError:
+        except Exception:
             assert ignore_bias
 
 
@@ -686,7 +721,7 @@ def test_peepholelstm(node, use_gpu, ignore_bias):
     for k in layer1.params.keys():
         try:
             compare(func, layer1.params[k], node)
-        except KeyError:
+        except Exception:
             assert ignore_bias
 
 
@@ -839,14 +874,18 @@ def test_abs(node, use_gpu):
     [Variable(rand((1, 2))), 0],
     [Variable(rand((2, 1))), 1],
     [Variable(rand((1,))), 0],
+    [Variable(rand((2, 3, 4, 5))), (1, 2, 3)],
 ])
 def test_sum(node, axis, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
+    result = sum(node, axis=axis, keepdims=True)
+    assert len(result.shape) == len(node.shape)
 
-    def func(node):
-        return sum(sum(node, axis=axis))
-    compare(func, node, node)
+    def func(node, keepdims):
+        return sum(sum(node, axis=axis, keepdims=keepdims))
+    compare(func, node, node, True)
+    compare(func, node, node, False)
 
 
 @pytest.mark.parametrize("node", [
