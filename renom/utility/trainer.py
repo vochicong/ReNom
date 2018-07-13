@@ -13,14 +13,13 @@ class _EventHandlers(object):
         def deco(f):
             self._events[name] = f
             return f
-
         return deco
 
     def __setattr__(self, name, f):
         self._events[name] = f
 
     def get_handlers(self):
-        return self._evnets
+        return self._events
 
 # Default events
 
@@ -197,19 +196,21 @@ class Trainer(object):
                 datalen = len(data) // len(models)
                 self.data = [data[i:i + datalen] for i in range(0, datalen * len(models), datalen)]
                 if is_cuda_active():
-                    self.data = [Node(d) for d in self.data]
+                    self.data = [Node(d) if not isinstance(d, Node) else d for d in self.data]
                     for n, d in enumerate(self.data):
-                        with use_device(n):
-                            d.to_gpu()
+                        if not d._gpu:
+                            with use_device(n):
+                                d.to_gpu()
 
                 targetlen = len(target) // len(models)
                 self.targets = [target[i:i + targetlen]
                                 for i in range(0, targetlen * len(models), targetlen)]
                 if is_cuda_active():
-                    self.targets = [Node(d) for d in self.targets]
+                    self.targets = [Node(d) if not isinstance(d, Node) else d for d in self.targets]
                     for n, d in enumerate(self.targets):
-                        with use_device(n):
-                            d.to_gpu()
+                        if not d._gpu:
+                            with use_device(n):
+                                d.to_gpu()
 
                 for gpu in range(1, self.num_gpu):
                     models[gpu].copy_params(models[0])

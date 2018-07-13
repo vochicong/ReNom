@@ -247,6 +247,7 @@ cdef class GPUHeap(object):
     cdef public size_t ptr
     cdef public size_t nbytes
     cdef public int device_id
+    cdef public int refcount
 
     cpdef memcpyH2D(self, cpu_ptr, size_t nbytes)
     cpdef memcpyD2H(self, cpu_ptr, size_t nbytes)
