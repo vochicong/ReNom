@@ -117,6 +117,7 @@ class NPoolBase:
                 x.shape)
         return self.forward(x)
 
+
 class Pool3Base(NPoolBase):
 
     def __call__(self, x):
@@ -130,13 +131,16 @@ class MaxPoolNd(NPoolBase):
     def forward(self, x):
         return max_poolnd(x, self._kernel, self._stride, self._padding)
 
+
 class MaxPool3d(Pool3Base):
     def forward(self, x):
         return max_poolnd(x, self._kernel, self._stride, self._padding)
 
+
 class AveragePoolNd(NPoolBase):
     def forward(self, x):
         return average_poolnd(x, self._kernel, self._stride, self._padding)
+
 
 class AveragePool3d(Pool3Base):
     def forward(self, x):
