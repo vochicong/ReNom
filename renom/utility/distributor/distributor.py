@@ -13,11 +13,6 @@ else:
     cuda_imported = False
 
 
-try:
-    import renom.cuda.cuda_base as cuda_base
-except:
-    cuda_base = None
-
 
 class Distributor(object):
     '''Distributor class
@@ -177,12 +172,12 @@ class GPUDistributor(Distributor):
 
     def __init__(self, x, y, **kwargs):
         if not cuda_imported:
-            raise ImportError("Failed to import cuda during distributor.py import, cannot launch GPUDistributor.")
+            raise ImportError(
+                "Failed to import cuda during distributor.py import, cannot launch GPUDistributor.")
         assert is_cuda_active(), "Cuda must be activated to use GPU distributor"
         super(GPUDistributor, self).__init__(x=x, y=y, data_table=kwargs.get("data_table"))
         assert len(x) == len(y), "Input batches must have same number as output batches"
         self._data_size = len(x)
-
 
     @staticmethod
     def preload_single(batch):

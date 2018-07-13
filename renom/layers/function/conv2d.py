@@ -12,7 +12,8 @@ from renom.cuda import cuda as cu
 class conv2d(Node):
 
     def __new__(cls, x, w, b, filter=3, stride=1, padding=0, dilation=1, ignore_bias=False):
-        filter, stride, padding, dilation = (tuplize(x) for x in (filter, stride, padding, dilation))
+        filter, stride, padding, dilation = (tuplize(x)
+                                             for x in (filter, stride, padding, dilation))
 
         in_shape = x.shape[1:]
         out_shape = [w.shape[0]]

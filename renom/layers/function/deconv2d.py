@@ -13,7 +13,8 @@ from renom.cuda import cuda as cu
 class deconv2d(Node):
 
     def __new__(cls, x, w, b, filter=3, stride=1, padding=0, dilation=1, ignore_bias=False):
-        filter, stride, padding, dilation = (tuplize(x) for x in (filter, stride, padding, dilation))
+        filter, stride, padding, dilation = (tuplize(x)
+                                             for x in (filter, stride, padding, dilation))
 
         in_shape = x.shape[1:]
         out_shape = [w.shape[1], ]
@@ -21,7 +22,7 @@ class deconv2d(Node):
         return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, dilation, ignore_bias)
 
     @classmethod
-    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation,ignore_bias):
+    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation, ignore_bias):
         z = np.tensordot(w, x, (0, 1))
         z = np.rollaxis(z, 3)
         z = col2im(z, out_shape[1:], stride, padding, dilation)
@@ -95,6 +96,7 @@ class deconv2d(Node):
         if isinstance(self.attrs._b, Node):
             self.attrs._b._update_diff(context, db, **kwargs)
 
+
 class Deconv2d(Parametrized):
     '''2d convolution layer.
 
@@ -156,4 +158,4 @@ class Deconv2d(Parametrized):
 
     def forward(self, x):
         return deconv2d(x, self.params["w"], self.params["b"],
-                self._kernel, self._stride, self._padding, self._dilation, self._ignore_bias)
+                        self._kernel, self._stride, self._padding, self._dilation, self._ignore_bias)

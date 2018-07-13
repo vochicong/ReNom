@@ -449,6 +449,7 @@ def test_conv2d(node, use_gpu, ignore_bias):
     except Exception:
         assert ignore_bias
 
+
 @pytest.mark.parametrize("node, size, raise_error", [
     [Variable(rand((2, 2, 5, 6))), 2, False],
     [Variable(rand((2, 2, 7, 8))), 3, False],
@@ -469,6 +470,7 @@ def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
         assert not raise_error
     except:
         assert raise_error
+
 
 @pytest.mark.parametrize("node, error", [
     [Variable(rand((1, 1, 3, 3, 3, 3))), True],
@@ -515,6 +517,7 @@ def test_deconv2d(node, use_gpu, ignore_bias):
     except Exception:
         assert ignore_bias
 
+
 @pytest.mark.parametrize("node, size", [
     [Variable(rand((2, 3, 3, 3))), 2],
     [Variable(rand((2, 3, 4, 5))), 3],
@@ -530,6 +533,7 @@ def test_deconv2d_with_dilation(node, size, use_gpu):
     compare(func, node, node)
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
+
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),

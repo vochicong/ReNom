@@ -410,7 +410,7 @@ class GPUValue(object):
             cuda_base.c_gpu_allocator.free(self._ptr)
 
     # Del is not called for extension classes
-    #def __del__(self):
+    # def __del__(self):
     #    self._free()
 
     def alloc(self):
@@ -436,8 +436,9 @@ class GPUValue(object):
         # TODO: Currently shape size is checked during numpy reshaping, but this results in
         # a numpy reshaping error when the issue occurs within GPUValue, should probably
         # be a GPUValue error
-        # assert np.prod(a.shape) == np.prod(self.shape), 'Requested shape has size {0} but original GPUValue has size {1}'.format(np.prod(a.shape),np.prod(self.shape))
-        ret = GPUValue(ptr=self._ptr,shape=a.shape)
+        # assert np.prod(a.shape) == np.prod(self.shape), 'Requested shape has size {0} but original GPUValue \
+        # has size {1}'.format(np.prod(a.shape),np.prod(self.shape))
+        ret = GPUValue(ptr=self._ptr, shape=a.shape)
         return ret
 
     def get_gpu(self):
