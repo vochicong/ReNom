@@ -426,6 +426,9 @@ class GPUValue(object):
             cuda_base.get_gpu_allocator().free(self._ptr)
         self._ptr = None
 
+    def __len__(self):
+        return self.shape[0]
+
     def reshape(self, *shape):
         # TODO: Find a way to create shapes without requesting potentially large
         # blocks of  temporary CPU memory.
