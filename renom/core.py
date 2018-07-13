@@ -389,10 +389,11 @@ class Node(np.ndarray):
         if initial is None:
             if self.size > 1:
                 raise ValueError("Initial diff is required for scalar value.")
-            initial = np.ones_like(self).astype(precision)
+
             if is_cuda_active():
-                initial = Node(initial)
-                initial.to_gpu()
+                initial = Node(get_gpu(self).ones_like_me())
+            else:
+                initial = np.ones_like(self).astype(precision)
 
         context = Grads(self)
         self._update_diff(context, initial, **kwargs)

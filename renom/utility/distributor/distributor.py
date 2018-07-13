@@ -185,7 +185,6 @@ class GPUDistributor(Distributor):
             batch = batch.astype(np.dtype(precision))
             cu.pinNumpy(batch)
             ret = get_gpu(batch)
-            cu.cuDeviceSynchronize()
         return Node(ret)
 
     @staticmethod
@@ -208,7 +207,7 @@ class GPUDistributor(Distributor):
                     b = next(generator)
                     example_batch = b[0] if b[0].size * \
                         b[0].itemsize >= b[1].size * b[1].itemsize else b[1]
-                    cu.initPinnedMemory(example_batch)
+                    cu.initPinnedMemory(example_batch.astype(np.dtype(precision)))
                     x1, y1 = GPUDistributor.preload_pair(b[0], b[1])
                     first = False
                 b = next(generator)

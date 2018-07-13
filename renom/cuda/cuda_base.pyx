@@ -120,7 +120,7 @@ def pinNumpy(np.ndarray arr):
     cdef int elems
     elems = getArrayElements(arr)
     cdef size_t arr_size = <size_t> arr.descr.itemsize*elems
-    assert arr_size <= pin_size, "Attempting to insert memory larger than what was made available through initPinnedMemory.\n(Allocated,Requested)({:d},{:d})".format(pin_size,arr.descr.itemsize*len(arr))
+    assert arr_size <= pin_size, "Attempting to insert memory larger than what was made available through initPinnedMemory.\n(Allocated,Requested)({:d},{:d})".format(pin_size,arr.descr.itemsize*elems)
     cdef void * vptr = <void*> arr.data
     cudaEventSynchronize(events[using])
     #memcpy(ptrs[using], vptr, pin_size)
@@ -162,6 +162,12 @@ def cuDestroyStream(uintptr_t stream):
 
 def cuResetDevice():
   runtime_check(cudaDeviceReset())
+
+def cuGetMemInfo():
+    cdef size_t free, total
+    cudaMemGetInfo(&free, &total)
+    return <long> free, <long> (total-free), <long> total # free, used, total
+
 
 def cuSetDevice(int dev):
     runtime_check(cudaSetDevice(dev))
@@ -381,11 +387,7 @@ cdef class GPUHeap(object):
 
         with renom.cuda.use_device(self.device_id):
             #cuMemcpyH2D(ptr.ptr, self.ptr, nbytes)
-            # Async can be called safely, since if the user does not
-            # set up all the requirements for Async, it will perform
-            # as an ordinairy blocking call
-            cuMemcpyH2D(ptr.ptr, self.ptr, nbytes)
-            #cuMemcpyH2Dvar(ptr.ptr, self.ptr, nbytes, <uintptr_t> self._mystream)
+            cuMemcpyH2Dvar(ptr.ptr, self.ptr, nbytes, <uintptr_t> self._mystream)
 
     cpdef memcpyD2H(self, cpu_ptr, size_t nbytes):
         shape = cpu_ptr.shape
