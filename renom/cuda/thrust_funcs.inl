@@ -1907,6 +1907,24 @@ namespace renom{
       }
     }
 
+    __global__ void cuda_optimizer_adadelta(int Elems, VALUE_TYPE decay_rate, VALUE_TYPE epsilon, VALUE_TYPE * previous_squared_gradient, VALUE_TYPE * previous_squared_delta, VALUE_TYPE * dy, VALUE_TYPE * new_dy)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx < Elems) {
+        VALUE_TYPE current_squared_gradient = decay_rate * previous_squared_gradient[idx] + (1 - decay_rate) * dy[idx] * dy[idx];
+        new_dy[idx] = sqrtf(previous_squared_delta[idx] + epsilon) / sqrtf(current_squared_gradient + epsilon) * dy[idx];
+        previous_squared_delta[idx] = decay_rate * previous_squared_delta[idx] + (1 - decay_rate) * new_dy[idx] * new_dy[idx];
+        previous_squared_gradient[idx] = current_squared_gradient;
+      }
+    }
+
+    void thrust_optimizer_adadelta(int Elems, VALUE_TYPE decay_rate, VALUE_TYPE epsilon, VALUE_TYPE * previous_squared_gradient, VALUE_TYPE * previous_squared_delta, VALUE_TYPE * dy, VALUE_TYPE * new_dy)
+    {
+      if(Elems) {
+        cuda_optimizer_adadelta<<<ceil(Elems/256.0), 256>>>(Elems, decay_rate, epsilon, previous_squared_gradient, previous_squared_delta, dy, new_dy);
+      }
+    }
+
     __global__ void cuda_get_fg_ary_forward(int N, int M, VALUE_TYPE *ptr1, VALUE_TYPE *ptr2){
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
         if (idx >= N) return;

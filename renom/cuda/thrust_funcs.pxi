@@ -1090,3 +1090,15 @@ def cu_optimizer_adam(learning_rate, epsilon, gamma, gamma_orig, beta, beta_orig
     cdef VALUE_TYPE * ptr_ndy = <VALUE_TYPE * > < uintptr_t > new_dy._ptr
     thrust_optimizer_adam(Elems, lr, ptr_dy, eps, g, go, b,
                           bo, min, flug, ptr_u, ptr_r, ptr_ndy)
+
+def cu_optimizer_adadelta(decay_rate, epsilon, previous_squared_gradient, previous_squared_delta, dy, new_dy):
+    cdef int Elem = 1
+    for v in dy.shape:
+        Elem *= v
+    cdef VALUE_TYPE dr = decay_rate
+    cdef VALUE_TYPE eps = epsilon
+    cdef VALUE_TYPE * ptr_psg = <VALUE_TYPE * > < uintptr_t > previous_squared_gradient._ptr
+    cdef VALUE_TYPE * ptr_psx = <VALUE_TYPE * > < uintptr_t > previous_squared_delta._ptr
+    cdef VALUE_TYPE * ptr_dy = <VALUE_TYPE * > < uintptr_t > dy._ptr
+    cdef VALUE_TYPE * ptr_ndy = <VALUE_TYPE * > < uintptr_t > new_dy._ptr
+    thrust_optimizer_adadelta(Elem, dr, eps, ptr_psg, ptr_psx, ptr_dy, ptr_ndy)

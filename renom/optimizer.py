@@ -3,7 +3,7 @@
 from __future__ import division, print_function
 import numpy as np
 from renom.core import get_gpu, Node, Variable
-from renom.operation import sqrt
+from renom.operation import sqrt, square
 from renom.cuda.cuda import is_cuda_active
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
@@ -124,6 +124,72 @@ class Adagrad(Optimizer):
     def reset(self):
         self._params = {}
 
+
+class Adadelta(Optimizer):
+    '''Adaptive gradient algorithm. [Adagrad]_
+
+    Args:
+        dr (float): Decay rate.
+        epsilon (float): Small number in the equation for avoiding zero division.
+
+    .. [Adagrad] Duchi, J., Hazan, E., & Singer, Y. Adaptive Subgradient Methods for
+        Online Learning and Stochastic Optimization. Journal of Machine Learning Research, 12, 2121–2159.
+    '''
+
+    def __init__(self, dr=0.95, epsilon=1e-8):
+        self._dr = dr
+        self._epsilon = epsilon
+        self._params = {}
+
+    def _get_cpu(self, dy, node):
+        node_id = id(node)
+        pdy = self._params.get(node_id, None)
+        if pdy is None:
+            psg = 0
+            psx = 0
+        else:
+            psg = pdy['psg']      #E_squared_grad[t-1]
+            psx = pdy['psx']      #E_squared_x[t-1]
+        dr = self._dr
+        E_squared_grad = dr*psg + (1 - dr)*np.square(dy)
+        dx = np.sqrt(psx + self._epsilon)/np.sqrt(E_squared_grad + self._epsilon)*dy
+        E_squared_x = dr*psx + (1-dr)*np.square(dx)
+
+        ret = dx
+        self._params[node_id] = {
+            'psg': E_squared_grad,
+            'psx': E_squared_x,
+        }
+
+        if isinstance(ret, Node):
+            ret.detach_graph()
+        return ret
+
+    def _get_gpu(self, dy, node):
+        node_id = id(Node)
+        pdy = self._params.get(node_id, None)
+        if pdy is None:
+            psg = get_gpu(dy).zeros_like_me()
+            psx = get_gpu(dy).zeros_like_me()
+        else:
+            psg = pdy['psg']
+            psx = pdy['psx']
+        dr = self._dr
+        eps = self._epsilon
+        ndy = get_gpu(dy).empty_like_me()
+        cu.cu_optimizer_adadelta(dr, eps, psg, psx, get_gpu(dy), ndy)
+        ret = ndy
+        self._params[node_id] = {
+            'psg': psg,
+            'psx': psx,
+        }
+
+        if isinstance(ret, Node):
+            ret.detach_graph()
+        return ret
+
+    def reset(self):
+        self._params = {}
 
 class Rmsprop(Optimizer):
     '''Rmsprop described by following formula. [Rmsprop]_
