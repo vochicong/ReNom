@@ -151,6 +151,10 @@ class LayerNormalize(Parametrized):
     The resultant bell curve can be transformed with the gain/bias parameters, displacing the mean with the bias
     or the variance with gain.
 
+    Args:
+        gain (float): Initial value of gain.
+        bias (float): Initial value of bias.
+
     Example:
         >>> import numpy as np
         >>> import renom as rm

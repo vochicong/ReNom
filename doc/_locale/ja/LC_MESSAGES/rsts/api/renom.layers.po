@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
 
-#: ../../index.rst:7
-msgid "ReNom version 2.6.0"
+#: ../../rsts/api/renom.layers.rst:2
+msgid "renom.layers"
 msgstr ""
 

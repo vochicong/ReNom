@@ -1,0 +1,582 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.6\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-07-13 13:29+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+#: ../../rsts/api/renom.utility.rst:2
+msgid "renom.utility"
+msgstr ""
+
+#: ../../rsts/api/renom.utility.rst:5
+msgid "renom.utility.initializer"
+msgstr ""
+
+#: of renom.utility.initializer.Initializer:1
+msgid "Base class of initializer."
+msgstr ""
+
+#: of renom.utility.initializer.Initializer:3
+msgid ""
+"When the initialization of parameterized layer class, dense, conv2d, lstm"
+" ... , you can select the initialization method changing the initializer "
+"class as following example."
+msgstr ""
+
+#: of renom.utility.distributor.imageloader.ImageLoader:11
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:18
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:16
+#: renom.utility.initializer.Initializer:8 renom.utility.searcher.Searcher:11
+#: renom.utility.trainer.Trainer:23
+msgid "Example"
+msgstr ""
+
+#: of renom.utility.initializer.GlorotUniform:1
+msgid ""
+"Glorot uniform initializer [1]_ initializes parameters sampled by "
+"following uniform distribution \"U(max, min)\"."
+msgstr ""
+
+#: of renom.utility.initializer.GlorotNormal:1
+msgid ""
+"Glorot normal initializer [1]_ initializes parameters sampled by "
+"following normal distribution \"N(0, std)\"."
+msgstr ""
+
+#: of renom.utility.initializer.GlorotNormal:9
+msgid ""
+"Xavier Glorot, Yoshua Bengio. Understanding the difficulty of training "
+"deep feedforward neural networks."
+msgstr ""
+
+#: of renom.utility.initializer.Gaussian:1
+msgid ""
+"Gaussian initializer. Initialize parameters using samples drawn from "
+":math:`N(mean, std)`"
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor
+#: renom.utility.distributor.distributor.Distributor.batch
+#: renom.utility.distributor.distributor.Distributor.split
+#: renom.utility.distributor.distributor.GPUDistributor
+#: renom.utility.distributor.distributor.GPUDistributor.batch
+#: renom.utility.distributor.distributor.NdarrayDistributor
+#: renom.utility.distributor.imageloader.ImageLoader
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor.batch
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch
+#: renom.utility.distributor.threadingdistributor.ImageDistributor
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create
+#: renom.utility.initializer.Gaussian renom.utility.initializer.Uniform
+#: renom.utility.searcher.BayesSearcher
+#: renom.utility.searcher.BayesSearcher.suggest
+#: renom.utility.searcher.GridSearcher
+#: renom.utility.searcher.GridSearcher.suggest
+#: renom.utility.searcher.RandomSearcher
+#: renom.utility.searcher.RandomSearcher.suggest
+#: renom.utility.searcher.Searcher renom.utility.searcher.Searcher.best
+#: renom.utility.searcher.Searcher.set_result
+#: renom.utility.searcher.Searcher.suggest renom.utility.trainer.Trainer
+#: renom.utility.trainer.Trainer.test renom.utility.trainer.Trainer.train
+msgid "Parameters"
+msgstr ""
+
+#: of renom.utility.initializer.Gaussian:4
+msgid "Mean value of normal distribution."
+msgstr ""
+
+#: of renom.utility.initializer.Gaussian:6
+msgid "Standard deviation value of normal distribution."
+msgstr ""
+
+#: of renom.utility.initializer.Uniform:1
+msgid ""
+"Uniform initializer. Initialize parameters using samples drawn from "
+":math:`U(min, max)`"
+msgstr ""
+
+#: of renom.utility.initializer.Uniform:4
+msgid "Minimum limit of uniform distribution."
+msgstr ""
+
+#: of renom.utility.initializer.Uniform:6
+msgid "Maximum limit of uniform distribution."
+msgstr ""
+
+#: ../../rsts/api/renom.utility.rst:11
+msgid "renom.utility.searcher"
+msgstr ""
+
+#: of renom.utility.searcher.Searcher:1
+msgid "Base class of searcher."
+msgstr ""
+
+#: of renom.utility.searcher.Searcher:3
+msgid ""
+"Searcher classes searches the hyper parameter that yields the lowest "
+"value."
+msgstr ""
+
+#: of renom.utility.searcher.BayesSearcher:6
+#: renom.utility.searcher.RandomSearcher:6 renom.utility.searcher.Searcher:6
+msgid ""
+"Dictionary which contains the parameter name as a key and each parameter "
+"space as a value."
+msgstr ""
+
+#: of renom.utility.searcher.Searcher.set_result:1
+msgid "Set the result of yielded hyper parameter to searcher object."
+msgstr ""
+
+#: of renom.utility.searcher.Searcher.set_result:3
+msgid "The result of yielded hyper parameter."
+msgstr ""
+
+#: of renom.utility.searcher.Searcher.set_result:5
+msgid ""
+"The hyper parameter which used in model. If None has given, the result is"
+" considered as it caused by last yielded hyper parameter."
+msgstr ""
+
+#: of renom.utility.searcher.GridSearcher.suggest:1
+#: renom.utility.searcher.RandomSearcher.suggest:1
+#: renom.utility.searcher.Searcher.suggest:1
+msgid "This method yields next hyper parameter."
+msgstr ""
+
+#: of renom.utility.searcher.BayesSearcher.suggest:1
+#: renom.utility.searcher.GridSearcher.suggest:3
+#: renom.utility.searcher.RandomSearcher.suggest:3
+#: renom.utility.searcher.Searcher.suggest:3
+msgid "Maximum iteration number of parameter search."
+msgstr ""
+
+#: of renom.utility.searcher.GridSearcher.suggest
+#: renom.utility.searcher.RandomSearcher.suggest
+#: renom.utility.searcher.Searcher.suggest
+msgid "Yields"
+msgstr ""
+
+#: of renom.utility.searcher.GridSearcher.suggest:6
+#: renom.utility.searcher.RandomSearcher.suggest:6
+#: renom.utility.searcher.Searcher.suggest:6
+msgid "*dict* -- Dictionary of hyper parameter."
+msgstr ""
+
+#: of renom.utility.searcher.Searcher.best:1
+msgid ""
+"Returns the best hyper parameters. By default, this method returns the "
+"top 3 hyper parameter as a result of searching."
+msgstr ""
+
+#: of renom.utility.searcher.Searcher.best:5
+msgid "The number of hyper parameters."
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor.batch
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create
+#: renom.utility.searcher.Searcher.best renom.utility.trainer.Trainer.test
+msgid "Returns"
+msgstr ""
+
+#: of renom.utility.searcher.Searcher.best:8
+msgid "A list of dictionary of hyper parameters."
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor.batch
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create
+#: renom.utility.searcher.Searcher.best
+msgid "Return type"
+msgstr ""
+
+#: of renom.utility.searcher.GridSearcher:1
+msgid "Grid searcher class."
+msgstr ""
+
+#: of renom.utility.searcher.GridSearcher:3
+msgid ""
+"This class searches better hyper parameter in the parameter space with "
+"grid search."
+msgstr ""
+
+#: of renom.utility.searcher.GridSearcher:5
+msgid ""
+"Dictionary witch contains the parameter name as a key and each parameter "
+"space as a value."
+msgstr ""
+
+#: of renom.utility.searcher.RandomSearcher:1
+msgid "Random searcher class."
+msgstr ""
+
+#: of renom.utility.searcher.RandomSearcher:3
+msgid ""
+"This class randomly searches a parameter of the model which yields the "
+"lowest loss."
+msgstr ""
+
+#: of renom.utility.searcher.BayesSearcher:1
+msgid "Bayes searcher class."
+msgstr ""
+
+#: of renom.utility.searcher.BayesSearcher:3
+msgid "This class performs hyper parameter search based on bayesian optimization."
+msgstr ""
+
+#: of renom.utility.searcher.BayesSearcher:12
+msgid ""
+"This class requires the module GPy [1]_. You can install it using pip. "
+"``pip install gpy``"
+msgstr ""
+
+#: of renom.utility.searcher.BayesSearcher:15
+msgid "GPy - Gaussian Process framework http://sheffieldml.github.io/GPy/"
+msgstr ""
+
+#: of renom.utility.searcher.BayesSearcher.suggest:3
+msgid "Number of random search."
+msgstr ""
+
+#: ../../rsts/api/renom.utility.rst:17
+msgid "renom.utility.trainer"
+msgstr ""
+
+#: of renom.utility.trainer.Trainer:1
+msgid "Trainer class."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer:3
+msgid ""
+"This class owns train loop. It executes forward propagation, back "
+"propagation and updating of weight parameters for the specified number of"
+" times."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer:7
+msgid "Model to be trained."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer:9
+msgid "Numer of iteration."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer:11
+msgid "Loss function."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer:13
+msgid "Batch size."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer:15
+msgid "Gradient descent algorithm."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer:17
+msgid "If it's true, mini batch is created randomly."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer:19
+msgid "Dictionary of function."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer.train:1
+msgid ""
+"Train method. This method executes train loop. If test_distributor is "
+"given, validation loss will be calculated."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer.train:5
+msgid "Distributor for yielding train data."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer.train:7
+msgid "Distributor for yielding test data."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer.test:1
+msgid "Test method. This method executes forward propagation for given data."
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor:4
+#: renom.utility.distributor.distributor.GPUDistributor:3
+#: renom.utility.distributor.distributor.NdarrayDistributor:3
+#: renom.utility.trainer.Trainer.test:4
+msgid "Input data."
+msgstr ""
+
+#: of renom.utility.trainer.Trainer.test:7
+msgid "ndarray"
+msgstr ""
+
+#: ../../rsts/api/renom.utility.rst:23
+msgid "renom.utility.distributor.distributor"
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor:1
+msgid "Distributor class This is the base class of a data distributor."
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor:6
+#: renom.utility.distributor.distributor.GPUDistributor:5
+#: renom.utility.distributor.distributor.NdarrayDistributor:5
+msgid "Target data."
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor:8
+msgid "Path to data."
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor.batch:1
+#: renom.utility.distributor.distributor.GPUDistributor.batch:1
+msgid "This function returns `minibatch`."
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor.batch:3
+#: renom.utility.distributor.distributor.GPUDistributor.batch:3
+msgid "Size of batch."
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor.batch:5
+#: renom.utility.distributor.distributor.GPUDistributor.batch:5
+msgid "If True is passed, data will be selected randomly."
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor.split:1
+msgid ""
+"This method splits its own data and generates 2 distributors using the "
+"split data."
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor.split:3
+msgid "Ratio for dividing data."
+msgstr ""
+
+#: of renom.utility.distributor.distributor.Distributor.split:5
+msgid "If True, the data is shuffled before dividing."
+msgstr ""
+
+#: of renom.utility.distributor.distributor.NdarrayDistributor:1
+msgid "Derived class of Distributor which manages ndarray data."
+msgstr ""
+
+#: of renom.utility.distributor.distributor.GPUDistributor:1
+msgid "Derived class of Distributor which manages GPUValue data."
+msgstr ""
+
+#: ../../rsts/api/renom.utility.rst:29
+msgid "renom.utility.distributor.imageloader"
+msgstr ""
+
+#: of renom.utility.distributor.imageloader.ImageLoader:1
+msgid ""
+"ImageLoader is a generator that yields images in batches. By inputting "
+"list of image path, ImageLoader load images and yields according to "
+"number of batch size."
+msgstr ""
+
+#: of renom.utility.distributor.imageloader.ImageLoader:5
+#: renom.utility.distributor.threadingdistributor.ImageDistributor:6
+msgid "List of image path."
+msgstr ""
+
+#: of renom.utility.distributor.imageloader.ImageLoader:7
+msgid "Color Space of Input Image."
+msgstr ""
+
+#: ../../rsts/api/renom.utility.rst:35
+msgid "renom.utility.distributor.threadingdistributor"
+msgstr ""
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:1
+msgid ""
+"Base class for image distribution. Use subclasses "
+"ImageClassificationDistributor, ImageDetectionDistributor, "
+"ImageSegmentationDistributor depending on the image task. Or sublass it "
+"for original image tasks."
+msgstr ""
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:8
+msgid "List of labels (bbox and class) for every image (2 dimensional array)."
+msgstr ""
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:10
+msgid "List of classes name for this dataset."
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:9
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:11
+#: renom.utility.distributor.threadingdistributor.ImageDistributor:12
+msgid "If True, apply datasets shuffle per epoch"
+msgstr ""
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:14
+msgid "Resize input image for converting batch ndarray."
+msgstr ""
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:16
+msgid "Color of Input Image. [\"RGB\", \"GRAY\"]"
+msgstr ""
+
+#: of renom.utility.distributor.threadingdistributor.ImageDistributor:18
+msgid "Augmentater for input Image."
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:1
+msgid ""
+"Distributor class for tasks of image detection. Labels are expected to be"
+" Bounding boxes and Classes. ex:) np.array([[center x, center y, "
+"x_top_left, height, 0, 0, 0, 1, 0]])"
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:3
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:5
+msgid "list of image path"
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:5
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:7
+msgid "list of labels (bbox and class) for every image"
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:7
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:9
+msgid "list of classes name for this dataset"
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:11
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:13
+msgid "resize input image for converting batch ndarray"
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:13
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:15
+msgid "color of Input Image. [\"RGB\", \"GRAY\"]"
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor:17
+msgid "augmentater for Input Image"
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch:1
+msgid "Returns generator of batch images."
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor.batch:1
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch:3
+msgid "size of a batch."
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch:6
+msgid ""
+"Images(4 dimension) of input data for Network.   If including labels, "
+"return with transformed labels"
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch:8
+msgid "Images(4 dimension) of input data for Network."
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageDetectionDistributor.batch:9
+msgid "If including labels, return with transformed labels"
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:1
+msgid "Distributor class for tasks of image classification."
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor:15
+msgid "(function) augmentater for Input Image"
+msgstr ""
+
+#: of
+#: renom.utility.distributor.threadingdistributor.ImageClassificationDistributor.batch:4
+msgid ""
+"Images(4 dimension) of input data for Network. If including labels, "
+"return with original labels"
+msgstr ""
+
+#: ../../rsts/api/renom.utility.rst:42
+msgid "renom.utility.image.data_augmentation.augmentation"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.augmentation.DataAugmentation:1
+msgid ""
+"Apply transformation to the input x and labels. You could choose "
+"transform function from below. [\"Flip\", \"Resize\", \"Crop\", "
+"\"Color_jitter\", \"Rescale\", \"Rotate\", \"Shift\"]."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.augmentation.DataAugmentation:5
+msgid "list of instance for converter."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.augmentation.DataAugmentation:7
+msgid "apply random transformation or not"
+msgstr ""
+
+#: of
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:1
+msgid ""
+"Performs a DataAugmentation of a Numpy images. if x is a Batch, apply "
+"DataAugmentation to Batch. if arguments include labels, apply label "
+"transformation."
+msgstr ""
+
+#: of
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:5
+msgid "3 or 4(batch) dimensional images. dtype is float32. value=[0.0, 255.0]."
+msgstr ""
+
+#: of
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:7
+msgid "labels for classification, detection and segmentation. 2-dimensional array"
+msgstr ""
+
+#: of
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:9
+msgid "number of class of datasets"
+msgstr ""
+
+#: of
+#: renom.utility.image.data_augmentation.augmentation.DataAugmentation.create:12
+msgid ""
+"Images(4 dimension) of augment transformed. If including labels, return "
+"with transformed labels"
+msgstr ""
+

@@ -1,0 +1,548 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.6\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-07-13 13:29+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+#: ../../rsts/api/renom.utility.image.data_augmentation.rst:2
+msgid "renom.utility.image.data_augmentation.color_jitter"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.color_jitter.color_jitter:1
+msgid ""
+"Performs a HSV color jitter of a RGB images. if x is a Batch, apply "
+"jitter transform to Batch. if arguments include labels, apply label "
+"transformation."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.color_jitter.ColorJitter
+#: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter
+#: renom.utility.image.data_augmentation.crop.Crop
+#: renom.utility.image.data_augmentation.crop.Crop.transform
+#: renom.utility.image.data_augmentation.crop.crop
+#: renom.utility.image.data_augmentation.flip.Flip
+#: renom.utility.image.data_augmentation.flip.Flip.transform
+#: renom.utility.image.data_augmentation.flip.flip
+#: renom.utility.image.data_augmentation.rescale.Rescale
+#: renom.utility.image.data_augmentation.rescale.Rescale.transform
+#: renom.utility.image.data_augmentation.rescale.rescale
+#: renom.utility.image.data_augmentation.resize.Resize
+#: renom.utility.image.data_augmentation.resize.Resize.transform
+#: renom.utility.image.data_augmentation.resize.resize
+#: renom.utility.image.data_augmentation.rotate.Rotate
+#: renom.utility.image.data_augmentation.rotate.Rotate.transform
+#: renom.utility.image.data_augmentation.rotate.rotate
+#: renom.utility.image.data_augmentation.shift.Shift
+#: renom.utility.image.data_augmentation.shift.Shift.transform
+#: renom.utility.image.data_augmentation.shift.shift
+#: renom.utility.image.data_augmentation.zoom.Zoom
+#: renom.utility.image.data_augmentation.zoom.Zoom.transform
+#: renom.utility.image.data_augmentation.zoom.zoom
+msgid "Parameters"
+msgstr ""
+
+#: of
+#: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform:5
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter:5
+msgid "3 or 4(batch) dimensional RGB images"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.color_jitter.ColorJitter:3
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter:7
+msgid ""
+"multiple value to h channel of HSV color space. when you apply random "
+"transformation, please use tuple (min h, max h)"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.color_jitter.ColorJitter:6
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter:10
+msgid ""
+"multiple value to s channel of HSV color space. when you apply random "
+"transformation, please use tuple (min s, max s)"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.color_jitter.ColorJitter:9
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter:13
+msgid ""
+"multiple value to v channel of HSV color space. when you apply random "
+"transformation, please use tuple (min v, max v)"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.color_jitter.color_jitter:16
+msgid "If True, apply random jitter transform"
+msgstr ""
+
+#: of
+#: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform:9
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter:18
+#: renom.utility.image.data_augmentation.crop.Crop.transform:9
+#: renom.utility.image.data_augmentation.crop.crop:11
+#: renom.utility.image.data_augmentation.flip.Flip.transform:9
+#: renom.utility.image.data_augmentation.flip.flip:14
+#: renom.utility.image.data_augmentation.rescale.Rescale.transform:6
+#: renom.utility.image.data_augmentation.resize.Resize.transform:6
+#: renom.utility.image.data_augmentation.resize.resize:6
+#: renom.utility.image.data_augmentation.shift.Shift.transform:9
+#: renom.utility.image.data_augmentation.shift.shift:15
+msgid ""
+"rectangle labels(2-dimensional array) ex:) np.array([[center x, center y,"
+" x_top_left, height, 0, 0, 0, 1, 0]])"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter
+#: renom.utility.image.data_augmentation.crop.Crop.transform
+#: renom.utility.image.data_augmentation.crop.crop
+#: renom.utility.image.data_augmentation.flip.Flip.transform
+#: renom.utility.image.data_augmentation.flip.flip
+#: renom.utility.image.data_augmentation.rescale.Rescale.transform
+#: renom.utility.image.data_augmentation.rescale.rescale
+#: renom.utility.image.data_augmentation.resize.Resize.transform
+#: renom.utility.image.data_augmentation.resize.resize
+#: renom.utility.image.data_augmentation.rotate.rotate
+#: renom.utility.image.data_augmentation.shift.Shift.transform
+#: renom.utility.image.data_augmentation.shift.shift
+#: renom.utility.image.data_augmentation.zoom.Zoom.transform
+#: renom.utility.image.data_augmentation.zoom.zoom
+msgid "Returns"
+msgstr ""
+
+#: of
+#: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform:13
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter:22
+msgid ""
+"Images(4 dimension) of jitter transformed. If including labels, return "
+"with transformed labels"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter
+#: renom.utility.image.data_augmentation.crop.Crop.transform
+#: renom.utility.image.data_augmentation.crop.crop
+#: renom.utility.image.data_augmentation.flip.Flip.transform
+#: renom.utility.image.data_augmentation.flip.flip
+#: renom.utility.image.data_augmentation.rescale.Rescale.transform
+#: renom.utility.image.data_augmentation.rescale.rescale
+#: renom.utility.image.data_augmentation.resize.Resize.transform
+#: renom.utility.image.data_augmentation.resize.resize
+#: renom.utility.image.data_augmentation.rotate.rotate
+#: renom.utility.image.data_augmentation.shift.Shift.transform
+#: renom.utility.image.data_augmentation.shift.shift
+#: renom.utility.image.data_augmentation.zoom.Zoom.transform
+#: renom.utility.image.data_augmentation.zoom.zoom
+msgid "Return type"
+msgstr ""
+
+#: of
+#: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform:17
+#: renom.utility.image.data_augmentation.color_jitter.color_jitter:26
+#: renom.utility.image.data_augmentation.crop.Crop.transform:19
+#: renom.utility.image.data_augmentation.crop.crop:23
+#: renom.utility.image.data_augmentation.flip.Flip.transform
+#: renom.utility.image.data_augmentation.flip.flip:24
+#: renom.utility.image.data_augmentation.rescale.rescale
+#: renom.utility.image.data_augmentation.resize.Resize.transform
+#: renom.utility.image.data_augmentation.resize.resize
+#: renom.utility.image.data_augmentation.rotate.Rotate:14
+#: renom.utility.image.data_augmentation.rotate.rotate:25
+#: renom.utility.image.data_augmentation.shift.Shift.transform:19
+#: renom.utility.image.data_augmentation.shift.shift:25
+#: renom.utility.image.data_augmentation.zoom.Zoom.transform:20
+#: renom.utility.image.data_augmentation.zoom.zoom:24
+msgid "Example"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.color_jitter.ColorJitter:1
+msgid "Apply color jitter transformation to the input x and labels."
+msgstr ""
+
+#: of
+#: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform:1
+msgid ""
+"Performs a HSV color jitter of a RGB images. if x is a Batch, apply "
+"jitter transform to Batch if arguments include labels, apply label "
+"transformation"
+msgstr ""
+
+#: of
+#: renom.utility.image.data_augmentation.color_jitter.ColorJitter.transform:7
+msgid "apply random jitter or not"
+msgstr ""
+
+#: ../../rsts/api/renom.utility.image.data_augmentation.rst:9
+msgid "renom.utility.image.data_augmentation.crop"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.crop.crop:1
+msgid ""
+"Performs a Crop of a Numpy images. if x is a Batch, apply Crop transform "
+"to Batch. if arguments include labels, apply label transformation."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.crop.Crop.transform:5
+#: renom.utility.image.data_augmentation.crop.crop:5
+#: renom.utility.image.data_augmentation.flip.Flip.transform:5
+#: renom.utility.image.data_augmentation.flip.flip:5
+#: renom.utility.image.data_augmentation.rescale.Rescale.transform:4
+#: renom.utility.image.data_augmentation.rotate.Rotate:3
+#: renom.utility.image.data_augmentation.rotate.Rotate.transform:4
+#: renom.utility.image.data_augmentation.rotate.rotate:4
+#: renom.utility.image.data_augmentation.shift.Shift.transform:5
+#: renom.utility.image.data_augmentation.shift.shift:5
+msgid "3 or 4(batch) dimensional images"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.crop.Crop:3
+#: renom.utility.image.data_augmentation.crop.crop:7
+msgid "x and y of top left (y, x)"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.crop.Crop:5
+#: renom.utility.image.data_augmentation.crop.crop:9
+msgid "width and height of crop image (Height, Width)"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.crop.Crop.transform:12
+#: renom.utility.image.data_augmentation.crop.crop:14
+#: renom.utility.image.data_augmentation.flip.Flip.transform:12
+#: renom.utility.image.data_augmentation.flip.flip:17
+#: renom.utility.image.data_augmentation.zoom.Zoom.transform:13
+#: renom.utility.image.data_augmentation.zoom.zoom:17
+msgid "number of class of datasets (for rectangle transformation)"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.crop.crop:16
+msgid "If True, apply random cropping. left_top is randomly decided."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.crop.Crop.transform:15
+#: renom.utility.image.data_augmentation.crop.crop:19
+msgid ""
+"Images(4 dimension) of crop transformed. If including labels, return with"
+" transformed labels"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.crop.Crop:1
+msgid "Apply crop transformation to the input x and labels."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.crop.Crop.transform:1
+msgid ""
+"Performs a Crop of a Numpy images. if x is a Batch, apply Crop transform "
+"to Batch if arguments include labels, apply label transformation"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.crop.Crop.transform:7
+msgid "If True, apply random cropping. left_top is randomly desided."
+msgstr ""
+
+#: ../../rsts/api/renom.utility.image.data_augmentation.rst:16
+msgid "renom.utility.image.data_augmentation.flip"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.flip.flip:1
+msgid ""
+"Performs a flip of a Numpy images. if x is a Batch, apply flip transform "
+"to Batch. if arguments include labels, apply label transformation."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.flip.Flip:3
+#: renom.utility.image.data_augmentation.flip.flip:7
+msgid ""
+"1 means Horizontal Flip. 2 means Vertical Flip. 3 means both. else no "
+"flip conversion."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.flip.Flip.transform:7
+#: renom.utility.image.data_augmentation.flip.flip:12
+msgid "apply random flip or not"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.flip.Flip.transform:15
+#: renom.utility.image.data_augmentation.flip.flip:20
+msgid ""
+"Images(4 dimension) of flip transformed. If including labels, return with"
+" transformed labels"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.flip.Flip:1
+msgid "Apply flip transformation to the input x and labels."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.flip.Flip.transform:1
+msgid ""
+"Performs a flip of a Numpy images. if x is a Batch, apply flip transform "
+"to Batch if arguments include labels, apply label transformation"
+msgstr ""
+
+#: ../../rsts/api/renom.utility.image.data_augmentation.rst:23
+msgid "renom.utility.image.data_augmentation.rescale"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rescale.rescale:1
+msgid ""
+"Performs a rescale transform of a Numpy images. if x is a Batch, apply "
+"rescale transform to Batch."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rescale.rescale:4
+msgid "4(batch) dimensional images"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rescale.Rescale:3
+#: renom.utility.image.data_augmentation.rescale.rescale:6
+msgid ""
+"option of rescale. \"zero\": rescale images to [-0.5, 0.5]. \"vgg\" : "
+"substract averate values of vgg datasets. other : rescale [0.0, 1.0]."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rescale.rescale:11
+#: renom.utility.image.data_augmentation.zoom.Zoom.transform:10
+#: renom.utility.image.data_augmentation.zoom.zoom:14
+msgid ""
+"rectangle labels(2-dimensional array). ex:) np.array([[center x, center "
+"y, x_top_left, height, 0, 0, 0, 1, 0]])"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rescale.Rescale.transform:10
+#: renom.utility.image.data_augmentation.rescale.rescale:15
+msgid ""
+"Images(4 dimension) of rescale transformed. If including labels, return "
+"with transformed labels"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rescale.Rescale:1
+msgid "Apply rescale transformation to the input x"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rescale.Rescale.transform:1
+msgid ""
+"Performs a rescale transform of a Numpy images. if x is a Batch, apply "
+"rescale transform to Batch"
+msgstr ""
+
+#: ../../rsts/api/renom.utility.image.data_augmentation.rst:30
+msgid "renom.utility.image.data_augmentation.resize"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.resize.resize:1
+msgid ""
+"Performs a resize transformation of a Numpy Image 'x'. if x is a Batch, "
+"apply Resize transform to Batch. if arguments include labels, apply label"
+" transformation."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.resize.resize:5
+msgid "3 or 4(batch) dimensional x(images)"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.resize.Resize.transform:8
+#: renom.utility.image.data_augmentation.resize.resize:8
+#: renom.utility.image.data_augmentation.shift.Shift.transform:12
+#: renom.utility.image.data_augmentation.shift.shift:18
+msgid "number of class of datasets"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.resize.Resize.transform:9
+#: renom.utility.image.data_augmentation.resize.resize:9
+msgid ""
+"Images(4 dimension) of resize transformed. If including labels, return "
+"with transformed labels"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.resize.Resize:1
+msgid "Apply resize transformation to the input x and labels."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.resize.Resize:3
+msgid "size of ('Height', \"Width\")"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.resize.Resize.transform:1
+msgid ""
+"Performs a resize transformation of a Numpy Image x. if x is a Batch, "
+"apply Resize transform to Batch. if arguments include labels, apply label"
+" transformation."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.resize.Resize.transform:5
+msgid "3 or 4(batch) dimensional x"
+msgstr ""
+
+#: ../../rsts/api/renom.utility.image.data_augmentation.rst:38
+msgid "renom.utility.image.data_augmentation.rotate"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.rotate:1
+msgid ""
+"Performs a rotation of a Numpy images. if x is a Batch, apply rotation "
+"transform to Batch."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.Rotate:5
+#: renom.utility.image.data_augmentation.rotate.rotate:6
+msgid "rotation degree [-180 : 180]"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.Rotate:7
+#: renom.utility.image.data_augmentation.rotate.rotate:8
+msgid ""
+"method of interpolation after rotate transform you can use ['constant', "
+"'nearest']"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.Rotate:10
+#: renom.utility.image.data_augmentation.rotate.rotate:11
+#: renom.utility.image.data_augmentation.shift.Shift:7
+#: renom.utility.image.data_augmentation.shift.shift:11
+msgid "the interpolation value if fill_mode is 'constant'"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:6
+#: renom.utility.image.data_augmentation.rotate.rotate:13
+msgid "random rotation. degree is [-degree, +degree]"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:8
+#: renom.utility.image.data_augmentation.rotate.rotate:15
+msgid "you can use only when degree=90"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.rotate:18
+msgid ""
+"Images(4 dimension) of rotate transformed.     If including labels, "
+"return with transformed labels"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.rotate:20
+msgid "Images(4 dimension) of rotate transformed."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:13
+#: renom.utility.image.data_augmentation.rotate.rotate:21
+msgid "If including labels, return with transformed labels"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.Rotate:1
+msgid "Apply rotate transformation to the input x"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:1
+msgid ""
+"Performs a rotation of a Numpy images. if x is a Batch, apply rotation "
+"transform to Batch"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:12
+msgid "Retuens:"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.rotate.Rotate.transform:12
+msgid "(ndarray): Images(4 dimension) of rotate transformed."
+msgstr ""
+
+#: ../../rsts/api/renom.utility.image.data_augmentation.rst:46
+msgid "renom.utility.image.data_augmentation.shift"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.shift.Shift.transform:1
+#: renom.utility.image.data_augmentation.shift.shift:1
+msgid ""
+"Performs shift transformation to Numpy images. if x is a Batch, apply "
+"shifts transform to Batch. if arguments include labels, apply label "
+"transformation."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.shift.Shift:3
+#: renom.utility.image.data_augmentation.shift.shift:7
+msgid "values of x and y shifts (y, x)"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.shift.Shift:5
+#: renom.utility.image.data_augmentation.shift.shift:9
+msgid "method of interpolation after rotate transform"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.shift.Shift.transform:7
+#: renom.utility.image.data_augmentation.shift.shift:13
+msgid "random shift or not"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.shift.Shift.transform:15
+#: renom.utility.image.data_augmentation.shift.shift:21
+msgid ""
+"Images(4 dimension) of shift transformed. If including labels, return "
+"with transformed labels"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.shift.Shift:1
+msgid "Apply shift transformation to the input x and labels"
+msgstr ""
+
+#: ../../rsts/api/renom.utility.image.data_augmentation.rst:54
+msgid "renom.utility.image.data_augmentation.zoom"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.zoom.zoom:1
+msgid ""
+"Apply zoom in transformation to the input x. if x is a Batch, apply Zoom "
+"transform to Batch. needs zoom_rate (has to be > 1.0). If you use Random "
+"transformation, Zoom will be done randomly for values between the two "
+"limits given by the tuple or from 1 to zoom_rate."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.zoom.Zoom:3
+#: renom.utility.image.data_augmentation.zoom.zoom:6
+msgid "3 or 4(batch) dimensional Images"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.zoom.Zoom:5
+#: renom.utility.image.data_augmentation.zoom.zoom:8
+msgid ""
+"zoom ratio. If use random transformation, zoom_rate can be an interval "
+"(lower bound > 1.0). If you want to specify the range, you could use "
+"tuple (min, max)"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.zoom.Zoom.transform:8
+#: renom.utility.image.data_augmentation.zoom.zoom:12
+msgid "If True, apply random transformation."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.zoom.Zoom.transform:16
+#: renom.utility.image.data_augmentation.zoom.zoom:20
+msgid ""
+"Images(4 dimension) of zoom transformed. If including labels, return with"
+" transformed labels"
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.zoom.Zoom:1
+msgid "Apply zoom in transformation to the input x."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.zoom.Zoom.transform:1
+msgid ""
+"Performs a Zoom transformation of a Numpy Images. if x is a Batch, apply "
+"Zoom transform to Batch. needs zoom_rate (has to be > 1.0). If you use "
+"Random transformation, Zoom will be done randomly for values between the "
+"two limits given by the tuple or from 1 to zoom_rate."
+msgstr ""
+
+#: of renom.utility.image.data_augmentation.zoom.Zoom.transform:6
+msgid "3 or 4(batch) dimensional Image"
+msgstr ""
+
