@@ -158,8 +158,9 @@ class Conv2d(Parametrized):
     def weight_initiallize(self, input_size):
         size_f = (self._channel, input_size[0],
                   self._kernel[0], self._kernel[1])
-        assert all([s >= min(self._kernel) for s in input_size[1:]]), \
-            "The shape of input array {} is too small. Please give an array which size is lager than kernel size.".format(input_size[1:])
+        assert all([s > 0 for s in input_size[1:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
+                input_size[1:])
         self.params = {"w": Variable(self._initializer(size_f), auto_update=True)}
         if not self._ignore_bias:
             self.params["b"] = Variable(
@@ -167,8 +168,8 @@ class Conv2d(Parametrized):
 
     def forward(self, x):
         assert len(x.shape) == 4, "The dimension of input array must be 4. Actual dim is {}".format(x.ndim)
-        assert all([s >= min(self._kernel) for s in x.shape[2:]]), \
-            "The shape of input array {} is too small. Please give an array which size is lager than kernel size.".format(
-                x.shape[2:])
+        assert all([s > 0 for s in x.shape[2:]]), \
+            "The shape of input array {} is small. Please give an array which size is lager than 0.".format(
+                x.shape)
         return conv2d(x, self.params.w, self.params.get("b", None), self._kernel,
                       self._stride, self._padding, self._dilation)
