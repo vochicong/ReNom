@@ -143,7 +143,7 @@ class ConvNd(Parametrized):
         # After this dimension, the image data is assumed to be meaningfully correlated.
         self._dims = len(input_size[1:])
         if is_cuda_active():
-            assert self._dims < 4, "GPU Version currently only supports up to 3 dimensions"
+            assert self._dims < 4, "GPU Version currently only supports 2 and 3 dimensions"
 
         def func(var):
             return check_input(var, self._dims)
@@ -184,7 +184,7 @@ class Conv3d(Parametrized):
         # The first dimension is to allow different types of uncorrelated images as inputs, such as RGB information.
         # After this dimension, the image data is assumed to be meaningfully correlated.
         self._dims = len(input_size[1:])
-        assert self._dims < 4, "Conv3D expects up to 3 dimensions"
+        assert self._dims == 3, "Conv3D expects 3 dimensions"
 
         def func(var):
             return check_input(var, self._dims)
