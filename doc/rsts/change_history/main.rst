@@ -15,13 +15,18 @@ Changes 2.5 => 2.6
 
 7. Added ``Gru``. See :py:meth:`renom.layers.function.gru.Gru`
 
-8. Added ``Conv3d``.
+8. Added ``Conv3d``. See :py:meth:`renom.layers.function.convnd.Conv3d`
 
-9. Added ``ConvNd``.
+9. Added ``ConvNd``. See :py:meth:`renom.layers.function.convnd.ConvNd`
 
-10. Added ``Pool3d``.
+10. Added ``Average, Max Pool3d``.
+    See :py:meth:`renom.layers.function.poolnd.AvgPool3d` and
+    See :py:meth:`renom.layers.function.poolnd.MaxPool3d`
 
-11. Added ``PoolNd``.
+11. Added ``Average, Max PoolNd``. See
+    :py:meth:`renom.layers.function.poolnd.AvgPoolNd` and 
+    :py:meth:`renom.layers.function.poolnd.MaxPoolNd`.
 
-12. Added ``Unpool2d``
-
+12. Added ``Average, Max Unpool2d``. See 
+    :py:meth:`renom.layers.function.poolnd.AvgUnPool2d` and 
+    :py:meth:`renom.layers.function.poolnd.MaxUnPool2d`.
