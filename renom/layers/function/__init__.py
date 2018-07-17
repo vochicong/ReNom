@@ -2,7 +2,6 @@ from .parameterized import Model, Parametrized, Sequential
 from .dense import Dense
 from .conv2d import Conv2d
 from .convnd import ConvNd, Conv3d
-from .poolnd import MaxPoolNd
 from .batch_normalize import BatchNormalize
 from .layer_normalize import LayerNormalize
 from .weight_normalize import WeightNormalize

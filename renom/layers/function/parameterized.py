@@ -167,7 +167,7 @@ class Model(with_metaclass(ABCMeta, object)):
     def prevent_update(self):
         """This context manager can controls that whether model's weight parameter be updated.
 
-        Example: 
+        Example:
             >>> import numpy as np
             >>> import renom as rm
             >>> model = rm.Sequential([
@@ -175,10 +175,10 @@ class Model(with_metaclass(ABCMeta, object)):
             ... ])
             >>> x = np.random.rand(2, 2)
             >>> y = np.random.rand(2, 1)
-            >>> 
+            >>>
             >>> with model.train():
             ...     loss = rm.mean_squared_error(model(x), y)
-            >>> 
+            >>>
             >>> print("Before", model[0].params.w)
             Before
              [[ 0.03417877]
@@ -189,7 +189,7 @@ class Model(with_metaclass(ABCMeta, object)):
              [[ 0.526793  ]
              [ 0.00882804]]
             >>>
-            >>>     
+            >>>
             >>> print("Before", model[0].params.w)
             Before
              [[ 0.526793  ]

@@ -371,7 +371,7 @@ class Node(np.ndarray):
 
     def copy(self):
         """Returns a copy of itself.
-        If node object does not have data on gpu, 
+        If node object does not have data on gpu,
         this returns ndarray.
 
         Returns:

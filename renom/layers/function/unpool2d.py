@@ -142,7 +142,7 @@ class AverageUnPool2d:
         prev_pool (average_pool2d, None):   The previous pool to be unpooled. In the case of none,
                                         the model searches through the history for the previous layer.
 
-    Note: 
+    Note:
         The input shape requirement:
         ``x.shape == previous_pool.shape``
 

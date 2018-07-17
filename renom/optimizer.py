@@ -148,12 +148,12 @@ class Adadelta(Optimizer):
             psg = 0
             psx = 0
         else:
-            psg = pdy['psg']      #E_squared_grad[t-1]
-            psx = pdy['psx']      #E_squared_x[t-1]
+            psg = pdy['psg']      # E_squared_grad[t-1]
+            psx = pdy['psx']      # E_squared_x[t-1]
         dr = self._dr
-        E_squared_grad = dr*psg + (1 - dr)*np.square(dy)
-        dx = np.sqrt(psx + self._epsilon)/np.sqrt(E_squared_grad + self._epsilon)*dy
-        E_squared_x = dr*psx + (1-dr)*np.square(dx)
+        E_squared_grad = dr * psg + (1 - dr) * np.square(dy)
+        dx = np.sqrt(psx + self._epsilon) / np.sqrt(E_squared_grad + self._epsilon) * dy
+        E_squared_x = dr * psx + (1 - dr) * np.square(dx)
 
         ret = dx
         self._params[node_id] = {
@@ -166,7 +166,7 @@ class Adadelta(Optimizer):
         return ret
 
     def _get_gpu(self, dy, node):
-        node_id = id(Node)
+        node_id = id(node)
         pdy = self._params.get(node_id, None)
         if pdy is None:
             psg = get_gpu(dy).zeros_like_me()
