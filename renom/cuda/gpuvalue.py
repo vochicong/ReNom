@@ -427,7 +427,10 @@ class GPUValue(object):
         self._ptr = None
 
     def __len__(self):
-        return self.shape[0]
+        if len(self.shape) > 0:
+            return self.shape[0]
+        else:
+            return 1
 
     def reshape(self, *shape):
         # TODO: Find a way to create shapes without requesting potentially large
