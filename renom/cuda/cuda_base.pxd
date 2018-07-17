@@ -187,6 +187,7 @@ cdef extern from "cuda_runtime.h":
     cudaError_t cudaMemcpy(void * dst, const void * src, int size, cudaMemcpyKind kind)
     cudaError_t cudaMemcpyAsync(void * dst, const void * src, int count, cudaMemcpyKind kind, cudaStream_t stream)
     cudaError_t cudaMemcpyPeer(void * dst, int dstDevice, const void * src, int srcDevice, size_t count)
+    cudaError_t cudaMemGetInfo(size_t * free, size_t * total)
 
     cudaError_t cudaHostAlloc(void ** ptr, size_t size, int flags)
     cudaError_t cudaMallocHost(void ** ptr, size_t size)

@@ -1854,7 +1854,7 @@ namespace renom{
     void thrust_optimizer_sgd(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy)
     {
       if(Elems) {
-        cuda_optimizer_sgd <<<ceil(Elems/256.0), 256>>> (Elems, learning_rate, dy, momentum, pdy, ndy);
+        cuda_optimizer_sgd <<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>> (Elems, learning_rate, dy, momentum, pdy, ndy);
       }
     }
 
@@ -1870,7 +1870,7 @@ namespace renom{
     void thrust_optimizer_adagrad(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
     {
       if(Elems) {
-        cuda_optimizer_adagrad<<<ceil(Elems/256.0), 256>>>(Elems, learning_rate, dy, eps, pdy, ndy, r);
+        cuda_optimizer_adagrad<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, learning_rate, dy, eps, pdy, ndy, r);
       }
     }
 
@@ -1886,7 +1886,7 @@ namespace renom{
     void thrust_optimizer_rmsprop(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
     {
       if(Elems) {
-        cuda_optimizer_rmsprop<<<ceil(Elems/256.0), 256>>>(Elems, learning_rate, dy, eps, gamma, pdy, ndy, r);
+        cuda_optimizer_rmsprop<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, learning_rate, dy, eps, gamma, pdy, ndy, r);
       }
     }
 
@@ -1903,7 +1903,7 @@ namespace renom{
     void thrust_optimizer_adam(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE gamma_orig, VALUE_TYPE beta, VALUE_TYPE beta_orig, VALUE_TYPE min, bool flug, VALUE_TYPE *u, VALUE_TYPE *r, VALUE_TYPE *ndy)
     {
       if(Elems) {
-        cuda_optimizer_adam<<<ceil(Elems/256.0), 256>>>(Elems, learning_rate, dy, eps, gamma, gamma_orig, beta, beta_orig, min, flug, u, r, ndy);
+        cuda_optimizer_adam<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, learning_rate, dy, eps, gamma, gamma_orig, beta, beta_orig, min, flug, u, r, ndy);
       }
     }
 
