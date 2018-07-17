@@ -50,7 +50,7 @@ class MeanSquaredError(object):
     In the case of the argument `reduce_sum` is False, this class will not perform summation.
 
     .. math::
-        E(x) = \\frac{1}{2N}(x_{nk}-y_{nk})^2
+        E({\\bf x}) = \\frac{1}{2N}({\\bf x}-{\\bf y})^2
 
     :math:`N` is batch size.
 
