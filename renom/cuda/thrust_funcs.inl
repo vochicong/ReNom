@@ -1921,7 +1921,7 @@ namespace renom{
     void thrust_optimizer_adadelta(int Elems, VALUE_TYPE decay_rate, VALUE_TYPE epsilon, VALUE_TYPE * previous_squared_gradient, VALUE_TYPE * previous_squared_delta, VALUE_TYPE * dy, VALUE_TYPE * new_dy)
     {
       if(Elems) {
-        cuda_optimizer_adadelta<<<ceil(Elems/256.0), 256>>>(Elems, decay_rate, epsilon, previous_squared_gradient, previous_squared_delta, dy, new_dy);
+        cuda_optimizer_adadelta<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, decay_rate, epsilon, previous_squared_gradient, previous_squared_delta, dy, new_dy);
       }
     }
 
