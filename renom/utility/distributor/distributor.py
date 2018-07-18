@@ -184,8 +184,8 @@ class GPUDistributor(Distributor):
         with cu.asyncBehaviour():
             batch = batch.astype(np.dtype(precision))
             cu.pinNumpy(batch)
-            ret = get_gpu(batch)
-        return Node(ret)
+            ret = Node(get_gpu(batch))
+        return ret
 
     @staticmethod
     def preload_pair(batch1, batch2):

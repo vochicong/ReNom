@@ -149,13 +149,27 @@ def cuCreateStream(name = None):
     return < uintptr_t > stream
 
 cdef cudaStream_t mainstream = <cudaStream_t><uintptr_t> 0
+cdef cudaStream_t cudnnstream = <cudaStream_t><uintptr_t> 0
+
 
 def setMainStream(stream):
     global mainstream
     mainstream = <cudaStream_t><uintptr_t> stream
 
-def cuGetStream(myid = None):
-  pass
+def setCudnnStream(stream):
+  global cudnnstream
+  cudnnstream = <cudaStream_t><uintptr_t> stream
+
+def insertEvent(GPUHeap heap):
+  global mainstream
+  runtime_check(cudaEventRecord(heap.event, mainstream))
+
+def heapReady(GPUHeap heap):
+  ret = cudaEventQuery(heap.event)
+  if ret == cudaSuccess:
+    return True
+  else:
+    return False
 
 def cuDestroyStream(uintptr_t stream):
     runtime_check(cudaStreamDestroy(<cudaStream_t> stream))
@@ -358,6 +372,7 @@ cdef class GPUHeap(object):
         # constructed GPUHeaps. All Memcpy operations will occur on the same
         # stream.
         self._mystream = stream
+        cudaEventCreate(&self.event)
 
     def __int__(self):
         return self.ptr
@@ -387,7 +402,7 @@ cdef class GPUHeap(object):
 
         with renom.cuda.use_device(self.device_id):
             #cuMemcpyH2D(ptr.ptr, self.ptr, nbytes)
-            cuMemcpyH2Dvar(ptr.ptr, self.ptr, nbytes, <uintptr_t> self._mystream)
+            cuMemcpyH2Dvar(ptr.ptr, self.ptr, nbytes, <uintptr_t> get_gpu_allocator()._memsync_stream)
 
     cpdef memcpyD2H(self, cpu_ptr, size_t nbytes):
         shape = cpu_ptr.shape
@@ -454,11 +469,16 @@ cdef class GpuAllocator(object):
         cdef GPUHeap pool = self.getAvailablePool(nbytes)
         if pool is None:
             ptr = cuMalloc(nbytes)
-            pool = GPUHeap(nbytes=nbytes, ptr=ptr, device_id=cuGetDevice(), stream=self._memsync_stream)
+            pool = GPUHeap(nbytes=nbytes, ptr=ptr, device_id=cuGetDevice())
         return pool
 
 
     cpdef free(self, GPUHeap pool):
+        '''
+        When a pool is to be freed, we first record the current status of the stream in which it was used,
+        so as to make sure that it is not prematurely released for use by other GPUValues requesting a pool.
+        '''
+        insertEvent(pool)
         if pool.nbytes:
             device_id = pool.device_id
             if not getattr(bisect, 'bisect', None):
@@ -470,8 +490,13 @@ cdef class GpuAllocator(object):
 
     cpdef GPUHeap getAvailablePool(self, size_t size):
         pool = None
-        cdef size_t min = size
-        cdef size_t max = size * 2 + 4096
+        '''
+        We will be looking through the currently available pools and we demand that they
+        big enough to fit all our requested data, but we allow for pools that are slightly
+        larger than what is requested
+        '''
+        cdef size_t min_requested = size
+        cdef size_t max_requested = size * 2 + 4096
 
         device = cuGetDevice()
         pools = self._pool_lists[device]
@@ -483,10 +508,10 @@ cdef class GpuAllocator(object):
 
         for i in range(idx, len(pools)):
             _, p = pools[i]
-            if p.nbytes >= max:
+            if p.nbytes >= max_requested:
                 break
 
-            if min <= p.nbytes:
+            if min_requested <= p.nbytes and heapReady(p):
                 pool = p
                 del pools[i]
                 break
