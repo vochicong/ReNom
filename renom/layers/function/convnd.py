@@ -115,10 +115,11 @@ class ConvNd(Parametrized):
 
     Args:
         channel (int): The dimensionality of the output.
-        filter int: Filter size of the convolution kernel.
-        padding int: Size of the zero - padding around the image.
-        stride int: Stride - size of the convolution.
+        filter (int): Filter size of the convolution kernel.
+        padding (int): Size of the zero - padding around the image.
+        stride (int): Stride - size of the convolution.
         input_size (tuple): Input unit size. This must be a tuple like (Channel, Height, Width).
+        ignore_bias (bool): If `True` is given, bias will not be added.
         initializer (Initializer): Initializer object for weight initialization.
 
     Example:

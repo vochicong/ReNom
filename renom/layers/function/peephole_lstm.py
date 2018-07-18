@@ -206,7 +206,7 @@ class peephole_lstm(Node):
 
 
 class PeepholeLstm(Parametrized):
-    '''Long short time memory with peephole [4]_ .
+    '''Long short time memory with peephole [plstm]_ .
     Lstm object has 11 weights and 4 biases parameters to learn.
 
     Weights applied to the input of the input gate, forget gate and output gate.
@@ -255,7 +255,7 @@ class PeepholeLstm(Parametrized):
              [-0.0205425 , -0.05837972,  0.00467286]], dtype=float32)
         >>> layer.truncate()
 
-    .. [4] Felix A. Gers, Nicol N. Schraudolph, J ̈urgen Schmidhuber.
+    .. [plstm] Felix A. Gers, Nicol N. Schraudolph, J ̈urgen Schmidhuber.
         Learning Precise Timing with LSTM Recurrent Networks
     '''
 
