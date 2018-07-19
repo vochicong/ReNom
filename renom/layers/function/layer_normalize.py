@@ -37,7 +37,7 @@ def get_sigma(x, mu=None):
 
 
 def get_mu_diff(x):
-    H = np.prod(x.shape[1:])
+    H = float(np.prod(x.shape[1:]))
     return 1 / H
 
 
@@ -76,7 +76,7 @@ class layer_normalize(Node):
             "Currently only normalizes for dense and 2d convolutional networks."
         _x, _gain, _bias = map(get_gpu, [x, gain, bias])
         _ax = tuple([r for r in range(1, len(x.shape[1:]) + 1)])
-        H = np.prod(x.shape[1:])
+        H = float(np.prod(x.shape[1:]))
         sum1 = op.sum(_x, axis=_ax, keepdims=True)
         mu = get_gpu(sum1 / H)
         sum2 = op.sum((_x - mu) ** 2, axis=_ax, keepdims=True)
@@ -117,22 +117,23 @@ class layer_normalize(Node):
 
     def _backward_gpu(self, context, dy, **kwargs):
         dx = get_gpu(self.attrs._x).zeros_like_me()
-        H = self.attrs._x.shape[1]
         x = get_gpu(self.attrs._x)
         mu = get_gpu(self.attrs._mu)
         sigma = get_gpu(self.attrs._sigma)
         gain = get_gpu(self.attrs._gain)
         dy = get_gpu(dy)
         _ax = tuple([r for r in range(1, len(x.shape[1:]) + 1)])
-        H = np.prod(x.shape[1:])
+        H = float(np.prod(x.shape[1:]))
         mu_diff = get_gpu(get_mu_diff(x))
-        sigma_diff = get_gpu(1 / (2 * sigma) * ((2 * x + H * (2 * mu / H) -
+
+        sigma_diff = get_gpu(1 / (2 * sigma) * ((2 * x + 2 * mu -
                                                  get_gpu(2 * (op.sum(x, axis=_ax, keepdims=True) / H + mu))) / H))
         dx = get_gpu(dy / sigma) \
             - get_gpu(sigma_diff * get_gpu(op.sum(x * dy, axis=_ax, keepdims=True)) / (sigma ** 2)) \
             - get_gpu(get_gpu(op.sum(mu_diff * dy, axis=_ax, keepdims=True)) / sigma) \
             + get_gpu(sigma_diff * get_gpu(op.sum(dy, axis=_ax, keepdims=True)) * mu / (sigma ** 2))
         dx *= gain
+
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
 
