@@ -191,6 +191,7 @@ class Adadelta(Optimizer):
     def reset(self):
         self._params = {}
 
+
 class Rmsprop(Optimizer):
     '''Rmsprop described by following formula. [Rmsprop]_
 

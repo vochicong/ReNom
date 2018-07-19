@@ -4,7 +4,7 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
-## ReNom version 2.6.0
+## ReNom version 2.6.1
 - http://renom.jp/rsts/renomdl/main.html
 
 #### Changes from 2.5
@@ -22,6 +22,12 @@ Please refer to `changes` at renom.jp.
 - Add `Convlution 3d, nd`.
 - Add `Max, Avg Pooling 3d, nd`.
 - Add `Unpooling 2d`.
+
+#### Changes from 2.6.0
+- Bug fix of the class LayerNormalize. Not to raise index error when gpu calculation.
+- Add an example of LayerNormalize.
+
+
 
 ## Requirements
 
