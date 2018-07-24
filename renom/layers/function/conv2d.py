@@ -47,10 +47,11 @@ class conv2d(Node):
         N = x.shape[0]
         conv_desc = cu.ConvolutionDescriptor(padding, stride, dilation, precision)
         filter_desc = cu.FilterDescriptor(w.shape, precision)
+        _x, _w = map(lambda x: get_gpu(x), [x, w])
 
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
-            cu.cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y)
+            cu.cuConvolutionForward(handle, conv_desc, filter_desc, _x, _w, y)
             if b is not None:
                 cu.cu_add_bias(get_gpu(b), y)
 

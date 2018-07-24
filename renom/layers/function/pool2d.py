@@ -49,6 +49,7 @@ class max_pool2d(pool_base):
     def _oper_gpu(cls, x, in_shape, out_shape, karnel, stride, padding):
         N = x.shape[0]
         pool_desc = cu.PoolingDescriptor(karnel, padding, stride, pool_mode=0)
+        x = get_gpu(x)
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
             cu.cuPoolingForward(handle, pool_desc, x, y)
