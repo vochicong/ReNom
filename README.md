@@ -36,7 +36,7 @@ Please refer to `changes` at renom.jp.
 - pytest 3.0.7
 - cython 0.24
 - cuda-toolkit 8.0, 9.1
-- cudnn 5.1, 6.0, 7.1
+- cudnn 7.1
 - matplotlib 2.0.2
 - pandas 0.20.3
 - scikit-learn 0.18.2
