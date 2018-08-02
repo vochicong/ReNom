@@ -5,22 +5,6 @@ from renom.cuda import use_device, is_cuda_active
 from renom.core import Node
 
 
-class _EventHandlers(object):
-    def __init__(self, events):
-        super(_EventHandlers, self).__setattr__('_events', events)
-
-    def __getattr__(self, name):
-        def deco(f):
-            self._events[name] = f
-            return f
-
-        return deco
-
-    def __setattr__(self, name, f):
-        self._events[name] = f
-
-    def get_handlers(self):
-        return self._evnets
 
 # Default events
 
@@ -138,13 +122,14 @@ class Trainer(object):
     """
 
     def __init__(self, model, num_epoch, loss_func, batch_size,
-                 optimizer=None, shuffle=True, events=None, num_gpu=1):
+                 optimizer=None, shuffle=True, events=None, num_gpu=1, regularization=None):
 
         self.model = model
         self.num_epoch = num_epoch
         self.loss_func = loss_func
         self.batch_size = batch_size
         self.optimizer = optimizer
+        self.regularization = regularization
         self.shuffle = shuffle
         self.num_gpu = num_gpu
         self.train_loss_list = []
@@ -155,12 +140,9 @@ class Trainer(object):
         else:
             self._events = DEFAULT_EVENTS
 
-        self.events = _EventHandlers(self._events)
 
     def on_event(self, event):
-        if self._events:
-            events = self._events
-
+        events = self._events
         handler = events.get(event)
         if handler:
             handler(self)
@@ -233,8 +215,10 @@ class Trainer(object):
                 for gpu in range(self.num_gpu):
                     model = models[gpu]
                     with use_device(gpu):
-                        self.losses.append(self.loss_func(self.outputs[gpu], self.targets[gpu]))
-
+                        loss = self.loss_func(self.outputs[gpu], self.targets[gpu])
+                        if self.regularization:
+                            loss = self.regularization(model) + loss
+                        self.losses.append(loss)
                 self.avg_train_loss += (self.losses[0] -
                                         self.avg_train_loss) / (iteration + 1)
 
