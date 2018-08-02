@@ -324,7 +324,10 @@ class Model(with_metaclass(ABCMeta, object)):
                         diff = Node(diff)
                     with use_device(curdiff.device_id):
                         if diff.device_id != curdiff.device_id:
-                            diff = Node(diff.get_gpu().copy())
+                            g = GPUValue(shape=diff.shape)
+                            g.copy_from(diff.get_gpu())
+                            diff = Node(g)
+
                         newdiff = curdiff + diff
 
                 grads.set(obj, newdiff)
