@@ -195,6 +195,8 @@ class Trainer(object):
 
             for iteration, (data, target) in enumerate(self.train_distributor.batch(self.batch_size, self.shuffle)):
                 datalen = len(data) // len(models)
+                if not datalen:
+                    continue
                 self.data = [data[i:i + datalen] for i in range(0, datalen * len(models), datalen)]
                 if is_cuda_active():
                     self.data = [Node(d) for d in self.data]
