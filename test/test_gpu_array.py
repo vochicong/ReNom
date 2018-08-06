@@ -1265,12 +1265,10 @@ def test_copy_from_another_gpu():
         dest = Variable(rand((100,)))
         dest.to_gpu()
 
-    print("Finishing up")
     dest.copy_from(src)
     close(src, dest)
 
     close(src._gpu.new_array(), dest._gpu.new_array())
-    print("Passed tests")
 
 @test_utility.skipgpu
 @pytest.mark.parametrize("a, axis", [
