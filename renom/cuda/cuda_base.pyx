@@ -478,7 +478,9 @@ cdef class GpuAllocator(object):
         When a pool is to be freed, we first record the current status of the stream in which it was used,
         so as to make sure that it is not prematurely released for use by other GPUValues requesting a pool.
         '''
-        insertEvent(pool)
+        global mainstream
+        if not <uintptr_t> mainstream == 0:
+            insertEvent(pool)
         if pool.nbytes:
             device_id = pool.device_id
             if not getattr(bisect, 'bisect', None):
