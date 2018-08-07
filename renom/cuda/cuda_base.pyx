@@ -1,8 +1,12 @@
 from __future__ import print_function
+import atexit
 import sys
 import traceback
 import contextlib
 import bisect
+import threading
+
+from libc.stdio cimport printf
 cimport numpy as np
 import numpy as pnp
 cimport cython
@@ -15,6 +19,13 @@ from renom.config import precision
 import collections
 import renom.core
 import renom.cuda
+
+# Indicate Python started shutdown process
+cdef int _python_shutdown = 0
+
+@atexit.register
+def on_exit():
+    _python_shutdown = 1
 
 
 @contextlib.contextmanager
@@ -382,17 +393,26 @@ cdef class GPUHeap(object):
 
         cdef int cur
         cdef cudaError_t err
+        cdef const char *errstr;
 
         cudaGetDevice(&cur)
+
         try:
             err = cudaSetDevice(self.device_id)
             if err == cudaSuccess:
                 err = cudaFree(<void * >self.ptr)
 
             if err != cudaSuccess:
-                print("Error in GPUHeap.__dealloc__():", err, file=sys.stderr)
+                errstr = cudaGetErrorString(err)
+                if _python_shutdown == 0:
+                    s =  errstr.decode('utf-8', 'replace')
+                    print("Error in GPUHeap.__dealloc__():", err, s, file=sys.stderr)
+                else:
+                    printf("Error in GPUHeap.__dealloc__(): %s\n", errstr)
+
         finally:
             cudaSetDevice(cur)
+
 
     cpdef memcpyH2D(self, cpu_ptr, size_t nbytes):
         # todo: this copy is not necessary
@@ -459,6 +479,7 @@ cdef class GpuAllocator(object):
         self._pool_lists = collections.defaultdict(list)
         # We create one stream for all the GPUHeaps to share
         self._memsync_stream = cuCreateStream("Memcpy Stream")
+        self._rlock = threading.RLock()
 
     @property
     def pool_list(self):
@@ -479,16 +500,19 @@ cdef class GpuAllocator(object):
         so as to make sure that it is not prematurely released for use by other GPUValues requesting a pool.
         '''
         global mainstream
+        if _python_shutdown:
+            return
+
         if not <uintptr_t> mainstream == 0:
             insertEvent(pool)
+
         if pool.nbytes:
             device_id = pool.device_id
-            if not getattr(bisect, 'bisect', None):
-                # Python is shutting down
-                return
-            self._pool_lists[device_id]
-            index = bisect.bisect(self._pool_lists[device_id], (pool.nbytes,))
-            self._pool_lists[device_id].insert(index, (pool.nbytes, pool))
+
+            with self._rlock:
+                self._pool_lists[device_id]
+                index = bisect.bisect(self._pool_lists[device_id], (pool.nbytes,))
+                self._pool_lists[device_id].insert(index, (pool.nbytes, pool))
 
     cpdef GPUHeap getAvailablePool(self, size_t size):
         pool = None
@@ -499,24 +523,25 @@ cdef class GpuAllocator(object):
         '''
         cdef size_t min_requested = size
         cdef size_t max_requested = size * 2 + 4096
-
-        device = cuGetDevice()
-        pools = self._pool_lists[device]
-
-        cdef size_t idx = bisect.bisect_left(pools, (size,))
-
+        cdef size_t idx, i
         cdef GPUHeap p
-        cdef size_t i
 
-        for i in range(idx, len(pools)):
-            _, p = pools[i]
-            if p.nbytes >= max_requested:
-                break
+        with self._rlock:
+            device = cuGetDevice()
+            pools = self._pool_lists[device]
 
-            if min_requested <= p.nbytes and heapReady(p):
-                pool = p
-                del pools[i]
-                break
+            idx = bisect.bisect_left(pools, (size,))
+
+
+            for i in range(idx, len(pools)):
+                _, p = pools[i]
+                if p.nbytes >= max_requested:
+                    break
+
+                if min_requested <= p.nbytes and heapReady(p):
+                    pool = p
+                    del pools[i]
+                    break
 
         return pool
 
@@ -544,3 +569,6 @@ cpdef _cuSetLimit(limit, value):
     ret = cuCtxGetLimit(&c_value, limit)
 
     cuCtxSetLimit(limit, value)
+
+
+
