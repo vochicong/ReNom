@@ -11,17 +11,17 @@ from renom.cuda import cuda as cu
 
 class conv2d(Node):
 
-    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, dilation=1, descriptors=None):
+    def __new__(cls, x, w, b, filter=3, stride=1, padding=0, dilation=1):
         filter, stride, padding, dilation = (tuplize(x)
                                              for x in (filter, stride, padding, dilation))
 
         in_shape = x.shape[1:]
         out_shape = [w.shape[0]]
         out_shape.extend(out_size(x.shape[2:], filter, stride, padding, dilation))
-        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, dilation, descriptors)
+        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, dilation)
 
     @classmethod
-    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation, descriptors = None):
+    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation):
         col = im2col(to_value(x),
                      out_shape[1:], kernel,
                      stride, padding, dilation)
@@ -43,14 +43,10 @@ class conv2d(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation, descriptors = None):
+    def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation):
         N = x.shape[0]
-        if descriptors is None:
-            conv_desc = cu.ConvolutionDescriptor(padding, stride, dilation, precision)
-            filter_desc = cu.FilterDescriptor(w.shape, precision)
-        else:
-            conv_desc = descriptors['conv_desc']
-            filter_desc = descriptors['filter_desc']
+        conv_desc = cu.ConvolutionDescriptor(padding, stride, dilation, precision)
+        filter_desc = cu.FilterDescriptor(w.shape, precision)
         _x, _w = map(lambda x: get_gpu(x), [x, w])
 
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
@@ -94,7 +90,7 @@ class conv2d(Node):
             if db is None:
                 db = np.zeros((1, self.attrs._w.shape[0], 1, 1))
             cu.cuConvolutionBackward(handle, self.attrs._conv_desc, self.attrs._filter_desc,
-                                     self.attrs._x, self.attrs._w, dy, dw, db, dx, **kwargs)
+                                     get_gpu(self.attrs._x), get_gpu(self.attrs._w), dy, dw, db, dx, **kwargs)
         if isinstance(self.attrs._w, Node):
             self.attrs._w._update_diff(context, dw, **kwargs)
 
@@ -167,12 +163,6 @@ class Conv2d(Parametrized):
             "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
                 input_size[1:])
         self.params = {"w": Variable(self._initializer(size_f), auto_update=True)}
-        if cu.is_cuda_active():
-            self._desc = \
-                {'conv_desc' : cu.ConvolutionDescriptor(self._padding, self._stride, self._dilation, precision),
-                 'filter_desc' : cu.FilterDescriptor(size_f, precision)}
-        else:
-            self._desc = None
         if not self._ignore_bias:
             self.params["b"] = Variable(
                 np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)
@@ -183,4 +173,4 @@ class Conv2d(Parametrized):
             "The shape of input array {} is small. Please give an array which size is lager than 0.".format(
                 x.shape)
         return conv2d(x, self.params.w, self.params.get("b", None), self._kernel,
-                      self._stride, self._padding, self._dilation, self._desc)
+                      self._stride, self._padding, self._dilation)

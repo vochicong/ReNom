@@ -20,7 +20,7 @@ class pool_base(Node):
     def _backward_gpu(self, context, dy, **kwargs):
         dx = get_gpu(self.attrs._x).empty_like_me()
         with cu.cudnn_handler() as handle:
-            cu.cuPoolingBackward(handle, self.attrs._pool_desc, self.attrs._x, self, dy, dx)
+            cu.cuPoolingBackward(handle, self.attrs._pool_desc, get_gpu(self.attrs._x), get_gpu(self), get_gpu(dy), dx)
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
 
@@ -49,10 +49,10 @@ class max_pool2d(pool_base):
     def _oper_gpu(cls, x, in_shape, out_shape, karnel, stride, padding):
         N = x.shape[0]
         pool_desc = cu.PoolingDescriptor(karnel, padding, stride, pool_mode=0)
-        x = get_gpu(x)
+        _x = get_gpu(x)
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
-            cu.cuPoolingForward(handle, pool_desc, x, y)
+            cu.cuPoolingForward(handle, pool_desc, _x, y)
         ret = cls._create_node(y)
         ret.attrs._pool_desc = pool_desc
         ret.attrs._x = x
