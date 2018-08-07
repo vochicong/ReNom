@@ -1843,18 +1843,19 @@ namespace renom{
         }
     }
 
-    __global__ void cuda_optimizer_sgd(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy)
+    __global__ void cuda_optimizer_sgd(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *node)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
       if (idx < Elems) {
         ndy[idx] = dy[idx] * learning_rate + pdy[idx] * momentum;
+        node[idx] -= ndy[idx];
       }
     }
 
-    void thrust_optimizer_sgd(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy)
+    void thrust_optimizer_sgd(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *node)
     {
       if(Elems) {
-        cuda_optimizer_sgd <<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>> (Elems, learning_rate, dy, momentum, pdy, ndy);
+        cuda_optimizer_sgd <<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>> (Elems, learning_rate, dy, momentum, pdy, ndy, node);
       }
     }
 
@@ -1912,8 +1913,9 @@ namespace renom{
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
       if (idx < Elems) {
         VALUE_TYPE current_squared_gradient = decay_rate * previous_squared_gradient[idx] + (1 - decay_rate) * dy[idx] * dy[idx];
-        new_dy[idx] = sqrtf(previous_squared_delta[idx] + epsilon) / sqrtf(current_squared_gradient + epsilon) * dy[idx];
-        previous_squared_delta[idx] = decay_rate * previous_squared_delta[idx] + (1 - decay_rate) * new_dy[idx] * new_dy[idx];
+        VALUE_TYPE tmp_new = sqrtf(previous_squared_delta[idx] + epsilon) / sqrtf(current_squared_gradient + epsilon) * dy[idx];
+        new_dy[idx] -= tmp_new;
+        previous_squared_delta[idx] = decay_rate * previous_squared_delta[idx] + (1 - decay_rate) * tmp_new * tmp_new;
         previous_squared_gradient[idx] = current_squared_gradient;
       }
     }

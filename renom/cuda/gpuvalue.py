@@ -375,7 +375,6 @@ class GPUValue(object):
         if not is_cuda_active():
             raise ValueError('Cuda is not active. '
                              'Use renom.cuda.set_cuda_active() to activate.')
-
         if shape is not None:
             self.shape = tuple(shape)
         else:
@@ -427,6 +426,8 @@ class GPUValue(object):
         self._ptr = None
 
     def __len__(self):
+        if not self.shape:
+            return 0
         return self.shape[0]
 
     def reshape(self, *shape):

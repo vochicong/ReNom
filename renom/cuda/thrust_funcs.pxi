@@ -1029,7 +1029,7 @@ def cu_set_item(value, valuesize, gpu_value1, slices, strides, broadcasted_strid
     thrust_setitem(ptr1, valuesize, ptr2, & infos)
 
 
-def cu_optimizer_sgd(learning_rate, momentum, dy, previous_dy, new_dy):
+def cu_optimizer_sgd(learning_rate, momentum, dy, previous_dy, new_dy, node):
     Elem = 1
     for v in dy.shape:
         Elem *= v
@@ -1039,7 +1039,8 @@ def cu_optimizer_sgd(learning_rate, momentum, dy, previous_dy, new_dy):
     cdef VALUE_TYPE * ptr_dy = <VALUE_TYPE * > < uintptr_t > dy._ptr
     cdef VALUE_TYPE * ptr_pdy = <VALUE_TYPE * > < uintptr_t > previous_dy._ptr
     cdef VALUE_TYPE * ptr_ndy = <VALUE_TYPE * > < uintptr_t > new_dy._ptr
-    thrust_optimizer_sgd(Elems, lr, ptr_dy, mo, ptr_pdy, ptr_ndy)
+    cdef VALUE_TYPE * ptr_nod = <VALUE_TYPE * > < uintptr_t > node._ptr
+    thrust_optimizer_sgd(Elems, lr, ptr_dy, mo, ptr_pdy, ptr_ndy, ptr_nod)
 
 
 def cu_optimizer_adagrad(learning_rate, epsilon, dy, previous_dy, new_dy, r):

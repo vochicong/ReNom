@@ -12,6 +12,7 @@ from renom.cuda import cuda as cu
 
 class Optimizer(with_metaclass(ABCMeta, object)):
 
+    _updates_node = False
     # Called by update_node in core.py
     def __call__(self, *args, **kwargs):
         if is_cuda_active():
@@ -26,6 +27,10 @@ class Optimizer(with_metaclass(ABCMeta, object)):
     @abstractmethod
     def _get_gpu(self, *args, **kwargs):
         pass
+
+    @property
+    def updates_node(self):
+        return self._updates_node == True
 
 
 class Sgd(Optimizer):
@@ -56,6 +61,7 @@ class Sgd(Optimizer):
     '''
 
     def __init__(self, lr=0.1, momentum=0.4):
+        self._updates_node = True
         self._lr = lr
         self._momentum = momentum
         self._params = {}
@@ -76,7 +82,7 @@ class Sgd(Optimizer):
         node_id = id(node)
         pdy = self._params.get(node_id, get_gpu(dy).zeros_like_me())
         ndy = get_gpu(dy).empty_like_me()
-        cu.cu_optimizer_sgd(self._lr, self._momentum, get_gpu(dy), get_gpu(pdy), ndy)
+        cu.cu_optimizer_sgd(self._lr, self._momentum, get_gpu(dy), get_gpu(pdy), ndy, get_gpu(node))
 
         if self._momentum > 0:
             self._params[node_id] = ndy
@@ -137,6 +143,7 @@ class Adadelta(Optimizer):
     '''
 
     def __init__(self, dr=0.95, epsilon=1e-8):
+        self._updates_node = True
         self._dr = dr
         self._epsilon = epsilon
         self._params = {}
@@ -176,7 +183,7 @@ class Adadelta(Optimizer):
             psx = pdy['psx']
         dr = self._dr
         eps = self._epsilon
-        ndy = get_gpu(dy).empty_like_me()
+        ndy = get_gpu(node)
         cu.cu_optimizer_adadelta(dr, eps, psg, psx, get_gpu(dy), ndy)
         ret = ndy
         self._params[node_id] = {

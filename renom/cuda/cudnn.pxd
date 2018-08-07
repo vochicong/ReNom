@@ -18,6 +18,12 @@ cdef extern from "cudnn.h":
         CUDNN_STATUS_NOT_SUPPORTED,
         CUDNN_STATUS_LICENSE_ERROR
 
+    ctypedef enum cudnnMathType_t:
+
+        CUDNN_DEFAULT_MATH,
+        CUDNN_TENSOR_OP_MATH,
+
+
     size_t cudnnGetVersion()
 
     # human-readable error messages
@@ -283,6 +289,11 @@ cdef extern from "cudnn.h":
         const int upscaleA[],
         cudnnConvolutionMode_t mode,
         cudnnDataType_t dataType)  # convolution data type
+
+    cudnnStatus_t cudnnSetConvolutionMathType(
+        cudnnConvolutionDescriptor_t convDesc,
+        cudnnMathType_t mathType
+    ) # Permits the use of tensore cores for cudnn
 
     cudnnStatus_t cudnnGetConvolutionNdDescriptor(
         const cudnnConvolutionDescriptor_t convDesc,
@@ -1364,4 +1375,3 @@ cdef extern from "compat.h":
         int upscaley,  # upscale the input in y-direction
         cudnnConvolutionMode_t mode,
         cudnnDataType_t dataType)
-

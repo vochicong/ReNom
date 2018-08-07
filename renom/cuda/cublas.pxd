@@ -30,6 +30,10 @@ cdef extern from "cublas_v2.h":
         CUBLAS_STATUS_NOT_SUPPORTED = 15,
         CUBLAS_STATUS_LICENSE_ERROR = 16
 
+    ctypedef enum cublasMath_t:
+        CUBLAS_DEFAULT_MATH,
+        CUBLAS_TENSOR_OP_MATH
+
     # ---------------- CUBLAS BLAS1 functions ----------------
     # NRM2
     cublasStatus_t cublasSnrm2(cublasHandle_t, int n, const float * x, int incx)
@@ -503,6 +507,8 @@ cdef extern from "cublas_v2.h":
     cublasStatus_t cublasCreate(cublasHandle_t * handle)
     cublasStatus_t cublasSetStream(cublasHandle_t handle, cudaStream_t stream)
     cublasStatus_t cublasGetStream(cublasHandle_t handle, cudaStream_t *stream)
+    cublasStatus_t cublasSetMathMode(cublasHandle_t handle, cublasMath_t mode)
+    cublasStatus_t cublasGetMathMode(cublasHandle_t handle, cublasMath_t *mode)
     cublasStatus_t cublasDestroy ( cublasHandle_t handle);
 
     # ---------------- CUBLAS BLAS-like extension ----------------

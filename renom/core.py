@@ -90,7 +90,7 @@ class Grads:
                     v[...] += dy
         else:
             if isinstance(dy, GPUValue):
-                dy = Variable(dy)
+                pass#dy = Variable(dy)
             self.variables[selfid] = dy
             if node._auto_update:
                 self._auto_updates.append(node)
@@ -132,8 +132,11 @@ class Grads:
             return
 
         with self.unlock_node(node):
-            dy = self.get(node) if opt is None else opt(self.get(node), node)
-            if node._auto_update:
+            if node._auto_update and not opt is None and is_cuda_active() and opt.updates_node:
+                opt(self.get(node), node)
+            elif node._auto_update:
+                assert False
+                dy = self.get(node) if opt is None else opt(self.get(node), node)
                 if callable(node.auto_update):
                     node.auto_update(dy)
                 else:

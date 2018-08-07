@@ -128,6 +128,12 @@ def pinNumpy(np.ndarray arr):
     #using = (using + 1) % numPointers
     return
 
+
+cdef cudaStream_t updatestream1 = <cudaStream_t><uintptr_t> 0
+cdef cudaStream_t updatestream2 = <cudaStream_t><uintptr_t> 0
+cdef cudaStream_t updatestream3 = <cudaStream_t><uintptr_t> 0
+cdef int last_stream = 1
+
 '''
 Creates a stream
 The name is optional, if not given a default name will be chosen
@@ -138,9 +144,31 @@ To reuse this stream as a C-defined cudaStream_t variable, simply cast the
 returned integer value back to cudaStream_t
 '''
 def cuCreateStream(name = None):
+    global updatestream1, updatestream2, updatestream3, mainstream, last_stream
     cdef cudaStream_t stream
     cdef char* cname
+    cdef cudaEvent_t e
     #runtime_check(cudaStreamCreateWithFlags( & stream, cudaStreamNonBlocking))
+
+    if name == "update":
+      if <uintptr_t> updatestream1 == 0:
+        updatestream1 = < cudaStream_t ><uintptr_t> cuCreateStream()
+        updatestream2 = < cudaStream_t ><uintptr_t> cuCreateStream()
+        updatestream3 = < cudaStream_t ><uintptr_t> cuCreateStream()
+      if last_stream == 1:
+        stream = updatestream2
+        last_stream = 2
+      elif last_stream == 2:
+        stream = updatestream3
+        last_stream = 3
+      elif last_stream == 3:
+        stream = updatestream1
+        last_stream = 1
+      runtime_check(cudaEventCreate(&e))
+      runtime_check(cudaEventRecord(e, mainstream))
+      runtime_check(cudaStreamWaitEvent(stream, e, 0))
+      return <uintptr_t> stream
+
     runtime_check(cudaStreamCreate( & stream ))
     if name is not None:
       py_byte_string = name.encode("UTF-8")
@@ -148,17 +176,21 @@ def cuCreateStream(name = None):
       nvtxNameCudaStreamA(stream, cname)
     return < uintptr_t > stream
 
+def cuWaitStream(uintptr_t stream):
+  global mainstream
+  cdef cudaEvent_t e
+  cdef cudaStream_t strm = <cudaStream_t> stream
+  runtime_check(cudaEventCreate(&e))
+  runtime_check(cudaEventRecord(e, strm))
+  runtime_check(cudaStreamWaitEvent(mainstream, e, 0))
+  #runtime_check(cudaEventDestroy(e))
+
 cdef cudaStream_t mainstream = <cudaStream_t><uintptr_t> 0
-cdef cudaStream_t cudnnstream = <cudaStream_t><uintptr_t> 0
 
 
 def setMainStream(stream):
     global mainstream
     mainstream = <cudaStream_t><uintptr_t> stream
-
-def setCudnnStream(stream):
-  global cudnnstream
-  cudnnstream = <cudaStream_t><uintptr_t> stream
 
 def insertEvent(GPUHeap heap):
   global mainstream
