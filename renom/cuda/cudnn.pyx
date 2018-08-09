@@ -7,6 +7,7 @@ from libc.stdlib cimport malloc, free
 from libc.stdint cimport uintptr_t, intptr_t
 from cuda_utils cimport _VoidPtr
 import cuda_base
+cimport cuda_base as cuda_base_c
 
 cdef cudnnTensorFormat_t tensor_format = cd.cudnnTensorFormat_t.CUDNN_TENSOR_NCHW
 
@@ -436,26 +437,27 @@ def cuBatchNormalizatoinBackward(handle, x, w, dy, saved_mean, saved_var, dx, dw
 def cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y):
 
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
-    cdef cudnnConvolutionFwdAlgo_t algo
-    cdef cudnnConvolutionFwdPreference_t pref = cudnnConvolutionFwdPreference_t.CUDNN_CONVOLUTION_FWD_NO_WORKSPACE
     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
-    cdef cudnnFilterDescriptor_t wDesc = <cudnnFilterDescriptor_t> <uintptr_t> filter_desc
     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
+    cdef cudnnFilterDescriptor_t wDesc = <cudnnFilterDescriptor_t> <uintptr_t> filter_desc
     cdef cudnnConvolutionDescriptor_t convDesc = <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc
+    cdef int requested_algorithms = 1
+    cdef int returned_algorithms = 0
+    cdef cudnnConvolutionFwdAlgoPerf_t result
 
-    check(cudnnGetConvolutionForwardAlgorithm(
+    check(cudnnFindConvolutionForwardAlgorithm(
         handler,
         xDesc.tensor_desc,
         wDesc,
         convDesc,
         yDesc.tensor_desc,
-        pref,
-        0,
-        & algo))
-    return <uintptr_t> algo
+        requested_algorithms,
+        &returned_algorithms,
+        &result))
+    return <uintptr_t> result.algo
 
 
-def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):
+def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):#, algorithm):
 
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
 
@@ -467,8 +469,9 @@ def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):
     # cdef cudnnConvolutionFwdAlgo_t algo = <cudnnConvolutionFwdAlgo_t><uintptr_t>cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y)
     # output of CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM is not deterministic
     #cdef cudnnConvolutionFwdAlgo_t algo = cudnnConvolutionFwdAlgo_t.CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM
-    #cdef cudnnConvolutionFwdAlgo_t algo = cudnnConvolutionFwdAlgo_t.CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_PRECOMP_GEMM
-    cdef cudnnConvolutionFwdAlgo_t algo = cudnnConvolutionFwdAlgo_t.CUDNN_CONVOLUTION_FWD_ALGO_WINOGRAD_NONFUSED
+    #cdef cudnnConvolutionFwdAlgo_t algo = <cudnnConvolutionFwdAlgo_t><uintptr_t> algorithm
+    cdef cudnnConvolutionFwdAlgo_t algo = cudnnConvolutionFwdAlgo_t.CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_PRECOMP_GEMM
+    #cdef cudnnConvolutionFwdAlgo_t algo = cudnnConvolutionFwdAlgo_t.CUDNN_CONVOLUTION_FWD_ALGO_WINOGRAD_NONFUSED
     #cdef int workSpace = 0
 
 
@@ -486,7 +489,7 @@ def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):
     ))
     tmp_heap = 0
     if (workspaceSize > 0):
-        tmp_heap = cuda_base.get_gpu_allocator().malloc(workspaceSize)
+        tmp_heap = cuda_base_c.c_gpu_allocator.malloc(workspaceSize)
 
     check(cudnnConvolutionForward(
         handler,
@@ -503,10 +506,46 @@ def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):
         yDesc.tensor_desc,
         <void *> <uintptr_t> y._ptr))
     if not tmp_heap == 0:
-      cuda_base.get_gpu_allocator().free(tmp_heap)
+      cuda_base_c.c_gpu_allocator.free(tmp_heap)
 
 
-def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
+def cuGetConvolutionBwdAlgo(handle, conv_desc, filter_desc, x, y):
+
+    cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
+    cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
+    cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
+    cdef cudnnFilterDescriptor_t wDesc = <cudnnFilterDescriptor_t> <uintptr_t> filter_desc
+    cdef cudnnConvolutionDescriptor_t convDesc = <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc
+    cdef int requested_algorithms = 1
+    cdef int returned_algorithms = 0
+    cdef cudnnConvolutionBwdDataAlgoPerf_t result_data
+    cdef cudnnConvolutionBwdFilterAlgoPerf_t result_filter
+
+    check(cudnnFindConvolutionBackwardDataAlgorithm(
+        handler,
+        wDesc,
+        yDesc.tensor_desc,
+        convDesc,
+        xDesc.tensor_desc,
+        requested_algorithms,
+        &returned_algorithms,
+        &result_data
+    ))
+
+    check(cudnnFindConvolutionBackwardFilterAlgorithm(
+        handler,
+        xDesc.tensor_desc,
+        yDesc.tensor_desc,
+        convDesc,
+        wDesc,
+        requested_algorithms,
+        &returned_algorithms,
+        &result_filter
+    ))
+
+    return {'data' : <int>result_data.algo, 'filter' : <int>result_data.algo}
+
+def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):#, algorithms):
     if db is None:
         cuda_base.check_heap_device(x, w, dy, dw, dx)
     else:
@@ -523,10 +562,14 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
     if db is not None:
         dbDesc = TensorDesc(db.shape, dtype=db.dtype)
 
-    #cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
-    cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_WINOGRAD_NONFUSED
-    #cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
-    cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_WINOGRAD_NONFUSED
+    #cdef cudnnConvolutionBwdDataAlgo_t algo_data = <cudnnConvolutionBwdDataAlgo_t><int> algorithms['data']
+    #cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = <cudnnConvolutionBwdFilterAlgo_t><int> algorithms['filter']
+
+
+    cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
+    #cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_WINOGRAD_NONFUSED
+    cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
+    #cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_WINOGRAD_NONFUSED
     #cdef int workSpace = 0
 
     cdef size_t workspaceSize
@@ -543,7 +586,7 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
     ))
 
     if (workspaceSize > 0):
-        tmp_heap = cuda_base.get_gpu_allocator().malloc(workspaceSize)
+        tmp_heap = cuda_base_c.get_gpu_allocator().malloc(workspaceSize)
 
     check(cudnnConvolutionBackwardFilter(
         handler,
@@ -561,7 +604,7 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
         <void *> <uintptr_t> dw._ptr))
 
     if not tmp_heap == 0:
-      cuda_base.get_gpu_allocator().free(tmp_heap)
+      cuda_base_c.get_gpu_allocator().free(tmp_heap)
       tmp_heap = 0
       workspaceSize = 0
 
@@ -576,7 +619,7 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
         &workspaceSize,
     ))
     if (workspaceSize > 0):
-        tmp_heap = cuda_base.get_gpu_allocator().malloc(workspaceSize)
+        tmp_heap = cuda_base_c.get_gpu_allocator().malloc(workspaceSize)
 
     check(cudnnConvolutionBackwardData(
         handler,
@@ -592,6 +635,11 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
         bt.ptr,
         xDesc.tensor_desc,
         <void *> <uintptr_t> dx._ptr))
+
+    if not tmp_heap == 0:
+      cuda_base_c.get_gpu_allocator().free(tmp_heap)
+      tmp_heap = 0
+      workspaceSize = 0
 
     if db is not None:
         check(cudnnConvolutionBackwardBias(

@@ -127,6 +127,26 @@ def cublas_gemm(gpu_value1, t1, gpu_value2, t2, gpu_value3):
     cdef float alpha = 1.0, beta = 0.0
     cdef double alpha2 = 1.0, beta2 = 0.0
     if gpu_value1.dtype == np.float32:
+        #check(cublasGemmEx(<cublasHandle_t> handle,
+        #                    c2,
+        #                    c1,
+        #                    n,
+        #                    m,
+        #                    k,
+        #                    &alpha,
+        #                    <float*>ptr2,
+        #                    CUDA_R_32F,
+        #                    shape2[1],
+        #                    <float*>ptr1,
+        #                    CUDA_R_32F,
+        #                    shape1[1],
+        #                    &beta,
+        #                    <float*>ptr3,
+        #                    CUDA_R_32F,
+        #                    n,
+        #                    CUDA_R_32F,
+        #                    CUBLAS_GEMM_DEFAULT_TENSOR_OP
+        #))
         check(cublasSgemm(<cublasHandle_t> handle, c2, c1, n, m, k, &alpha, <float*>ptr2, shape2[1], <float*>ptr1, shape1[1], &beta, <float*>ptr3, n))
     else:
         check(cublasDgemm(<cublasHandle_t> handle, c2, c1, n, m, k, &alpha2, <double*>ptr2, shape2[1], <double*>ptr1, shape1[1], &beta2, <double*>ptr3, n))

@@ -80,7 +80,9 @@ class Sgd(Optimizer):
     def _get_gpu(self, dy, node):
 
         node_id = id(node)
-        pdy = self._params.get(node_id, get_gpu(dy).zeros_like_me())
+        pdy = self._params.get(node_id)
+        if pdy is None:
+            pdy = get_gpu(dy).zeros_like_me()
         ndy = get_gpu(dy).empty_like_me()
         cu.cu_optimizer_sgd(self._lr, self._momentum, get_gpu(dy), get_gpu(pdy), ndy, get_gpu(node))
 
