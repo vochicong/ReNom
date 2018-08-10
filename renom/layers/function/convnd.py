@@ -41,7 +41,7 @@ class convnd(Node):
         y = GPUValue(shape=tuple(output_shape))
 
         with cu.cudnn_handler() as handle:
-            cu.cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y)
+            cu.cuConvolutionForward(handle, conv_desc, filter_desc, get_gpu(x), get_gpu(w), y)
             if b is not None:
                 cu.cu_add_bias(get_gpu(b), y)
 
@@ -75,7 +75,7 @@ class convnd(Node):
 
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionBackward(handle, self.attrs._conv_desc, self.attrs._filter_desc,
-                                     self.attrs._x, self.attrs._w, dy, dw, db, dx, **kwargs)
+                                     get_gpu(self.attrs._x), get_gpu(self.attrs._w), get_gpu(dy), dw, db, dx, **kwargs)
         if isinstance(self.attrs._w, Node):
             self.attrs._w._update_diff(context, dw, **kwargs)
 

@@ -96,7 +96,7 @@ class average_pool2d(pool_base):
         pool_desc = cu.PoolingDescriptor(karnel, padding, stride, pool_mode=1)
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
-            cu.cuPoolingForward(handle, pool_desc, x, y)
+            cu.cuPoolingForward(handle, pool_desc, get_gpu(x), y)
         ret = cls._create_node(y)
         ret.attrs._pool_desc = pool_desc
         ret.attrs._x = x

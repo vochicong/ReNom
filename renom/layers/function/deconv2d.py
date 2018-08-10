@@ -48,7 +48,7 @@ class deconv2d(Node):
         z = GPUValue(shape=tuple([N, ] + list(out_shape)))
 
         with cu.cudnn_handler() as handle:
-            cu.cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, x, z)
+            cu.cuConvolutionBackwardData(handle, conv_desc, filter_desc, get_gpu(w), get_gpu(x), z)
         if b is not None:
             cu.cu_add_bias(get_gpu(b), z)
 
@@ -82,11 +82,11 @@ class deconv2d(Node):
                       for g in (self.attrs._w, self.attrs._b, self.attrs._x))
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionForward(handle, self.attrs._conv_desc,
-                                    self.attrs._filter_desc, dy, self.attrs._w, dx)
+                                    self.attrs._filter_desc, get_gpu(dy), get_gpu(self.attrs._w), dx)
             cu.cuConvolutionBackwardFilter(handle, self.attrs._conv_desc,
-                                           self.attrs._filter_desc, dy, self.attrs._x, dw)
+                                           self.attrs._filter_desc, get_gpu(dy), get_gpu(self.attrs._x), dw)
             if db is not None:
-                cu.cuConvolutionBackwardBias(handle, dy, db)
+                cu.cuConvolutionBackwardBias(handle, get_gpu(dy), db)
 
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)

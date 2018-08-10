@@ -255,6 +255,7 @@ class Node(np.ndarray):
 
     @classmethod
     def _create_node(cls, value):
+        print(cls)
         if isinstance(value, np.ndarray):
             ret = value.astype(precision).view(cls)
         elif isinstance(value, GPUValue):
