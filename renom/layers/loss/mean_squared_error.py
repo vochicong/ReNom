@@ -20,10 +20,7 @@ class mean_squared_error(BinOp):
     @classmethod
     def _oper_gpu(cls, lhs, rhs, reduce_sum=True):
         assert len(rhs.shape) > 1, "Input arrays must have no less than 2 dimension."
-        print(lhs, rhs)
         N = len(lhs)
-        print(Node(cu.cusum((get_gpu(lhs) - get_gpu(rhs)) ** 2) / (N * 2)))
-        #assert False
         if reduce_sum:
             return cu.cusum((get_gpu(lhs) - get_gpu(rhs)) ** 2) / (N * 2)
         else:
