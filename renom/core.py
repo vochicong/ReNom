@@ -135,7 +135,6 @@ class Grads:
             if node._auto_update and not opt is None and is_cuda_active() and opt.updates_node:
                 opt(self.get(node), node)
             elif node._auto_update:
-                assert False
                 dy = self.get(node) if opt is None else opt(self.get(node), node)
                 if callable(node.auto_update):
                     node.auto_update(dy)

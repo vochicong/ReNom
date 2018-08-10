@@ -45,7 +45,7 @@ class conv2d(Node):
     @classmethod
     def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation, descriptor = None):#, algorithms = None):
         N = x.shape[0]
-        if descriptor:
+        if not descriptor is None:
             conv_desc = descriptor['conv_desc']
             filter_desc = descriptor['filter_desc']
         else:
@@ -159,6 +159,7 @@ class Conv2d(Parametrized):
         self._channel = channel
         self._ignore_bias = ignore_bias
         self._initializer = initializer
+        self._descriptors = None
         self._algo = None
         super(Conv2d, self).__init__(input_size)
 
