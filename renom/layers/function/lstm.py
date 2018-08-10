@@ -194,7 +194,7 @@ class lstm(Node):
 
 
 class Lstm(Parametrized):
-    '''Long short time memory[4]_ .
+    '''Long short time memory [lstm]_ .
     Lstm object has 8 weights and 4 biases parameters to learn.
 
     Weights applied to the input of the input gate, forget gate and output gate.
@@ -242,7 +242,7 @@ class Lstm(Parametrized):
              [-0.0205425 , -0.05837972,  0.00467286]], dtype=float32)
         >>> layer.truncate()
 
-    .. [4] Learning Precise Timing with LSTM Recurrent Networks
+    .. [lstm] Learning Precise Timing with LSTM Recurrent Networks
     '''
 
     def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal()):

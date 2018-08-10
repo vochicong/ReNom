@@ -200,6 +200,82 @@ class Adadelta(Optimizer):
     def reset(self):
         self._params = {}
 
+
+class Adamax(Optimizer):
+
+    def __init__(self, alpha=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
+        self._alpha = alpha
+        self._beta1 = beta1
+        self._beta2 = beta2
+        self._epsilon = epsilon
+        self._params = {}
+
+    def _get_cpu(self, dy, node):
+        node_id = id(node)
+        g_t = dy
+        pdy = self._params.get(node_id, None)
+        if pdy is None:
+            moment1 = np.zeros_like(dy)
+            moment2 = np.zeros_like(dy)
+            running_beta1 = self._beta1
+            running_beta2 = self._beta2
+            time = 1
+        else:
+            moment1 = pdy['moment1']
+            moment2 = pdy['moment2']
+            time = pdy['time'] + 1
+            # Performs (beta_1 ** (t - 1)) * (beta_1 ** 1) as replacement for beta_1 ** t
+            running_beta1 = pdy['running_beta1'] * self._beta1
+            running_beta2 = pdy['running_beta2'] * self._beta2
+
+        new_moment1 = self._beta1 * moment1 + (1 - self._beta1) * g_t
+        new_moment2 = self._beta2 * moment2 + (1 - self._beta2) * g_t**2
+        moment1_estimate = new_moment1 / (1 - running_beta1)
+        moment2_estimate = new_moment2 / (1 - running_beta2)
+        ret = self._alpha * moment1_estimate / (np.sqrt(moment2_estimate) + self._epsilon)
+        self._params[node_id] = {
+            'moment1': new_moment1,
+            'moment2': new_moment2,
+            'time': time,
+            'running_beta1': running_beta1,
+            'running_beta2': running_beta2,
+        }
+        return ret
+
+    def _get_gpu(self, dy, node):
+        node_id = id(node)
+        pdy = self._params.get(node_id, None)
+        if pdy is None:
+            moment1 = get_gpu(dy).zeros_like_me()
+            moment2 = get_gpu(dy).zeros_like_me()
+            running_beta1 = self._beta1
+            running_beta2 = self._beta2
+            time = 1
+        else:
+            moment1 = pdy['moment1']
+            moment2 = pdy['moment2']
+            time = pdy['time'] + 1
+            # Performs (beta_1 ** (t - 1)) * (beta_1 ** 1) as replacement for beta_1 ** t
+            running_beta1 = pdy['running_beta1'] * self._beta1
+            running_beta2 = pdy['running_beta2'] * self._beta2
+        ndy = get_gpu(dy).empty_like_me()
+        cu.cu_optimizer_adamax(self._alpha, self._epsilon, (self._beta1, running_beta1),
+                               (self._beta2, running_beta2), moment1, moment2, get_gpu(dy), ndy)
+
+        self._params[node_id] = {
+            'moment1': moment1,
+            'moment2': moment2,
+            'time': time,
+            'running_beta1': running_beta1,
+            'running_beta2': running_beta2,
+        }
+        ret = ndy
+        return ret
+
+    def reset(self):
+        self._params = {}
+
+
 class Rmsprop(Optimizer):
     '''Rmsprop described by following formula. [Rmsprop]_
 

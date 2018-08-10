@@ -315,6 +315,9 @@ namespace renom{
 		void thrust_optimizer_adadelta(int Elems, VALUE_TYPE decay_rate, VALUE_TYPE epsilon, VALUE_TYPE * previous_squared_gradient, VALUE_TYPE * previous_squared_delta, VALUE_TYPE * dy, VALUE_TYPE * new_dy);
 		__global__ void cuda_optimizer_adadelta(int Elems, VALUE_TYPE decay_rate, VALUE_TYPE epsilon, VALUE_TYPE * previous_squared_gradient, VALUE_TYPE * previous_squared_delta, VALUE_TYPE * dy, VALUE_TYPE * new_dy);
 
+		void thrust_optimizer_adamax(int Elems, VALUE_TYPE alpha, VALUE_TYPE epsilon, VALUE_TYPE beta1, VALUE_TYPE running_beta1, VALUE_TYPE beta2, VALUE_TYPE running_beta2, VALUE_TYPE * moment1, VALUE_TYPE * moment2, VALUE_TYPE * dy, VALUE_TYPE * new_dy);
+		__global__ void cuda_optimizer_adamax(int Elems, VALUE_TYPE alpha, VALUE_TYPE epsilon, VALUE_TYPE beta1, VALUE_TYPE running_beta1, VALUE_TYPE beta2, VALUE_TYPE running_beta2, VALUE_TYPE * moment1, VALUE_TYPE * moment2, VALUE_TYPE * dy, VALUE_TYPE * new_dy);
+
     void thrust_get_fg_ary_forward(int N, int M, VALUE_TYPE *ptr1, VALUE_TYPE *ptr2);
     __global__ void cuda_get_fg_ary_forward(int N, int M, VALUE_TYPE *ptr1, VALUE_TYPE *ptr2);
 

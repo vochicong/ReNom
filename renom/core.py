@@ -90,7 +90,7 @@ class Grads:
                     v[...] += dy
         else:
             if isinstance(dy, GPUValue):
-                pass#dy = Variable(dy)
+                dy = Variable(dy)
             self.variables[selfid] = dy
             if node._auto_update:
                 self._auto_updates.append(node)

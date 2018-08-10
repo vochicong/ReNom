@@ -26,8 +26,6 @@ def test_gpu_distributor(data_shape):
     data_distributor = GPUDistributor(x=X, y=Y)
     epochs = 3
 
-
-
     # Test the distributor over a normal loop to see if it always produces correct data.
     for e in range(epochs):
         i = 0

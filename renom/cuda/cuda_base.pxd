@@ -262,6 +262,7 @@ cdef class GPUHeap(object):
 cdef class GpuAllocator(object):
     cpdef object _pool_lists, _all_pools
     cpdef object _memsync_stream
+    cpdef object _rlock
 
     cpdef GPUHeap malloc(self, size_t nbytes)
     cpdef GPUHeap getAvailablePool(self, size_t size)
