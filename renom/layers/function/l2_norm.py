@@ -5,6 +5,7 @@ from renom.cuda import cuda as cu
 from renom.layers.function.parameterized import Parametrized
 import renom as rm
 
+
 class l2_norm(Node):
     def __new__(cls, x, w):
         return cls.calc_value(x, w)
@@ -32,7 +33,8 @@ class l2_norm(Node):
     def _backward_cpu(self, context, dy, **kwargs):
         norm = self.attrs._norm
         if isinstance(self.attrs._x, Node):
-            dx = dy * norm - (np.sum(self.attrs._x * dy, axis=1, keepdims=True) * self.attrs._x) / norm
+            dx = dy * norm - (np.sum(self.attrs._x * dy, axis=1,
+                                     keepdims=True) * self.attrs._x) / norm
             dx = dx / (norm * norm)
             self.attrs._x._update_diff(context, dx * self.attrs._w, **kwargs)
         if isinstance(self.attrs._w, Node):
@@ -42,13 +44,15 @@ class l2_norm(Node):
     def _backward_gpu(self, context, dy, **kwargs):
         norm = self.attrs._norm
         if isinstance(self.attrs._x, Node):
-            dx = dy * norm - (rm.sum(self.attrs._x * dy, axis=1, keepdims=True) * self.attrs._x) / norm
+            dx = dy * norm - (rm.sum(self.attrs._x * dy, axis=1,
+                                     keepdims=True) * self.attrs._x) / norm
             dx = dx / (norm * norm)
             self.attrs._x._update_diff(context, get_gpu(dx * self.attrs._w), **kwargs)
         if isinstance(self.attrs._w, Node):
             dl = dy * (self.attrs._x / norm)
             self.attrs._w._update_diff(context,
                                        get_gpu(rm.sum(dl.as_ndarray(), axis=(0, 2, 3), keepdims=True)), **kwargs)
+
 
 class L2Norm(Parametrized):
     """ L2 Normalziation function [1]
@@ -72,6 +76,7 @@ class L2Norm(Parametrized):
     .. [1] Wei Liu, Andrew Rabinovich, Alexander C. Berg. ParseNet: Looking Wider to See Better
 
     """
+
     def __init__(self, scale=20, input_size=None):
         self.scale = scale
         super(L2Norm, self).__init__(input_size)

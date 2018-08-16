@@ -601,6 +601,7 @@ def test_deconv2d_with_dilation(node, size, use_gpu):
     compare(func, layer.params["w"], node)
     compare(func, layer.params["b"], node)
 
+
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
     Variable(rand((2, 3, 4, 5))),
@@ -649,6 +650,7 @@ def test_roi_pool2d(node, rois, use_gpu):
         return sum(layer(node, rois))
     compare(func, node, node, rois)
 
+
 @pytest.mark.parametrize("node", [
     Variable(rand((1, 3, 3, 3))),
 ])
@@ -662,6 +664,7 @@ def test_l2norm(node, use_gpu):
         return sum(layer(node))
     compare(func, node, node)
     compare(func, layer.params["w"], node)
+
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),

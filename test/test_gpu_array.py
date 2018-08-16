@@ -1253,10 +1253,10 @@ def test_copy_from_gpu():
 
     close(src._gpu.new_array(), dest._gpu.new_array())
 
+
 @test_utility.skipmultigpu
 def test_copy_from_another_gpu():
     set_cuda_active(True)
-
 
     src = Variable(rand((100,)))
     src.to_gpu()
@@ -1269,6 +1269,7 @@ def test_copy_from_another_gpu():
     close(src, dest)
 
     close(src._gpu.new_array(), dest._gpu.new_array())
+
 
 @test_utility.skipgpu
 @pytest.mark.parametrize("a, axis", [
