@@ -429,14 +429,14 @@ def test_weight_normalize(node, use_gpu):
     compare(func, layer.params["bias"], node)
 
 
-#@pytest.mark.parametrize("node", [
+# @pytest.mark.parametrize("node", [
 #    Variable(rand((1, 2, 4, 3))),
 #    Variable(rand((2, 5))),
 #    Variable(rand((20, 2))),
 #    Variable(rand((3, 14))),
 #    Variable(rand((2, 4)))
-#])
-#def test_layer_normalize(node, use_gpu):
+# ])
+# def test_layer_normalize(node, use_gpu):
 #    node = Variable(node * 50)
 #    set_cuda_active(use_gpu)
 #
@@ -921,7 +921,6 @@ def test_mean_squared_error(node, x, use_gpu):
             node = Variable(rand(node.shape))
             x = rand(x.shape)
     assert False
-
 
 
 @pytest.mark.parametrize("node, x", [

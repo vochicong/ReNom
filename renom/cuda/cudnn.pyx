@@ -457,7 +457,7 @@ def cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y):
     return <uintptr_t> result.algo
 
 
-def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):#, algorithm):
+def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y, algorithm):
 
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
 
@@ -466,13 +466,7 @@ def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):#, algorithm):
 
     cdef TensorDesc xDesc = TensorDesc(x.shape, dtype=x.dtype)
     cdef TensorDesc yDesc = TensorDesc(y.shape, dtype=y.dtype)
-    # cdef cudnnConvolutionFwdAlgo_t algo = <cudnnConvolutionFwdAlgo_t><uintptr_t>cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y)
-    # output of CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM is not deterministic
-    cdef cudnnConvolutionFwdAlgo_t algo = cudnnConvolutionFwdAlgo_t.CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_GEMM
-    #cdef cudnnConvolutionFwdAlgo_t algo = <cudnnConvolutionFwdAlgo_t><uintptr_t> algorithm
-    #cdef cudnnConvolutionFwdAlgo_t algo = cudnnConvolutionFwdAlgo_t.CUDNN_CONVOLUTION_FWD_ALGO_IMPLICIT_PRECOMP_GEMM
-    #cdef cudnnConvolutionFwdAlgo_t algo = cudnnConvolutionFwdAlgo_t.CUDNN_CONVOLUTION_FWD_ALGO_WINOGRAD_NONFUSED
-    #cdef int workSpace = 0
+    cdef cudnnConvolutionFwdAlgo_t algo = <cudnnConvolutionFwdAlgo_t><uintptr_t> algorithm
 
 
     cdef size_t workspaceSize
@@ -545,7 +539,7 @@ def cuGetConvolutionBwdAlgo(handle, conv_desc, filter_desc, x, y):
 
     return {'data' : <int>result_data.algo, 'filter' : <int>result_data.algo}
 
-def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):#, algorithms):
+def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx, algorithms):
     if db is None:
         cuda_base.check_heap_device(x, w, dy, dw, dx)
     else:
@@ -562,15 +556,9 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
     if db is not None:
         dbDesc = TensorDesc(db.shape, dtype=db.dtype)
 
-    #cdef cudnnConvolutionBwdDataAlgo_t algo_data = <cudnnConvolutionBwdDataAlgo_t><int> algorithms['data']
-    #cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = <cudnnConvolutionBwdFilterAlgo_t><int> algorithms['filter']
+    cdef cudnnConvolutionBwdDataAlgo_t algo_data = <cudnnConvolutionBwdDataAlgo_t><int> algorithms['data']
+    cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = <cudnnConvolutionBwdFilterAlgo_t><int> algorithms['filter']
 
-
-    cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_0
-    #cdef cudnnConvolutionBwdFilterAlgo_t algo_filter = cudnnConvolutionBwdFilterAlgo_t.CUDNN_CONVOLUTION_BWD_FILTER_ALGO_WINOGRAD_NONFUSED
-    cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_0
-    #cdef cudnnConvolutionBwdDataAlgo_t algo_data = cudnnConvolutionBwdDataAlgo_t.CUDNN_CONVOLUTION_BWD_DATA_ALGO_WINOGRAD_NONFUSED
-    #cdef int workSpace = 0
 
     cdef size_t workspaceSize
     tmp_heap = 0

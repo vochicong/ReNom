@@ -132,7 +132,7 @@ class Grads:
             return
 
         with self.unlock_node(node):
-            if node._auto_update and not opt is None and is_cuda_active() and opt.updates_node:
+            if node._auto_update and opt is not None and is_cuda_active() and opt.updates_node:
                 opt(self.get(node), node)
             elif node._auto_update:
                 dy = self.get(node) if opt is None else opt(self.get(node), node)

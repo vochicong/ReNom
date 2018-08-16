@@ -14,6 +14,7 @@ class Optimizer(with_metaclass(ABCMeta, object)):
 
     _updates_node = False
     # Called by update_node in core.py
+
     def __call__(self, *args, **kwargs):
         if is_cuda_active():
             return self._get_gpu(*args, **kwargs)
@@ -30,7 +31,7 @@ class Optimizer(with_metaclass(ABCMeta, object)):
 
     @property
     def updates_node(self):
-        return self._updates_node == True
+        return self._updates_node is True
 
 
 class Sgd(Optimizer):

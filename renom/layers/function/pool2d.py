@@ -20,7 +20,8 @@ class pool_base(Node):
     def _backward_gpu(self, context, dy, **kwargs):
         dx = get_gpu(self.attrs._x).empty_like_me()
         with cu.cudnn_handler() as handle:
-            cu.cuPoolingBackward(handle, self.attrs._pool_desc, get_gpu(self.attrs._x), get_gpu(self), get_gpu(dy), dx)
+            cu.cuPoolingBackward(handle, self.attrs._pool_desc, get_gpu(
+                self.attrs._x), get_gpu(self), get_gpu(dy), dx)
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
 
