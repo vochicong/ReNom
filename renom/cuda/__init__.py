@@ -8,6 +8,7 @@ try:
     from renom.cuda.thrust import *
     from renom.cuda.curand import *
     from renom.cuda.cudnn import *
+    from renom.cuda.renom_cuda import *
     _has_cuda = True
 except ImportError as e:
     gpu_allocator = None

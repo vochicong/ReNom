@@ -191,3 +191,26 @@ def cublas_geam( a, gpu_value1, t1, b, gpu_value2, t2, gpu_value3, hand = None):
 def cublas_transpose(handle, gpu_value1, gpu_value2):
     cuda_base.check_heap_device(gpu_value1, gpu_value2)
     cublas_geam(1.0, gpu_value1, 1, 0.0, gpu_value1, 1, gpu_value2, handle)
+
+cpdef cublas_sum(gpu_value, ones_array, return_val):
+    cdef cublasHandle_t handle = <cublasHandle_t><uintptr_t> get_handle()
+    cdef cublasOperation_t trans = CUBLAS_OP_N
+    cdef int m = gpu_value.shape[1] if len(gpu_value.shape) > 1 else 1
+    cdef int n = gpu_value.shape[0]
+    cdef double alpha = 1
+    cdef uintptr_t A = gpu_value._ptr
+    cdef int lda = m
+    cdef uintptr_t x = ones_array._ptr
+    cdef int incx = 1
+    cdef double beta = 0
+    cdef uintptr_t y = return_val._ptr
+    cdef int incy = 1
+
+    check(cublasDgemv(handle,
+                      trans,
+                      m, n,
+                      &alpha,
+                      <double*> A, lda,
+                      <double*> x, incx,
+                      &beta,
+                      <double*> y, incy))

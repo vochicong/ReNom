@@ -124,8 +124,8 @@ cdef extern from "cublas_v2.h":
     cublasStatus_t cublasIzamin(cublasHandle_t, int n, const cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
     # ASUM
-    cublasStatus_t cublasSasum(cublasHandle_t, int n, const float * x, int incx)
-    cublasStatus_t cublasDasum(cublasHandle_t, int n, const double * x, int incx)
+    cublasStatus_t cublasSasum(cublasHandle_t, int n, const float * x, int incx, float * result)
+    cublasStatus_t cublasDasum(cublasHandle_t, int n, const double * x, int incx, double * result)
     cublasStatus_t cublasScasum(cublasHandle_t, int n, const cuComplex * x, int incx)
     cublasStatus_t cublasDzasum(cublasHandle_t, int n, const cuDoubleComplex * x, int incx)
     #------------------------------------------------------------------------
@@ -169,9 +169,9 @@ cdef extern from "cublas_v2.h":
     cublasStatus_t cublasSgemv(cublasHandle_t, char trans, int m, int n, float alpha,
                      const float * A, int lda, const float * x, int incx,
                      float beta, float * y, int incy)
-    cublasStatus_t cublasDgemv(cublasHandle_t, char trans, int m, int n, double alpha,
+    cublasStatus_t cublasDgemv(cublasHandle_t, char trans, int m, int n, double * alpha,
                      const double * A, int lda, const double * x, int incx,
-                     double beta, double * y, int incy)
+                     double * beta, double * y, int incy)
     cublasStatus_t cublasCgemv(cublasHandle_t, char trans, int m, int n, cuComplex alpha,
                      const cuComplex * A, int lda, const cuComplex * x, int incx,
                      cuComplex beta, cuComplex * y, int incy)

@@ -252,9 +252,10 @@ def test_div(node, x, raise_error, use_gpu):
     Variable(rand((2, 2))),
     Variable(rand((2,))),
 ])
-def test_tanh_activation(node, use_gpu):
+def test_tanh_activation(node):#, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    set_cuda_active(True)
+    #set_cuda_active(use_gpu)
 
     def func(node):
         return sum(tanh(node))

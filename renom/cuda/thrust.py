@@ -1,3 +1,10 @@
+'''
+Imports ReNoms thrust library.
+
+This is probably not the module you want to import, instead
+import renom.cuda and through that access the thrust methods.
+'''
+
 import numpy as np
 from renom.core import precision
 

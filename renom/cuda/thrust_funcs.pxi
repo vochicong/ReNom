@@ -677,7 +677,7 @@ cdef _cusum(size_t max_grids, size_t num_threads,
     return result
 
 
-def cusum(gpu_value1, axis=None, keepdims=False, max_grids=65536, num_threads=512):
+def cu_sum(gpu_value1, axis=None, keepdims=False, max_grids=65536, num_threads=512):
     return _reduce_array(max_grids, num_threads, gpu_value1, axis, keepdims, _cusum, None)
 
 

@@ -446,6 +446,10 @@ class GPUValue(object):
     def get_gpu(self):
         return self
 
+    def fill(self, val):
+        cufill(val, self)
+        return self
+
     def copy(self):
         if cuGetDevice() == self.device_id:
             ret = GPUValue(shape=self.shape)
