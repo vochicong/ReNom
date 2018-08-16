@@ -6,12 +6,7 @@ from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshap
 from renom.config import precision
 
 try:
-    from renom.cuda.cublas import *
-    from renom.cuda.cuda_base import *
-    if precision == np.float32:
-        from renom.cuda.thrust_float import *
-    else:
-        from renom.cuda.thrust_double import *
+    import renom.cuda as cu
 except ImportError:
     pass
 
@@ -69,7 +64,7 @@ class sum(Node):
 
     @classmethod
     def _oper_gpu(cls, arg, axis=None, keepdims=False):
-        return cusum(get_gpu(arg), axis=axis, keepdims=keepdims)
+        return cu.cusum(get_gpu(arg), axis=axis, keepdims=keepdims)
 
     def __new__(cls, arg, axis=None, keepdims=False):
         value = cls.calc_value(arg, axis, keepdims=keepdims)
@@ -150,7 +145,7 @@ class dot(BinOp):
     def _oper_gpu(cls, lhs, rhs):
         new_shape = (lhs.shape[0], rhs.shape[1])
         ret = GPUValue(shape=new_shape)
-        cublas_gemm(get_gpu(lhs), 0,
+        cu.cublas_gemm(get_gpu(lhs), 0,
                     get_gpu(rhs), 0,
                     get_gpu(ret))
         return ret
@@ -168,7 +163,7 @@ class dot(BinOp):
         if isinstance(self.attrs._lhs, Node):
             new_shape = lhs.shape
             ldx = GPUValue(shape=new_shape)
-            cublas_gemm(get_gpu(dy), 0,
+            cu.cublas_gemm(get_gpu(dy), 0,
                         get_gpu(rhs), 1,
                         get_gpu(ldx))
             self.attrs._lhs._update_diff(context, ldx, **kwargs)
@@ -176,7 +171,7 @@ class dot(BinOp):
         if isinstance(self.attrs._rhs, Node):
             new_shape = rhs.shape
             rdx = GPUValue(shape=new_shape)
-            cublas_gemm(get_gpu(lhs), 1,
+            cu.cublas_gemm(get_gpu(lhs), 1,
                         get_gpu(dy), 0,
                         get_gpu(rdx))
             self.attrs._rhs._update_diff(context, rdx, **kwargs)
@@ -219,7 +214,7 @@ class concat(Node):
             (np.sum([a.shape[axis] for a in args]), ) + args[0].shape[axis + 1:]
 
         ret = GPUValue(shape=newshape)
-        cuconcat([get_gpu(a) for a in args], ret, axis)
+        cu.cuconcat([get_gpu(a) for a in args], ret, axis)
         return ret
 
     def __new__(cls, *args, **kwargs):
@@ -361,7 +356,7 @@ class sqrt(UnaryOp):
     @classmethod
     def _oper_gpu(cls, arg):
         ret = GPUValue(shape=arg.shape)
-        cusqrt(get_gpu(arg), ret)
+        cu.cusqrt(get_gpu(arg), ret)
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
@@ -393,7 +388,7 @@ class square(UnaryOp):
     @classmethod
     def _oper_gpu(cls, arg):
         ret = GPUValue(shape=arg.shape)
-        cupow(get_gpu(arg), 2, ret)
+        cu.cupow(get_gpu(arg), 2, ret)
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
@@ -425,7 +420,7 @@ class log(UnaryOp):
     @classmethod
     def _oper_gpu(cls, arg):
         ret = get_gpu(arg).empty_like_me()
-        culoge(get_gpu(arg), ret)
+        cu.culoge(get_gpu(arg), ret)
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
@@ -455,7 +450,7 @@ class exp(UnaryOp):
     @classmethod
     def _oper_gpu(cls, arg):
         ret = get_gpu(arg).empty_like_me()
-        cuexp(get_gpu(arg), ret)
+        cu.cuexp(get_gpu(arg), ret)
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):

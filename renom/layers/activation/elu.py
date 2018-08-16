@@ -4,7 +4,7 @@ import numpy as np
 from renom.core import UnaryOp, Node, get_gpu, showmark
 from renom.operation import where
 from renom.config import precision
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 @showmark

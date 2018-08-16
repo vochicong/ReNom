@@ -4,7 +4,7 @@ from __future__ import print_function, division
 import numpy as np
 import renom as rm
 from renom.core import BinOp, Node, get_gpu, to_value
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 from renom.operation import where
 
 

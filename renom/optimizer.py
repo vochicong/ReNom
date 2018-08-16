@@ -4,10 +4,9 @@ from __future__ import division, print_function
 import numpy as np
 from renom.core import get_gpu, Node, Variable
 from renom.operation import sqrt, square
-from renom.cuda.cuda import is_cuda_active
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 class Optimizer(with_metaclass(ABCMeta, object)):
@@ -16,7 +15,7 @@ class Optimizer(with_metaclass(ABCMeta, object)):
     # Called by update_node in core.py
 
     def __call__(self, *args, **kwargs):
-        if is_cuda_active():
+        if cu.is_cuda_active():
             return self._get_gpu(*args, **kwargs)
         else:
             return self._get_cpu(*args, **kwargs)
@@ -372,7 +371,7 @@ class Adam(Optimizer):
             nth = pdy["nth"]
 
             if nth % self.CHECK_ZERO_VALUE == 0:
-                if not is_cuda_active():
+                if not cu.is_cuda_active():
                     min_flug = np.where(np.abs(u) < self._min, True, False)
                     min_flug = np.where(np.abs(r) < self._min, True, False)
                     u.setflags(write=True)

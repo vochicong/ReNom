@@ -5,7 +5,7 @@ import numpy as np
 from renom.core import Node, GPUValue, get_gpu
 from renom.layers.function.utils import im2col, col2im, transpose_out_size, tuplize
 from renom.layers.function.pool2d import max_pool2d, average_pool2d
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 from .parameterized import Parametrized
 from renom.config import precision
 

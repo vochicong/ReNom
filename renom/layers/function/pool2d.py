@@ -5,7 +5,7 @@ from __future__ import division
 import numpy as np
 from renom.core import Node, GPUValue, get_gpu
 from renom.layers.function.utils import im2col, col2im, out_size, tuplize
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 class pool_base(Node):

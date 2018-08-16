@@ -7,7 +7,7 @@ from renom.layers.function.utils import col2im, transpose_out_size, im2col, tupl
 from renom.core import Node, Variable, to_value, GPUValue, get_gpu, precision
 from .parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 class deconv2d(Node):

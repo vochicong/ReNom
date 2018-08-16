@@ -3,7 +3,7 @@
 from __future__ import print_function, division
 import numpy as np
 from renom.core import Node, get_gpu, to_value
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 from renom.operation import log
 
 

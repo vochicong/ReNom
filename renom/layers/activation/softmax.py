@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 from renom.core import UnaryOp, Node, get_gpu, showmark
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 @showmark

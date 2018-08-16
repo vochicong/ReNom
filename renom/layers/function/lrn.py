@@ -4,7 +4,7 @@
 from __future__ import division
 import numpy as np
 from renom.core import Node, get_gpu, to_value
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 class lrn(Node):

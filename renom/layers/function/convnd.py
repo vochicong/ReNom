@@ -6,7 +6,7 @@ from renom.layers.function.utils import imncol, colnim, pad_dx, pad_image, colnw
 from renom.core import Node, Variable, to_value, GPUValue, get_gpu, precision
 from .parameterized import Parametrized
 from renom.utility.initializer import Gaussian
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 from renom.cuda import is_cuda_active
 
 

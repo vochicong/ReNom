@@ -6,7 +6,7 @@ import numpy as np
 from renom.core import Node, Variable, to_value, get_gpu, precision, GPUValue
 from renom.layers.function.parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 BATCH_NORMALIZE_FEATUREMAP = 1
 BATCH_NORMALIZE_ELEMENTWISE = 2

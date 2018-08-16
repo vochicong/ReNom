@@ -9,7 +9,7 @@ from renom.core import Node, Variable, to_value, get_gpu, precision, GPUValue
 import renom.operation as op
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 def gate(x):
