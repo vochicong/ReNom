@@ -46,11 +46,21 @@ class MeanSquaredError(object):
     .. math::
         E(x) = \\frac{1}{2N}\sum_{n}^{N}\sum_{k}^{K}(x_{nk}-y_{nk})^2
 
+
+    In the case of the argument `reduce_sum` is False, this class will not perform summation.
+
+    .. math::
+        E({\\bf x}) = \\frac{1}{2N}({\\bf x}-{\\bf y})^2
+
     :math:`N` is batch size.
 
     Args:
         x (ndarray,Node): Input array.
         y (ndarray,Node): Target array.
+        reduce_sum (bool): If True is given, the result array will be summed up and returns scalar value.
+
+    Returns:
+        (Node, ndarray): Mean squared error.
 
     Raises:
         AssertionError: An assertion error will be raised if the given tensor dimension is less than 2.
@@ -65,7 +75,10 @@ class MeanSquaredError(object):
         ((1, 2), (1, 2))
         >>> loss = rm.mean_squared_error(x, y)
         >>> print(loss)
-        mean_squared_error(4.0)
+        [4.]
+        >>> loss = rm.mean_squared_error(x, y, reduce_sum=False)
+        >>> print(loss)
+        [[ 2.  2.]]
 
     """
 

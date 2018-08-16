@@ -2,22 +2,22 @@ renom.layers.activation
 =======================
 
 .. automodule:: renom.layers.activation.elu
-    :members:
+    :members: Elu
 
 .. automodule:: renom.layers.activation.leaky_relu
-    :members:
+    :members: LeakyRelu
 
 .. automodule:: renom.layers.activation.relu
-    :members:
+    :members: Relu
 
 .. automodule:: renom.layers.activation.selu
-    :members:
+    :members: Selu
 
 .. automodule:: renom.layers.activation.sigmoid
-    :members:
+    :members: Sigmoid
 
 .. automodule:: renom.layers.activation.softmax
-    :members:
+    :members: Softmax
 
 .. automodule:: renom.layers.activation.tanh
-    :members:
+    :members: Tanh

@@ -1197,7 +1197,6 @@ namespace renom{
         thrust::transform(thrust::cuda::par.on(GET_STREAM_NAME()), dev_a, dev_a+size, dev_b, dev_b, sign_function());
     };
 
-
 	// Cross entropy
 	struct cross_entropy_function
 	{
@@ -1673,6 +1672,119 @@ namespace renom{
         }
     }
 
+
+
+
+    __global__ void cuda_forward_gru(int H, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
+                                      VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      int ypos = idx / M;
+      int xpos = idx - ypos * M;
+      if (idx < M * H) {
+        ABC[xpos + ypos*Y] = input[xpos + ypos*Y] + hminus[xpos + ypos*M] * u[xpos];
+        ABC[xpos+M + ypos*Y] = input[xpos+M + ypos*Y] + hminus[xpos + ypos*M] * u[xpos+M];
+        ABC[xpos+M*2 + ypos*Y] = input[xpos+M*2 + ypos*Y] + hminus[xpos + ypos*M] * u[xpos+M*2] * (1.0/(1.0+exp(-ABC[xpos+M + ypos*Y])));
+        h[xpos + ypos*M] = (1.0/(1.0+exp(-ABC[xpos + ypos*Y]))) + tanh(ABC[xpos+M*2 + ypos*Y]);
+      }
+    }
+
+
+
+    /*
+
+    __global__ void cuda_forward_gru(int H, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus,\
+                                      VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx < M) {
+        for (int i = 0; i < H; i++) {
+          ABC[idx + i*Y] = input[idx + i*Y] + hminus[idx + i*M] * u[idx];
+          ABC[idx+M + i*Y] = input[idx+M + i*Y] + hminus[idx + i*M] * u[idx+M]; //input[idx+M*2 + i*Y] +
+          ABC[idx+M*2 + i*Y] = input[idx+M*2 + i*Y] + hminus[idx + i*M] * u[idx+M*2] * (1.0/(1.0+exp(-ABC[idx+M + i*Y])));
+          h[idx + i*M] = (1.0/(1.0+exp(-ABC[idx + i*Y]))) + tanh(ABC[idx+M*2 + i*Y]);
+        }
+      }
+    }
+
+    */
+
+    void thrust_forward_gru(int X, int Y, int M, VALUE_TYPE *input, VALUE_TYPE *hminus, VALUE_TYPE *u, VALUE_TYPE *ABC, VALUE_TYPE *h)
+    {
+      int elements = X*Y;
+      cuda_forward_gru <<<elements/256+1,256>>> (X,Y,M,input,hminus,u,ABC,h);
+    }
+
+    __global__ void cuda_backward_gru(int H, int W, int M, int V, VALUE_TYPE *ABC, VALUE_TYPE *y, \
+                                      VALUE_TYPE *yc, VALUE_TYPE *u, VALUE_TYPE *hminus, \
+                                      VALUE_TYPE *db, VALUE_TYPE *du, VALUE_TYPE *pz, VALUE_TYPE *dx)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+
+
+
+      if (idx < M) {
+        db[idx] = 0;
+        db[idx+M] = 0;
+        db[idx+M*2] = 0;
+        du[idx] = 0;
+        du[idx+M] = 0;
+        du[idx+M*2] = 0;
+
+        for (int i = 0; i < H; i++) {
+          yc[idx + i * W] = y[idx + i * M] * (1.0 / (1.0+exp(-ABC[idx + i * W]))) * (1 - (1.0 / (1.0+exp(-ABC[idx + i * W]))));
+          yc[idx+M*2 + i * W] = y[idx + i * M] * (1.0 - tanh(-ABC[idx+M*2 + i * W]) * tanh(-ABC[idx+M*2 + i * W]));
+          yc[idx+M + i * W] = (1.0 / (1.0+exp(-ABC[idx+M + i * W]))) * (1 - (1.0 / (1.0+exp(-ABC[idx+M + i * W])))) \
+                              * hminus[idx + i * M] * u[idx+M*2] * yc[idx+M*2 + i * W];
+
+
+          db[idx] += yc[idx + i * W];
+          db[idx+M] += yc[idx + i * W +M];
+          db[idx+M*2] += yc[idx + i * W+M*2];
+
+
+          du[idx] += yc[idx + i * W] * hminus[idx + i * M];
+          du[idx+M] += yc[idx + i * W +M] * hminus[idx + i * M];
+          du[idx+M*2] += yc[idx + i * W+M*2] * hminus[idx + i * M] * (1.0 / (1.0+exp(-ABC[idx+M + i * W])));
+
+          pz[idx+M*i] =   yc[idx + i * W] * u[idx+M*0] + \
+                      yc[idx + i * W +M] * u[idx+M*1] + \
+                      yc[idx + i * W+M*2] * u[idx+M*2] * (1.0 / (1.0+exp(-ABC[idx+M + i * W])));
+
+        }
+      }
+    }
+
+    // Not implemented yet
+
+    __global__ void cuda_db_gru(int H, int W, int M, VALUE_TYPE *yc, VALUE_TYPE *db) {
+
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx < M) {
+        db[idx] = 0;
+        db[idx+M] = 0;
+        db[idx+M*2] = 0;
+        for (int i = H / 2; i > 0; i >>= 1) {
+          for (int j = 0; j < i; j++) {
+            yc[idx + j*W] += yc[idx + j*W + i*W];
+            yc[idx + j*W+M] += yc[idx + j*W + i*W +M];
+            yc[idx + j*W+M*2] += yc[idx + j*W + i*W+M*2];
+          }
+        }
+        db[idx] += yc[idx ];
+        db[idx+M] += yc[idx  +M];
+        db[idx+M*2] += yc[idx +M*2];
+      }
+    }
+
+    void thrust_backward_gru(int H, int W, int M, int V, VALUE_TYPE *ABC, VALUE_TYPE *y, VALUE_TYPE *yc, VALUE_TYPE *u, \
+      VALUE_TYPE *hminus, VALUE_TYPE *db, VALUE_TYPE *du, VALUE_TYPE *pz, VALUE_TYPE *dx)
+    {
+      int elements = H * W;
+      cuda_backward_gru <<<elements/256+1,256>>> (H, W, M, V, ABC, y, yc, u, hminus, db, du, pz, dx);
+
+    }
+
     // Binalize
     __global__ void cuda_binalize(VALUE_TYPE *a, VALUE_TYPE prob, int size, VALUE_TYPE *b){
 		int idx = blockIdx.x * blockDim.x + threadIdx.x;
@@ -1742,7 +1854,7 @@ namespace renom{
     void thrust_optimizer_sgd(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE momentum, VALUE_TYPE *pdy, VALUE_TYPE *ndy)
     {
       if(Elems) {
-        cuda_optimizer_sgd <<<ceil(Elems/256.0), 256>>> (Elems, learning_rate, dy, momentum, pdy, ndy);
+        cuda_optimizer_sgd <<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>> (Elems, learning_rate, dy, momentum, pdy, ndy);
       }
     }
 
@@ -1758,7 +1870,7 @@ namespace renom{
     void thrust_optimizer_adagrad(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
     {
       if(Elems) {
-        cuda_optimizer_adagrad<<<ceil(Elems/256.0), 256>>>(Elems, learning_rate, dy, eps, pdy, ndy, r);
+        cuda_optimizer_adagrad<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, learning_rate, dy, eps, pdy, ndy, r);
       }
     }
 
@@ -1774,7 +1886,7 @@ namespace renom{
     void thrust_optimizer_rmsprop(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
     {
       if(Elems) {
-        cuda_optimizer_rmsprop<<<ceil(Elems/256.0), 256>>>(Elems, learning_rate, dy, eps, gamma, pdy, ndy, r);
+        cuda_optimizer_rmsprop<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, learning_rate, dy, eps, gamma, pdy, ndy, r);
       }
     }
 
@@ -1791,7 +1903,44 @@ namespace renom{
     void thrust_optimizer_adam(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE gamma_orig, VALUE_TYPE beta, VALUE_TYPE beta_orig, VALUE_TYPE min, bool flug, VALUE_TYPE *u, VALUE_TYPE *r, VALUE_TYPE *ndy)
     {
       if(Elems) {
-        cuda_optimizer_adam<<<ceil(Elems/256.0), 256>>>(Elems, learning_rate, dy, eps, gamma, gamma_orig, beta, beta_orig, min, flug, u, r, ndy);
+        cuda_optimizer_adam<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, learning_rate, dy, eps, gamma, gamma_orig, beta, beta_orig, min, flug, u, r, ndy);
+      }
+    }
+
+    __global__ void cuda_optimizer_adadelta(int Elems, VALUE_TYPE decay_rate, VALUE_TYPE epsilon, VALUE_TYPE * previous_squared_gradient, VALUE_TYPE * previous_squared_delta, VALUE_TYPE * dy, VALUE_TYPE * new_dy)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx < Elems) {
+        VALUE_TYPE current_squared_gradient = decay_rate * previous_squared_gradient[idx] + (1 - decay_rate) * dy[idx] * dy[idx];
+        new_dy[idx] = sqrtf(previous_squared_delta[idx] + epsilon) / sqrtf(current_squared_gradient + epsilon) * dy[idx];
+        previous_squared_delta[idx] = decay_rate * previous_squared_delta[idx] + (1 - decay_rate) * new_dy[idx] * new_dy[idx];
+        previous_squared_gradient[idx] = current_squared_gradient;
+      }
+    }
+
+    void thrust_optimizer_adadelta(int Elems, VALUE_TYPE decay_rate, VALUE_TYPE epsilon, VALUE_TYPE * previous_squared_gradient, VALUE_TYPE * previous_squared_delta, VALUE_TYPE * dy, VALUE_TYPE * new_dy)
+    {
+      if(Elems) {
+        cuda_optimizer_adadelta<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, decay_rate, epsilon, previous_squared_gradient, previous_squared_delta, dy, new_dy);
+      }
+    }
+
+    __global__ void cuda_optimizer_adamax(int Elems, VALUE_TYPE alpha, VALUE_TYPE epsilon, VALUE_TYPE beta1, VALUE_TYPE running_beta1, VALUE_TYPE beta2, VALUE_TYPE running_beta2, VALUE_TYPE * moment1, VALUE_TYPE * moment2, VALUE_TYPE * dy, VALUE_TYPE * new_dy)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx < Elems) {
+        moment1[idx] = beta1 * moment1[idx] + (1 - beta1) * dy[idx];
+        moment2[idx] = beta2 * moment2[idx] + (1 - beta2) * dy[idx] * dy[idx];
+        VALUE_TYPE est1 = moment1[idx] / (1 - running_beta1);
+        VALUE_TYPE est2 = moment2[idx] / (1 - running_beta2);
+        new_dy[idx] = alpha * est1 / (sqrtf(est2) + epsilon);
+      }
+    }
+
+    void thrust_optimizer_adamax(int Elems, VALUE_TYPE alpha, VALUE_TYPE epsilon, VALUE_TYPE beta1, VALUE_TYPE running_beta1, VALUE_TYPE beta2, VALUE_TYPE running_beta2, VALUE_TYPE * moment1, VALUE_TYPE * moment2, VALUE_TYPE * dy, VALUE_TYPE * new_dy)
+    {
+      if(Elems) {
+        cuda_optimizer_adamax<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, alpha, epsilon, beta1, running_beta1, beta2, running_beta2, moment1, moment2, dy, new_dy);
       }
     }
 

@@ -179,19 +179,12 @@ class GPUDistributor(Distributor):
         assert len(x) == len(y), "Input batches must have same number as output batches"
         self._data_size = len(x)
 
-    # def __getitem__(self, index):
-    #    return super(GPUDistributor, self).__getitem__(self, index)
-
-    # def kfold(self, num=4, overlap=False, shuffle=True):
-    #    return super(GPUDistributor, self).kfold(self, num, overlap, shuffle)
-
     @staticmethod
     def preload_single(batch):
         with cu.asyncBehaviour():
             batch = batch.astype(np.dtype(precision))
             cu.pinNumpy(batch)
-            ret = get_gpu(batch)
-            cu.cuDeviceSynchronize()
+            ret = Node(get_gpu(batch))
         return ret
 
     @staticmethod
@@ -214,7 +207,7 @@ class GPUDistributor(Distributor):
                     b = next(generator)
                     example_batch = b[0] if b[0].size * \
                         b[0].itemsize >= b[1].size * b[1].itemsize else b[1]
-                    cu.initPinnedMemory(example_batch)
+                    cu.initPinnedMemory(example_batch.astype(np.dtype(precision)))
                     x1, y1 = GPUDistributor.preload_pair(b[0], b[1])
                     first = False
                 b = next(generator)

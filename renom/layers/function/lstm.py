@@ -87,6 +87,7 @@ class lstm(Node):
         cu.culstm_forward(get_gpu(u), get_gpu(state), get_gpu(s_p), get_gpu(z))
 
         ret = cls._create_node(z)
+
         ret.attrs._x = x
         ret.attrs._w = w
         ret.attrs._wr = wr
@@ -152,6 +153,7 @@ class lstm(Node):
             self.attrs._pz._update_diff(context, np.dot(dr, wr.T))
 
     def _backward_gpu(self, context, dy, **kwargs):
+
         w = self.attrs._w
         wr = self.attrs._wr
         b = self.attrs._b
@@ -167,6 +169,7 @@ class lstm(Node):
         e = get_gpu(dy)
 
         dr, dou_n = (get_gpu(a).empty_like_me() for a in (drt, dou))
+
         cu.culstm_backward(*map(get_gpu, (u, dr, s, ps, e, pfg, dou, dou_n)))
 
         dx = dot(dr, w.T)
@@ -191,7 +194,7 @@ class lstm(Node):
 
 
 class Lstm(Parametrized):
-    '''Long short time memory[4]_ .
+    '''Long short time memory [lstm]_ .
     Lstm object has 8 weights and 4 biases parameters to learn.
 
     Weights applied to the input of the input gate, forget gate and output gate.
@@ -219,6 +222,7 @@ class Lstm(Parametrized):
     Args:
         output_size (int): Output unit size.
         input_size (int): Input unit size.
+        ignore_bias (bool): If True is given, bias will not be added.
         initializer (Initializer): Initializer object for weight initialization.
 
     Example:
@@ -238,7 +242,7 @@ class Lstm(Parametrized):
              [-0.0205425 , -0.05837972,  0.00467286]], dtype=float32)
         >>> layer.truncate()
 
-    .. [4] Learning Precise Timing with LSTM Recurrent Networks
+    .. [lstm] Learning Precise Timing with LSTM Recurrent Networks
     '''
 
     def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal()):

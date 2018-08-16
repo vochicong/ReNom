@@ -67,6 +67,10 @@ class SigmoidCrossEntropy:
     Args:
         x (ndarray,Node): Input array.
         y (ndarray,Node): Target array.
+        reduce_sum (bool): If True is given, the result array will be summed up and returns scalar value.
+
+    Returns:
+        (Node, ndarray): Cross entropy error between sigmoid(x) and target y.
 
     Raises:
         AssertionError: An assertion error will be raised if the given tensor dimension is less than 2.

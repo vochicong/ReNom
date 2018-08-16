@@ -11,6 +11,7 @@ from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device
 from renom.core import to_value, Variable, get_gpu
 from renom.operation import dot, sum, sqrt, square
 from renom.config import precision
+from renom.layers.function.gru import Gru
 import renom as rm
 import test_utility
 from renom.layers.function.batch_normalize import BATCH_NORMALIZE_FEATUREMAP
@@ -754,6 +755,38 @@ def test_gpu_lstm(a):
 
 @test_utility.skipgpu
 @pytest.mark.parametrize("a", [
+    rand((1, 2)),
+    rand((2, 2)),
+])
+def test_gpu_gru(a):
+    unit = Gru(output_size=2)
+
+    def func(x):
+        return sum(unit(x))
+
+    set_cuda_active(True)
+
+    g1 = Variable(a)
+
+    g3 = func(g1)
+    g3.to_cpu()
+
+    g = g3.grad()
+    g_g1 = g.get(g1)
+    g_g1.to_cpu()
+
+    set_cuda_active(False)
+    unit.truncate()
+    c3 = func(g1)
+    c = c3.grad()
+    c_g1 = c.get(g1)
+
+    close(g3, c3)
+    close(c_g1, g_g1)
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a", [
     rand((3, 3, 3, 3)),
     rand((1, 3, 9, 9)),
     rand((2, 3, 9, 9)),
@@ -1036,6 +1069,40 @@ def test_batch_normalize(a, mode):
 
 @test_utility.skipgpu
 @pytest.mark.parametrize("a", [
+    rand((2, 3)),
+])
+def test_gpu_layer_normalize(a):
+    set_cuda_active(True)
+
+    g1 = Variable(a)
+
+    layer = rm.LayerNormalize()
+
+    g2 = layer(g1)
+    g3 = rm.sum(g2)
+    g = g3.grad(detach_graph=False)
+    g_g1 = g.get(g1)
+    g_g2 = g.get(layer.params["gain"])
+    g_g3 = g.get(layer.params["bias"])
+
+    set_cuda_active(False)
+
+    c2 = layer(g1)
+    c3 = rm.sum(c2)
+    c = c3.grad(detach_graph=False)
+    c_c1 = c.get(g1)
+    c_c2 = c.get(layer.params["gain"])
+    c_c3 = c.get(layer.params["bias"])
+
+    close(g2, c2)
+    close(g3, c3)
+    close(g_g1, c_c1)
+    close(g_g2, c_c2)
+    close(g_g3, c_c3)
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a", [
     rand((1, 3)),
     rand((1, 1)),
     rand((3, 1)),
@@ -1186,10 +1253,10 @@ def test_copy_from_gpu():
 
     close(src._gpu.new_array(), dest._gpu.new_array())
 
-
 @test_utility.skipmultigpu
 def test_copy_from_another_gpu():
     set_cuda_active(True)
+
 
     src = Variable(rand((100,)))
     src.to_gpu()
@@ -1202,7 +1269,6 @@ def test_copy_from_another_gpu():
     close(src, dest)
 
     close(src._gpu.new_array(), dest._gpu.new_array())
-
 
 @test_utility.skipgpu
 @pytest.mark.parametrize("a, axis", [

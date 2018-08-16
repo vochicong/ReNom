@@ -38,7 +38,8 @@ class smoothed_l1(Node):
         abs_d = abs(d.as_ndarray())
         flag = abs_d < delta
         if reduce_sum:
-            loss = cu.cusum(get_gpu(flag * 0.5 * (d * d) + (1 - flag) * (abs_d - 0.5 * delta) * delta))
+            loss = cu.cusum(get_gpu(flag * 0.5 * (d * d) +
+                                    (1 - flag) * (abs_d - 0.5 * delta) * delta))
         else:
             loss = get_gpu(flag * 0.5 * (d * d) + (1 - flag) * (abs_d - 0.5 * delta) * delta)
         ret = cls._create_node(loss / N)

@@ -44,7 +44,7 @@ class leaky_relu(UnaryOp):
 
 class LeakyRelu:
 
-    '''The Leaky relu [2]_ activation function is described by the following formula:
+    '''The Leaky relu [leaky_relu]_ activation function is described by the following formula:
 
         :math:`f(x)=max(x, 0)+min(slope*x, 0)`
 
@@ -65,7 +65,7 @@ class LeakyRelu:
         >>> activation(x)
         leaky_relu([[ 1.  , -0.01]])
 
-    .. [2] Andrew L. Maas, Awni Y. Hannun, Andrew Y. Ng (2014).
+    .. [leaky_relu] Andrew L. Maas, Awni Y. Hannun, Andrew Y. Ng (2014).
         Rectifier Nonlinearities Improve Neural Network Acoustic Models
     '''
 

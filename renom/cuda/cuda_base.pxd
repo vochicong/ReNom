@@ -187,6 +187,7 @@ cdef extern from "cuda_runtime.h":
     cudaError_t cudaMemcpy(void * dst, const void * src, int size, cudaMemcpyKind kind)
     cudaError_t cudaMemcpyAsync(void * dst, const void * src, int count, cudaMemcpyKind kind, cudaStream_t stream)
     cudaError_t cudaMemcpyPeer(void * dst, int dstDevice, const void * src, int srcDevice, size_t count)
+    cudaError_t cudaMemGetInfo(size_t * free, size_t * total)
 
     cudaError_t cudaHostAlloc(void ** ptr, size_t size, int flags)
     cudaError_t cudaMallocHost(void ** ptr, size_t size)
@@ -196,6 +197,7 @@ cdef extern from "cuda_runtime.h":
     cudaError_t cudaEventCreate(cudaEvent_t * event)
     cudaError_t cudaEventRecord(cudaEvent_t event, cudaStream_t stream)
     cudaError_t cudaEventSynchronize(cudaEvent_t)
+    cudaError_t cudaEventQuery(cudaEvent_t)
     cudaError_t cudaMalloc(void ** ptr, size_t size)
     #cudaError_t cudaMallocHost(void ** ptr, size_t size, unsigned int flags)
     cudaError_t cudaSetDevice(int size)
@@ -247,6 +249,8 @@ cdef class GPUHeap(object):
     cdef public size_t ptr
     cdef public size_t nbytes
     cdef public int device_id
+    cdef public int refcount
+    cdef cudaEvent_t event
 
     cpdef memcpyH2D(self, cpu_ptr, size_t nbytes)
     cpdef memcpyD2H(self, cpu_ptr, size_t nbytes)
@@ -257,6 +261,7 @@ cdef class GPUHeap(object):
 cdef class GpuAllocator(object):
     cpdef object _pool_lists, _all_pools
     cpdef object _memsync_stream
+    cpdef object _rlock
 
     cpdef GPUHeap malloc(self, size_t nbytes)
     cpdef GPUHeap getAvailablePool(self, size_t size)
