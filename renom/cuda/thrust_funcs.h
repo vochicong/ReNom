@@ -88,6 +88,7 @@ namespace renom{
                                         int outw, VALUE_TYPE *dx);
 
     // Fill
+		__global__ void cuda_fill(VALUE_TYPE value, VALUE_TYPE *array, int size);
     void thrust_fill(VALUE_TYPE value, VALUE_TYPE *a, int size);
 
     // Log e function

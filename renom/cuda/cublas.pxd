@@ -166,9 +166,9 @@ cdef extern from "cublas_v2.h":
 
     # --------------- CUBLAS BLAS2 functions  ----------------
     # GEMV
-    cublasStatus_t cublasSgemv(cublasHandle_t, char trans, int m, int n, float alpha,
+    cublasStatus_t cublasSgemv(cublasHandle_t, char trans, int m, int n, float * alpha,
                      const float * A, int lda, const float * x, int incx,
-                     float beta, float * y, int incy)
+                     float * beta, float * y, int incy)
     cublasStatus_t cublasDgemv(cublasHandle_t, char trans, int m, int n, double * alpha,
                      const double * A, int lda, const double * x, int incx,
                      double * beta, double * y, int incy)

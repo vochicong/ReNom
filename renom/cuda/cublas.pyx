@@ -192,25 +192,37 @@ def cublas_transpose(handle, gpu_value1, gpu_value2):
     cuda_base.check_heap_device(gpu_value1, gpu_value2)
     cublas_geam(1.0, gpu_value1, 1, 0.0, gpu_value1, 1, gpu_value2, handle)
 
-cpdef cublas_sum(gpu_value, ones_array, return_val):
+cpdef cublas_sum(gpu_value, ones_array, return_val, transpose = False):
     cdef cublasHandle_t handle = <cublasHandle_t><uintptr_t> get_handle()
-    cdef cublasOperation_t trans = CUBLAS_OP_N
-    cdef int m = gpu_value.shape[1] if len(gpu_value.shape) > 1 else 1
+    cdef cublasOperation_t trans = CUBLAS_OP_T if transpose else CUBLAS_OP_N
+    cdef int m = gpu_value.shape[1]
     cdef int n = gpu_value.shape[0]
-    cdef double alpha = 1
+    cdef float alphaS = 1
+    cdef double alphaD = 1
     cdef uintptr_t A = gpu_value._ptr
     cdef int lda = m
     cdef uintptr_t x = ones_array._ptr
     cdef int incx = 1
-    cdef double beta = 0
+    cdef float betaS = 0
+    cdef double betaD = 0
     cdef uintptr_t y = return_val._ptr
     cdef int incy = 1
 
-    check(cublasDgemv(handle,
-                      trans,
-                      m, n,
-                      &alpha,
-                      <double*> A, lda,
-                      <double*> x, incx,
-                      &beta,
-                      <double*> y, incy))
+    if gpu_value.dtype == np.float32:
+      check(cublasSgemv(handle,
+                        trans,
+                        m, n,
+                        &alphaS,
+                        <float*> A, lda,
+                        <float*> x, incx,
+                        &betaS,
+                        <float*> y, incy))
+    elif gpu_value.dtype == np.float64:
+      check(cublasDgemv(handle,
+                        trans,
+                        m, n,
+                        &alphaD,
+                        <double*> A, lda,
+                        <double*> x, incx,
+                        &betaD,
+                        <double*> y, incy))

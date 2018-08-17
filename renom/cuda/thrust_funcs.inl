@@ -1130,11 +1130,20 @@ namespace renom{
 		thrust::transform(thrust::cuda::par.on(GET_STREAM_NAME()), dev_a, dev_a+size, dev_b, dev_b, tanh_function());
 	}
 
+  __global__ void cuda_fill(VALUE_TYPE value, VALUE_TYPE *array, int size)
+  {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < size) {
+      array[idx] = value;
+    }
+  }
+
 	//fill
 	void thrust_fill(VALUE_TYPE value, VALUE_TYPE *a, int size)
 	{
-		thrust::device_ptr<VALUE_TYPE> dev_ptr(a);
-		thrust::fill(thrust::cuda::par.on(GET_STREAM_NAME()), dev_ptr, dev_ptr + size, value);
+    cuda_fill<<<ceil(size/256.0), 256, 0, GET_STREAM_NAME()>>>(value, a, size);
+		//thrust::device_ptr<VALUE_TYPE> dev_ptr(a);
+		//thrust::fill(thrust::cuda::par.on(GET_STREAM_NAME()), dev_ptr, dev_ptr + size, value);
 	}
 
 	// loge function
