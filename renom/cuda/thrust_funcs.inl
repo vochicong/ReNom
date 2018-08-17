@@ -2,6 +2,9 @@
 #include <time.h>
 #include <algorithm>
 #include "thrust_funcs.h"
+
+#define IDX (blockIdx.x * blockDim.x + threadIdx.x)
+
 namespace renom{
 
     cudaStream_t GLOBAL_STREAM_NAME = NULL;
@@ -17,7 +20,7 @@ namespace renom{
 
     __global__ void cuda_add_bias(int size, int n, int wh, VALUE_TYPE *bias, VALUE_TYPE *a)
     {
-        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        int idx = IDX;
         if(idx >= size)
             return;
         a[idx] += bias[(int)(idx%(size/n)/wh)];
