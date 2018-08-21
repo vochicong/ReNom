@@ -187,6 +187,26 @@ def cuCreateStream(name = None):
       nvtxNameCudaStreamA(stream, cname)
     return < uintptr_t > stream
 
+def cuProduceEvent():
+  global mainstream
+  cdef cudaEvent_t e
+  runtime_check(cudaEventCreate(&e))
+  runtime_check(cudaEventRecord(e, mainstream))
+  return <uintptr_t> e
+
+def cuConsumeEvent(event):
+  cdef cudaEvent_t e = <cudaEvent_t><uintptr_t> event
+  runtime_check(cudaEventSynchronize(e))
+  runtime_check(cudaEventDestroy(e))
+
+def cuWaitKernels():
+  global mainstream
+  cdef cudaEvent_t e
+  runtime_check(cudaEventCreate(&e))
+  runtime_check(cudaEventRecord(e, mainstream))
+  runtime_check(cudaEventSynchronize(e))
+  runtime_check(cudaEventDestroy(e))
+
 def cuWaitStream(uintptr_t stream):
   global mainstream
   cdef cudaEvent_t e
@@ -194,7 +214,7 @@ def cuWaitStream(uintptr_t stream):
   runtime_check(cudaEventCreate(&e))
   runtime_check(cudaEventRecord(e, strm))
   runtime_check(cudaStreamWaitEvent(mainstream, e, 0))
-  #runtime_check(cudaEventDestroy(e))
+  runtime_check(cudaEventDestroy(e))
 
 cdef cudaStream_t mainstream = <cudaStream_t><uintptr_t> 0
 

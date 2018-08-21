@@ -114,7 +114,7 @@ class sum(Node):
             arg._update_diff(context, get_gpu(dx), **kwargs)
 
 
-class dot(BinOp):
+class dot(Node):
     '''
     This function executes dot product of the two matrixes.
 
@@ -136,19 +136,31 @@ class dot(BinOp):
         dot([[ 0.10709135,  0.15022227,  0.12853521],
              [ 0.30557284,  0.32320538,  0.26753256]], dtype=float32)
     '''
+    def __new__(cls, lhs, rhs):
+        shape = (lhs.shape[0], rhs.shape[1])
+        ret = cls._create_node(shape)
+        return ret
 
-    @classmethod
-    def _oper_cpu(cls, lhs, rhs):
-        return np.dot(lhs, rhs)
+    def __init__(self, *args, **kwds):
+        self.prepare_value(*args, **kwds)
 
-    @classmethod
-    def _oper_gpu(cls, lhs, rhs):
+    def _oper_cpu(self, lhs, rhs):
+        self[...] = np.dot(lhs, rhs)[...]
+
+    def _oper_gpu(self, lhs, rhs):
         new_shape = (lhs.shape[0], rhs.shape[1])
-        ret = GPUValue(shape=new_shape)
-        cu.cublas_gemm(get_gpu(lhs), 0,
+        if lhs.shape[0] != self.shape[0]:
+            self.resize(new_shape, refcheck=False)
+        if self._gpu is None or self._gpu.shape != self.shape:
+            ret = GPUValue(shape=new_shape)
+        else:
+            ret = self._gpu
+        cublas_gemm(get_gpu(lhs), 0,
                     get_gpu(rhs), 0,
                     get_gpu(ret))
-        return ret
+        self._gpu = ret
+        self.attrs._lhs = lhs
+        self.attrs._rhs = rhs
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._lhs, Node):

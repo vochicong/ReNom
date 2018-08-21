@@ -15,37 +15,42 @@ class conv2d(Node):
         filter, stride, padding, dilation = (tuplize(x)
                                              for x in (filter, stride, padding, dilation))
 
-        in_shape = x.shape[1:]
-        out_shape = [w.shape[0]]
+        out_shape = [x.shape[0], w.shape[0]]
         out_shape.extend(out_size(x.shape[2:], filter, stride, padding, dilation))
-        return cls.calc_value(x, w, b, in_shape, out_shape, filter, stride, padding, dilation, descriptor, algorithms)
+        return cls._create_node(tuple(out_shape))
 
-    @classmethod
-    def _oper_cpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation,
+    def __init__(self, *args, **kwds):
+        self.prepare_value(*args, **kwds)
+
+    def _oper_cpu(self, x, w, b, kernel, stride, padding, dilation,
                   descriptor=None, algorithms=None):
+        in_shape = x.shape[1:]
+        out_shape = self.shape
         col = im2col(to_value(x),
-                     out_shape[1:], kernel,
+                     out_shape[2:], kernel,
                      stride, padding, dilation)
         value = np.rollaxis(np.tensordot(col, to_value(w),
                                          ([1, 2, 3], [1, 2, 3])), 3, 1)
         if b is not None:
             value += b
-        ret = cls._create_node(value)
-        ret.attrs._col = col
-        ret.attrs._x = x
-        ret.attrs._w = w
-        ret.attrs._b = b
-        ret.attrs._in_shape = in_shape
-        ret.attrs._out_shape = out_shape
-        ret.attrs._kernel = kernel
-        ret.attrs._stride = stride
-        ret.attrs._padding = padding
-        ret.attrs._dilation = dilation
-        return ret
+        self[...] = value[...]
+        self.attrs._col = col
+        self.attrs._x = x
+        self.attrs._w = w
+        self.attrs._b = b
+        self.attrs._in_shape = in_shape
+        self.attrs._out_shape = out_shape
+        self.attrs._kernel = kernel
+        self.attrs._stride = stride
+        self.attrs._padding = padding
+        self.attrs._dilation = dilation
 
-    @classmethod
-    def _oper_gpu(cls, x, w, b, in_shape, out_shape, kernel, stride, padding, dilation,
+    def _oper_gpu(self, x, w, b, kernel, stride, padding, dilation,
                   descriptor=None, algorithms=None):
+        if x.shape[0] != self.shape[0]:
+            out_shape = [x.shape[0], w.shape[0]]
+            out_shape.extend(out_size(x.shape[2:], kernel, stride, padding, dilation))
+            self.resize(out_shape, refcheck=False)
         N = x.shape[0]
         if descriptor is not None:
             conv_desc = descriptor['conv_desc']
@@ -63,24 +68,23 @@ class conv2d(Node):
             }
 
         _x, _w = map(lambda x: get_gpu(x), [x, w])
-
-        y = GPUValue(shape=tuple([N, ] + list(out_shape)))
+        if self._gpu is None or self._gpu.shape != self.shape:
+            y = GPUValue(shape=self.shape)
+        else:
+            y = self._gpu
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionForward(handle, conv_desc, filter_desc,
                                     _x, _w, y, algorithms['forward'])
             if b is not None:
                 cu.cu_add_bias(get_gpu(b), y)
 
-        # assert type(x) is not np.ndarray
-
-        ret = cls._create_node(y)
-        ret.attrs._conv_desc = conv_desc
-        ret.attrs._filter_desc = filter_desc
-        ret.attrs._algorithms = algorithms
-        ret.attrs._x = x
-        ret.attrs._w = w
-        ret.attrs._b = b
-        return ret
+        self._gpu = y
+        self.attrs._conv_desc = conv_desc
+        self.attrs._filter_desc = filter_desc
+        self.attrs._algorithms = algorithms
+        self.attrs._x = x
+        self.attrs._w = w
+        self.attrs._b = b
 
     def _backward_cpu(self, context, dy, **kwargs):
         dy = to_value(dy)
@@ -174,6 +178,7 @@ class Conv2d(Parametrized):
         self._initializer = initializer
         self._descriptors = None
         self._algo = None
+        self._node = None
         super(Conv2d, self).__init__(input_size)
 
     def weight_initiallize(self, input_size):
@@ -211,5 +216,10 @@ class Conv2d(Parametrized):
                                                            np.ndarray(tuple([x.shape[0], ] + out_shape),
                                                            dtype=precision))
                 }
-        return conv2d(x, self.params.w, self.params.get("b", None), self._kernel,
+        if self._node is None:
+            self._node = conv2d(x, self.params.w, self.params.get("b", None), self._kernel,
+                      self._stride, self._padding, self._dilation, self._descriptors, self._algo) 
+        else:
+            self._node.prepare_value(x, self.params.w, self.params.get("b", None), self._kernel,
                       self._stride, self._padding, self._dilation, self._descriptors, self._algo)
+        return self._node 

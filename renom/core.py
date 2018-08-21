@@ -256,6 +256,9 @@ class Node(np.ndarray):
     def _create_node(cls, value):
         if isinstance(value, np.ndarray):
             ret = value.astype(precision).view(cls)
+        elif isinstance(value, tuple):
+            ret = super(Node, cls).__new__(
+                cls, shape=value, dtype=precision)
         elif isinstance(value, GPUValue):
             ret = super(Node, cls).__new__(
                 cls, shape=value.shape, dtype=value.dtype)
@@ -286,6 +289,12 @@ class Node(np.ndarray):
         else:
             value = cls._oper_cpu(*args, **kwargs)
         return value
+
+    def prepare_value(self, *args, **kwargs):
+        if is_cuda_active():
+            value = self._oper_gpu(*args, **kwargs)
+        else:
+            value = self._oper_cpu(*args, **kwargs)
 
     def __init__(self, *args, **kwargs):
         self.setflags(write=False)
@@ -1026,15 +1035,25 @@ def cu_broad_cast(hs, dy):
     return dy
 
 
-class Add(BinOp):
+class Add(Node):
 
-    @classmethod
-    def _oper_cpu(cls, lhs, rhs):
-        return np.ndarray.__add__(lhs, rhs)
+    def __new__(cls, lhs, rhs):
+        shape = lhs.shape
+        ret = cls._create_node(shape)
+        return ret
 
-    @classmethod
-    def _oper_gpu(cls, lhs, rhs):
-        return get_gpu(lhs) + get_gpu(rhs)
+    def __init__(self, *args, **kwds):
+        self.prepare_value(*args, **kwds)
+
+    def _oper_cpu(self, lhs, rhs):
+        self[...] = np.ndarray.__add__(lhs, rhs)[...]
+
+    def _oper_gpu(self, lhs, rhs):
+        if lhs.shape[0] != self.shape[0]:
+            self.resize(lhs.shape, refcheck=False)
+        self._gpu = get_gpu(lhs) + get_gpu(rhs)
+        self.attrs._lhs = lhs
+        self.attrs._rhs = rhs
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._rhs, Node):
@@ -1059,13 +1078,11 @@ class Add(BinOp):
 
 class RAdd(Add):
 
-    @classmethod
-    def _oper_cpu(cls, lhs, rhs):
-        return np.ndarray.__radd__(rhs, lhs)
+    def _oper_cpu(self, lhs, rhs):
+        self[...] = np.ndarray.__radd__(rhs, lhs)[...]
 
-    @classmethod
-    def _oper_gpu(cls, lhs, rhs):
-        return get_gpu(rhs) + get_gpu(lhs)
+    def _oper_gpu(self, lhs, rhs):
+        self._gpu = get_gpu(rhs) + get_gpu(lhs)
 
 
 class Sub(BinOp):

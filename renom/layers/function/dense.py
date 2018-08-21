@@ -40,6 +40,8 @@ class Dense(Parametrized):
         self._output_size = output_size
         self._ignore_bias = ignore_bias
         self._initializer = initializer
+        self._l1 = None
+        self._l2 = None
         super(Dense, self).__init__(input_size)
 
     def clone(self, n):
@@ -53,7 +55,15 @@ class Dense(Parametrized):
             self.params["b"] = Variable(np.zeros((1, size_o)).astype(precision), auto_update=True)
 
     def forward(self, x):
-        z = dot(x, self.params["w"])
+        if self._l1 is None:
+            self._l1 = dot(x, self.params["w"])
+        else:
+            self._l1.prepare_value(x, self.params["w"])
+
         if self.params.get("b", None) is not None:
-            z += self.params['b']
-        return z
+            if self._l2 is None:
+                self._l2 = self._l1 + self.params["b"]
+            else:
+                self._l2.prepare_value(self._l1, self.params["b"])
+            return self._l2
+        return self._l1
