@@ -16,8 +16,13 @@ class sigmoid_cross_entropy(Node):
     def _oper_cpu(cls, lhs, rhs, reduce_sum):
         N = len(lhs)
         z = 1. / (1. + np.exp(to_value(-lhs)))
-        loss = -np.sum(to_value(rhs) * np.log(z + 1e-8) +
-                       to_value(1 - rhs) * np.log(1 - z + 1e-8)) / N
+        if reduce_sum:
+            loss = -np.sum(to_value(rhs) * np.log(z + 1e-8) +
+                to_value(1 - rhs) * np.log(1 - z + 1e-8)) / N
+        else:
+            loss = -(to_value(rhs) * np.log(z + 1e-8) +
+                to_value(1 - rhs) * np.log(1 - z + 1e-8)) / N
+
         ret = cls._create_node(loss)
         ret.attrs._z = z
         ret.attrs._lhs = lhs

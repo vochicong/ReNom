@@ -17,3 +17,4 @@ from .lstm import Lstm as Lstm
 from .gru import Gru as Gru
 from .embedding import embedding, Embedding
 from .roi_pool2d import roi_pool2d, RoiPool2d
+from .l2_norm import l2_norm, L2Norm

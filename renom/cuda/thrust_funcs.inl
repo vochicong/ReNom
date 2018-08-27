@@ -1925,6 +1925,25 @@ namespace renom{
       }
     }
 
+    __global__ void cuda_optimizer_adamax(int Elems, VALUE_TYPE alpha, VALUE_TYPE epsilon, VALUE_TYPE beta1, VALUE_TYPE running_beta1, VALUE_TYPE beta2, VALUE_TYPE running_beta2, VALUE_TYPE * moment1, VALUE_TYPE * moment2, VALUE_TYPE * dy, VALUE_TYPE * new_dy)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx < Elems) {
+        moment1[idx] = beta1 * moment1[idx] + (1 - beta1) * dy[idx];
+        moment2[idx] = beta2 * moment2[idx] + (1 - beta2) * dy[idx] * dy[idx];
+        VALUE_TYPE est1 = moment1[idx] / (1 - running_beta1);
+        VALUE_TYPE est2 = moment2[idx] / (1 - running_beta2);
+        new_dy[idx] = alpha * est1 / (sqrtf(est2) + epsilon);
+      }
+    }
+
+    void thrust_optimizer_adamax(int Elems, VALUE_TYPE alpha, VALUE_TYPE epsilon, VALUE_TYPE beta1, VALUE_TYPE running_beta1, VALUE_TYPE beta2, VALUE_TYPE running_beta2, VALUE_TYPE * moment1, VALUE_TYPE * moment2, VALUE_TYPE * dy, VALUE_TYPE * new_dy)
+    {
+      if(Elems) {
+        cuda_optimizer_adamax<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, alpha, epsilon, beta1, running_beta1, beta2, running_beta2, moment1, moment2, dy, new_dy);
+      }
+    }
+
     __global__ void cuda_get_fg_ary_forward(int N, int M, VALUE_TYPE *ptr1, VALUE_TYPE *ptr2){
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
         if (idx >= N) return;

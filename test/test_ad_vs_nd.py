@@ -33,6 +33,7 @@ from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd
 from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
+from renom.layers.function.l2_norm import L2Norm
 from renom.layers.function.weight_normalize import WeightNormalize
 from renom.layers.function.gru import Gru
 from renom.layers.function.batch_normalize import BatchNormalize,\
@@ -651,6 +652,21 @@ def test_roi_pool2d(node, rois, use_gpu):
 
 
 @pytest.mark.parametrize("node", [
+    Variable(rand((1, 3, 3, 3))),
+])
+def test_l2norm(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = L2Norm(20)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
+
+
+@pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 3, 3))),
     Variable(rand((2, 3, 4, 5))),
 ])
@@ -901,7 +917,6 @@ def test_sigmoid_cross_entropy_no_reduce(node, x, use_gpu):
 
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 1))), rand((1, 1))],
-    [Variable(rand((1, 3))), rand((1, 3))],
     [Variable(rand((2, 1))), rand((2, 1))],
     [Variable(rand((1, 1, 1, 2))), rand((1, 1, 1, 2))],
 ])
@@ -916,7 +931,6 @@ def test_mean_squared_error(node, x, use_gpu):
 
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 1))), rand((1, 1))],
-    [Variable(rand((1, 3))), rand((1, 3))],
     [Variable(rand((2, 1))), rand((2, 1))],
     [Variable(rand((1, 1, 1, 2))), rand((1, 1, 1, 2))],
 ])
