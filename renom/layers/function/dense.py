@@ -36,7 +36,8 @@ class Dense(Parametrized):
         (3, 3)
     '''
 
-    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal(), weight_decay = None):
+        self._weight_decay = weight_decay
         self._output_size = output_size
         self._ignore_bias = ignore_bias
         self._initializer = initializer
@@ -54,6 +55,8 @@ class Dense(Parametrized):
 
     def forward(self, x):
         z = dot(x, self.params["w"])
+        z.attrs._w = self.params["w"]
+        z.attrs._w.weight_decay = self._weight_decay
         if self.params.get("b", None) is not None:
             z += self.params['b']
         return z
