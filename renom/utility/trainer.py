@@ -138,7 +138,6 @@ class Trainer(object):
         else:
             self._events = DEFAULT_EVENTS
 
-
     def on_event(self, event):
         events = self._events
         handler = events.get(event)

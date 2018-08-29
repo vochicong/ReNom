@@ -351,10 +351,11 @@ def test_softmax(node, x, use_gpu):
         return rm.cross_entropy(rm.softmax(node), x)
     compare(func, node, node, x)
 
+
 @pytest.mark.parametrize("node", [
-    Variable(rand((2,2))),
-    Variable(rand((3,2,4))),
-    Variable(rand((1,3))),
+    Variable(rand((2, 2))),
+    Variable(rand((3, 2, 4))),
+    Variable(rand((1, 3))),
 ])
 def test_softplus(node, use_gpu):
     node = Variable(node)
@@ -363,6 +364,7 @@ def test_softplus(node, use_gpu):
     def func(node):
         return sum(rm.softplus(node))
     compare(func, node, node)
+
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
