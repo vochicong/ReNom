@@ -167,7 +167,7 @@ def setup_cuda():
     ext_base = Extension('renom.cuda.cuda_base',
                          sources=['renom/cuda/cuda_base.pyx'],
                          depends=cuda_depends,
-                         libraries=['cublas', 'cuda', 'cudart'],
+                         libraries=['cublas', 'cuda', 'cudart', 'nvToolsExt'],
                          library_dirs=libraries,
                          language='c++',
                          include_dirs=includes,
@@ -273,4 +273,4 @@ setup(
     name='renom',
     packages=find_packages(),
     include_dirs=[numpy.get_include()],
-    version='2.5.1')
+    version='2.6.1')

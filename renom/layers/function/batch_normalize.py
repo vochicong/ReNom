@@ -16,11 +16,11 @@ mode_dict = {
 
 
 class batch_normalize(Node):
-    def __new__(cls, x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon, ignore_bias=False):
-        return cls.calc_value(x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon, ignore_bias)
+    def __new__(cls, x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon):
+        return cls.calc_value(x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon)
 
     @classmethod
-    def _oper_cpu(cls, x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon, ignore_bias):
+    def _oper_cpu(cls, x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon):
         if mode == BATCH_NORMALIZE_FEATUREMAP:
             axs = (0, 2, 3)
         else:
@@ -36,7 +36,7 @@ class batch_normalize(Node):
         sq_var = 1.0 / np.sqrt(var + epsilon)
         xh = (to_value(x) - mean) * sq_var
         z = to_value(w) * xh
-        if not ignore_bias:
+        if b is not None:
             z += to_value(b)
 
         ret = cls._create_node(z)
@@ -54,14 +54,14 @@ class batch_normalize(Node):
         return ret
 
     @classmethod
-    def _oper_gpu(cls, x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon, ignore_bias):
+    def _oper_gpu(cls, x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon):
         if mode == BATCH_NORMALIZE_FEATUREMAP:
             axs = 1
         else:
             axs = 0
 
-        if ignore_bias:
-            b = np.zeros(w.shape[0])
+        if b is None:
+            b = get_gpu(w).zeros_like_me()
 
         y, mean, sq_var = (get_gpu(g).empty_like_me() for g in (x, w, w))
         mov_m = get_gpu(mov_m)
@@ -126,7 +126,7 @@ class batch_normalize(Node):
 
 
 class BatchNormalize(Parametrized):
-    """Batch normalization function [1]_.
+    """Batch normalization function [bn]_.
     This layer accelerates learning speed with reducing internal covariate shift
     and allow us to set high learning rate.
 
@@ -149,6 +149,7 @@ class BatchNormalize(Parametrized):
         momentum (float): Momentum coefficient for the moving average.
         mode (str): 'activation'  or 'feature'.
         epsilon (float): Small number added to avoid division by zero.
+        ignore_bias (bool): If `True` is given, bias will not be added.
         initializer (Initializer): Initializer object for weight initialization.
 
     Example:
@@ -163,7 +164,7 @@ class BatchNormalize(Parametrized):
                          [-0.00887055, -0.01459344],
                          [ 0.05934474,  0.00987731]], dtype=float32)
 
-    .. [1] Sergey Ioffe, Christian Szegedy. Batch Normalization:
+    .. [bn] Sergey Ioffe, Christian Szegedy. Batch Normalization:
         Accelerating Deep Network Training by Reducing Internal Covariate Shift(2015)
 
     """
@@ -195,21 +196,20 @@ class BatchNormalize(Parametrized):
         if self._mode == BATCH_NORMALIZE_FEATUREMAP and len(size_i) > 2:
             size_i[2] = 1
             size_i[3] = 1
-        self.params = {
-            "w": Variable(self._initializer(size_i).astype(precision), auto_update=True),
-            "b": None if self._ignore_bias else Variable(np.zeros(size_i, dtype=precision), auto_update=True)}
+        self.params = {"w": Variable(self._initializer(size_i).astype(precision), auto_update=True)}
+        if not self._ignore_bias:
+            self.params["b"] = Variable(np.zeros(size_i, dtype=precision), auto_update=True)
 
     def forward(self, x):
         ret = batch_normalize(x,
                               self.params["w"],
-                              self.params["b"],
+                              self.params.get("b", None),
                               self._momentum,
                               self._mov_mean,
                               self._mov_std,
                               self.inference,
                               self._mode,
-                              self._epsilon,
-                              self._ignore_bias)
-        self._mov_mean = getattr(ret.attrs, "_mov_m", self._mov_mean)
-        self._mov_std = getattr(ret.attrs, "_mov_v", self._mov_std)
+                              self._epsilon)
+        self._mov_mean = ret.attrs.get("_mov_m", self._mov_mean)
+        self._mov_std = ret.attrs.get("_mov_v", self._mov_std)
         return ret

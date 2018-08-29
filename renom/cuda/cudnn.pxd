@@ -109,6 +109,13 @@ cdef extern from "cudnn.h":
         const int dimA[],
         const int strideA[])
 
+    cudnnStatus_t cudnnSetTensorNdDescriptorEx(
+        cudnnTensorDescriptor_t tensorDesc,
+        cudnnTensorFormat_t format,
+        cudnnDataType_t dataType,
+        int nbDims,
+        const int dimA[])
+
     cudnnStatus_t cudnnGetTensorNdDescriptor(
         const cudnnTensorDescriptor_t tensorDesc,
         int nbDimsRequested,

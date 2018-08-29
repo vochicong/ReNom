@@ -436,6 +436,36 @@ def cupeepholelstm_backward(u, prestate, state, prefg, wc, dy, drt, dot, dr, dou
                                   ptr_dy, ptr_drt, ptr_dot, ptr_dr, ptr_dou, ptr_dwc)
 
 
+def cugru_forward(input, hminus, u, ABC, h):
+    cdef int X = input.shape[0]
+    cdef int Y = input.shape[1]
+    cdef int M = input.shape[1] // 3
+    cdef VALUE_TYPE * ptr_input = < VALUE_TYPE * > < uintptr_t > input._ptr
+    cdef VALUE_TYPE * ptr_hminus = < VALUE_TYPE * > < uintptr_t > hminus._ptr
+    cdef VALUE_TYPE * ptr_u = < VALUE_TYPE * > < uintptr_t > u._ptr
+    cdef VALUE_TYPE * ptr_ABC = < VALUE_TYPE * > < uintptr_t > ABC._ptr
+    cdef VALUE_TYPE * ptr_h = < VALUE_TYPE * > < uintptr_t > h._ptr
+    thrust_forward_gru(X, Y, M, ptr_input, ptr_hminus, ptr_u, ptr_ABC, ptr_h)
+
+
+def cugru_backward(a, b, c, d, e, f, g, h, i):
+    cdef int H = a.shape[0]
+    cdef int W = a.shape[1]
+    cdef int M = a.shape[1] // 3
+    cdef int V = i.shape[1]
+
+    cdef VALUE_TYPE * ptr_a = < VALUE_TYPE * > < uintptr_t > a._ptr
+    cdef VALUE_TYPE * ptr_b = < VALUE_TYPE * > < uintptr_t > b._ptr
+    cdef VALUE_TYPE * ptr_c = < VALUE_TYPE * > < uintptr_t > c._ptr
+    cdef VALUE_TYPE * ptr_d = < VALUE_TYPE * > < uintptr_t > d._ptr
+    cdef VALUE_TYPE * ptr_e = < VALUE_TYPE * > < uintptr_t > e._ptr
+    cdef VALUE_TYPE * ptr_f = < VALUE_TYPE * > < uintptr_t > f._ptr
+    cdef VALUE_TYPE * ptr_g = < VALUE_TYPE * > < uintptr_t > g._ptr
+    cdef VALUE_TYPE * ptr_h = < VALUE_TYPE * > < uintptr_t > h._ptr
+    cdef VALUE_TYPE * ptr_i = < VALUE_TYPE * > < uintptr_t > i._ptr
+    thrust_backward_gru(H, W, M, V, ptr_a, ptr_b, ptr_c, ptr_d, ptr_e, ptr_f, ptr_g, ptr_h, ptr_i)
+
+
 def cubinarize(gpu_value1, th, gpu_value2):
     cdef int N = gpu_value1.size
     cdef VALUE_TYPE * gpu_ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
@@ -804,7 +834,13 @@ def cu_add_bias(bias, gpu_value):
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > bias._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value._ptr
     cdef int size = <int > gpu_value.size
-    cdef int wh = <int > (gpu_value.shape[2] * gpu_value.shape[3])
+    cdef int wh
+    if len(gpu_value.shape) < 5:
+        wh = <int > (gpu_value.shape[2] * gpu_value.shape[3])
+    elif len(gpu_value.shape) is 5:
+        wh = <int > (gpu_value.shape[2] * gpu_value.shape[3] * gpu_value.shape[4])
+    else:
+        assert False, "cu_add_bias currently supports only 2d or 3d biases"
     cdef int n = <int > gpu_value.shape[0]
     thrust_add_bias(size, n, wh, ptr1, ptr2)
 
@@ -1064,3 +1100,33 @@ def cu_clip(array, minimum, maximum):
     cdef VALUE_TYPE min = <VALUE_TYPE > minimum
     cdef VALUE_TYPE * ptr_arr = <VALUE_TYPE * > < uintptr_t > array._ptr
     thrust_clip(Elem, ptr_arr, maximum, minimum)
+
+def cu_optimizer_adadelta(decay_rate, epsilon, previous_squared_gradient, previous_squared_delta, dy, new_dy):
+    cdef int Elem = 1
+    for v in dy.shape:
+        Elem *= v
+    cdef VALUE_TYPE dr = decay_rate
+    cdef VALUE_TYPE eps = epsilon
+    cdef VALUE_TYPE * ptr_psg = <VALUE_TYPE * > < uintptr_t > previous_squared_gradient._ptr
+    cdef VALUE_TYPE * ptr_psx = <VALUE_TYPE * > < uintptr_t > previous_squared_delta._ptr
+    cdef VALUE_TYPE * ptr_dy = <VALUE_TYPE * > < uintptr_t > dy._ptr
+    cdef VALUE_TYPE * ptr_ndy = <VALUE_TYPE * > < uintptr_t > new_dy._ptr
+    thrust_optimizer_adadelta(Elem, dr, eps, ptr_psg, ptr_psx, ptr_dy, ptr_ndy)
+
+
+def cu_optimizer_adamax(alpha, epsilon, beta1, beta2, moment1, moment2, dy, new_dy):
+    cdef int Elem = 1
+    for v in dy.shape:
+        Elem *= v
+    cdef VALUE_TYPE alp = alpha
+    cdef VALUE_TYPE eps = epsilon
+    cdef VALUE_TYPE b_1 = beta1[0]
+    cdef VALUE_TYPE rb_1 = beta1[1]
+    cdef VALUE_TYPE b_2 = beta2[0]
+    cdef VALUE_TYPE rb_2 = beta2[1]
+    cdef VALUE_TYPE * ptr_mom1 = <VALUE_TYPE * > < uintptr_t > moment1._ptr
+    cdef VALUE_TYPE * ptr_mom2 = <VALUE_TYPE * > < uintptr_t > moment2._ptr
+    cdef VALUE_TYPE * ptr_dy = <VALUE_TYPE * > < uintptr_t > dy._ptr
+    cdef VALUE_TYPE * ptr_ndy = <VALUE_TYPE * > < uintptr_t > new_dy._ptr
+    thrust_optimizer_adamax(Elem, alp, eps, b_1, rb_1, b_2, rb_2,
+                            ptr_mom1, ptr_mom2, ptr_dy, ptr_ndy)

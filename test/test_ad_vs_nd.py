@@ -25,13 +25,20 @@ from renom.layers.activation.maxout import maxout
 
 from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
+from renom.layers.function.convnd import ConvNd, Conv3d
 from renom.layers.function.deconv2d import Deconv2d
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
+from renom.layers.function.unpool2d import MaxUnPool2d, AverageUnPool2d
+from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd
 from renom.layers.function.roi_pool2d import RoiPool2d
 from renom.layers.function.dropout import Dropout, SpatialDropout
 from renom.layers.function.lstm import Lstm
+from renom.layers.function.l2_norm import L2Norm
+from renom.layers.function.weight_normalize import WeightNormalize
+from renom.layers.function.gru import Gru
 from renom.layers.function.batch_normalize import BatchNormalize,\
     BATCH_NORMALIZE_FEATUREMAP
+from renom.layers.function.layer_normalize import LayerNormalize
 from renom.layers.function.lrn import Lrn
 from test_utility import auto_diff, numeric_diff
 
@@ -63,13 +70,22 @@ def onehot(shape):
     return ret
 
 
-def compare(func, node, *args):
+def compare(func, node, *args, **kwargs):
+    if 'atol' in kwargs:
+        atol = kwargs['atol']
+    else:
+        atol = 1e-5
+    if 'rtol' in kwargs:
+        rtol = kwargs['rtol']
+    else:
+        rtol = 1e-3
     ad = auto_diff(func, node, *args)
     nd = numeric_diff(func, node, *args)
+    diff = ad - nd
     print("ad = \n{}".format(ad))
     print("nd = \n{}".format(nd))
     print("difference = \n{}".format(ad - nd))
-    assert np.allclose(ad, nd, atol=1e-5, rtol=1e-3)
+    assert np.allclose(ad, nd, atol=atol, rtol=rtol)
 
 
 @pytest.mark.parametrize("node, x, raise_error", [
@@ -353,7 +369,7 @@ def test_dense(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
 
 
@@ -389,8 +405,60 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 3))),
+    Variable(rand((7, 9))),
+    Variable(rand((8, 4))),
+])
+def test_weight_normalize(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = WeightNormalize(4)
+    layer2 = Dense(3)  # This is important to ensure that dy is properly transferred backwards
+
+    def func(node):
+        return sum(layer2(layer(node)))
+
+    compare(func, node, node)
+    compare(func, layer.params["gain"], node)
+    compare(func, layer.params["w"], node)
+    compare(func, layer.params["bias"], node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((1, 2, 4, 3))),
+    Variable(rand((2, 5))),
+    Variable(rand((20, 2))),
+    Variable(rand((3, 14))),
+    Variable(rand((2, 4)))
+])
+def test_layer_normalize(node, use_gpu):
+    node = Variable(node * 50)
+    set_cuda_active(use_gpu)
+
+    layer = LayerNormalize()
+    layer2 = Dense(4)
+    layer3 = Conv2d(channel=3)
+
+    def func(node):
+        ret = layer(node)
+        if len(ret.shape) > 2:
+            return sum(layer3(ret))
+        else:
+            return sum(layer2(ret))
+    a = 1e-5
+    r = 1e-3
+    if use_gpu:
+        a = 1e-2
+        r = 1e-3
+    compare(func, node, node, atol=a, rtol=r)
+    compare(func, layer.params["gain"], node)
+    compare(func, layer.params["bias"], node)
 
 
 @pytest.mark.parametrize("node", [
@@ -441,8 +509,59 @@ def test_conv2d(node, use_gpu, ignore_bias):
     compare(func, layer.params["w"], node)
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
+
+
+@pytest.mark.parametrize("node, size, raise_error", [
+    [Variable(rand((2, 2, 5, 6))), 2, False],
+    [Variable(rand((2, 2, 7, 8))), 3, False],
+    [Variable(rand((2, 3, 3, 3))), 2, True],
+])
+def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = Conv2d(channel=3, dilation=size)
+
+    def func(node):
+        return sum(layer(node))
+    try:
+        compare(func, node, node)
+        compare(func, layer.params["w"], node)
+        compare(func, layer.params["b"], node)
+        assert not raise_error
+    except:
+        assert raise_error
+
+
+@pytest.mark.parametrize("node, error", [
+    [Variable(rand((1, 1, 3, 3, 3, 3))), True],
+    [Variable(rand((2, 2, 4, 4))), False],
+    [Variable(rand((2, 3, 4, 6, 6))), False],
+    [Variable(rand((1, 1, 4, 8))), False],
+])
+def test_convnd(node, error, use_gpu, ignore_bias):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+    layer = ConvNd(channel=1, filter=3, stride=1, ignore_bias=ignore_bias)
+
+    def func(node):
+        return sum(layer(node))
+    if error and is_cuda_active():
+        # CuDNN can manage tensor dim < 6.
+        try:
+            func(node)
+            assert False
+        except:
+            pass
+    else:
+        compare(func, node, node)
+        compare(func, layer.params["w"], node)
+        try:
+            compare(func, layer.params["b"], node)
+        except Exception:
+            assert ignore_bias
 
 
 @pytest.mark.parametrize("node", [
@@ -462,8 +581,25 @@ def test_deconv2d(node, use_gpu, ignore_bias):
 
     try:
         compare(func, layer.params["b"], node)
-    except KeyError:
+    except Exception:
         assert ignore_bias
+
+
+@pytest.mark.parametrize("node, size", [
+    [Variable(rand((2, 3, 3, 3))), 2],
+    [Variable(rand((2, 3, 4, 5))), 3],
+])
+def test_deconv2d_with_dilation(node, size, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = Deconv2d(channel=3, dilation=size)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
+    compare(func, layer.params["b"], node)
 
 
 @pytest.mark.parametrize("node", [
@@ -481,6 +617,22 @@ def test_max_pool2d(node, use_gpu):
     compare(func, node, node)
 
 
+@pytest.mark.parametrize("node", [
+    Variable(10 * rand((3, 2, 4, 5, 2))),
+    Variable(10 * rand((2, 2, 3, 3))),
+    Variable(10 * rand((2, 3, 4, 5)))
+])
+def test_max_poolnd(node, use_gpu):
+
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+    layer = MaxPoolNd(kernel=2)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+
+
 @pytest.mark.parametrize("node, rois", [
     [Variable(rand((3, 3, 8, 13)) * 10), Variable(np.array([
         [0, 1, 1, 6, 6],
@@ -489,7 +641,7 @@ def test_max_pool2d(node, use_gpu):
         [0, 3, 3, 3, 3]
     ], dtype=np.float64))]
 ])
-def test_roi_pool2d(node, rois,  use_gpu):
+def test_roi_pool2d(node, rois, use_gpu):
     set_cuda_active(use_gpu)
     node = Variable(node)
     layer = RoiPool2d(outh=7, outw=5, spatial_scale=0.6)
@@ -497,6 +649,21 @@ def test_roi_pool2d(node, rois,  use_gpu):
     def func(node, rois):
         return sum(layer(node, rois))
     compare(func, node, node, rois)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((1, 3, 3, 3))),
+])
+def test_l2norm(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer = L2Norm(20)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
 
 
 @pytest.mark.parametrize("node", [
@@ -508,6 +675,20 @@ def test_average_pool2d(node, use_gpu):
     set_cuda_active(use_gpu)
 
     layer = AveragePool2d()
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2, 3, 3, 3))),
+    Variable(rand((2, 3, 4, 5))),
+])
+def test_average_poolnd(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+    layer = AveragePoolNd()
 
     def func(node):
         return sum(layer(node))
@@ -558,7 +739,7 @@ def test_spatial_dropout(node, seed, use_gpu):
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
     Variable(rand((2, 1))),
-    Variable(rand((1, 2))),
+    Variable(rand((30, 30))),
 ])
 def test_lstm(node, use_gpu, ignore_bias):
     node = Variable(node)
@@ -569,15 +750,40 @@ def test_lstm(node, use_gpu, ignore_bias):
     def func(node):
         loss = 0
         for _ in range(3):
-            loss += sum(layer1(node))
+            loss = sum(layer1(node))
         layer1.truncate()
         return loss
 
     compare(func, node, node)
     for k in layer1.params.keys():
+        compare(func, layer1.params[k], node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((2, 1))),
+    Variable(rand((1, 2))),
+    Variable(rand((30, 30))),
+])
+def test_gru(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    layer1 = Gru(output_size=30)
+
+    def func(node):
+        loss = 0
+        for _ in range(3):
+            loss = sum(layer1(node))
+        layer1.truncate()
+        return loss
+
+    compare(func, node, node)
+    func(node)
+    for k in layer1.params.keys():
         try:
             compare(func, layer1.params[k], node)
-        except KeyError:
+        except Exception:
             assert ignore_bias
 
 
@@ -626,7 +832,7 @@ def test_peepholelstm(node, use_gpu, ignore_bias):
     for k in layer1.params.keys():
         try:
             compare(func, layer1.params[k], node)
-        except KeyError:
+        except Exception:
             assert ignore_bias
 
 
@@ -669,6 +875,21 @@ def test_softmax_cross_entropy(node, x, use_gpu):
 
 
 @pytest.mark.parametrize("node, x", [
+    [Variable(rand((2, 2))), onehot((2, 2))],
+    [Variable(rand((2, 3))), onehot((2, 3))],
+    [Variable(rand((1, 2))), onehot((1, 2))],
+    [Variable(rand((2, 2, 3, 3))), onehot((2, 2, 3, 3))],
+])
+def test_softmax_cross_entropy_no_reduce(node, x, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.sum(rm.softmax_cross_entropy(node, x, reduce_sum=False))
+    compare(func, node, node, x)
+
+
+@pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 1))), Variable(randInteger((1, 1)))],
     [Variable(rand((2, 1))), Variable(randInteger((2, 1)))],
 ])
@@ -682,8 +903,20 @@ def test_sigmoid_cross_entropy(node, x, use_gpu):
 
 
 @pytest.mark.parametrize("node, x", [
+    [Variable(rand((1, 1))), Variable(randInteger((1, 1)))],
+    [Variable(rand((2, 1))), Variable(randInteger((2, 1)))],
+])
+def test_sigmoid_cross_entropy_no_reduce(node, x, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.sum(rm.sigmoid_cross_entropy(node, x, reduce_sum=False))
+    compare(func, node, node, x)
+
+
+@pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 1))), rand((1, 1))],
-    [Variable(rand((1, 3))), rand((1, 3))],
     [Variable(rand((2, 1))), rand((2, 1))],
     [Variable(rand((1, 1, 1, 2))), rand((1, 1, 1, 2))],
 ])
@@ -697,6 +930,20 @@ def test_mean_squared_error(node, x, use_gpu):
 
 
 @pytest.mark.parametrize("node, x", [
+    [Variable(rand((1, 1))), rand((1, 1))],
+    [Variable(rand((2, 1))), rand((2, 1))],
+    [Variable(rand((1, 1, 1, 2))), rand((1, 1, 1, 2))],
+])
+def test_mean_squared_error_no_reduce(node, x, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.sum(rm.mean_squared_error(node, x, reduce_sum=False))
+    compare(func, node, node, x)
+
+
+@pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 2))), Variable(randInteger((1, 2)))],
     [Variable(rand((2, 2))), Variable(randInteger((2, 2)))],
 ])
@@ -706,6 +953,19 @@ def test_cross_entropy(node, x, use_gpu):
 
     def func(node, x):
         return rm.cross_entropy(node, x)
+    compare(func, node, node, x)
+
+
+@pytest.mark.parametrize("node, x", [
+    [Variable(rand((1, 2))), Variable(randInteger((1, 2)))],
+    [Variable(rand((2, 2))), Variable(randInteger((2, 2)))],
+])
+def test_cross_entropy_no_reduce(node, x, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.sum(rm.cross_entropy(node, x, reduce_sum=False))
     compare(func, node, node, x)
 
 
@@ -779,14 +1039,18 @@ def test_abs(node, use_gpu):
     [Variable(rand((1, 2))), 0],
     [Variable(rand((2, 1))), 1],
     [Variable(rand((1,))), 0],
+    [Variable(rand((2, 3, 4, 5))), (1, 2, 3)],
 ])
 def test_sum(node, axis, use_gpu):
     node = Variable(node)
     set_cuda_active(use_gpu)
+    result = sum(node, axis=axis, keepdims=True)
+    assert len(result.shape) == len(node.shape)
 
-    def func(node):
-        return sum(sum(node, axis=axis))
-    compare(func, node, node)
+    def func(node, keepdims):
+        return sum(sum(node, axis=axis, keepdims=keepdims))
+    compare(func, node, node, True)
+    compare(func, node, node, False)
 
 
 @pytest.mark.parametrize("node", [
@@ -1060,4 +1324,20 @@ def test_smooth_l1(node, x, delta, use_gpu):
 
     def func(node, x):
         return rm.smoothed_l1(node, x, delta)
+    compare(func, node, node, x)
+
+
+@pytest.mark.parametrize("node, x, delta", [
+    [Variable(rand((1, 1))), rand((1, 1)), 1],
+    [Variable(rand((1, 1))), rand((1, 1)), 3],
+    [Variable(rand((1, 3))), rand((1, 3)), 1],
+    [Variable(rand((2, 1))), rand((2, 1)), 1],
+    [Variable(rand((1, 1, 1, 2))), rand((1, 1, 1, 2)), 1],
+])
+def test_smooth_l1_no_reduce(node, x, delta, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node, x):
+        return rm.sum(rm.smoothed_l1(node, x, delta, reduce_sum=False))
     compare(func, node, node, x)

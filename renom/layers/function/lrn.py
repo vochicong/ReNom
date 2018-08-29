@@ -69,7 +69,7 @@ class lrn(Node):
 
 
 class Lrn:
-    '''Local response normalization function [3]_ .
+    '''Local response normalization function [lrn]_ .
 
     .. math::
         y_{c_{out},j,i}= \\frac{x_{c_{in},i,j}}{(k + a{\sum_{c=max(0, i-n/2)}^{min(N-1, i+n/2)} (x_{c,i,j})})^b}
@@ -95,7 +95,7 @@ class Lrn:
         >>> z.shape
         (3, 3, 32, 32)
 
-    .. [3] Alex Krizhevsky Krizhevsky, , Ilya IlyaSutskever Sutskever, Geoff.
+    .. [lrn] Alex Krizhevsky Krizhevsky, , Ilya IlyaSutskever Sutskever, Geoff.
         ImageNet Classification with Deep Convolutional Neural Networks
 
     '''

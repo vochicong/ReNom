@@ -9,25 +9,32 @@ from renom.layers.function.utils import tuplize
 
 class clipped_mean_squared_error(Node):
 
-    def __new__(cls, lhs, rhs, clip=1):
+    def __new__(cls, lhs, rhs, clip=1, reduce_sum=True):
         assert rhs.ndim > 1, "Input arrays must have no less than 2 dimension."
         c = clip if isinstance(clip, tuple) else (-clip, clip)
-        return cls.calc_value(lhs, rhs, c)
+        return cls.calc_value(lhs, rhs, c, reduce_sum)
 
     @classmethod
-    def _oper_cpu(cls, lhs, rhs, clip):
+    def _oper_cpu(cls, lhs, rhs, clip, reduce_sum):
         N = len(lhs)
-        ret = cls._create_node(np.sum((lhs - rhs) ** 2) / (N * 2))
+        if reduce_sum:
+            z = np.sum((lhs - rhs) ** 2) / (N * 2)
+        else:
+            z = (lhs - rhs) ** 2 / (N * 2)
+        ret = cls._create_node(z)
         ret.attrs._lhs = lhs
         ret.attrs._rhs = rhs
         ret.attrs._clip = clip
         return ret
 
     @classmethod
-    def _oper_gpu(cls, lhs, rhs, clip):
+    def _oper_gpu(cls, lhs, rhs, clip, reduce_sum):
         N = len(lhs)
-        value = cu.cusum(get_gpu((get_gpu(lhs) - get_gpu(rhs)) ** 2)) / (N * 2)
-        ret = cls._create_node(value)
+        if reduce_sum:
+            z = cu.cusum(get_gpu((get_gpu(lhs) - get_gpu(rhs)) ** 2)) / (N * 2)
+        else:
+            z = get_gpu((get_gpu(lhs) - get_gpu(rhs)) ** 2) / (N * 2)
+        ret = cls._create_node(z)
         ret.attrs._lhs = lhs
         ret.attrs._rhs = rhs
         ret.attrs._clip = clip
@@ -67,15 +74,20 @@ class ClippedMeanSquaredError:
         x (ndarray,Node): Input data.
         y (ndarray,Node): Target data.
         clip (float,tuple): Clipping threshold.
+        reduce_sum (bool): If True is given, the result array will be summed up and returns scalar value.
+
+    Returns:
+        (Node, ndarray): Clipping mean squared error.
 
     Raises:
         AssertionError: An assertion error will be raised if the given tensor dimension is less than 2.
 
     """
 
-    def __init__(self, clip=1.0):
+    def __init__(self, clip=1.0, reduce_sum=True):
         c = clip if isinstance(clip, tuple) else (-clip, clip)
         self._clip = c
+        self.reduce_sum = reduce_sum
 
     def __call__(self, x, y):
-        return clipped_mean_squared_error(x, y, self._clip)
+        return clipped_mean_squared_error(x, y, self._clip, self.reduce_sum)
