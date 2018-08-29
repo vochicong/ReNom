@@ -53,7 +53,7 @@ def culeaky_leru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def culeaky_leru_backward(s, gpu_value1, gpu_value2):
@@ -62,7 +62,7 @@ def culeaky_leru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_leaky_relu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_leaky_relu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_forward(s, gpu_value1, gpu_value2):
@@ -71,7 +71,7 @@ def cueru_forward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_forward( < VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cueru_backward(s, gpu_value1, gpu_value2):
@@ -80,7 +80,7 @@ def cueru_backward(s, gpu_value1, gpu_value2):
     cdef int size = <int > gpu_value1.size
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
-    thrust_elu_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
+    thrust_elu_backward( < VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 def cusoftplus_forward(gpu_value1, gpu_value2):
@@ -1013,7 +1013,7 @@ def cu_get_item(gpu_value1, size, dest_size, slices):
     cdef VALUE_TYPE * ptr_result = <VALUE_TYPE * > < uintptr_t > result._ptr
 
     cdef getitem_slice_infos infos
-    _build_slice_infos( & infos, slices)
+    _build_slice_infos(& infos, slices)
 
     cdef getitem_slice_info * info
 
@@ -1038,7 +1038,7 @@ def cu_set_item(value, valuesize, gpu_value1, slices, strides, broadcasted_strid
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
 
     cdef getitem_slice_infos infos
-    _build_slice_infos( & infos, slices)
+    _build_slice_infos(& infos, slices)
 
     infos.stride_size = len(strides)
     for i, (s, b) in enumerate(zip(strides, broadcasted_strides)):
@@ -1119,6 +1119,7 @@ def cu_clip(array, minimum, maximum):
     cdef VALUE_TYPE min = <VALUE_TYPE > minimum
     cdef VALUE_TYPE * ptr_arr = <VALUE_TYPE * > < uintptr_t > array._ptr
     thrust_clip(Elem, ptr_arr, maximum, minimum)
+
 
 def cu_optimizer_adadelta(decay_rate, epsilon, previous_squared_gradient, previous_squared_delta, dy, new_dy):
     cdef int Elem = 1
