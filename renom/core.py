@@ -58,9 +58,9 @@ class Grads:
                 if isinstance(t, Variable):
                     wd = t.weight_decay or self._weight_decay
                     #wd = None
-                    #if t.weight_decay is not None:
+                    # if t.weight_decay is not None:
                     #    wd = t.weight_decay
-                    #elif self._weight_decay is not None:
+                    # elif self._weight_decay is not None:
                     #    wd = self._weight_decay
                     if wd is not None:
                         self.variables[nodeid] = wd * t
@@ -449,7 +449,7 @@ class Node(np.ndarray):
             else:
                 initial = np.ones_like(self).astype(precision)
 
-        context = Grads(self,weight_decay=weight_decay)
+        context = Grads(self, weight_decay=weight_decay)
         self._update_diff(context, initial, **kwargs)
 
         if detach_graph:

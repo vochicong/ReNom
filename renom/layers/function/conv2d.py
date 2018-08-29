@@ -148,7 +148,7 @@ class Conv2d(Parametrized):
                  input_size=None,
                  ignore_bias=False,
                  initializer=GlorotNormal(),
-                 weight_decay = None):
+                 weight_decay=None):
         self._padding, self._stride, self._kernel, self._dilation = (tuplize(x)
                                                                      for x in (padding, stride, filter, dilation))
         self._channel = channel
@@ -163,7 +163,8 @@ class Conv2d(Parametrized):
         assert all([s > 0 for s in input_size[1:]]), \
             "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
                 input_size[1:])
-        self.params = {"w": Variable(self._initializer(size_f), auto_update=True, weight_decay = self._weight_decay)}
+        self.params = {"w": Variable(self._initializer(
+            size_f), auto_update=True, weight_decay=self._weight_decay)}
         if not self._ignore_bias:
             self.params["b"] = Variable(
                 np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)
