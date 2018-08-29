@@ -55,15 +55,15 @@ class Grads:
             t = q.pop()
             if isinstance(t, Node):
                 nodeid = id(t)
-                if '_w' in t.attrs.get_names():
-                    weight_id = id(t.attrs._w)
-                    wd = None
-                    if t.attrs._w.weight_decay is not None: # Individually set weight-decay takes precedence
-                        wd = t.attrs._w.weight_decay
-                    elif self._weight_decay is not None:
-                        wd = self._weight_decay
-                    if wd is not None and weight_id not in self.variables:
-                        self.variables[weight_id] = t.attrs._w * wd
+                if isinstance(t, Variable):
+                    wd = t.weight_decay or self._weight_decay
+                    #wd = None
+                    #if t.weight_decay is not None:
+                    #    wd = t.weight_decay
+                    #elif self._weight_decay is not None:
+                    #    wd = self._weight_decay
+                    if wd is not None:
+                        self.variables[nodeid] = wd * t
                 seen = nodeid in self._refcounts
                 self._refcounts[nodeid] += 1
 
@@ -298,7 +298,6 @@ class Node(np.ndarray):
     def __init__(self, *args, **kwargs):
         self.setflags(write=False)
         self._args = []
-        self.weight_decay = None
         q = collections.deque([args])
         while q:
             a = q.pop()
@@ -857,9 +856,12 @@ class Variable(Node):
         Variable([ 1., -1.], dtype=float32)
     '''
 
-    def __new__(cls, value, auto_update=True):
+    weight_decay = None
+
+    def __new__(cls, value, auto_update=True, weight_decay=None):
         ret = super(Variable, cls).__new__(cls, value)
         ret._auto_update = auto_update
+        ret.weight_decay = weight_decay
         return ret
 
     def backward(self, context, dy, **kwargs):

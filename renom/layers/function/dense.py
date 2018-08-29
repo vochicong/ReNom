@@ -49,14 +49,12 @@ class Dense(Parametrized):
     def weight_initiallize(self, input_size):
         size_i = input_size[0] if isinstance(input_size, tuple) else input_size
         size_o = self._output_size
-        self.params = {"w": Variable(self._initializer((size_i, size_o)), auto_update=True)}
+        self.params = {"w": Variable(self._initializer((size_i, size_o)), auto_update=True, weight_decay=self._weight_decay)}
         if not self._ignore_bias:
             self.params["b"] = Variable(np.zeros((1, size_o)).astype(precision), auto_update=True)
 
     def forward(self, x):
         z = dot(x, self.params["w"])
-        z.attrs._w = self.params["w"]
-        z.attrs._w.weight_decay = self._weight_decay
         if self.params.get("b", None) is not None:
             z += self.params['b']
         return z
