@@ -2102,4 +2102,17 @@ namespace renom{
     {
         cuda_clip_roi <<<ceil(N*M/256.0), 256.0, 0, GET_STREAM_NAME()>>>(N, M, roi_ptr, start, end, step, min_v, max_v, ary_ptr);
     }
+
+    __global__ void cuda_clip(int elem, VALUE_TYPE * array, VALUE_TYPE max, VALUE_TYPE min)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx>=elem) return;
+      if (array[idx] < min) array[idx] = min;
+      if (array[idx] > max) array[idx] = max;
+    }
+
+    void thrust_clip(int elem, VALUE_TYPE * array, VALUE_TYPE max, VALUE_TYPE min)
+    {
+      cuda_clip<<<ceil(elem/256.0), 256.0>>>(elem, array, max, min);
+    }
 }
