@@ -1111,6 +1111,15 @@ def cu_optimizer_adam(learning_rate, epsilon, gamma, gamma_orig, beta, beta_orig
                           bo, min, flug, ptr_u, ptr_r, ptr_ndy)
 
 
+def cu_clip(array, minimum, maximum):
+    cdef int Elem = 1
+    for v in array.shape:
+        Elem *= <int > v
+    cdef VALUE_TYPE max = <VALUE_TYPE > maximum
+    cdef VALUE_TYPE min = <VALUE_TYPE > minimum
+    cdef VALUE_TYPE * ptr_arr = <VALUE_TYPE * > < uintptr_t > array._ptr
+    thrust_clip(Elem, ptr_arr, maximum, minimum)
+
 def cu_optimizer_adadelta(decay_rate, epsilon, previous_squared_gradient, previous_squared_delta, dy, new_dy):
     cdef int Elem = 1
     for v in dy.shape:

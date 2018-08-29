@@ -36,10 +36,11 @@ class Grads:
               [ 2.,  2.,  2.]], dtype=float32)
     '''
 
-    def __init__(self, root=None):
+    def __init__(self, root=None, weight_decay=None):
         self.stroage = {}
         self.variables = {}
         self._auto_updates = []
+        self._weight_decay = weight_decay
 
         if root is not None:
             self._build_refcounts(root)
@@ -54,6 +55,15 @@ class Grads:
             t = q.pop()
             if isinstance(t, Node):
                 nodeid = id(t)
+                if isinstance(t, Variable):
+                    wd = t.weight_decay or self._weight_decay
+                    #wd = None
+                    # if t.weight_decay is not None:
+                    #    wd = t.weight_decay
+                    # elif self._weight_decay is not None:
+                    #    wd = self._weight_decay
+                    if wd is not None:
+                        self.variables[nodeid] = wd * t
                 seen = nodeid in self._refcounts
                 self._refcounts[nodeid] += 1
 
@@ -419,7 +429,7 @@ class Node(np.ndarray):
         if self._gpu:
             self._gpu = None
 
-    def grad(self, initial=None, detach_graph=True, **kwargs):
+    def grad(self, initial=None, detach_graph=True, weight_decay=None, **kwargs):
         '''This method follows computational graph and returns the gradients of
         Variable object.
 
@@ -439,7 +449,7 @@ class Node(np.ndarray):
             else:
                 initial = np.ones_like(self).astype(precision)
 
-        context = Grads(self)
+        context = Grads(self, weight_decay=weight_decay)
         self._update_diff(context, initial, **kwargs)
 
         if detach_graph:
@@ -846,9 +856,12 @@ class Variable(Node):
         Variable([ 1., -1.], dtype=float32)
     '''
 
-    def __new__(cls, value, auto_update=True):
+    weight_decay = None
+
+    def __new__(cls, value, auto_update=True, weight_decay=None):
         ret = super(Variable, cls).__new__(cls, value)
         ret._auto_update = auto_update
+        ret.weight_decay = weight_decay
         return ret
 
     def backward(self, context, dy, **kwargs):

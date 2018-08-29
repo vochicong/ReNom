@@ -245,10 +245,11 @@ class Lstm(Parametrized):
     .. [lstm] Learning Precise Timing with LSTM Recurrent Networks
     '''
 
-    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal(), weight_decay=None):
         self._size_o = output_size
         self._ignore_bias = ignore_bias
         self._initializer = initializer
+        self._weight_decay = weight_decay
         super(Lstm, self).__init__(input_size)
 
     def weight_initiallize(self, size_i):
@@ -257,8 +258,8 @@ class Lstm(Parametrized):
         bias = np.zeros((1, size_o * 4), dtype=precision)
         bias[:, size_o:size_o * 2] = 1
         self.params = {
-            "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True),
-            "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True)}
+            "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True, weight_decay=self._weight_decay),
+            "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True, weight_decay=self._weight_decay)}
         if self._ignore_bias:
             self.params["b"] = Variable(bias, auto_update=True)
 
