@@ -242,6 +242,12 @@ namespace renom{
     struct elu_backward_function;
     void thrust_elu_backward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);
 
+		__global__ void cuda_softplus_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size);
+		void thrust_softplus_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size);
+
+		__global__ void cuda_softplus_backward(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *dy, int size);
+		void thrust_softplus_backward(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *dy, int size);
+
     // Lstm forward activation without peep hole
     __global__ void cuda_forward_lstm_activate(int N, int M, VALUE_TYPE *u);
     void thrust_forward_lstm_activate(int N, int M, VALUE_TYPE *u);
