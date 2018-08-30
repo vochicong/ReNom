@@ -148,7 +148,7 @@ class Conv2d(Parametrized):
                  input_size=None,
                  ignore_bias=False,
                  initializer=GlorotNormal(),
-                 weight_decay=None):
+                 weight_decay=0):
         self._padding, self._stride, self._kernel, self._dilation = (tuplize(x)
                                                                      for x in (padding, stride, filter, dilation))
         self._channel = channel

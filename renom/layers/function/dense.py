@@ -36,7 +36,7 @@ class Dense(Parametrized):
         (3, 3)
     '''
 
-    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal(), weight_decay=None):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal(), weight_decay=0):
         self._weight_decay = weight_decay
         self._output_size = output_size
         self._ignore_bias = ignore_bias

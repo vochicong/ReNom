@@ -56,20 +56,19 @@ class Grads:
             if isinstance(t, Node):
                 nodeid = id(t)
                 if isinstance(t, Variable):
-                    wd = t.weight_decay or self._weight_decay
-                    #wd = None
-                    # if t.weight_decay is not None:
-                    #    wd = t.weight_decay
-                    # elif self._weight_decay is not None:
-                    #    wd = self._weight_decay
-                    if wd is not None:
-                        self.variables[nodeid] = wd * t
+                    self.check_weight_decay(t)
                 seen = nodeid in self._refcounts
                 self._refcounts[nodeid] += 1
 
                 if not seen and not getattr(t, '_no_backward', False):
                     for c in t._args:
                         q.append(c)
+
+    def check_weight_decay(self, node):
+        if node.weight_decay is not None:
+            wd = node.weight_decay or self._weight_decay
+            if wd is not None and wd != 0:
+                self.variables[id(node)] = wd * node
 
     @contextlib.contextmanager
     def unlock_node(self, node):
@@ -436,6 +435,8 @@ class Node(np.ndarray):
         Args:
             initial (ndarray): Initial value of following the graph.
             detach_graph (boolean): If it's True, the computational graph will be destroyed.
+            weight_decay (int): Sets the default weight decay of the model.
+                                See the Variable class for more info.
         '''
         if not self._has_autoupdate():
             return Grads()
@@ -847,6 +848,28 @@ class Variable(Node):
     Args:
         value (Variable,ndarray): Input array.
         auto_update (bool): Auto update flag.
+        weight_decay (int):
+            Weight decay allows the user to choose if weight decay is to be used in any
+            of their variables.
+            If weight decay is not defined in the Variable (I.e. defaults to None),
+            then no weight decay is performed.
+
+            For convenience, one can define a variable with a weight decay of 0 and provide
+            the weight decay argument when building the gradients to default all weights to the
+            same λ for weight decay.
+
+            Individually assigned weight decay takes precedence over this default value,
+            allowing users to customize the weight decay in the network.
+
+            In summary, weight decay updates according to the following table.
+            ┌───────────┬───────────┬──────────────┐
+            │ Variable  │   Grad    │   Result     │
+            ├───────────┼───────────┼──────────────┤
+            │ None      │   <Any>   │   No Update  │
+            │ 0.3       │   <Any>   │   0.3        │
+            │ 0         │   None/0  │   No Update  │
+            │ 0         │   0.3     │   0.3        │
+            └───────────┴───────────┴──────────────┘
 
     Example:
         >>> import numpy as np
