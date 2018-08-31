@@ -3,7 +3,7 @@
 import numpy as np
 from renom.core import Node
 from renom.layers.function.utils import imnpool, poolnim
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 from renom.cuda import is_cuda_active
 
 

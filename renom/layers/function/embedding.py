@@ -3,7 +3,7 @@
 
 from __future__ import division
 import numpy as np
-from renom.core import Node, get_gpu, GPUValue, Variable
+from renom.core import Node, Variable
 from renom import precision
 from renom.layers.function.parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal

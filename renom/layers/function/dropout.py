@@ -3,7 +3,7 @@
 
 from __future__ import division
 import numpy as np
-from renom.core import Node, get_gpu, GPUValue
+from renom.core import Node
 from renom import precision
 from renom.layers.function.parameterized import Model
 

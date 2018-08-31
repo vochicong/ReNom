@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division
 import numpy as np
-from renom.core import BinOp, Node, get_gpu
-from renom.cuda import cuda as cu
+from renom.core import BinOp, Node
+import renom.cuda as cu
 from renom.layers.function.utils import tuplize
 
 
