@@ -354,6 +354,20 @@ def test_softmax(node, x, use_gpu):
 
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
+    Variable(rand((3, 2, 4))),
+    Variable(rand((1, 3))),
+])
+def test_softplus(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.softplus(node))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
     Variable(rand((2, 1))),
     Variable(rand((1, 2))),
 ])

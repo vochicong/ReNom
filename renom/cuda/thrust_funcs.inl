@@ -1099,6 +1099,29 @@ namespace renom{
 	}
 
 
+  __global__ void cuda_softplus_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
+  {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < size) {
+      b[idx] = log(1 + exp(a[idx]));
+    }
+  }
+  void thrust_softplus_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
+  {
+    cuda_softplus_forward<<<size / 256 + 1, 256, 0, GET_STREAM_NAME()>>>(a, b, size);
+  }
+
+  __global__ void cuda_softplus_backward(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *dy, int size)
+  {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < size) {
+      b[idx] = dy[idx] / (1 + exp(-a[idx]));
+    }
+  }
+  void thrust_softplus_backward(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *dy, int size)
+  {
+    cuda_softplus_backward<<<size / 256 + 1, 256, 0, GET_STREAM_NAME()>>>(a, b, dy, size);
+  }
 
 	// Sigmoid
 	struct sigmoid_function
