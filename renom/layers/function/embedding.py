@@ -83,16 +83,17 @@ class Embedding(Parametrized):
         2. Both ``output_size`` and ``input_size`` must be specified.
     """
 
-    def __init__(self, output_size, input_size, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size, initializer=GlorotNormal(), weight_decay=None):
         self._output_size = output_size
         self._initializer = initializer
+        self._weight_decay=weight_decay
         super(Embedding, self).__init__(input_size)
 
     def weight_initiallize(self, input_size):
         size_i = input_size[0] if isinstance(input_size, tuple) else input_size
         size_o = self._output_size
         self.params = {
-            "w": Variable(self._initializer((size_i, size_o)), auto_update=True)}
+            "w": Variable(self._initializer((size_i, size_o)), auto_update=True, weight_decay=self._weight_decay)}
 
     def forward(self, x):
         return embedding(x, self.params.w)
