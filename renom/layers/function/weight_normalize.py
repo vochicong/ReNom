@@ -128,15 +128,16 @@ class WeightNormalize(Parametrized):
     .. [weight_norm] https://arxiv.org/abs/1602.07868
     '''
 
-    def __init__(self, units, gain=0.1, initializer=init.GlorotNormal(), input_size=None):
+    def __init__(self, units, gain=0.1, initializer=init.GlorotNormal(), input_size=None,weight_decay):
         super(WeightNormalize, self).__init__(input_size)
         self._units = units
         self._gain = gain
+        self._weight_decay=weight_decay
         self._initializer = initializer
 
     def weight_initiallize(self, input_size):
         self.params = {
-            "w": Variable(self._initializer((input_size[0], self._units)), auto_update=True),
+            "w": Variable(self._initializer((input_size[0], self._units)), auto_update=True,weight_decay=self._weight_decay),
             "gain": Variable(np.ones((1, self._units)) * self._gain, auto_update=True),
             "bias": Variable(np.ones((1, self._units)), auto_update=True)}
 
