@@ -3,7 +3,8 @@
 
 import numpy as np
 from renom.layers.function.utils import imncol, colnim, pad_dx, pad_image, colnw
-from renom.core import Node, Variable, to_value, GPUValue, get_gpu, precision
+from renom.core import Node, Variable, to_value, GPUValue, get_gpu
+from renom import precision
 from .parameterized import Parametrized
 from renom.utility.initializer import Gaussian
 from renom.cuda import cuda as cu

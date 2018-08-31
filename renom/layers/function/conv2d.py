@@ -3,7 +3,8 @@
 
 import numpy as np
 from renom.layers.function.utils import im2col, col2im, out_size, tuplize
-from renom.core import Node, Variable, to_value, GPUValue, get_gpu, precision
+from renom.core import Node, Variable, to_value, GPUValue, get_gpu
+from renom import precision
 from .parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
 from renom.cuda import cuda as cu

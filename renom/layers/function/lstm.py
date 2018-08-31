@@ -5,7 +5,8 @@ from __future__ import division
 import numpy as np
 from renom.layers.activation.sigmoid import sigmoid
 from renom.layers.activation.tanh import tanh
-from renom.core import Node, Variable, get_gpu, precision, GPUValue
+from renom.core import Node, Variable, get_gpu, GPUValue
+from renom import precision
 from renom.operation import dot, sum
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized

@@ -4,7 +4,7 @@ import itertools
 import collections
 import cython
 import numpy as np
-from renom.debug_graph import *
+import renom.debug_graph
 
 try:
     from . import is_cuda_active, use_device
