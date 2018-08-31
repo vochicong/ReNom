@@ -245,7 +245,7 @@ class Lstm(Parametrized):
     .. [lstm] Learning Precise Timing with LSTM Recurrent Networks
     '''
 
-    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal(), weight_decay=None):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal(), weight_decay=0):
         self._size_o = output_size
         self._ignore_bias = ignore_bias
         self._initializer = initializer

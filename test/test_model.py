@@ -154,6 +154,38 @@ def test_save(tmpdir_factory):
     assert not nn2.layer1.layer1.params.b._auto_update
     assert nn2.AAA == 9999
 
+def test_weight_decay():
+    set_cuda_active(False)
+    def add_weight_decay(weighted_model, decay):
+        reg = rm.sum(weighted_model.params.w * weighted_model.params.w)
+        return reg * (decay / 2)
+
+    test_decay = 0.25
+    input = np.random.rand(2,2)
+    unweighted_model = rm.Dense(2, input_size=(2,))
+    weighted_model = rm.Dense(2, input_size=(2,), weight_decay=test_decay)
+    unweighted_model.params['w'].setflags(write=True)
+    unweighted_model.params['w'][...] = weighted_model.params['w'][...]
+
+    set_cuda_active(True)
+
+    with unweighted_model.train(), weighted_model.train():
+        unweighted_loss = rm.sum(unweighted_model(input))
+        weighted_loss = rm.sum(weighted_model(input))
+        added_loss = rm.sum(unweighted_loss + add_weight_decay(unweighted_model, test_decay))
+    n_1 = unweighted_loss.grad(weight_decay=test_decay,detach_graph=False).get(unweighted_model.params["w"])
+    n_2 = weighted_loss.grad(detach_graph=False).get(weighted_model.params["w"])
+    n_3 = added_loss.grad(detach_graph=False).get(unweighted_model.params["w"])
+    map(lambda x: x.to_cpu(), [n_1, n_2, n_3])
+    try:
+        assert np.allclose(n_1, n_2)
+        assert np.allclose(n_1, n_3)
+    except AssertionError:
+        print("Error in weight decay")
+        print(n_1)
+        print(n_2)
+        print(n_3)
+        assert False
 
 def test_update():
     nn = rm.Dense(2)
