@@ -2,7 +2,7 @@
 # encoding: utf-8
 
 import numpy as np
-from renom.core import Node, GPUValue, to_value, get_gpu
+from renom.core import Node, to_value
 from renom.layers.function.utils import roi_pooling_slice, region_cordinates, roi_pooling_slice_decode
 import renom.cuda as cu
 

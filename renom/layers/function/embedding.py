@@ -7,7 +7,7 @@ from renom.core import Node, get_gpu, GPUValue, Variable
 from renom import precision
 from renom.layers.function.parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 class embedding(Node):

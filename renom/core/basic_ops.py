@@ -1,7 +1,9 @@
 from __future__ import division
 from renom.core import Node
 import numpy as np
-from renom.cuda.gpuvalue import GPUValue
+import renom.cuda
+if renom.cuda.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue
 
 def to_value(array):
     if isinstance(array, Node):

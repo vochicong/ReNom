@@ -9,7 +9,7 @@ import weakref
 import copy
 import numpy as np
 from renom import get_model_graph, EnterModel, LeaveModel, Pos
-from renom.core import Node, Variable, GPUValue
+from renom.core import Node, Variable
 import renom.cuda
 from renom.cuda import use_device, is_cuda_active
 from future.utils import with_metaclass

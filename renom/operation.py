@@ -2,17 +2,14 @@
 from __future__ import print_function, division
 
 import numpy as np
-from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshape
+from renom.core import Node, BinOp, UnaryOp, to_value, Reshape
 from renom.debug_graph import showmark
 from renom.config import precision
 
 try:
     from renom.cuda.cublas import *
     from renom.cuda.cuda_base import *
-    if precision == np.float32:
-        from renom.cuda.thrust_float import *
-    else:
-        from renom.cuda.thrust_double import *
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 except ImportError:
     pass
 

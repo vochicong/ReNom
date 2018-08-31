@@ -1,12 +1,11 @@
 
 from __future__ import division
 import numpy as np
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 from renom.core import Node, Variable, Pow
 import renom.operation as op
 import renom.utility.initializer as init
 from .parameterized import Parametrized
-from renom.cuda.gpuvalue import *
 
 
 def normalized_form(x):

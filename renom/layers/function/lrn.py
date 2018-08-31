@@ -3,8 +3,8 @@
 
 from __future__ import division
 import numpy as np
-from renom.core import Node, get_gpu, to_value
-from renom.cuda import cuda as cu
+from renom.core import Node, to_value
+import renom.cuda as cu
 
 
 class lrn(Node):

@@ -1,8 +1,8 @@
 from __future__ import division, print_function
 import numpy as np
-from renom.core import Node, Variable, to_value, get_gpu, GPUValue
+from renom.core import Node, Variable, to_value
 from renom import precision
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 from renom.layers.function.parameterized import Parametrized
 import renom as rm
 

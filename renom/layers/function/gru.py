@@ -10,7 +10,7 @@ from renom import precision
 from renom.operation import dot, sum, concat
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 def sigmoid_diff(x):

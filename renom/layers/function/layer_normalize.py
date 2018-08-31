@@ -1,11 +1,10 @@
 
 from __future__ import division
 import numpy as np
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 from renom.core import Node, Variable
 import renom.operation as op
 from .parameterized import Parametrized
-from renom.cuda.gpuvalue import *
 
 
 def get_std_distribution(x):

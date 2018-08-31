@@ -5,12 +5,12 @@ from __future__ import division
 import numpy as np
 from renom.layers.activation.sigmoid import sigmoid
 from renom.layers.activation.tanh import tanh
-from renom.core import Node, Variable, to_value, get_gpu, GPUValue
+from renom.core import Node, Variable, to_value
 from renom import precision
 import renom.operation as op
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 def gate(x):

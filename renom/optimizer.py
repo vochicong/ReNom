@@ -2,12 +2,12 @@
 # encoding: utf-8
 from __future__ import division, print_function
 import numpy as np
-from renom.core import get_gpu, Node, Variable
+from renom.core import Node, Variable
 from renom.operation import sqrt, square
-from renom.cuda.cuda import is_cuda_active
+from renom.cuda import is_cuda_active
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 class Optimizer(with_metaclass(ABCMeta, object)):

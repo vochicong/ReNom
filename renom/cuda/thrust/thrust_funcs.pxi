@@ -13,7 +13,6 @@ from libcpp cimport bool
 import cuda_base
 import operator
 import functools
-import renom.core
 import renom.cuda
 
 # For debug

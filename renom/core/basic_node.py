@@ -7,8 +7,10 @@ from numbers import Number
 from renom import precision
 from renom import GET_ACTIVE_NODE, get_model_graph
 import renom.cuda
-from renom.cuda import is_cuda_active
-from renom.cuda.gpuvalue import GPUValue
+if renom.cuda.has_cuda():
+    from renom.cuda import is_cuda_active
+    from renom.cuda.gpuvalue import GPUValue
+
 
 
 

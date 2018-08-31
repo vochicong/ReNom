@@ -2,8 +2,9 @@ import contextlib
 from renom import precision
 import collections
 from renom.core import Node, Variable
-from renom.cuda import is_cuda_active
-from renom.cuda.gpuvalue import GPUValue
+from renom.cuda import is_cuda_active, has_cuda
+if has_cuda():
+    from renom.cuda import GPUValue
 import numpy as np
 
 class Grads:

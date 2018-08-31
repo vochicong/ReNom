@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
-from renom.core import UnaryOp, Node, get_gpu
+from renom.core import UnaryOp, Node
 from renom.debug_graph import showmark
-from renom.cuda import cuda as cu
+import renom.cuda as cu
 
 
 @showmark
