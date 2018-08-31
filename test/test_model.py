@@ -3,14 +3,13 @@ import pytest
 
 import numpy as np
 import renom as rm
-from renom.core import Variable, to_value, DEBUG_GRAPH_INIT, DEBUG_NODE_GRAPH
-from renom.cuda.cuda import set_cuda_active
+from renom.core import Variable, to_value
+from renom import DEBUG_GRAPH_INIT, DEBUG_NODE_GRAPH
+from renom.cuda import set_cuda_active
 from renom.cuda import use_device
 import test_utility
 
 set_cuda_active(True)
-
-from renom.core import DEBUG_GRAPH_INIT
 
 
 class NN(rm.Model):

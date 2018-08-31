@@ -22,7 +22,6 @@ from renom.layers.activation.sigmoid import sigmoid
 from renom.layers.activation.tanh import tanh
 from renom.layers.activation.relu import relu
 from renom.layers.activation.maxout import maxout
-
 from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
 from renom.layers.function.convnd import ConvNd, Conv3d
@@ -885,7 +884,7 @@ def test_softmax_cross_entropy_no_reduce(node, x, use_gpu):
     set_cuda_active(use_gpu)
 
     def func(node, x):
-        return rm.sum(rm.softmax_cross_entropy(node, x, reduce_sum=False))
+        return sum(rm.softmax_cross_entropy(node, x, reduce_sum=False))
     compare(func, node, node, x)
 
 
@@ -911,7 +910,7 @@ def test_sigmoid_cross_entropy_no_reduce(node, x, use_gpu):
     set_cuda_active(use_gpu)
 
     def func(node, x):
-        return rm.sum(rm.sigmoid_cross_entropy(node, x, reduce_sum=False))
+        return sum(rm.sigmoid_cross_entropy(node, x, reduce_sum=False))
     compare(func, node, node, x)
 
 
@@ -939,7 +938,7 @@ def test_mean_squared_error_no_reduce(node, x, use_gpu):
     set_cuda_active(use_gpu)
 
     def func(node, x):
-        return rm.sum(rm.mean_squared_error(node, x, reduce_sum=False))
+        return sum(rm.mean_squared_error(node, x, reduce_sum=False))
     compare(func, node, node, x)
 
 
@@ -965,7 +964,7 @@ def test_cross_entropy_no_reduce(node, x, use_gpu):
     set_cuda_active(use_gpu)
 
     def func(node, x):
-        return rm.sum(rm.cross_entropy(node, x, reduce_sum=False))
+        return sum(rm.cross_entropy(node, x, reduce_sum=False))
     compare(func, node, node, x)
 
 
@@ -1339,5 +1338,5 @@ def test_smooth_l1_no_reduce(node, x, delta, use_gpu):
     set_cuda_active(use_gpu)
 
     def func(node, x):
-        return rm.sum(rm.smoothed_l1(node, x, delta, reduce_sum=False))
+        return sum(rm.smoothed_l1(node, x, delta, reduce_sum=False))
     compare(func, node, node, x)

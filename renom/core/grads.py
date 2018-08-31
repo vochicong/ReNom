@@ -78,13 +78,13 @@ class Grads:
         if selfid in self.variables:
             v = self.variables[selfid]
             with self.unlock_node(v):
-                if isinstance(dy, GPUValue):
+                if has_cuda() and isinstance(dy, GPUValue):
                     diff = v.get_gpu() + dy
                     v.set_gpu(diff)
                 else:
                     v[...] += dy
         else:
-            if isinstance(dy, GPUValue):
+            if has_cuda() and isinstance(dy, GPUValue):
                 dy = Variable(dy)
             self.variables[selfid] = dy
             if node._auto_update:

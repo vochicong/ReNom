@@ -9,7 +9,9 @@ from renom import core
 from renom.core import EnterModel, LeaveModel, Pos
 from renom.core import Variable
 from renom import operation
-from renom import utility
+from renom.operation import *
+from renom.utility import *
+from renom.utility.distributor import *
 from renom.layers.activation import *
 from renom.layers.function import *
 from renom.layers.loss import *

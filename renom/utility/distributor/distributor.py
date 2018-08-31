@@ -3,7 +3,7 @@
 from __future__ import division
 import warnings
 import numpy as np
-from renom.core import get_gpu, Node
+from renom.core import Node
 from renom.cuda import has_cuda, is_cuda_active
 from renom.config import precision
 

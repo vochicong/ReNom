@@ -1,5 +1,5 @@
 import numpy as np
-from renom.core import Variable, GPUValue, Node, to_value
+from renom.core import Variable, Node, to_value
 from renom.operation import dot
 from renom.config import precision
 from renom.optimizer import *
