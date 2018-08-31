@@ -7,11 +7,11 @@ import numpy as np
 import renom.debug_graph
 
 try:
-    from . import is_cuda_active, use_device
-    from .thrust import *
-    from .cuda_base import *
-    from . import cuda_base
-    from . import cublas
+    from renom.cuda import is_cuda_active, use_device
+    from renom.cuda.thrust.thrust import *
+    from renom.cuda.base.cuda_base import *
+    from renom.cuda.base import cuda_base
+    from renom.cuda.cublas import cublas
 except ImportError:
     pass
 

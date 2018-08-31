@@ -7,8 +7,8 @@ from libc.stdlib cimport malloc, free
 from libc.stdint cimport uintptr_t, intptr_t
 from renom.cuda import get_gpu
 from renom.config import precision
-from cuda_utils cimport _VoidPtr
-import cuda_base
+from renom.cuda.base.cuda_utils cimport _VoidPtr
+from renom.cuda.base import cuda_base
 
 cdef cudnnTensorFormat_t tensor_format = cd.cudnnTensorFormat_t.CUDNN_TENSOR_NCHW
 
@@ -177,7 +177,7 @@ cdef class ConvolutionDescriptor(BaseConvolutionDescriptor):
         upscalex, upscaley = dilation
 
         check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))
-        check(cudnnSetConvolution2dDescriptor_9(
+        check(cudnnSetConvolution2dDescriptor(
             self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
 
 cdef class PoolingNDescriptor:

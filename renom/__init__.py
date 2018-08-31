@@ -27,14 +27,14 @@ ReNom (Top Level)
   │         Base   cuBLAS   cuDNN  cuRAND  GPUValue  Thrust
   │
   │
-  ├── Layers ────┬────────────────────────┬──────────────┐
-  │              │                        │              │
-  │         Activation                 Loss          Function
-  │              │                        │              │
-  │     < Activation Methods >     < Loss Methods >      │
-  │                                                      ├── Model
-  └──── Operations                                       │
-                                                         └── < Pre-implemented network models >
+  ├── Layers ────┬─────────────────────┬─────────────┐
+  │              │                     │             │
+  │         Activation               Loss         Function
+  │              │                     │             │
+  │     < Activation Methods >  < Loss Methods >     ├── Model
+  │                                                  │
+  │                                                  └── < Pre-implemented network models >
+  └── Operations
 
 
 

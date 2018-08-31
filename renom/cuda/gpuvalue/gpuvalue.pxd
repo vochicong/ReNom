@@ -1,7 +1,7 @@
 # distutils: language=c++
 
-from . cimport cublas
-from . cimport cuda_base
+from renom.cuda.cublas cimport cublas
+from renom.cuda.base cimport cuda_base
 
 cdef class _AdvIndex:
     cdef public object org_index

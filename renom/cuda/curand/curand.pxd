@@ -1,4 +1,4 @@
-from cuda_base cimport *
+from renom.cuda.base.cuda_base cimport *
 
 cdef extern from "curand.h":
     ctypedef enum curandStatus:
@@ -71,7 +71,7 @@ cdef extern from "curand.h":
     ctypedef curandOrdering curandOrdering_t
 
     ctypedef enum curandDirectionVectorSet:
-        # Specific set of 32-bit direction vectors generated from polynomials 
+        # Specific set of 32-bit direction vectors generated from polynomials
         # recommended by S. Joe and F. Y. Kuo, for up to 20,000 dimensions
         CURAND_DIRECTION_VECTORS_32_JOEKUO6 = 101,
         # Specific set of 32-bit direction vectors generated from polynomials
@@ -171,28 +171,28 @@ cdef extern from "curand.h":
 
     curandStatus_t curandGenerateNormal(
         curandGenerator_t generator,
-        float *outputPtr, 
+        float *outputPtr,
         size_t n,
         float mean,
         float stddev)
 
     curandStatus_t curandGenerateNormalDouble(
         curandGenerator_t generator,
-        double *outputPtr, 
+        double *outputPtr,
         size_t n,
         double mean,
         double stddev)
 
     curandStatus_t curandGenerateLogNormal(
         curandGenerator_t generator,
-        float *outputPtr, 
+        float *outputPtr,
         size_t n,
         float mean,
         float stddev)
 
     curandStatus_t curandGenerateLogNormalDouble(
         curandGenerator_t generator,
-        double *outputPtr, 
+        double *outputPtr,
         size_t n,
         double mean,
         double stddev)
@@ -242,8 +242,7 @@ cdef extern from "curand.h":
     curandStatus_t curandGetScrambleConstants32(unsigned int **constants)
 
     curandStatus_t curandGetDirectionVectors64(
-        curandDirectionVectors64_t *vectors[], 
+        curandDirectionVectors64_t *vectors[],
         curandDirectionVectorSet_t set)
 
     curandStatus_t curandGetScrambleConstants64(unsigned long long **constants)
-

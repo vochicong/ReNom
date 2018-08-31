@@ -5,6 +5,7 @@ import traceback
 import contextlib
 import bisect
 import threading
+cimport cuda_base
 
 from libc.stdio cimport printf
 cimport numpy as np
