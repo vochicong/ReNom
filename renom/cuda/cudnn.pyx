@@ -5,7 +5,7 @@ cimport cudnn as cd
 cimport cython
 from libc.stdlib cimport malloc, free
 from libc.stdint cimport uintptr_t, intptr_t
-from renom.core import get_gpu
+from renom.cuda import get_gpu
 from renom.config import precision
 from cuda_utils cimport _VoidPtr
 import cuda_base

@@ -17,7 +17,6 @@ from libc.string cimport memcpy
 from cuda_utils cimport _VoidPtr
 from renom.config import precision
 import collections
-import renom.core
 import renom.cuda
 
 # Indicate Python started shutdown process
@@ -569,6 +568,3 @@ cpdef _cuSetLimit(limit, value):
     ret = cuCtxGetLimit(&c_value, limit)
 
     cuCtxSetLimit(limit, value)
-
-
-

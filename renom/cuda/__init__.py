@@ -21,6 +21,18 @@ _cuda_is_active = False
 _cuda_is_disabled = False
 
 
+def get_gpu(array):
+    f = getattr(array, 'get_gpu', None)
+    if f:
+        return f()
+
+    if isinstance(array, np.ndarray):
+        return GPUValue(array=array)
+    elif isinstance(array, Number):
+        return array
+    else:
+        raise Exception("Gpu not supported data type.")
+
 def set_cuda_active(activate=True):
     '''If True is given, cuda will be activated.
 

@@ -22,17 +22,7 @@ def _select_device(device_id):
     return cur
 
 
-def get_gpu(array):
-    f = getattr(array, 'get_gpu', None)
-    if f:
-        return f()
 
-    if isinstance(array, np.ndarray):
-        return GPUValue(array=array)
-    elif isinstance(array, Number):
-        return array
-    else:
-        raise Exception("Gpu not supported data type.")
 
 
 def calc_broadcast_shape(*args):
