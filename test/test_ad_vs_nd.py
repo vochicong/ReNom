@@ -68,14 +68,16 @@ def onehot(shape):
         ret[np.random.randint(0, N)] = 1
     return ret
 
+
 def assert_cuda_active(should_be_active):
     if should_be_active is True:
-        assert has_cuda() # Make sure we have cuda for the test
+        assert has_cuda()  # Make sure we have cuda for the test
 
     set_cuda_active(should_be_active)
 
     if should_be_active is True:
-        assert is_cuda_active() # Make sure it is properly activated
+        assert is_cuda_active()  # Make sure it is properly activated
+
 
 def compare(func, node, *args, **kwargs):
     if 'atol' in kwargs:
@@ -437,14 +439,14 @@ def test_weight_normalize(node, use_gpu):
     compare(func, layer.params["bias"], node)
 
 
-#@pytest.mark.parametrize("node", [
+# @pytest.mark.parametrize("node", [
 #    Variable(rand((1, 2, 4, 3))),
 #    Variable(rand((2, 5))),
 #    Variable(rand((20, 2))),
 #    Variable(rand((3, 14))),
 #    Variable(rand((2, 4)))
-#])
-#def test_layer_normalize(node, use_gpu):
+# ])
+# def test_layer_normalize(node, use_gpu):
 #    node = Variable(node * 50)
 #    assert_cuda_active(use_gpu)
 #
@@ -946,6 +948,7 @@ def test_mean_squared_error(node, x, use_gpu):
         except AssertionError:
             node = Variable(rand(node.shape))
     assert False
+
 
 @pytest.mark.parametrize("node, x", [
     [Variable(rand((1, 1))), rand((1, 1))],

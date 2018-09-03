@@ -21,6 +21,7 @@ def _select_device(device_id):
     cuSetDevice(device_id)  # switch device
     return cur
 
+
 def get_gpu(array):
     f = getattr(array, 'get_gpu', None)
     if f:
@@ -32,7 +33,6 @@ def get_gpu(array):
         return array
     else:
         raise Exception("Gpu not supported data type.")
-
 
 
 def calc_broadcast_shape(*args):

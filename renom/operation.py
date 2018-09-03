@@ -179,6 +179,7 @@ class Amin(Abase):
         index = cu_reduce_argmin(array, axis)
         return value, index
 
+
 def reshape(array, shape):
     """This function reshapes array.
 

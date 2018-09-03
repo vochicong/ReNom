@@ -21,6 +21,7 @@ except ImportError as e:
 _cuda_is_active = False
 _cuda_is_disabled = False
 
+
 def set_cuda_active(activate=True):
     '''If True is given, cuda will be activated.
 

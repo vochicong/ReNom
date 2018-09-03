@@ -129,10 +129,11 @@ class layer_normalize(Node):
 
         sigma_diff = get_gpu(1 / (2 * sigma) * ((get_gpu(2 * x) + get_gpu(2 * mu) -
                                                  get_gpu(2 * (op.sum(x, axis=_ax, keepdims=True) / H + mu))) / H))
-        dx =  get_gpu(dy / sigma) \
+        dx = get_gpu(dy / sigma) \
             - get_gpu(sigma_diff * get_gpu(op.sum(x * dy, axis=_ax, keepdims=True)) / get_gpu(sigma ** 2)) \
             - get_gpu(get_gpu(op.sum(mu_diff * dy, axis=_ax, keepdims=True)) / sigma) \
-            + get_gpu(sigma_diff * get_gpu(op.sum(dy, axis=_ax, keepdims=True)) * get_gpu(mu / get_gpu(sigma ** 2)))
+            + get_gpu(sigma_diff * get_gpu(op.sum(dy, axis=_ax, keepdims=True))
+                      * get_gpu(mu / get_gpu(sigma ** 2)))
         dx *= gain
 
         if isinstance(self.attrs._x, Node):

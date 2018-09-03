@@ -7,6 +7,7 @@ if has_cuda():
     from renom.cuda.gpuvalue import GPUValue, get_gpu
 import numpy as np
 
+
 class Grads:
     '''Grads class. This class contains gradients of each Node object.
 
@@ -184,6 +185,7 @@ class Grads:
                     if id(node) in self.variables:
                         self.update_node(node, opt)
 
+
 def _grad(self, initial=None, detach_graph=True, **kwargs):
     '''This method follows computational graph and returns the gradients of
     Variable object.
@@ -210,4 +212,6 @@ def _grad(self, initial=None, detach_graph=True, **kwargs):
     if detach_graph:
         self.detach_graph()
     return context
+
+
 Node.grad = _grad

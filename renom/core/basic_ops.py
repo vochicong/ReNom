@@ -6,6 +6,7 @@ if renom.cuda.has_cuda():
     from renom.cuda.thrust.thrust import *
     from renom.cuda.gpuvalue.gpuvalue import GPUValue, get_gpu
 
+
 def to_value(array):
     if isinstance(array, Node):
         array.to_cpu()
@@ -13,12 +14,14 @@ def to_value(array):
     else:
         return array
 
+
 class UnaryOp(Node):
     def __new__(cls, arg, *args, **kwargs):
         value = cls.calc_value(arg, *args, **kwargs)
         ret = super(UnaryOp, cls).__new__(cls, value)
         ret.attrs._arg = arg
         return ret
+
 
 class Neg(UnaryOp):
 
@@ -38,7 +41,9 @@ class Neg(UnaryOp):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, -get_gpu(dy), **kwargs)
 
+
 Node.__neg__ = lambda self: Neg(self)
+
 
 class Abs(UnaryOp):
 
@@ -64,7 +69,9 @@ class Abs(UnaryOp):
             cuabs_backward(get_gpu(self.attrs._arg), new_ptr)
             self.attrs._arg._update_diff(context, new_ptr, **kwargs)
 
+
 Node.__abs__ = lambda self: Abs(self)
+
 
 class Invert(UnaryOp):
 
@@ -77,8 +84,6 @@ class Invert(UnaryOp):
 
     def _backward_gpu(self, context, dy, **kwargs):
         return self.attrs._backward_cpu(context, dy, **kwargs)
-
-
 
 
 class BinOp(Node):
@@ -160,6 +165,7 @@ class Add(BinOp):
 Node.__add__ = lambda self, other: Add(self, other)
 Node.__iadd__ = lambda self, other: Add(self, other)
 
+
 class RAdd(Add):
 
     @classmethod
@@ -170,7 +176,9 @@ class RAdd(Add):
     def _oper_gpu(cls, lhs, rhs):
         return get_gpu(rhs) + get_gpu(lhs)
 
+
 Node.__radd__ = lambda self, other: RAdd(other, self)
+
 
 class Sub(BinOp):
 
@@ -207,8 +215,10 @@ class Sub(BinOp):
 
             self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
 
+
 Node.__sub__ = lambda self, other: Sub(self, other)
 Node.__isub__ = lambda self, other: Sub(self, other)
+
 
 class RSub(Sub):
 
@@ -220,7 +230,9 @@ class RSub(Sub):
     def _oper_gpu(cls, lhs, rhs):
         return - get_gpu(rhs) + get_gpu(lhs)
 
+
 Node.__rsub__ = lambda self, other: RSub(other, self)
+
 
 class Mul(BinOp):
 
@@ -260,8 +272,10 @@ class Mul(BinOp):
 
             self.attrs._lhs._update_diff(context, dxl, **kwargs)
 
+
 Node.__mul__ = lambda self, other: Mul(self, other)
 Node.__imul__ = lambda self, other: Mul(self, other)
+
 
 class RMul(Mul):
 
@@ -273,7 +287,9 @@ class RMul(Mul):
     def _oper_gpu(cls, lhs, rhs):
         return get_gpu(rhs) * get_gpu(lhs)
 
+
 Node.__rmul__ = lambda self, other: RMul(other, self)
+
 
 class Div(BinOp):
 
@@ -339,6 +355,7 @@ class TrueDiv(Div):
     def _oper_gpu(cls, lhs, rhs):
         return get_gpu(lhs) / get_gpu(rhs)
 
+
 Node.__truediv__ = lambda self, other: TrueDiv(self, other)
 Node.__itruediv__ = lambda self, other: TrueDiv(self, other)
 
@@ -349,7 +366,9 @@ class RTrueDiv(TrueDiv):
     def _oper_cpu(cls, lhs, rhs):
         return np.ndarray.__rtruediv__(rhs, lhs)
 
+
 Node.__rtruediv__ = lambda self, other: RTrueDiv(other, self)
+
 
 class Mod(BinOp):
 
@@ -438,6 +457,7 @@ class Pow(BinOp):
             new_r_dx = get_gpu(dy) * get_gpu(self) * lhs
             self.attrs._rhs._update_diff(context, new_r_dx, **kwargs)
 
+
 Node.__pow__ = lambda self, other: Pow(self, other)
 Node.__ipow__ = lambda self, other: Pow(self, other)
 
@@ -451,6 +471,7 @@ class RPow(Pow):
     @classmethod
     def _oper_gpu(cls, lhs, rhs):
         return get_gpu(lhs) ** get_gpu(rhs)
+
 
 Node.__rpow__ = lambda self, other: RPow(other, self)
 
@@ -633,8 +654,7 @@ class GetItem(BinOp):
                 return False
         return True
 
-def _getitem(self, index): return GetItem(self, index)
-Node.__getitem__ = _getitem
+Node.__getitem__ = lambda self, index: GetItem(self, index)
 
 
 class GetFgAry(Node):
@@ -742,6 +762,9 @@ class GetSlice(Node):
         self._backward_cpu(context, dy, **kwargs)
 
 
+Node.__getslice__ = lambda self, i, j: GetSlice(self, i, j)
+
+
 class AssignPredBox(Node):
     def __new__(cls, arg, x, y, h, w):
         ary = GPUValue(shape=arg.shape)
@@ -816,6 +839,7 @@ class Reshape(Node):
             self.attrs._array._update_diff(context, get_gpu(
                 dy).reshape(self.attrs._shape), **kwargs)
 
+
 def _reshape(self, *shape):
     """Returns reshaped array.
 
@@ -840,7 +864,10 @@ def _reshape(self, *shape):
     if isinstance(shape[0], (list, tuple)):
         shape = tuple(shape[0])
     return Reshape(self, shape)
+
+
 Node.reshape = _reshape
+
 
 class Transpose2d(UnaryOp):
     @classmethod
@@ -859,6 +886,8 @@ class Transpose2d(UnaryOp):
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, get_gpu(dy).T, **kwargs)
+
+
 class _TransposeProperty:
     def __get__(self, obj, type=None):
         """Returns 2d transposed array.
@@ -878,10 +907,13 @@ class _TransposeProperty:
              [ 1.  3.]]
         """
         if obj is None:
-            raise AttributeError("Make sure you are taking the transpose of an instance of the Node class, not the Node class itself.")
+            raise AttributeError(
+                "Make sure you are taking the transpose of an instance of the Node class, not the Node class itself.")
         return Transpose2d(obj)
 
+
 Node.T = _TransposeProperty()
+
 
 class Transpose(Node):
 
@@ -913,6 +945,7 @@ class Transpose(Node):
             axis = self.attrs._axis
             self.attrs._arg._update_diff(context, get_gpu(dy).transpose(axis), **kwargs)
 
+
 def _transpose(self, *axis):
     """Returns an array with axes transposed.
 
@@ -942,7 +975,10 @@ def _transpose(self, *axis):
 
     assert len(self.shape) == len(ax), "Axis must be same size to matrix dim size."
     return Transpose(self, ax)
+
+
 Node.transpose = _transpose
+
 
 class Pos(UnaryOp):
 
@@ -962,6 +998,7 @@ class Pos(UnaryOp):
         if isinstance(self.attrs._arg, Node):
             self.attrs._arg._update_diff(context, get_gpu(dy), **kwargs)
 
+
 class Mark(Pos):
     def __new__(cls, arg, model):
         ret = super(Mark, cls).__new__(cls, arg)
@@ -971,6 +1008,7 @@ class Mark(Pos):
 
     def _reduce_graph(self):
         return
+
 
 class NodeMark(Mark):
     pass

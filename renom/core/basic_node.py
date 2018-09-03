@@ -5,7 +5,7 @@ import weakref
 import numpy as np
 from numbers import Number
 from renom import precision
-from renom import GET_ACTIVE_NODE, get_model_graph
+from renom import GET_ACTIVE_NODE, get_model_graph, SET_NODE_DICT, NodeMark, Pos
 import renom.cuda
 if renom.cuda.has_cuda():
     from renom.cuda.base import cuda_base
@@ -233,8 +233,6 @@ class Node(np.ndarray):
         if self._gpu:
             self._gpu = None
 
-
-
     def _update_diff(self, context, dy, **kwargs):
         ready = context.add(self, dy)
         if ready:
@@ -299,7 +297,7 @@ class Node(np.ndarray):
         assert False
 
     def __invert__(self):
-        return Invert(self)
+        assert False
 
     def __add__(self, other):
         '''This method is defined in basic_ops.py'''
@@ -319,6 +317,7 @@ class Node(np.ndarray):
 
     def __rsub__(self, other):
         assert False
+
     def __isub__(self, other):
         assert False
 
@@ -363,16 +362,16 @@ class Node(np.ndarray):
         assert False
 
     def __rmod__(self, other):
-        return RMod(other, self)
+        assert False
 
     def __imod__(self, other):
-        return Mod(self, other)
+        assert False
 
     def __divmod__(self, other):
-        return DivMod(self, other)
+        assert False
 
     def __rdivmod__(self, other):
-        return RDivMod(other, self)
+        assert False
 
     def __pow__(self, other):
         assert False
@@ -384,49 +383,49 @@ class Node(np.ndarray):
         assert False
 
     def __lshift__(self, other):
-        return Lshift(self, other)
+        assert False
 
     def __rlshift__(self, other):
-        return RLshift(other, self)
+        assert False
 
     def __ilshift__(self, other):
-        return Lshift(self, other)
+        assert False
 
     def __rshift__(self, other):
-        return Rshift(self, other)
+        assert False
 
     def __rrshift__(self, other):
-        return RRshift(other, self)
+        assert False
 
     def __irshift__(self, other):
-        return Rshift(self, other)
+        assert False
 
     def __and__(self, other):
-        return And(self, other)
+        assert False
 
     def __rand__(self, other):
-        return RAnd(other, self)
+        assert False
 
     def __iand__(self, other):
-        return And(self, other)
+        assert False
 
     def __xor__(self, other):
-        return Xor(self, other)
+        assert False
 
     def __rxor__(self, other):
-        return RXor(other, self)
+        assert False
 
     def __ixor__(self, other):
-        return Xor(self, other)
+        assert False
 
     def __or__(self, other):
-        return Or(self, other)
+        assert False
 
     def __ror__(self, other):
-        return ROr(other, self)
+        assert False
 
     def __ior__(self, other):
-        return Or(self, other)
+        assert False
 
     def __getitem__(self, index):
         '''This method is defined in basic_ops.py'''
@@ -439,7 +438,7 @@ class Node(np.ndarray):
             np.ndarray.__setitem__(self, index, value)
 
     def __getslice__(self, i, j):
-        return GetSlice(self, i, j)
+        assert False
 
     def __lt__(self, other):
         self.to_cpu()
@@ -541,7 +540,6 @@ class Node(np.ndarray):
 
         ret = getattr(ufunc, method)(*new_inputs, **kwargs)
         return ret
-
 
     def reshape(self, *shape):
         '''This method is defined in basic_ops.py'''

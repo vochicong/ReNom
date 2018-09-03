@@ -8,6 +8,7 @@ import renom.cuda as cu
 if cu.has_cuda():
     from renom.cuda.gpuvalue import get_gpu
 
+
 class lrn(Node):
 
     def __new__(cls, x, n=5, k=2, a=1e-4, b=0.75):
