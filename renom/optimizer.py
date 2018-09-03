@@ -8,6 +8,8 @@ from renom.cuda import is_cuda_active
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 class Optimizer(with_metaclass(ABCMeta, object)):

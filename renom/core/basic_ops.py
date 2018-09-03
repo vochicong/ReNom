@@ -654,6 +654,7 @@ class GetItem(BinOp):
                 return False
         return True
 
+
 Node.__getitem__ = lambda self, index: GetItem(self, index)
 
 

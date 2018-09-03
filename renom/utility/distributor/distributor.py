@@ -9,6 +9,7 @@ from renom.config import precision
 
 if has_cuda():
     import renom.cuda.base.cuda_base as cu
+    from renom.cuda.gpuvalue import get_gpu
     cuda_imported = True
 else:
     cuda_imported = False

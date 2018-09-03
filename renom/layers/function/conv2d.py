@@ -92,7 +92,8 @@ class conv2d(Node):
             if db is None:
                 db = np.zeros((1, self.attrs._w.shape[0], 1, 1))
             cu.cuConvolutionBackward(handle, self.attrs._conv_desc, self.attrs._filter_desc,
-                                     get_gpu(self.attrs._x), get_gpu(self.attrs._w), get_gpu(dy), get_gpu(dw), get_gpu(db), get_gpu(dx), **kwargs)
+                                     get_gpu(self.attrs._x), get_gpu(self.attrs._w), get_gpu(dy),
+                                     get_gpu(dw), get_gpu(db), get_gpu(dx), **kwargs)
         if isinstance(self.attrs._w, Node):
             self.attrs._w._update_diff(context, dw, **kwargs)
 
