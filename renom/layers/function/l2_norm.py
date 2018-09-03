@@ -3,6 +3,8 @@ import numpy as np
 from renom.core import Node, Variable, to_value
 from renom import precision
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 from renom.layers.function.parameterized import Parametrized
 import renom as rm
 

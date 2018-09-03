@@ -5,6 +5,8 @@ import numpy as np
 import renom as rm
 from renom.core import BinOp, Node, to_value
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 from renom.operation import where
 
 

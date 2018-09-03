@@ -9,6 +9,8 @@ from renom import precision
 from .parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 class deconv2d(Node):
@@ -83,7 +85,7 @@ class deconv2d(Node):
                       for g in (self.attrs._w, self.attrs._b, self.attrs._x))
         with cu.cudnn_handler() as handle:
             cu.cuConvolutionForward(handle, self.attrs._conv_desc,
-                                    self.attrs._filter_desc, get_gpu(dy), get_gpu(self.attrs._w), dx, 0)
+                                    self.attrs._filter_desc, get_gpu(dy), get_gpu(self.attrs._w), dx)
             cu.cuConvolutionBackwardFilter(handle, self.attrs._conv_desc,
                                            self.attrs._filter_desc, get_gpu(dy), get_gpu(self.attrs._x), dw)
             if db is not None:

@@ -2,6 +2,8 @@
 from __future__ import division
 import numpy as np
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 from renom.core import Node, Variable, Pow
 import renom.operation as op
 import renom.utility.initializer as init

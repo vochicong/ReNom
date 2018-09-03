@@ -8,6 +8,8 @@ from renom import precision
 from renom.layers.function.parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 BATCH_NORMALIZE_FEATUREMAP = 1
 BATCH_NORMALIZE_ELEMENTWISE = 2

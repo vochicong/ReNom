@@ -41,7 +41,7 @@ from renom.layers.function.layer_normalize import LayerNormalize
 from renom.layers.function.lrn import Lrn
 from test_utility import auto_diff, numeric_diff
 
-from renom.cuda import is_cuda_active, set_cuda_active, curand_generator
+from renom.cuda import is_cuda_active, set_cuda_active, curand_generator, has_cuda
 from test_utility import skipgpu
 
 if precision is not np.float64:
@@ -68,6 +68,11 @@ def onehot(shape):
         ret[np.random.randint(0, N)] = 1
     return ret
 
+def assert_cuda_active(should_be_active):
+    if should_be_active is True:
+        assert has_cuda()
+        set_cuda_active(should_be_active)
+        assert is_cuda_active()
 
 def compare(func, node, *args, **kwargs):
     if 'atol' in kwargs:
@@ -97,7 +102,7 @@ def compare(func, node, *args, **kwargs):
 ])
 def test_add(node, x, raise_error, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     # Add
     def func_add1(node, x):
@@ -139,7 +144,7 @@ def test_add(node, x, raise_error, use_gpu):
 ])
 def test_sub(node, x, raise_error, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func_sub1(node, x):
         return sum(x - node)
@@ -178,7 +183,7 @@ def test_sub(node, x, raise_error, use_gpu):
 ])
 def test_mul(node, x, raise_error, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func_mul1(node, x):
         return sum(x * node)
@@ -218,7 +223,7 @@ def test_mul(node, x, raise_error, use_gpu):
 def test_div(node, x, raise_error, use_gpu):
     node = Variable(node)
     x = np.array(x)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func_div1(node, x):
         return sum(x / node)
@@ -254,7 +259,7 @@ def test_div(node, x, raise_error, use_gpu):
 ])
 def test_tanh_activation(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(tanh(node))
@@ -269,7 +274,7 @@ def test_tanh_activation(node, use_gpu):
 ])
 def test_sigmoid_activation(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(sigmoid(node))
@@ -284,7 +289,7 @@ def test_sigmoid_activation(node, use_gpu):
 ])
 def test_relu_activation(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(relu(node))
@@ -299,7 +304,7 @@ def test_relu_activation(node, use_gpu):
 ])
 def test_selu_activation(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(rm.selu(node))
@@ -314,7 +319,7 @@ def test_selu_activation(node, use_gpu):
 ])
 def test_elu_activation(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(rm.elu(node))
@@ -329,7 +334,7 @@ def test_elu_activation(node, use_gpu):
 ])
 def test_leaky_relu_activation(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(rm.leaky_relu(node))
@@ -344,7 +349,7 @@ def test_leaky_relu_activation(node, use_gpu):
 ])
 def test_softmax(node, x, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return rm.cross_entropy(rm.softmax(node), x)
@@ -358,7 +363,7 @@ def test_softmax(node, x, use_gpu):
 ])
 def test_dense(node, use_gpu, ignore_bias):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = Dense(output_size=2, ignore_bias=ignore_bias)
 
@@ -378,7 +383,7 @@ def test_dense(node, use_gpu, ignore_bias):
 ])
 def test_embedding(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = rm.Embedding(output_size=2, input_size=2)
 
@@ -394,7 +399,7 @@ def test_embedding(node, use_gpu):
 ])
 def test_batch_normalize(node, use_gpu, ignore_bias):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = BatchNormalize(ignore_bias=ignore_bias)
 
@@ -415,7 +420,7 @@ def test_batch_normalize(node, use_gpu, ignore_bias):
 ])
 def test_weight_normalize(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = WeightNormalize(4)
     layer2 = Dense(3)  # This is important to ensure that dy is properly transferred backwards
@@ -438,7 +443,7 @@ def test_weight_normalize(node, use_gpu):
 ])
 def test_layer_normalize(node, use_gpu):
     node = Variable(node * 50)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = LayerNormalize()
     layer2 = Dense(4)
@@ -455,9 +460,15 @@ def test_layer_normalize(node, use_gpu):
     if use_gpu:
         a = 1e-2
         r = 1e-3
-    compare(func, node, node, atol=a, rtol=r)
-    compare(func, layer.params["gain"], node)
-    compare(func, layer.params["bias"], node)
+    for trial in range(1):
+        try:
+            compare(func, node, node, atol=a, rtol=r)
+            compare(func, layer.params["gain"], node)
+            compare(func, layer.params["bias"], node)
+            return
+        except:
+            node = Variable(rand(node.shape))
+    assert False
 
 
 @pytest.mark.parametrize("node", [
@@ -466,7 +477,7 @@ def test_layer_normalize(node, use_gpu):
 ])
 def test_lrn(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = Lrn()
 
@@ -481,7 +492,7 @@ def test_lrn(node, use_gpu):
 ])
 def test_batch_normalize_featurewise(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = BatchNormalize(mode=BATCH_NORMALIZE_FEATUREMAP)
 
@@ -498,7 +509,7 @@ def test_batch_normalize_featurewise(node, use_gpu):
 ])
 def test_conv2d(node, use_gpu, ignore_bias):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = Conv2d(channel=3, ignore_bias=ignore_bias)
 
@@ -519,7 +530,7 @@ def test_conv2d(node, use_gpu, ignore_bias):
 ])
 def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = Conv2d(channel=3, dilation=size)
 
@@ -542,7 +553,7 @@ def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
 ])
 def test_convnd(node, error, use_gpu, ignore_bias):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
     layer = ConvNd(channel=1, filter=3, stride=1, ignore_bias=ignore_bias)
 
     def func(node):
@@ -569,7 +580,7 @@ def test_convnd(node, error, use_gpu, ignore_bias):
 ])
 def test_deconv2d(node, use_gpu, ignore_bias):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = Deconv2d(channel=3, ignore_bias=ignore_bias)
 
@@ -590,7 +601,7 @@ def test_deconv2d(node, use_gpu, ignore_bias):
 ])
 def test_deconv2d_with_dilation(node, size, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = Deconv2d(channel=3, dilation=size)
 
@@ -607,7 +618,7 @@ def test_deconv2d_with_dilation(node, size, use_gpu):
 ])
 def test_max_pool2d(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = MaxPool2d()
 
@@ -624,7 +635,7 @@ def test_max_pool2d(node, use_gpu):
 def test_max_poolnd(node, use_gpu):
 
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
     layer = MaxPoolNd(kernel=2)
 
     def func(node):
@@ -641,7 +652,7 @@ def test_max_poolnd(node, use_gpu):
     ], dtype=np.float64))]
 ])
 def test_roi_pool2d(node, rois, use_gpu):
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
     node = Variable(node)
     layer = RoiPool2d(outh=7, outw=5, spatial_scale=0.6)
 
@@ -655,7 +666,7 @@ def test_roi_pool2d(node, rois, use_gpu):
 ])
 def test_l2norm(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = L2Norm(20)
 
@@ -671,7 +682,7 @@ def test_l2norm(node, use_gpu):
 ])
 def test_average_pool2d(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = AveragePool2d()
 
@@ -686,7 +697,7 @@ def test_average_pool2d(node, use_gpu):
 ])
 def test_average_poolnd(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
     layer = AveragePoolNd()
 
     def func(node):
@@ -701,7 +712,7 @@ def test_average_poolnd(node, use_gpu):
 def test_dropout(node, seed, use_gpu):
     use_gpu = use_gpu and is_cuda_active()
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = Dropout()
 
@@ -722,7 +733,7 @@ def test_dropout(node, seed, use_gpu):
 def test_spatial_dropout(node, seed, use_gpu):
     use_gpu = use_gpu and is_cuda_active()
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer = SpatialDropout()
 
@@ -742,7 +753,7 @@ def test_spatial_dropout(node, seed, use_gpu):
 ])
 def test_lstm(node, use_gpu, ignore_bias):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer1 = Lstm(output_size=4, ignore_bias=ignore_bias)
 
@@ -766,7 +777,7 @@ def test_lstm(node, use_gpu, ignore_bias):
 ])
 def test_gru(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer1 = Gru(output_size=30)
 
@@ -793,7 +804,7 @@ def test_gru(node, use_gpu):
 ])
 def test_lstm_temporal_connection(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer1 = Lstm(output_size=4)
 
@@ -816,7 +827,7 @@ def test_lstm_temporal_connection(node, use_gpu):
 ])
 def test_peepholelstm(node, use_gpu, ignore_bias):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer1 = rm.PeepholeLstm(output_size=4, ignore_bias=ignore_bias)
 
@@ -842,7 +853,7 @@ def test_peepholelstm(node, use_gpu, ignore_bias):
 ])
 def test_peepholelstm_temporal_connection(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     layer1 = rm.PeepholeLstm(output_size=4)
 
@@ -866,7 +877,7 @@ def test_peepholelstm_temporal_connection(node, use_gpu):
 ])
 def test_softmax_cross_entropy(node, x, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return rm.softmax_cross_entropy(node, x)
@@ -881,7 +892,7 @@ def test_softmax_cross_entropy(node, x, use_gpu):
 ])
 def test_softmax_cross_entropy_no_reduce(node, x, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return sum(rm.softmax_cross_entropy(node, x, reduce_sum=False))
@@ -894,7 +905,7 @@ def test_softmax_cross_entropy_no_reduce(node, x, use_gpu):
 ])
 def test_sigmoid_cross_entropy(node, x, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return rm.sigmoid_cross_entropy(node, x)
@@ -907,7 +918,7 @@ def test_sigmoid_cross_entropy(node, x, use_gpu):
 ])
 def test_sigmoid_cross_entropy_no_reduce(node, x, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return sum(rm.sigmoid_cross_entropy(node, x, reduce_sum=False))
@@ -921,7 +932,7 @@ def test_sigmoid_cross_entropy_no_reduce(node, x, use_gpu):
 ])
 def test_mean_squared_error(node, x, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return rm.mean_squared_error(node, x)
@@ -935,7 +946,7 @@ def test_mean_squared_error(node, x, use_gpu):
 ])
 def test_mean_squared_error_no_reduce(node, x, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return sum(rm.mean_squared_error(node, x, reduce_sum=False))
@@ -948,7 +959,7 @@ def test_mean_squared_error_no_reduce(node, x, use_gpu):
 ])
 def test_cross_entropy(node, x, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return rm.cross_entropy(node, x)
@@ -961,7 +972,7 @@ def test_cross_entropy(node, x, use_gpu):
 ])
 def test_cross_entropy_no_reduce(node, x, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return sum(rm.cross_entropy(node, x, reduce_sum=False))
@@ -977,7 +988,7 @@ def test_dot(node, x, use_gpu):
     node = Variable(node)
     x = Variable(x)
 
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return sum(rm.dot(node, x))
@@ -990,7 +1001,7 @@ def test_dot(node, x, use_gpu):
 ])
 def test_where(node, x, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return sum(rm.where(node > 0.5, node, x))
@@ -1005,7 +1016,7 @@ def test_where(node, x, use_gpu):
     [[Variable(rand((2, 2, 2))), Variable(rand((2, 2, 1))), Variable(rand((2, 2, 3)))], 2],
 ])
 def test_concat(node, axis, use_gpu):
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(rm.concat(node, axis=axis))
@@ -1021,7 +1032,7 @@ def test_concat(node, axis, use_gpu):
 ])
 def test_abs(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(abs(node))
@@ -1042,7 +1053,7 @@ def test_abs(node, use_gpu):
 ])
 def test_sum(node, axis, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
     result = sum(node, axis=axis, keepdims=True)
     assert len(result.shape) == len(node.shape)
 
@@ -1061,7 +1072,7 @@ def test_sum(node, axis, use_gpu):
 ])
 def test_log(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(rm.log(node))
@@ -1077,7 +1088,7 @@ def test_log(node, use_gpu):
 ])
 def test_exp(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(rm.exp(node))
@@ -1093,7 +1104,7 @@ def test_exp(node, use_gpu):
 ])
 def test_sqrt(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func1(node):
         return sum(rm.sqrt(node))
@@ -1121,7 +1132,7 @@ def test_sqrt(node, use_gpu):
 ])
 def test_square(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func1(node):
         return sum(rm.square(node))
@@ -1149,7 +1160,7 @@ def test_square(node, use_gpu):
 ])
 def test_reshape(node, shape, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(rm.reshape(node, shape)) + sum(node.reshape(shape)) + sum(node.reshape(*shape))
@@ -1164,7 +1175,7 @@ def test_reshape(node, shape, use_gpu):
 ])
 def test_T(node, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(node.T)
@@ -1176,7 +1187,7 @@ def test_T(node, use_gpu):
 ])
 def test_transpose(node, axis, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(node.transpose(axis))
@@ -1201,7 +1212,7 @@ def keep_dimensions(request):
 ])
 def test_max(node, axis, use_gpu, keep_dimensions):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(rm.amax(node, axis=axis, keepdims=keep_dimensions))
@@ -1234,7 +1245,7 @@ def test_max(node, axis, use_gpu, keep_dimensions):
 ])
 def test_maxout(node, axis, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(rm.maxout(node, axis=axis))
@@ -1267,7 +1278,7 @@ def test_maxout(node, axis, use_gpu):
 ])
 def test_min(node, axis, use_gpu, keep_dimensions):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(rm.amin(node, axis, keepdims=keep_dimensions))
@@ -1294,7 +1305,7 @@ def test_min(node, axis, use_gpu, keep_dimensions):
 ])
 def test_getitem(node, index, error, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node):
         return sum(node[index])
@@ -1319,7 +1330,7 @@ def test_getitem(node, index, error, use_gpu):
 ])
 def test_smooth_l1(node, x, delta, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return rm.smoothed_l1(node, x, delta)
@@ -1335,7 +1346,7 @@ def test_smooth_l1(node, x, delta, use_gpu):
 ])
 def test_smooth_l1_no_reduce(node, x, delta, use_gpu):
     node = Variable(node)
-    set_cuda_active(use_gpu)
+    assert_cuda_active(use_gpu)
 
     def func(node, x):
         return sum(rm.smoothed_l1(node, x, delta, reduce_sum=False))

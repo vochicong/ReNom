@@ -11,6 +11,8 @@ from renom.operation import dot, sum, concat
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 
 
 def sigmoid_diff(x):

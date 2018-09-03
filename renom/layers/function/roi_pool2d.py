@@ -5,6 +5,8 @@ import numpy as np
 from renom.core import Node, to_value
 from renom.layers.function.utils import roi_pooling_slice, region_cordinates, roi_pooling_slice_decode
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 class roi_pool2d(Node):

@@ -11,6 +11,8 @@ import renom.operation as op
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 def gate(x):

@@ -5,6 +5,8 @@ import numpy as np
 from renom.core import Node
 from renom.layers.activation import softmax
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 import renom as rm
 
 

@@ -8,6 +8,8 @@ from renom import precision
 from .parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 class conv2d(Node):

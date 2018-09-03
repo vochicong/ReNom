@@ -4,6 +4,8 @@ import numpy as np
 from renom.core import Node
 from renom.layers.function.utils import imnpool, poolnim
 import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 from renom.cuda import is_cuda_active
 
 

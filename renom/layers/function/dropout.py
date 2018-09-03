@@ -6,6 +6,9 @@ import numpy as np
 from renom.core import Node
 from renom import precision
 from renom.layers.function.parameterized import Model
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu, GPUValue
 
 try:
     from renom.cuda import curand_generator

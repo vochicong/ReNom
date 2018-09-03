@@ -5,7 +5,8 @@ from __future__ import division
 import numpy as np
 from renom.core import Node, to_value
 import renom.cuda as cu
-
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 
 class lrn(Node):
 
