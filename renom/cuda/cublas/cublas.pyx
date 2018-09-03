@@ -2,7 +2,7 @@ import contextlib
 import numpy as np
 from cublas import *
 from libc.stdint cimport uintptr_t
-import renom.cuda.base.cuda_base
+import renom.cuda.base.cuda_base as cuda_base
 from renom.cuda.base.cuda_base import cuCreateStream, cuDestroyStream
 
 # This variable stores the integer value of a pointer directing towards

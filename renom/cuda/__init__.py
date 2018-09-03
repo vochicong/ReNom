@@ -10,6 +10,7 @@ try:
     from renom.cuda.cudnn.cudnn import *
     _has_cuda = True
 except ImportError as e:
+    assert False
     gpu_allocator = None
     curand_generator = None
     _has_cuda = False
