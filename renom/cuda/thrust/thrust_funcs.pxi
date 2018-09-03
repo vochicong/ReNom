@@ -10,7 +10,7 @@ import numpy as np
 from libc.stdint cimport uintptr_t
 from libc.stdio cimport printf
 from libcpp cimport bool
-import cuda_base
+import renom.cuda.base.cuda_base as cuda_base
 import operator
 import functools
 import renom.cuda

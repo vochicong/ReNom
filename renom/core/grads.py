@@ -4,7 +4,7 @@ import collections
 from renom.core import Node, Variable
 from renom.cuda import is_cuda_active, has_cuda
 if has_cuda():
-    from renom.cuda import GPUValue
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 import numpy as np
 
 class Grads:

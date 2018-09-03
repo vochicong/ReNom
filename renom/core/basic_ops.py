@@ -3,7 +3,8 @@ from renom.core import Node
 import numpy as np
 import renom.cuda
 if renom.cuda.has_cuda():
-    from renom.cuda.gpuvalue import GPUValue
+    from renom.cuda.thrust.thrust import *
+    from renom.cuda.gpuvalue.gpuvalue import GPUValue, get_gpu
 
 def to_value(array):
     if isinstance(array, Node):

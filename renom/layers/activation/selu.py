@@ -6,7 +6,8 @@ from renom.debug_graph import showmark
 from renom.operation import where
 from renom.config import precision
 import renom.cuda as cu
-
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 
 @showmark
 class selu(UnaryOp):

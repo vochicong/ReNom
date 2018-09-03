@@ -7,8 +7,9 @@ from renom.debug_graph import showmark
 from renom.config import precision
 
 try:
+    from renom.cuda import *
     from renom.cuda.cublas import *
-    from renom.cuda.cuda_base import *
+    from renom.cuda.base.cuda_base import *
     from renom.cuda.gpuvalue import GPUValue, get_gpu
 except ImportError:
     pass

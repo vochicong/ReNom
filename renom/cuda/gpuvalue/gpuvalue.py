@@ -4,7 +4,7 @@ import itertools
 import collections
 import cython
 import numpy as np
-import renom.debug_graph
+import renom.debug_graph as debug
 
 try:
     from renom.cuda import is_cuda_active, use_device
@@ -21,7 +21,17 @@ def _select_device(device_id):
     cuSetDevice(device_id)  # switch device
     return cur
 
+def get_gpu(array):
+    f = getattr(array, 'get_gpu', None)
+    if f:
+        return f()
 
+    if isinstance(array, np.ndarray):
+        return GPUValue(array=array)
+    elif isinstance(array, Number):
+        return array
+    else:
+        raise Exception("Gpu not supported data type.")
 
 
 
@@ -388,8 +398,8 @@ class GPUValue(object):
         else:
             self.device_id = cuGetDevice()
 
-        if GET_ACTIVE_GPU() is not None:
-            SET_GPU_DICT(id(self), self)
+        if debug.GET_ACTIVE_GPU() is not None:
+            debug.SET_GPU_DICT(id(self), self)
 
         assert self._ptr
         self._ptr.refcount += 1

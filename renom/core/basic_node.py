@@ -8,7 +8,8 @@ from renom import precision
 from renom import GET_ACTIVE_NODE, get_model_graph
 import renom.cuda
 if renom.cuda.has_cuda():
-    from renom.cuda.gpuvalue import GPUValue
+    from renom.cuda.base import cuda_base
+    from renom.cuda.gpuvalue.gpuvalue import GPUValue
 
 
 class GraphAttrs(object):
@@ -281,7 +282,7 @@ class Node(np.ndarray):
 
         if renom.cuda.is_cuda_active():
             if self._gpu:
-                with use_device(self._gpu.device_id):
+                with cuda_base.use_device(self._gpu.device_id):
                     return self._backward_gpu(context, dy, **kwargs)
             else:
                 return self._backward_gpu(context, dy, **kwargs)

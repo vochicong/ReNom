@@ -8,7 +8,7 @@ from renom.cuda import has_cuda, is_cuda_active
 from renom.config import precision
 
 if has_cuda():
-    import renom.cuda.cuda_base as cu
+    import renom.cuda.base.cuda_base as cu
     cuda_imported = True
 else:
     cuda_imported = False

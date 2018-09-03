@@ -4,7 +4,8 @@ import numpy as np
 from renom.core import UnaryOp, Node
 from renom.debug_graph import showmark
 import renom.cuda as cu
-
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 
 @showmark
 class relu(UnaryOp):
