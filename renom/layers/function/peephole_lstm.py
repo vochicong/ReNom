@@ -259,11 +259,11 @@ class PeepholeLstm(Parametrized):
         Learning Precise Timing with LSTM Recurrent Networks
     '''
 
-    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal(),weight_decay=0):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal(), weight_decay=0):
         self._size_o = output_size
         self._ignore_bias = ignore_bias
         self._initializer = initializer
-        self._weight_decay=weight_decay
+        self._weight_decay = weight_decay
         super(PeepholeLstm, self).__init__(input_size)
 
     def weight_initiallize(self, size_i):
@@ -272,9 +272,9 @@ class PeepholeLstm(Parametrized):
         bias = np.zeros((1, size_o * 4), dtype=precision)
         bias[:, size_o:size_o * 2] = 1
         self.params = {
-            "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True,weight_decay=self._weight_decay),
-            "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True,weight_decay=self._weight_decay),
-            "wc": Variable(self._initializer((1, size_o * 3)), auto_update=True,weight_decay=self._weight_decay)}
+            "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True, weight_decay=self._weight_decay),
+            "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True, weight_decay=self._weight_decay),
+            "wc": Variable(self._initializer((1, size_o * 3)), auto_update=True, weight_decay=self._weight_decay)}
         if not self._ignore_bias:
             self.params["b"] = Variable(bias, auto_update=True)
 

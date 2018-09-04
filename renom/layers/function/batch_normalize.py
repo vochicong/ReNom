@@ -178,7 +178,7 @@ class BatchNormalize(Parametrized):
                  epsilon=1e-5,
                  ignore_bias=False,
                  initializer=GlorotNormal(),
-                 weight_decay = 0):
+                 weight_decay=0):
 
         assert momentum > 0, "The value of momentum must be lager than 0."
         self._mov_mean = 0
@@ -198,7 +198,8 @@ class BatchNormalize(Parametrized):
         if self._mode == BATCH_NORMALIZE_FEATUREMAP and len(size_i) > 2:
             size_i[2] = 1
             size_i[3] = 1
-        self.params = {"w": Variable(self._initializer(size_i).astype(precision), auto_update=True, weight_decay=self._weight_decay)}
+        self.params = {"w": Variable(self._initializer(size_i).astype(
+            precision), auto_update=True, weight_decay=self._weight_decay)}
         if not self._ignore_bias:
             self.params["b"] = Variable(np.zeros(size_i, dtype=precision), auto_update=True)
 

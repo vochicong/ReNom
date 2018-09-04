@@ -86,7 +86,7 @@ class Embedding(Parametrized):
     def __init__(self, output_size, input_size, initializer=GlorotNormal(), weight_decay=None):
         self._output_size = output_size
         self._initializer = initializer
-        self._weight_decay=weight_decay
+        self._weight_decay = weight_decay
         super(Embedding, self).__init__(input_size)
 
     def weight_initiallize(self, input_size):
