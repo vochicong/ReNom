@@ -1099,6 +1099,29 @@ namespace renom{
 	}
 
 
+  __global__ void cuda_softplus_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
+  {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < size) {
+      b[idx] = log(1 + exp(a[idx]));
+    }
+  }
+  void thrust_softplus_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
+  {
+    cuda_softplus_forward<<<size / 256 + 1, 256, 0, GET_STREAM_NAME()>>>(a, b, size);
+  }
+
+  __global__ void cuda_softplus_backward(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *dy, int size)
+  {
+    int idx = blockIdx.x * blockDim.x + threadIdx.x;
+    if (idx < size) {
+      b[idx] = dy[idx] / (1 + exp(-a[idx]));
+    }
+  }
+  void thrust_softplus_backward(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *dy, int size)
+  {
+    cuda_softplus_backward<<<size / 256 + 1, 256, 0, GET_STREAM_NAME()>>>(a, b, dy, size);
+  }
 
 	// Sigmoid
 	struct sigmoid_function
@@ -2101,5 +2124,18 @@ namespace renom{
     void thrust_clip_roi(int N, int M, VALUE_TYPE *roi_ptr, int start, int end, int step, int min_v, int max_v, VALUE_TYPE *ary_ptr)
     {
         cuda_clip_roi <<<ceil(N*M/256.0), 256.0, 0, GET_STREAM_NAME()>>>(N, M, roi_ptr, start, end, step, min_v, max_v, ary_ptr);
+    }
+
+    __global__ void cuda_clip(int elem, VALUE_TYPE * array, VALUE_TYPE max, VALUE_TYPE min)
+    {
+      int idx = blockIdx.x * blockDim.x + threadIdx.x;
+      if (idx>=elem) return;
+      if (array[idx] < min) array[idx] = min;
+      if (array[idx] > max) array[idx] = max;
+    }
+
+    void thrust_clip(int elem, VALUE_TYPE * array, VALUE_TYPE max, VALUE_TYPE min)
+    {
+      cuda_clip<<<ceil(elem/256.0), 256.0>>>(elem, array, max, min);
     }
 }

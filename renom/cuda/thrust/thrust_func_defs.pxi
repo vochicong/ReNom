@@ -148,6 +148,8 @@ cdef extern from * namespace "renom":
     cdef void thrust_leaky_relu_backward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);
     cdef void thrust_elu_forward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);
     cdef void thrust_elu_backward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);
+    cdef void thrust_softplus_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size);
+    cdef void thrust_softplus_backward(VALUE_TYPE *a, VALUE_TYPE *b, VALUE_TYPE *dy, int size);
     cdef void thrust_forward_roi_pool2d(int N, VALUE_TYPE *x, float spatial_scale,
                                         int channels, int height, int width, int outh,
                                         int outw, VALUE_TYPE *rois, VALUE_TYPE *z,
@@ -197,3 +199,4 @@ cdef extern from * namespace "renom":
 
     cdef void thrust_get_ith_bbox(int N, int M, VALUE_TYPE *bbox_ptr, int i, VALUE_TYPE *ary_ptr)
     cdef void thrust_clip_roi(int N, int M, VALUE_TYPE *roi_ptr, int start, int end, int step, int min_v, int max_v, VALUE_TYPE *ary_ptr)
+    cdef void thrust_clip(int elem, VALUE_TYPE *array, VALUE_TYPE max, VALUE_TYPE min)

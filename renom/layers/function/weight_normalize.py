@@ -51,10 +51,10 @@ class weight_normalize(Node):
         weight = self.attrs._weight
         dx = op.dot(dy, w.T)
         normal_dw = op.dot(x.T, dy)
-        w_normed = normalized_form(weight)
-        dgain = normal_dw * weight / w_normed
-        dw = (1 / w_normed * normal_dw - op.sum(weight * normal_dw, keepdims=True) *
-              weight / (op.square(w_normed) * w_normed)) * gain
+
+        dgain = normal_dw * w / gain
+        dw = w / weight * (normal_dw - np.sum(w * normal_dw / gain, keepdims=True) * w / gain)
+        db = np.ones_like(dy) * dy
 
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
@@ -133,12 +133,12 @@ class WeightNormalize(Parametrized):
         super(WeightNormalize, self).__init__(input_size)
         self._units = units
         self._gain = gain
-        self._weight_decay=weight_decay
+        self._weight_decay = weight_decay
         self._initializer = initializer
 
     def weight_initiallize(self, input_size):
         self.params = {
-            "w": Variable(self._initializer((input_size[0], self._units)), auto_update=True,weight_decay=self._weight_decay),
+            "w": Variable(self._initializer((input_size[0], self._units)), auto_update=True, weight_decay=self._weight_decay),
             "gain": Variable(np.ones((1, self._units)) * self._gain, auto_update=True),
             "bias": Variable(np.ones((1, self._units)), auto_update=True)}
 

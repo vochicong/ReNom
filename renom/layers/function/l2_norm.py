@@ -80,13 +80,14 @@ class L2Norm(Parametrized):
 
     """
 
-    def __init__(self, scale=20, input_size=None,weight_decay=0):
+    def __init__(self, scale=20, input_size=None, weight_decay=0):
         self.scale = scale
         self._weight_decay = weight_decay
         super(L2Norm, self).__init__(input_size)
 
     def weight_initiallize(self, input_size):
-        self.params = {'w': Variable(np.ones((input_size[0], 1, 1)) * self.scale, auto_update=True,weight_decay=self._weight_decay)}
+        self.params = {'w': Variable(
+            np.ones((input_size[0], 1, 1)) * self.scale, auto_update=True, weight_decay=self._weight_decay)}
 
     def forward(self, x):
         ret = l2_norm(x, self.params['w'])

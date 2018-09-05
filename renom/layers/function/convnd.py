@@ -198,7 +198,7 @@ class Conv3d(Parametrized):
     '''
 
     def __init__(self, channel=2, filter=3, padding=0, stride=1,
-                 input_size=None, ignore_bias=False, initializer=Gaussian(),weight_decay=0):
+                 input_size=None, ignore_bias=False, initializer=Gaussian(), weight_decay=0):
         self._padding = padding
         self._stride = stride
         self._kernel = filter
@@ -228,7 +228,8 @@ class Conv3d(Parametrized):
         size_f = tuple(f_lst)
         size_b = tuple([1, self._channel] + [1 for _ in range(self._dims)])
 
-        self.params = {"w": Variable(self._initializer(size_f), auto_update=True, weight_decay=self._weight_decay)}
+        self.params = {"w": Variable(self._initializer(
+            size_f), auto_update=True, weight_decay=self._weight_decay)}
         if not self._ignore_bias:
             self.params["b"] = Variable(np.ones(size_b, dtype=precision), auto_update=True)
 
