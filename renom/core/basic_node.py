@@ -5,7 +5,7 @@ import weakref
 import numpy as np
 from numbers import Number
 from renom import precision
-from renom import GET_ACTIVE_NODE, get_model_graph, SET_NODE_DICT, NodeMark, Pos
+from renom import GET_ACTIVE_NODE, get_model_graph, SET_NODE_DICT
 import renom.cuda
 if renom.cuda.has_cuda():
     from renom.cuda.base import cuda_base
@@ -87,7 +87,7 @@ class Node(np.ndarray):
             SET_NODE_DICT(id(ret), ret)
 
         if ret.SHOWMARK and get_model_graph():
-            ret = NodeMark(ret, ret)
+            ret = renom.core.NodeMark(ret, ret)
 
         return ret
 
@@ -291,7 +291,7 @@ class Node(np.ndarray):
         assert False
 
     def __pos__(self):
-        return Pos(self)
+        return renom.core.Pos(self)
 
     def __abs__(self):
         assert False
