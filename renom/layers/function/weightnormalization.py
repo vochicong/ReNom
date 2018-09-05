@@ -52,8 +52,7 @@ class weightnorm(Node):
         normal_dw = op.dot(x.T, dy)
         w_normed = normalized_form(weight)
         dgain = normal_dw * weight / w_normed
-        dw = (1 / w_normed * normal_dw - op.sum(weight * normal_dw, keepdims=True) *
-              weight / (op.square(w_normed) * w_normed)) * gain
+        dw = w / weight * (normal_dw - np.sum(w * normal_dw / gain, keepdims=True) * w / gain)
         db = np.ones_like(dy)
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
