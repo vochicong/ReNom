@@ -415,6 +415,7 @@ def test_weight_normalize(node, use_gpu):
     compare(func, node, node)
     compare(func, layer.params["gain"], node)
     compare(func, layer.params["w"], node)
+    compare(func, layer.params["bias"], node)
 
 
 @pytest.mark.parametrize("node", [
