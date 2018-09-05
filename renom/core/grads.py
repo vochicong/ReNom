@@ -32,10 +32,11 @@ class Grads:
               [ 2.,  2.,  2.]], dtype=float32)
     '''
 
-    def __init__(self, root=None):
+    def __init__(self, root=None, weight_decay=None):
         self.stroage = {}
         self.variables = {}
         self._auto_updates = []
+        self._weight_decay = weight_decay
 
         if root is not None:
             self._build_refcounts(root)
@@ -50,12 +51,20 @@ class Grads:
             t = q.pop()
             if isinstance(t, Node):
                 nodeid = id(t)
+                if isinstance(t, Variable):
+                    self.check_weight_decay(t)
                 seen = nodeid in self._refcounts
                 self._refcounts[nodeid] += 1
 
                 if not seen and not getattr(t, '_no_backward', False):
                     for c in t._args:
                         q.append(c)
+
+    def check_weight_decay(self, node):
+        if node.weight_decay is not None:
+            wd = node.weight_decay or self._weight_decay
+            if wd is not None and wd != 0:
+                self.variables[id(node)] = wd * node
 
     @contextlib.contextmanager
     def unlock_node(self, node):
@@ -186,13 +195,15 @@ class Grads:
                         self.update_node(node, opt)
 
 
-def _grad(self, initial=None, detach_graph=True, **kwargs):
+def _grad(self, initial=None, detach_graph=True, weight_decay=None, **kwargs):
     '''This method follows computational graph and returns the gradients of
     Variable object.
 
     Args:
         initial (ndarray): Initial value of following the graph.
         detach_graph (boolean): If it's True, the computational graph will be destroyed.
+        weight_decay (int): Sets the default weight decay of the model.
+                            See the Variable class for more info.
     '''
     if not self._has_autoupdate():
         return Grads()
@@ -206,7 +217,7 @@ def _grad(self, initial=None, detach_graph=True, **kwargs):
         else:
             initial = np.ones_like(self).astype(precision)
 
-    context = Grads(self)
+    context = Grads(self, weight_decay=weight_decay)
     self._update_diff(context, initial, **kwargs)
 
     if detach_graph:

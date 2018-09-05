@@ -555,6 +555,28 @@ class Variable(Node):
     Args:
         value (Variable,ndarray): Input array.
         auto_update (bool): Auto update flag.
+        weight_decay (int):
+            Weight decay allows the user to choose if weight decay is to be used in any
+            of their variables.
+            If weight decay is not defined in the Variable (I.e. defaults to None),
+            then no weight decay is performed.
+
+            For convenience, one can define a variable with a weight decay of 0 and provide
+            the weight decay argument when building the gradients to default all weights to the
+            same λ for weight decay.
+
+            Individually assigned weight decay takes precedence over this default value,
+            allowing users to customize the weight decay in the network.
+
+            In summary, weight decay updates according to the following table.
+            ┌───────────┬───────────┬──────────────┐
+            │ Variable  │   Grad    │   Result     │
+            ├───────────┼───────────┼──────────────┤
+            │ None      │   <Any>   │   No Update  │
+            │ 0.3       │   <Any>   │   0.3        │
+            │ 0         │   None/0  │   No Update  │
+            │ 0         │   0.3     │   0.3        │
+            └───────────┴───────────┴──────────────┘
 
     Example:
         >>> import numpy as np
@@ -564,9 +586,10 @@ class Variable(Node):
         Variable([ 1., -1.], dtype=float32)
     '''
 
-    def __new__(cls, value, auto_update=True):
+    def __new__(cls, value, auto_update=True, weight_decay=None):
         ret = super(Variable, cls).__new__(cls, value)
         ret._auto_update = auto_update
+        ret.weight_decay = weight_decay
         return ret
 
     def backward(self, context, dy, **kwargs):

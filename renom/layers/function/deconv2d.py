@@ -146,19 +146,21 @@ class Deconv2d(Parametrized):
                  dilation=1,
                  input_size=None,
                  ignore_bias=False,
-                 initializer=GlorotNormal()):
+                 initializer=GlorotNormal(),
+                 weight_decay=0):
 
         self._padding, self._stride, self._kernel, self._dilation = (tuplize(x)
                                                                      for x in (padding, stride, filter, dilation))
         self._channel = channel
         self._initializer = initializer
         self._ignore_bias = ignore_bias
+        self._weight_decay=weight_decay
         super(Deconv2d, self).__init__(input_size)
 
     def weight_initiallize(self, input_size):
         size_f = (input_size[0], self._channel,
                   self._kernel[0], self._kernel[1])
-        self.params = {"w": Variable(self._initializer(size_f), auto_update=True)}
+        self.params = {"w": Variable(self._initializer(size_f), auto_update=True, weight_decay=self._weight_decay)}
         if not self._ignore_bias:
             self.params["b"] = Variable(
                 np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)
