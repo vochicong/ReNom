@@ -1,8 +1,12 @@
 from __future__ import print_function
+import atexit
 import sys
 import traceback
 import contextlib
 import bisect
+import threading
+
+from libc.stdio cimport printf
 cimport numpy as np
 import numpy as pnp
 cimport cython
@@ -15,6 +19,13 @@ from renom.config import precision
 import collections
 import renom.core
 import renom.cuda
+
+# Indicate Python started shutdown process
+cdef int _python_shutdown = 0
+
+@atexit.register
+def on_exit():
+    _python_shutdown = 1
 
 
 @contextlib.contextmanager
@@ -120,7 +131,7 @@ def pinNumpy(np.ndarray arr):
     cdef int elems
     elems = getArrayElements(arr)
     cdef size_t arr_size = <size_t> arr.descr.itemsize*elems
-    assert arr_size <= pin_size, "Attempting to insert memory larger than what was made available through initPinnedMemory.\n(Allocated,Requested)({:d},{:d})".format(pin_size,arr.descr.itemsize*len(arr))
+    assert arr_size <= pin_size, "Attempting to insert memory larger than what was made available through initPinnedMemory.\n(Allocated,Requested)({:d},{:d})".format(pin_size,arr.descr.itemsize*elems)
     cdef void * vptr = <void*> arr.data
     cudaEventSynchronize(events[using])
     #memcpy(ptrs[using], vptr, pin_size)
@@ -149,19 +160,39 @@ def cuCreateStream(name = None):
     return < uintptr_t > stream
 
 cdef cudaStream_t mainstream = <cudaStream_t><uintptr_t> 0
+cdef cudaStream_t cudnnstream = <cudaStream_t><uintptr_t> 0
+
 
 def setMainStream(stream):
     global mainstream
     mainstream = <cudaStream_t><uintptr_t> stream
 
-def cuGetStream(myid = None):
-  pass
+def setCudnnStream(stream):
+  global cudnnstream
+  cudnnstream = <cudaStream_t><uintptr_t> stream
+
+def insertEvent(GPUHeap heap):
+  global mainstream
+  runtime_check(cudaEventRecord(heap.event, mainstream))
+
+def heapReady(GPUHeap heap):
+  ret = cudaEventQuery(heap.event)
+  if ret == cudaSuccess:
+    return True
+  else:
+    return False
 
 def cuDestroyStream(uintptr_t stream):
     runtime_check(cudaStreamDestroy(<cudaStream_t> stream))
 
 def cuResetDevice():
   runtime_check(cudaDeviceReset())
+
+def cuGetMemInfo():
+    cdef size_t free, total
+    cudaMemGetInfo(&free, &total)
+    return <long> free, <long> (total-free), <long> total # free, used, total
+
 
 def cuSetDevice(int dev):
     runtime_check(cudaSetDevice(dev))
@@ -345,10 +376,14 @@ cdef class GPUHeap(object):
         self.ptr = ptr
         self.nbytes = nbytes
         self.device_id = device_id
+        # The GPUHeap sets its refcount to 0, as it does not personally know if it is
+        # to be owned during creation. Refcount is instead managed in GPUValue.
+        self.refcount = 0
         # The stream is decided by the allocator and given to all subsequently
         # constructed GPUHeaps. All Memcpy operations will occur on the same
         # stream.
         self._mystream = stream
+        cudaEventCreate(&self.event)
 
     def __int__(self):
         return self.ptr
@@ -358,17 +393,26 @@ cdef class GPUHeap(object):
 
         cdef int cur
         cdef cudaError_t err
+        cdef const char *errstr;
 
         cudaGetDevice(&cur)
+
         try:
             err = cudaSetDevice(self.device_id)
             if err == cudaSuccess:
                 err = cudaFree(<void * >self.ptr)
 
             if err != cudaSuccess:
-                print("Error in GPUHeap.__dealloc__():", err, file=sys.stderr)
+                errstr = cudaGetErrorString(err)
+                if _python_shutdown == 0:
+                    s =  errstr.decode('utf-8', 'replace')
+                    print("Error in GPUHeap.__dealloc__():", err, s, file=sys.stderr)
+                else:
+                    printf("Error in GPUHeap.__dealloc__(): %s\n", errstr)
+
         finally:
             cudaSetDevice(cur)
+
 
     cpdef memcpyH2D(self, cpu_ptr, size_t nbytes):
         # todo: this copy is not necessary
@@ -378,11 +422,7 @@ cdef class GPUHeap(object):
 
         with renom.cuda.use_device(self.device_id):
             #cuMemcpyH2D(ptr.ptr, self.ptr, nbytes)
-            # Async can be called safely, since if the user does not
-            # set up all the requirements for Async, it will perform
-            # as an ordinairy blocking call
-            cuMemcpyH2D(ptr.ptr, self.ptr, nbytes)
-            #cuMemcpyH2Dvar(ptr.ptr, self.ptr, nbytes, <uintptr_t> self._mystream)
+            cuMemcpyH2Dvar(ptr.ptr, self.ptr, nbytes, <uintptr_t> get_gpu_allocator()._memsync_stream)
 
     cpdef memcpyD2H(self, cpu_ptr, size_t nbytes):
         shape = cpu_ptr.shape
@@ -439,6 +479,7 @@ cdef class GpuAllocator(object):
         self._pool_lists = collections.defaultdict(list)
         # We create one stream for all the GPUHeaps to share
         self._memsync_stream = cuCreateStream("Memcpy Stream")
+        self._rlock = threading.RLock()
 
     @property
     def pool_list(self):
@@ -449,42 +490,58 @@ cdef class GpuAllocator(object):
         cdef GPUHeap pool = self.getAvailablePool(nbytes)
         if pool is None:
             ptr = cuMalloc(nbytes)
-            pool = GPUHeap(nbytes=nbytes, ptr=ptr, device_id=cuGetDevice(), stream=self._memsync_stream)
+            pool = GPUHeap(nbytes=nbytes, ptr=ptr, device_id=cuGetDevice())
         return pool
 
 
     cpdef free(self, GPUHeap pool):
+        '''
+        When a pool is to be freed, we first record the current status of the stream in which it was used,
+        so as to make sure that it is not prematurely released for use by other GPUValues requesting a pool.
+        '''
+        global mainstream
+        if _python_shutdown:
+            return
+
+        if not <uintptr_t> mainstream == 0:
+            insertEvent(pool)
+
         if pool.nbytes:
             device_id = pool.device_id
-            if not getattr(bisect, 'bisect', None):
-                # Python is shutting down
-                return
-            self._pool_lists[device_id]
-            index = bisect.bisect(self._pool_lists[device_id], (pool.nbytes,))
-            self._pool_lists[device_id].insert(index, (pool.nbytes, pool))
+
+            with self._rlock:
+                self._pool_lists[device_id]
+                index = bisect.bisect(self._pool_lists[device_id], (pool.nbytes,))
+                self._pool_lists[device_id].insert(index, (pool.nbytes, pool))
 
     cpdef GPUHeap getAvailablePool(self, size_t size):
         pool = None
-        cdef size_t min = size
-        cdef size_t max = size * 2 + 4096
-
-        device = cuGetDevice()
-        pools = self._pool_lists[device]
-
-        cdef size_t idx = bisect.bisect_left(pools, (size,))
-
+        '''
+        We will be looking through the currently available pools and we demand that they
+        big enough to fit all our requested data, but we allow for pools that are slightly
+        larger than what is requested
+        '''
+        cdef size_t min_requested = size
+        cdef size_t max_requested = size * 2 + 4096
+        cdef size_t idx, i
         cdef GPUHeap p
-        cdef size_t i
 
-        for i in range(idx, len(pools)):
-            _, p = pools[i]
-            if p.nbytes >= max:
-                break
+        with self._rlock:
+            device = cuGetDevice()
+            pools = self._pool_lists[device]
 
-            if min <= p.nbytes:
-                pool = p
-                del pools[i]
-                break
+            idx = bisect.bisect_left(pools, (size,))
+
+
+            for i in range(idx, len(pools)):
+                _, p = pools[i]
+                if p.nbytes >= max_requested:
+                    break
+
+                if min_requested <= p.nbytes and heapReady(p):
+                    pool = p
+                    del pools[i]
+                    break
 
         return pool
 
@@ -512,3 +569,6 @@ cpdef _cuSetLimit(limit, value):
     ret = cuCtxGetLimit(&c_value, limit)
 
     cuCtxSetLimit(limit, value)
+
+
+

@@ -56,6 +56,11 @@ class Softmax:
         >>> np.sum(z, axis=1)
         array([ 1.])
 
+        >>> # instantiation
+        >>> activation = rm.Softmax()
+        >>> activation(x)
+        softmax([[ 0.23229694  0.33505085  0.43265226]])
+
     '''
 
     def __call__(self, x):

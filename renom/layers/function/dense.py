@@ -21,6 +21,7 @@ class Dense(Parametrized):
     Args:
         output_size (int): Output unit size.
         input_size (int): Input unit size.
+        ignore_bias (bool): If True is given, bias will not be added.
         initializer (Initializer): Initializer object for weight initialization.
 
     Example:
@@ -35,7 +36,8 @@ class Dense(Parametrized):
         (3, 3)
     '''
 
-    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal(), weight_decay=0):
+        self._weight_decay = weight_decay
         self._output_size = output_size
         self._ignore_bias = ignore_bias
         self._initializer = initializer
@@ -47,12 +49,13 @@ class Dense(Parametrized):
     def weight_initiallize(self, input_size):
         size_i = input_size[0] if isinstance(input_size, tuple) else input_size
         size_o = self._output_size
-        self.params = {
-            "w": Variable(self._initializer((size_i, size_o)), auto_update=True),
-            "b": None if self._ignore_bias else Variable(np.zeros((1, size_o)).astype(precision), auto_update=True)}
+        self.params = {"w": Variable(self._initializer((size_i, size_o)),
+                                     auto_update=True, weight_decay=self._weight_decay)}
+        if not self._ignore_bias:
+            self.params["b"] = Variable(np.zeros((1, size_o)).astype(precision), auto_update=True)
 
     def forward(self, x):
         z = dot(x, self.params["w"])
-        if not self._ignore_bias:
+        if self.params.get("b", None) is not None:
             z += self.params['b']
         return z

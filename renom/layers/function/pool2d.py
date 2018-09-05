@@ -120,6 +120,10 @@ class PoolBase(object):
         self._padding, self._stride, self._kernel = (tuplize(x) for x in (padding, stride, filter))
 
     def __call__(self, x):
+        assert len(x.shape) == 4, "The dimension of input array must be 4. Actual dim is {}".format(x.ndim)
+        assert all([s > 0 for s in x.shape[2:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
+                x.shape)
         return self.forward(x)
 
 

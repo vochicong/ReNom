@@ -103,22 +103,45 @@ class NPoolBase:
     def __call__(self, x):
         dims = len(x.shape[2:])
         if is_cuda_active():
-            assert dims < 4, "GPU Version can only handle up to 3 dimensions"
+            assert dims < 4 and dims > 1, "GPU Version can only 2 and 3 dimensions"
 
         def func(var):
             return check_input(var, dims)
         self._padding, self._stride, self._kernel = map(
             func, [self._padding, self._stride, self._kernel])
+
+        assert len(
+            x.shape) >= 3, "The dimension of input array must be greater than 3. Actual dim is {}".format(x.ndim)
+        assert all([s > 0 for s in x.shape[2:]]), \
+            "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
+                x.shape)
         return self.forward(x)
 
 
-class MaxPoolNd(NPoolBase):
+class Pool3Base(NPoolBase):
 
+    def __call__(self, x):
+        dims = len(x.shape[2:])
+        if is_cuda_active():
+            assert dims == 3, "Pool 3D expects 3 dimensions"
+        super(Pool3Base, self).__call__(x)
+
+
+class MaxPoolNd(NPoolBase):
+    def forward(self, x):
+        return max_poolnd(x, self._kernel, self._stride, self._padding)
+
+
+class MaxPool3d(Pool3Base):
     def forward(self, x):
         return max_poolnd(x, self._kernel, self._stride, self._padding)
 
 
 class AveragePoolNd(NPoolBase):
+    def forward(self, x):
+        return average_poolnd(x, self._kernel, self._stride, self._padding)
 
+
+class AveragePool3d(Pool3Base):
     def forward(self, x):
         return average_poolnd(x, self._kernel, self._stride, self._padding)

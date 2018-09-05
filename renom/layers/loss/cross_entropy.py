@@ -9,23 +9,29 @@ from renom.operation import log
 
 class cross_entropy(Node):
 
-    def __new__(cls, lhs, rhs):
+    def __new__(cls, lhs, rhs, reduce_sum=True):
         assert rhs.ndim > 1, "Input arrays must have no less than 2 dimension."
-        return cls.calc_value(lhs, rhs)
+        return cls.calc_value(lhs, rhs, reduce_sum=reduce_sum)
 
     @classmethod
-    def _oper_cpu(cls, lhs, rhs):
+    def _oper_cpu(cls, lhs, rhs, reduce_sum):
         log_lhs = np.log(lhs + 1e-8)
-        ret = cls._create_node(-np.sum(rhs * log_lhs))
+        if reduce_sum:
+            ret = cls._create_node(-np.sum(rhs * log_lhs))
+        else:
+            ret = cls._create_node(-rhs * log_lhs)
         ret.attrs._log_lhs = log_lhs
         ret.attrs._rhs = rhs
         ret.attrs._lhs = lhs
         return ret
 
     @classmethod
-    def _oper_gpu(cls, lhs, rhs):
+    def _oper_gpu(cls, lhs, rhs, reduce_sum):
         log_lhs = log(lhs + 1e-8)
-        ret = cls._create_node(-cu.cusum(get_gpu(log_lhs * rhs)))
+        if reduce_sum:
+            ret = cls._create_node(-cu.cusum(get_gpu(log_lhs * rhs)))
+        else:
+            ret = cls._create_node(-get_gpu(log_lhs * rhs))
         ret.attrs._log_lhs = log_lhs
         ret.attrs._rhs = rhs
         ret.attrs._lhs = lhs
@@ -61,6 +67,10 @@ class CrossEntropy:
     Args:
         x (ndarray,Node): Input array.
         y (ndarray,Node): Target array.
+        reduce_sum (bool): If True is given, the result array will be summed up and returns scalar value.
+
+    Returns:
+        (Node, ndarray): Cross entropy error.
 
     Raises:
         AssertionError: An assertion error will be raised if the given tensor dimension is less than 2.
@@ -75,9 +85,12 @@ class CrossEntropy:
         ((1, 2), (1, 2))
         >>> loss = rm.cross_entropy(x, y)
         >>> print(loss)
-        cross_entropy(0.6931471824645996)
+        [0.6931471824645996]
+        >>> loss = rm.cross_entropy(x, y, reduce_sum=False)
+        >>> print(loss)
+        [[0.          0.69314718]]
 
     """
 
-    def __call__(self, lhs, rhs):
-        return cross_entropy(lhs, rhs)
+    def __call__(self, lhs, rhs, reduce_sum=True):
+        return cross_entropy(lhs, rhs, reduce_sum=reduce_sum)

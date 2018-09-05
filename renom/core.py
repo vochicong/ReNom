@@ -15,11 +15,11 @@ from .debug_graph import *
 class Grads:
     '''Grads class. This class contains gradients of each Node object.
 
-    When the function ``grad`` which is instance of Node class is called,
+    When the function ``grad`` which is a method of Node class is called,
     an instance of Grads class will be returned.
 
-    For getting the gradient with respect to a Variable object 'x' which is on a
-    computational graph, call the 'get' function of Grads object (An example is bellow).
+    For getting the gradient with respect to any Variable object 'x' which is on a
+    computational graph, call the 'get' function of Grads object.
 
     Example:
         >>> import numpy as np
@@ -28,7 +28,7 @@ class Grads:
         >>> b = rm.Variable(np.random.rand(2, 3))
         >>> c = rm.sum(a + 2*b)
         >>> grad = c.grad()
-        >>> grad.get(a)
+        >>> grad.get(a)   # Getting gradient of a.
         Mul([[ 1.,  1.,  1.],
              [ 1.,  1.,  1.]], dtype=float32)
         >>> grad.get(b)
@@ -36,10 +36,11 @@ class Grads:
               [ 2.,  2.,  2.]], dtype=float32)
     '''
 
-    def __init__(self, root=None):
+    def __init__(self, root=None, weight_decay=None):
         self.stroage = {}
         self.variables = {}
         self._auto_updates = []
+        self._weight_decay = weight_decay
 
         if root is not None:
             self._build_refcounts(root)
@@ -54,12 +55,20 @@ class Grads:
             t = q.pop()
             if isinstance(t, Node):
                 nodeid = id(t)
+                if isinstance(t, Variable):
+                    self.check_weight_decay(t)
                 seen = nodeid in self._refcounts
                 self._refcounts[nodeid] += 1
 
                 if not seen and not getattr(t, '_no_backward', False):
                     for c in t._args:
                         q.append(c)
+
+    def check_weight_decay(self, node):
+        if node.weight_decay is not None:
+            wd = node.weight_decay or self._weight_decay
+            if wd is not None and wd != 0:
+                self.variables[id(node)] = wd * node
 
     @contextlib.contextmanager
     def unlock_node(self, node):
@@ -103,14 +112,16 @@ class Grads:
 
     def get(self, node, default=_omit):
         '''This function returns the gradient with respect to the given node.
-        In the case of there are not any gradient of the given node, this function
+        In the case of that there isn't the gradient of given node, this function
         returns 'None'.
 
         Args:
             node (Node): Returns a gradient with respect to this argument.
+            default (object): If gradient of given node is not found, object given to this
+                argument will be returned.
 
         Return:
-            ndarray, Node, None: Gradient of given node object.
+            (ndarray, Node, None, object): Gradient of given node object or object given to argument default.
         '''
         if default is self._omit:
             try:
@@ -146,7 +157,7 @@ class Grads:
         '''This function updates variable objects on the computational graph
         using obtained gradients.
 
-        If an optimizer instance is passed, gradients are rescaled
+        If an optimizer instance is given, gradients are rescaled
         with regard to the optimization algorithm before updating.
 
         Args:
@@ -154,6 +165,28 @@ class Grads:
             models: List of models to update variables. When specified,
                     variables which does not belong to one of the models
                     are not updated.
+
+        Example:
+            >>> import numpy as np
+            >>> import renom as rm
+            >>> a = rm.Variable(np.arange(4).reshape(2, 2))
+            >>> b = rm.Variable(np.arange(4).reshape(2, 2))
+            >>> print("Before", a)
+            Before
+             [[ 0.  1.]
+             [ 2.  3.]]
+            >>> out = rm.sum(2*a + 3*b)
+            >>> grad = out.grad(models=(a, ))
+            >>> print("Gradient", grad.get(a))
+            Gradient
+             [[ 2.  2.]
+             [ 2.  2.]]
+            >>> grad.update()
+            >>> print("Updated", a)
+            Updated
+             [[-2. -1.]
+             [ 0.  1.]]
+
         '''
 
         if not models:
@@ -196,6 +229,9 @@ class GraphAttrs(object):
             return self.v__attrs[name]
         except KeyError:
             raise AttributeError('%r has no attribute %r' % (self, name))
+
+    def get(self, key, default=None):
+        return self.v__attrs.get(key, default)
 
 
 class Node(np.ndarray):
@@ -321,18 +357,35 @@ class Node(np.ndarray):
         self._gpu = gpu
 
     def to_cpu(self):
-        '''Send the data on GPU device to CPU.'''
+        '''Send the data from GPU device to CPU.'''
         if self._gpu:
             self._gpu.to_cpu(self)
 
     def to_gpu(self):
-        '''Send the data on CPU to GPU device.'''
+        '''Send the data on CPU to GPU device.
+        This method only available if cuda is activated otherwise this raises `ValueError`.
+
+        Example:
+            >>> import numpy as np
+            >>> import renom as rm
+            >>> from renom.cuda import set_cuda_active
+            >>> set_cuda_active(True)
+            >>> a = rm.Variable(np.arange(4).reshape(2, 2))
+            >>> a.to_gpu()  # Sending array to gpu device.
+        '''
         if self._gpu:
             self._gpu.to_gpu(self)
         else:
             self._gpu = GPUValue(self)
 
     def copy(self):
+        """Returns a copy of itself.
+        If node object does not have data on gpu,
+        this returns ndarray.
+
+        Returns:
+            (Node, ndarray): Copy of node object.
+        """
         if self._gpu:
             return self.__class__(self._gpu.copy())
         else:
@@ -371,17 +424,19 @@ class Node(np.ndarray):
             return np.array(ret)
 
     def release_gpu(self):
-        '''This method releases memory on GPU.'''
+        '''This method releases array data on GPU.'''
         if self._gpu:
             self._gpu = None
 
-    def grad(self, initial=None, detach_graph=True, **kwargs):
+    def grad(self, initial=None, detach_graph=True, weight_decay=None, **kwargs):
         '''This method follows computational graph and returns the gradients of
         Variable object.
 
         Args:
             initial (ndarray): Initial value of following the graph.
             detach_graph (boolean): If it's True, the computational graph will be destroyed.
+            weight_decay (int): Sets the default weight decay of the model.
+                                See the Variable class for more info.
         '''
         if not self._has_autoupdate():
             return Grads()
@@ -389,12 +444,13 @@ class Node(np.ndarray):
         if initial is None:
             if self.size > 1:
                 raise ValueError("Initial diff is required for scalar value.")
-            initial = np.ones_like(self).astype(precision)
-            if is_cuda_active():
-                initial = Node(initial)
-                initial.to_gpu()
 
-        context = Grads(self)
+            if is_cuda_active():
+                initial = Node(get_gpu(self).ones_like_me())
+            else:
+                initial = np.ones_like(self).astype(precision)
+
+        context = Grads(self, weight_decay=weight_decay)
         self._update_diff(context, initial, **kwargs)
 
         if detach_graph:
@@ -709,9 +765,45 @@ class Node(np.ndarray):
 
     @property
     def T(self):
+        """Returns 2d transposed array.
+
+        Returns:
+            (Node): Transposed array.
+
+        Example:
+            >>> import numpy as np
+            >>> import renom as rm
+            >>> a = rm.Variable(np.arange(4).reshape(2, 2))
+            >>> print(a)
+            [[ 0.  1.]
+             [ 2.  3.]]
+            >>> print(a.T)
+            [[ 0.  2.]
+             [ 1.  3.]]
+        """
         return Transpose2d(self)
 
     def transpose(self, *axis):
+        """Returns an array with axes transposed.
+
+        Args:
+            axes(list of ints): Permute the axes according to the values given.
+
+        Returns:
+            (Node): Transposed array.
+
+        Example:
+            >>> import numpy as np
+            >>> import renom as rm
+            >>> a = rm.Variable(np.arange(4).reshape(2, 2))
+            >>> print(a)
+            [[ 0.  1.]
+             [ 2.  3.]]
+            >>> print(a.transpose(1, 0))
+            [[ 0.  2.]
+             [ 1.  3.]]
+
+        """
         ax = axis
         if isinstance(ax[0], (tuple, list)):
             ax = ax[0]
@@ -722,6 +814,26 @@ class Node(np.ndarray):
         return Transpose(self, ax)
 
     def reshape(self, *shape):
+        """Returns reshaped array.
+
+        Args:
+            shape(list, int): Array will be reshaped according to given shape.
+
+        Returns:
+            (Node): Reshaped array.
+
+        Example:
+            >>> import numpy as np
+            >>> import renom as rm
+            >>> a = rm.Variable(np.arange(4).reshape(2, 2))
+            >>> print(a)
+            [[ 0.  1.]
+             [ 2.  3.]]
+            >>> print(a.reshape(-1))
+            [ 0.  1.  2.  3.]
+            >>> print(a.reshape(1, 4))
+            [[ 0.  1.  2.  3.]]
+        """
         if isinstance(shape[0], (list, tuple)):
             shape = tuple(shape[0])
         return Reshape(self, shape)
@@ -736,6 +848,28 @@ class Variable(Node):
     Args:
         value (Variable,ndarray): Input array.
         auto_update (bool): Auto update flag.
+        weight_decay (int):
+            Weight decay allows the user to choose if weight decay is to be used in any
+            of their variables.
+            If weight decay is not defined in the Variable (I.e. defaults to None),
+            then no weight decay is performed.
+
+            For convenience, one can define a variable with a weight decay of 0 and provide
+            the weight decay argument when building the gradients to default all weights to the
+            same λ for weight decay.
+
+            Individually assigned weight decay takes precedence over this default value,
+            allowing users to customize the weight decay in the network.
+
+            In summary, weight decay updates according to the following table.
+            ┌───────────┬───────────┬──────────────┐
+            │ Variable  │   Grad    │   Result     │
+            ├───────────┼───────────┼──────────────┤
+            │ None      │   <Any>   │   No Update  │
+            │ 0.3       │   <Any>   │   0.3        │
+            │ 0         │   None/0  │   No Update  │
+            │ 0         │   0.3     │   0.3        │
+            └───────────┴───────────┴──────────────┘
 
     Example:
         >>> import numpy as np
@@ -745,9 +879,12 @@ class Variable(Node):
         Variable([ 1., -1.], dtype=float32)
     '''
 
-    def __new__(cls, value, auto_update=True):
+    weight_decay = None
+
+    def __new__(cls, value, auto_update=True, weight_decay=None):
         ret = super(Variable, cls).__new__(cls, value)
         ret._auto_update = auto_update
+        ret.weight_decay = weight_decay
         return ret
 
     def backward(self, context, dy, **kwargs):

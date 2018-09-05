@@ -1,0 +1,347 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.6\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-07-13 13:29+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+#: ../../rsts/api/renom.rst:2
+msgid "renom"
+msgstr ""
+
+#: of renom.core.Grads:1
+msgid "Bases: :class:`object`"
+msgstr ""
+
+#: of renom.core.Grads:1
+msgid "Grads class. This class contains gradients of each Node object."
+msgstr ""
+
+#: of renom.core.Grads:3
+msgid ""
+"When the function ``grad`` which is a method of Node class is called, an "
+"instance of Grads class will be returned."
+msgstr ""
+
+#: of renom.core.Grads:6
+msgid ""
+"For getting the gradient with respect to any Variable object 'x' which is"
+" on a computational graph, call the 'get' function of Grads object."
+msgstr ""
+
+#: of renom.core.Grads:10 renom.core.Grads.update:14 renom.core.Node:5
+#: renom.core.Node.T:7 renom.core.Node.reshape:10 renom.core.Node.to_gpu:5
+#: renom.core.Node.transpose:10 renom.core.Variable:12 renom.operation.amax:12
+#: renom.operation.amin:12 renom.operation.concat:12 renom.operation.dot:12
+#: renom.operation.reshape:12 renom.operation.sqrt:10 renom.operation.sum:16
+#: renom.operation.where:14
+msgid "Example"
+msgstr ""
+
+#: of renom.core.Grads.get:1
+msgid ""
+"This function returns the gradient with respect to the given node. In the"
+" case of that there isn't the gradient of given node, this function "
+"returns 'None'."
+msgstr ""
+
+#: of renom.core.Grads.get renom.core.Grads.update renom.core.Node.grad
+#: renom.core.Node.reshape renom.core.Node.transpose renom.core.Variable
+#: renom.operation.amax renom.operation.amin renom.operation.concat
+#: renom.operation.dot renom.operation.exp renom.operation.log
+#: renom.operation.reshape renom.operation.sqrt renom.operation.square
+#: renom.operation.sum renom.operation.where
+msgid "Parameters"
+msgstr ""
+
+#: of renom.core.Grads.get:5
+msgid "Returns a gradient with respect to this argument."
+msgstr ""
+
+#: of renom.core.Grads.get:7
+msgid ""
+"If gradient of given node is not found, object given to this argument "
+"will be returned."
+msgstr ""
+
+#: of renom.core.Grads.get renom.core.Node.T renom.core.Node.copy
+#: renom.core.Node.reshape renom.core.Node.transpose renom.operation.concat
+#: renom.operation.dot renom.operation.exp renom.operation.log
+#: renom.operation.reshape renom.operation.sqrt renom.operation.square
+#: renom.operation.sum renom.operation.where
+msgid "Returns"
+msgstr ""
+
+#: of renom.core.Grads.get:11
+msgid "Gradient of given node object or object given to argument default."
+msgstr ""
+
+#: of renom.core.Grads.get renom.core.Node.T renom.core.Node.copy
+#: renom.core.Node.reshape renom.core.Node.transpose renom.operation.concat
+#: renom.operation.dot renom.operation.exp renom.operation.log
+#: renom.operation.reshape renom.operation.sqrt renom.operation.square
+#: renom.operation.sum renom.operation.where
+msgid "Return type"
+msgstr ""
+
+#: of renom.core.Grads.update:1
+msgid ""
+"This function updates variable objects on the computational graph using "
+"obtained gradients."
+msgstr ""
+
+#: of renom.core.Grads.update:4
+msgid ""
+"If an optimizer instance is given, gradients are rescaled with regard to "
+"the optimization algorithm before updating."
+msgstr ""
+
+#: of renom.core.Grads.update:7
+msgid "Algorithm for rescaling gradients."
+msgstr ""
+
+#: of renom.core.Grads.update:9
+msgid ""
+"List of models to update variables. When specified, variables which does "
+"not belong to one of the models are not updated."
+msgstr ""
+
+#: of renom.core.Node:1
+msgid "Bases: :class:`numpy.ndarray`"
+msgstr ""
+
+#: of renom.core.Node:1
+msgid ""
+"This is the base class of all operation function. Node class inherits "
+"numpy ndarray class."
+msgstr ""
+
+#: of renom.core.Node.to_cpu:1
+msgid "Send the data from GPU device to CPU."
+msgstr ""
+
+#: of renom.core.Node.to_gpu:1
+msgid ""
+"Send the data on CPU to GPU device. This method only available if cuda is"
+" activated otherwise this raises `ValueError`."
+msgstr ""
+
+#: of renom.core.Node.copy:1
+msgid ""
+"Returns a copy of itself. If node object does not have data on gpu, this "
+"returns ndarray."
+msgstr ""
+
+#: of renom.core.Node.copy:5
+msgid "Copy of node object."
+msgstr ""
+
+#: of renom.core.Node.as_ndarray:1
+msgid "This method returns itself as ndarray object."
+msgstr ""
+
+#: of renom.core.Node.release_gpu:1
+msgid "This method releases array data on GPU."
+msgstr ""
+
+#: of renom.core.Node.grad:1
+msgid ""
+"This method follows computational graph and returns the gradients of "
+"Variable object."
+msgstr ""
+
+#: of renom.core.Node.grad:4
+msgid "Initial value of following the graph."
+msgstr ""
+
+#: of renom.core.Node.grad:6
+msgid "If it's True, the computational graph will be destroyed."
+msgstr ""
+
+#: of renom.core.Node.detach_graph:1
+msgid "This method destroys computational graph."
+msgstr ""
+
+#: of renom.core.Node.T:1
+msgid "Returns 2d transposed array."
+msgstr ""
+
+#: of renom.core.Node.T:3 renom.core.Node.transpose:6
+msgid "Transposed array."
+msgstr ""
+
+#: of renom.core.Node.transpose:1
+msgid "Returns an array with axes transposed."
+msgstr ""
+
+#: of renom.core.Node.transpose:3
+msgid "Permute the axes according to the values given."
+msgstr ""
+
+#: of renom.core.Node.reshape:1
+msgid "Returns reshaped array."
+msgstr ""
+
+#: of renom.core.Node.reshape:3
+msgid "Array will be reshaped according to given shape."
+msgstr ""
+
+#: of renom.core.Node.reshape:6 renom.operation.reshape:8
+msgid "Reshaped array."
+msgstr ""
+
+#: of renom.core.Variable:1
+msgid "Bases: :class:`renom.core.Node`"
+msgstr ""
+
+#: of renom.core.Variable:1
+msgid "Variable class."
+msgstr ""
+
+#: of renom.core.Variable:3
+msgid ""
+"The gradient of this object will be calculated. Variable object is "
+"created from ndarray object or Number object."
+msgstr ""
+
+#: of renom.core.Variable:6 renom.operation.dot:3 renom.operation.dot:5
+#: renom.operation.exp:3 renom.operation.log:3 renom.operation.reshape:3
+#: renom.operation.sqrt:3 renom.operation.square:3 renom.operation.sum:5
+#: renom.operation.where:5 renom.operation.where:7
+msgid "Input array."
+msgstr ""
+
+#: of renom.core.Variable:8
+msgid "Auto update flag."
+msgstr ""
+
+#: of renom.operation.reshape:1
+msgid "This function reshapes array."
+msgstr ""
+
+#: of renom.operation.reshape:5
+msgid "Shape."
+msgstr ""
+
+#: of renom.operation.sum:1
+msgid ""
+"This function sums up matrix elements. If the argument 'axis' is passed, "
+"this function performs sum along specified axis."
+msgstr ""
+
+#: of renom.operation.sum:7
+msgid "Summing up along this axis."
+msgstr ""
+
+#: of renom.operation.sum:9
+msgid "If this is True, dimension will not be reduced."
+msgstr ""
+
+#: of renom.operation.sum:12
+msgid "Summed array."
+msgstr ""
+
+#: of renom.operation.dot:1
+msgid "This function executes dot product of the two matrixes."
+msgstr ""
+
+#: of renom.operation.dot:8
+msgid "Multiplied array."
+msgstr ""
+
+#: of renom.operation.concat:1
+msgid "Join a sequence of arrays along specified axis."
+msgstr ""
+
+#: of renom.operation.concat:3
+msgid "Input arrays or tuple of input arrays."
+msgstr ""
+
+#: of renom.operation.concat:5
+msgid "Concatenation will be performed along this axis. Default value is 1."
+msgstr ""
+
+#: of renom.operation.concat:8
+msgid "Concatenated array."
+msgstr ""
+
+#: of renom.operation.where:1
+msgid "Return elements, either from a or b, depending on condition."
+msgstr ""
+
+#: of renom.operation.where:3
+msgid "Condition array."
+msgstr ""
+
+#: of renom.operation.where:10
+msgid "Conditioned array."
+msgstr ""
+
+#: of renom.operation.sqrt:1
+msgid "Square root operation."
+msgstr ""
+
+#: of renom.operation.sqrt:6
+msgid "Square root of input array."
+msgstr ""
+
+#: of renom.operation.square:1
+msgid "Square operation."
+msgstr ""
+
+#: of renom.operation.square:6
+msgid "Squared array."
+msgstr ""
+
+#: of renom.operation.log:1
+msgid "Log operation."
+msgstr ""
+
+#: of renom.operation.log:6
+msgid "Logarithm of input array."
+msgstr ""
+
+#: of renom.operation.exp:1
+msgid "Exponential operation."
+msgstr ""
+
+#: of renom.operation.exp:6
+msgid "Exponential of input array."
+msgstr ""
+
+#: of renom.operation.amin:1
+msgid ""
+"Returns min value or array of given array. You can specify the axis which"
+" the operation will be performed for."
+msgstr ""
+
+#: of renom.operation.amax:4 renom.operation.amin:4
+msgid "Input matrix."
+msgstr ""
+
+#: of renom.operation.amax:6 renom.operation.amin:6
+msgid "Perform calculation along this argument."
+msgstr ""
+
+#: of renom.operation.amax:8 renom.operation.amin:8
+msgid "If `Ture` is passed, dimensions will not be reduced."
+msgstr ""
+
+#: of renom.operation.amax:1
+msgid ""
+"Returns max value or array of given array. You can specify the axis which"
+" the operation will be performed for."
+msgstr ""
+

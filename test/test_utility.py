@@ -13,7 +13,6 @@ skipmultigpu = pytest.mark.skipif(
     reason="Number of gpu card is less than 2.")
 
 np.random.seed(10)
-
 eps = np.sqrt(np.finfo(np.float32).eps)
 
 

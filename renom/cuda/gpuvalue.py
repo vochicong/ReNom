@@ -156,6 +156,17 @@ def _parse_index(arr, indexes):
 def build_shapes(arr, indexes):
     strides = calc_strides(arr.shape)
 
+    # If a list of slices, change to list of slices
+    if isinstance(indexes, list):
+        # python built-in function all does not work for cython?
+        all_slices = True
+        for elem in indexes:
+            if not isinstance(elem, slice):
+                all_slices = False
+                break
+        if all_slices:
+            indexes = tuple(indexes)
+
     # make indexes a list
     if isinstance(indexes, bool):
         slices = [[0, s, 1, None, st, st] for s, st in zip(arr.shape, strides)]
@@ -391,12 +402,16 @@ class GPUValue(object):
             SET_GPU_DICT(id(self), self)
 
         assert self._ptr
+        self._ptr.refcount += 1
 
     def __dealloc__(self):
-        cuda_base.c_gpu_allocator.free(self._ptr)
+        self._ptr.refcount -= 1
+        if self._ptr.refcount is 0:
+            cuda_base.c_gpu_allocator.free(self._ptr)
 
-    def __del__(self):
-        self._free()
+    # Del is not called for extension classes
+    # def __del__(self):
+    #    self._free()
 
     def alloc(self):
         self._free()
@@ -411,11 +426,23 @@ class GPUValue(object):
             cuda_base.get_gpu_allocator().free(self._ptr)
         self._ptr = None
 
+    def __len__(self):
+        if len(self.shape) > 0:
+            return self.shape[0]
+        else:
+            return 1
+
     def reshape(self, *shape):
-        clone = self.copy()
+        # TODO: Find a way to create shapes without requesting potentially large
+        # blocks of  temporary CPU memory.
         a = np.empty(self.shape, dtype=np.bool).reshape(*shape)
-        clone.shape = a.shape
-        return clone
+        # TODO: Currently shape size is checked during numpy reshaping, but this results in
+        # a numpy reshaping error when the issue occurs within GPUValue, should probably
+        # be a GPUValue error
+        # assert np.prod(a.shape) == np.prod(self.shape), 'Requested shape has size {0} but original GPUValue \
+        # has size {1}'.format(np.prod(a.shape),np.prod(self.shape))
+        ret = GPUValue(ptr=self._ptr, shape=a.shape)
+        return ret
 
     def get_gpu(self):
         return self
@@ -511,10 +538,12 @@ class GPUValue(object):
         return self.split(indices_or_sections, 1)
 
     def __pos__(self):
-        return self.copy()
+        ret = self.empty_like_me()
+        cumul(self, 1, ret)
+        return ret
 
     def __neg__(self):
-        ret = self.copy()
+        ret = self.empty_like_me()
         cumul(self, -1, ret)
         return ret
 

@@ -14,29 +14,17 @@ from renom.config import precision
 ])
 def test_gpu_distributor(data_shape):
     from renom.utility.distributor.distributor import GPUDistributor
+    np.set_printoptions(suppress=True)
     # Construct the data from numpy
     X = np.full(data_shape, 1)
-    X = np.arange(np.prod(data_shape)).reshape(*data_shape)
+    X = np.arange(np.prod(data_shape)).reshape(*data_shape) + 1
     X = X.astype(precision)
-    #Y = (X*2).reshape(*data_shape)
-    Y = np.full(data_shape, 0)
+
+    Y = np.full(data_shape, 1)
     batch_size = (len(X) // 100)
-    #batch_size = len(X)
-    # Set up the distributor and loop parameters
     set_cuda_active(True)
-    print(is_cuda_active())
     data_distributor = GPUDistributor(x=X, y=Y)
     epochs = 3
-
-    # Construct a data to test against
-    # If the resulting data is different from this, an error occured somewhere
-    #test_result = np.full(data_shape, 3).astype(precision)
-    #test_result = X+Y
-
-    # Create a big pool of data for renom to re-use later, removing
-    # potential delays from creating extra memory
-    #pre_data = np.full(data_shape, 0)
-    # get_gpu(pre_data)
 
     # Test the distributor over a normal loop to see if it always produces correct data.
     for e in range(epochs):
@@ -44,8 +32,7 @@ def test_gpu_distributor(data_shape):
         for batch_x, batch_y in data_distributor.batch(batch_size, shuffle=False):
             test_result = X[i * batch_size:(i + 1) * batch_size] + \
                 Y[i * batch_size:(i + 1) * batch_size]
-            result = rm.Node(batch_x + batch_y)
-            result.to_cpu()
+            result = batch_x + batch_y
             result = result.as_ndarray()
             assert np.allclose(result, test_result), "\n{}".format(np.isclose(result, test_result))
             i += 1
