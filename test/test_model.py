@@ -205,7 +205,7 @@ def test_update():
 
 @test_utility.skipgpu
 def test_multi_gpu():
-    from renom.cuda.cuda import cuGetDeviceCount
+    from renom.cuda import cuGetDeviceCount
 
     class NN2(rm.Model):
         def __init__(self):
