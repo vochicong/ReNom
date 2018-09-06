@@ -78,24 +78,21 @@ class weight_normalize(Node):
         weight = get_gpu(self.attrs._weight)
         dx = get_gpu(op.dot(dy, w.T))
         normal_dw = get_gpu(op.dot(x.T, dy))
-        w_normed = get_gpu(normalized_form(weight))
-        dgain = normal_dw * weight / w_normed
 
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
 
         if isinstance(self.attrs._gain, Node):
+            dgain = normal_dw * w / gain
             self.attrs._gain._update_diff(context,
                                           op.sum(dgain, axis=0, keepdims=True), **kwargs)
 
         if isinstance(self.attrs._weight, Node):
-            dw = (get_gpu(1 / w_normed * normal_dw) -
-                  get_gpu(get_gpu(op.sum(get_gpu(weight * normal_dw), keepdims=True)) *
-                          weight / (get_gpu(op.square(w_normed)) * w_normed))) * gain
+            dw = w / get_gpu(weight) * get_gpu(normal_dw - get_gpu(op.sum(w * get_gpu(normal_dw) / get_gpu(gain), keepdims=True) * w / get_gpu(gain)))
             self.attrs._weight._update_diff(context, dw, **kwargs)
 
         if isinstance(self.attrs._bias, Node):
-            db = get_gpu(dy)
+            db = dy
             self.attrs._bias._update_diff(context,
                                           op.sum(db, axis=0, keepdims=True), **kwargs)
 
