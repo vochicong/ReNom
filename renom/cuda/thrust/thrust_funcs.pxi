@@ -1073,20 +1073,7 @@ def cu_optimizer_adagrad(learning_rate, epsilon, dy, previous_dy, new_dy, r):
     cdef VALUE_TYPE * ptr_r = <VALUE_TYPE * > < uintptr_t > r._ptr
     thrust_optimizer_adagrad(Elems, lr, ptr_dy, eps, ptr_pdy, ptr_ndy, ptr_r)
 
-def cu_reduce_all(input_to_reduce):
-    cdef int siz = 1
-    for v in input_to_reduce.shape:
-        siz *= v
-
-    output = renom.core.GPUValue(shape=(1,))
-    cdef VALUE_TYPE *ptr_in = <VALUE_TYPE*><uintptr_t> input_to_reduce._ptr
-    cdef VALUE_TYPE *ptr_out = <VALUE_TYPE*><uintptr_t> output._ptr
-
-    thrust_all_sum(siz, ptr_in, ptr_out)
-    return output
-
 def cu_optimizer_rmsprop(learning_rate, epsilon, gamma, dy, previous_dy, new_dy, r):
-    cu_reduce_all(1)
     Elem = 1
     for v in dy.shape:
         Elem *= v

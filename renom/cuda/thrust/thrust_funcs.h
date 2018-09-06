@@ -336,10 +336,6 @@ namespace renom{
     void thrust_get_ith_ary_backward(int N, int M, int i, VALUE_TYPE *ptr1, VALUE_TYPE *ptr2);
     __global__ void cuda_get_ith_ary_backward(int N, int M, int i, VALUE_TYPE *ptr1, VALUE_TYPE *ptr2);
 
-		void thrust_all_sum(int size, VALUE_TYPE *input, VALUE_TYPE *out);
-		__global__ void reduce_all(VALUE_TYPE *input, int size, VALUE_TYPE *out);
-		__device__ void warpReduce(volatile VALUE_TYPE *sdata, int tid, int bid, int size);
-
 
     void thrust_get_nth_ary(int N, int M, int i, int j, VALUE_TYPE *ptr1, VALUE_TYPE *ptr2);
     __global__ void cuda_get_nth_ary(int N, int M, int i, int j, VALUE_TYPE *ptr1, VALUE_TYPE *ptr2);
