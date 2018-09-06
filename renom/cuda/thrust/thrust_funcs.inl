@@ -2063,6 +2063,55 @@ namespace renom{
         cuda_pred_ctr <<<ceil((N*M)/256.0), 256.0 , 0, GET_STREAM_NAME()>>> (N, M, arg_ptr, length_ptr, ctr_ptr, ary_ptr);
     }
 
+    __device__ void
+    warpReduce(volatile VALUE_TYPE *sdata, int tid, int bid, int size)
+    {
+      if (bid + 32 < size) sdata[tid] += sdata[tid + 32];
+      if (bid + 16 < size) sdata[tid] += sdata[tid + 16];
+      if (bid + 8 < size) sdata[tid] += sdata[tid + 8];
+      if (bid + 4 < size) sdata[tid] += sdata[tid + 4];
+      if (bid + 2 < size) sdata[tid] += sdata[tid + 2];
+      if (bid + 1 < size) sdata[tid] += sdata[tid + 1];
+    }
+
+    __global__ void reduce_all(VALUE_TYPE *input, int size, VALUE_TYPE *out)
+    {
+      const unsigned int tid = threadIdx.x;
+      const unsigned int bid = blockIdx.x * blockDim.x * 2 + tid;
+      extern __shared__ VALUE_TYPE sdata[];
+      if (!(bid < size)) return;
+      sdata[tid] = input[bid];
+      if (bid + blockDim.x < size) sdata[tid] += input[bid + blockDim.x];
+      __syncthreads();
+      for (unsigned int offset = blockDim.x/2; offset > 32; offset /= 2) {
+        if (tid < offset && bid + offset < size) sdata[tid] += sdata[tid + offset];
+        __syncthreads();
+      }
+      if (tid < 32) warpReduce(sdata, tid, bid, size);
+      if (tid == 0) out[blockIdx.x] = sdata[0];
+    }
+
+    void thrust_all_sum(int size, VALUE_TYPE *input, VALUE_TYPE *out)
+    {
+      int block_siz = 128;
+      int block_num = ceil(size / (block_siz * 2.0));
+      int block_mem = block_siz * sizeof(VALUE_TYPE);
+      reduce_all<<<block_num, block_siz, block_mem, GET_STREAM_NAME()>>>(input, size, (block_num == 1) ? out : input);
+
+      while(block_num > 1) {
+          size = block_num;
+          block_num = ceil(size / (block_siz * 2.0));
+          reduce_all<<<block_num, block_siz, block_mem, GET_STREAM_NAME()>>>(input, size, (block_num == 1) ? out : input);
+      }
+    }
+
+
+    void thrust_weight_normalize_forward(int size, VALUE_TYPE *in, VALUE_TYPE *v, VALUE_TYPE *bias, VALUE_TYPE *gain, VALUE_TYPE *out)
+    {
+      thrust::device_ptr<VALUE_TYPE> thrust_ptr_in(in);
+
+    }
+
     __global__ void cuda_generate_anchors(int A, int K, int N, VALUE_TYPE *shifts_ptr, VALUE_TYPE *ratios_ptr, VALUE_TYPE *scales_ptr, int ratio_size, int scale_size, int feat_stride, int base_size, VALUE_TYPE *anchors_ptr)
     {
         int idx = blockIdx.x * blockDim.x + threadIdx.x;
