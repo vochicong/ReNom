@@ -586,7 +586,7 @@ class Variable(Node):
         Variable([ 1., -1.], dtype=float32)
     '''
 
-    weight_decay=None
+    weight_decay = None
 
     def __new__(cls, value, auto_update=True, weight_decay=None):
         ret = super(Variable, cls).__new__(cls, value)

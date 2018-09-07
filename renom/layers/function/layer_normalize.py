@@ -62,6 +62,7 @@ class layer_normalize(Node):
         mu = get_mu(x)
         sigma = get_sigma(x, mu) + 1e-5
         normalized = (x - mu) / sigma
+        # ret = cls._create_node(normalized)# * gain + bias)
         ret = cls._create_node(normalized * gain + bias)
         ret.attrs._x = x
         ret.attrs._mu = mu
@@ -83,7 +84,7 @@ class layer_normalize(Node):
         sum2 = op.sum((_x - mu) ** 2, axis=_ax, keepdims=True)
         sigma = op.sqrt(sum2 / H) + 1e-5
         normalized = (_x - mu) / get_gpu(sigma)
-        ret = cls._create_node(get_gpu(normalized * get_gpu(_gain + _bias)))
+        ret = cls._create_node(get_gpu(normalized * _gain) + get_gpu(bias))
         ret.attrs._x = x
         ret.attrs._sigma = sigma
         ret.attrs._mu = mu

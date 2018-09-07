@@ -4,6 +4,7 @@ import numpy as np
 from renom.cuda import use_device, is_cuda_active
 from renom.core import Node
 
+
 class _EventHandlers(object):
     def __init__(self, events):
         super(_EventHandlers, self).__setattr__('_events', events)
@@ -22,6 +23,7 @@ class _EventHandlers(object):
         return self._evnets
 
 # Default events
+
 
 def default_event_start(trainer):
     pass

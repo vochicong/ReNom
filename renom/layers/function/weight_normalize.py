@@ -88,7 +88,8 @@ class weight_normalize(Node):
                                           op.sum(dgain, axis=0, keepdims=True), **kwargs)
 
         if isinstance(self.attrs._weight, Node):
-            dw = w / get_gpu(weight) * get_gpu(normal_dw - get_gpu(op.sum(w * get_gpu(normal_dw) / get_gpu(gain), keepdims=True) * w / get_gpu(gain)))
+            dw = w / get_gpu(weight) * get_gpu(normal_dw -
+                        get_gpu(op.sum(w * get_gpu(normal_dw) / get_gpu(gain), keepdims=True) * w / get_gpu(gain)))
             self.attrs._weight._update_diff(context, dw, **kwargs)
 
         if isinstance(self.attrs._bias, Node):
@@ -135,7 +136,8 @@ class WeightNormalize(Parametrized):
 
     def weight_initiallize(self, input_size):
         self.params = {
-            "w": Variable(self._initializer((input_size[0], self._units)), auto_update=True, weight_decay=self._weight_decay),
+            "w": Variable(self._initializer((input_size[0], self._units)), auto_update=True,
+                          weight_decay=self._weight_decay),
             "gain": Variable(np.ones((1, self._units)) * self._gain, auto_update=True),
             "bias": Variable(np.ones((1, self._units)), auto_update=True)}
 
