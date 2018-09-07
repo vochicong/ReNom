@@ -89,7 +89,8 @@ class weight_normalize(Node):
 
         if isinstance(self.attrs._weight, Node):
             dw = w / get_gpu(weight) * get_gpu(normal_dw -
-                        get_gpu(op.sum(w * get_gpu(normal_dw) / get_gpu(gain), keepdims=True) * w / get_gpu(gain)))
+                                               get_gpu(op.sum(w * get_gpu(normal_dw) / get_gpu(gain), keepdims=True)
+                                                       * w / get_gpu(gain)))
             self.attrs._weight._update_diff(context, dw, **kwargs)
 
         if isinstance(self.attrs._bias, Node):
