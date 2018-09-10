@@ -20,7 +20,8 @@ mode_dict = {
 
 class batch_normalize(Node):
     def __new__(cls, x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon):
-        assert inference is False or x.shape[0] > 1, "Batch Normalize expects more than one batch when not in inference mode."
+        assert inference is True or x.shape[0] > 1, "Batch Normalize expects more than" \
+            + " one batch when not in inference mode."
         return cls.calc_value(x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon)
 
     @classmethod
