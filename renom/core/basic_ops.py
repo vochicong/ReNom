@@ -1,5 +1,6 @@
 from __future__ import division
 from renom.core import Node
+import weakref
 import numpy as np
 import renom.cuda
 if renom.cuda.has_cuda():
