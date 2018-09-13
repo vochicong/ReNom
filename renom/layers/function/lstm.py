@@ -277,3 +277,16 @@ class Lstm(Parametrized):
         """Truncates temporal connection."""
         self._z = None
         self._state = None
+
+class ChainedLSTM(Lstm):
+
+    def __init__(self, *args, **kwargs):
+        super(ChainedLSTM, self).__init__(*args, **kwargs)
+
+    def forward(self, x):
+        lstm_model = super(ChainedLSTM, self)
+        lstm_model.truncate()
+        length = x.shape[1]
+        for i in range(length):
+            ret = lstm_model.forward(x[:,i])
+        return ret
