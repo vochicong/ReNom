@@ -1417,7 +1417,7 @@ namespace renom{
                 continue;
             }
 
-            int roi_batch_idx = rois[roi_n*5 + 0]; // one set is (id, xmin, ymin, xmax, ymax)
+            //int roi_batch_idx = rois[roi_n*5 + 0]; // one set is (id, xmin, ymin, xmax, ymax)
             int roi_start_w = round(rois[roi_n*5 + 1]*spatial_scale);
             int roi_start_h = round(rois[roi_n*5 + 2]*spatial_scale);
             int roi_end_w = round(rois[roi_n*5 + 3]*spatial_scale);
@@ -1897,19 +1897,22 @@ namespace renom{
       }
     }
 
-    __global__ void cuda_optimizer_rmsprop(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE epsilon, VALUE_TYPE gamma, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
+    __global__ void cuda_optimizer_rmsprop(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE epsilon, VALUE_TYPE gamma, VALUE_TYPE eta, VALUE_TYPE *k, VALUE_TYPE *ndy, VALUE_TYPE *r)
     {
       int idx = blockIdx.x * blockDim.x + threadIdx.x;
       if (idx < Elems) {
-        r[idx] = gamma * pdy[idx] + (1.0 - gamma)*dy[idx]*dy[idx];
-        ndy[idx] = learning_rate * dy[idx] / (sqrtf(r[idx]) + epsilon);
+        r[idx] = gamma * r[idx] + (1.0 - gamma) * dy[idx] * dy[idx];
+        k[idx] = eta * k[idx] + (1.0 - eta) * dy[idx];
+        VALUE_TYPE v = r[idx] - k[idx] * k[idx];
+        if (v < 0) v = 0;
+        ndy[idx] = learning_rate * dy[idx] / sqrtf(v + epsilon);
       }
     }
 
-    void thrust_optimizer_rmsprop(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE *pdy, VALUE_TYPE *ndy, VALUE_TYPE *r)
+    void thrust_optimizer_rmsprop(int Elems, VALUE_TYPE learning_rate, VALUE_TYPE *dy, VALUE_TYPE eps, VALUE_TYPE gamma, VALUE_TYPE eta, VALUE_TYPE *k, VALUE_TYPE *ndy, VALUE_TYPE *r)
     {
       if(Elems) {
-        cuda_optimizer_rmsprop<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, learning_rate, dy, eps, gamma, pdy, ndy, r);
+        cuda_optimizer_rmsprop<<<ceil(Elems/256.0), 256, 0, GET_STREAM_NAME()>>>(Elems, learning_rate, dy, eps, gamma, eta, k, ndy, r);
       }
     }
 
@@ -2061,6 +2064,13 @@ namespace renom{
     void thrust_pred_ctr(int N, int M, VALUE_TYPE *arg_ptr, VALUE_TYPE *length_ptr,VALUE_TYPE *ctr_ptr, VALUE_TYPE *ary_ptr)
     {
         cuda_pred_ctr <<<ceil((N*M)/256.0), 256.0 , 0, GET_STREAM_NAME()>>> (N, M, arg_ptr, length_ptr, ctr_ptr, ary_ptr);
+    }
+
+
+    void thrust_weight_normalize_forward(int size, VALUE_TYPE *in, VALUE_TYPE *v, VALUE_TYPE *bias, VALUE_TYPE *gain, VALUE_TYPE *out)
+    {
+      thrust::device_ptr<VALUE_TYPE> thrust_ptr_in(in);
+
     }
 
     __global__ void cuda_generate_anchors(int A, int K, int N, VALUE_TYPE *shifts_ptr, VALUE_TYPE *ratios_ptr, VALUE_TYPE *scales_ptr, int ratio_size, int scale_size, int feat_stride, int base_size, VALUE_TYPE *anchors_ptr)

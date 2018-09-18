@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from renom.core import Variable, precision
+from renom.core import Variable
+from renom import precision
 from renom.operation import dot
 from .parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal

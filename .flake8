@@ -27,5 +27,7 @@ ignore =
     F405
     # W503 Line break before binary operator
     W503
+    # F821 Undefined name in module being used 
+    F821
 
 exclude=test/*

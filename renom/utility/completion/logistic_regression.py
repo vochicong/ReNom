@@ -3,7 +3,7 @@ import numpy as np
 import renom as rm
 from sklearn.preprocessing import LabelBinarizer
 from renom.optimizer import Sgd, Adam
-from renom.cuda.cuda import set_cuda_active
+from renom.cuda import set_cuda_active
 
 
 class LogisticRegression(object):

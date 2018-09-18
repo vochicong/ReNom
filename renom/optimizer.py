@@ -2,12 +2,14 @@
 # encoding: utf-8
 from __future__ import division, print_function
 import numpy as np
-from renom.core import get_gpu, Node, Variable
+from renom.core import Node, Variable
 from renom.operation import sqrt, square
-from renom.cuda.cuda import is_cuda_active
+from renom.cuda import is_cuda_active
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 class Optimizer(with_metaclass(ABCMeta, object)):
@@ -301,29 +303,55 @@ class Rmsprop(Optimizer):
     .. [Rmsprop] Nitish Srivastava, Kevin Swersky, Geoffrey Hinton. Neural Networks for Machine Learning.
     '''
 
-    def __init__(self, lr=0.001, g=0.9, epsilon=1e-8):
+    def __init__(self, lr=0.001, g=0.9, epsilon=1e-8, running_average=1):
         self._lr = lr
         self._g = g
+        self._ra = running_average
         self._epsilon = epsilon
         self._params = {}
 
     def _get_cpu(self, dy, node):
         node_id = id(node)
-        pdy = self._params.get(node_id, 0)
-        r = self._g * pdy + (1 - self._g) * (dy**2)
-        ret = self._lr * dy / (sqrt(r) + self._epsilon)
-        self._params[node_id] = r
+        pdy = self._params.get(node_id, None)
+        if pdy is None:
+            pdy = {
+                'pmse': 0,
+                'pra': 0,
+            }
+        pmse = pdy['pmse']
+        pra = pdy['pra']
+
+        r = self._g * pmse + (1 - self._g) * (dy**2)
+        k = self._ra * pra + (1 - self._ra) * (dy)
+        v = (r - k**2).as_ndarray()
+        v[v < 0] = 0
+        ret = self._lr * dy / sqrt(v + self._epsilon)
+
+        self._params[node_id] = {
+            'pmse': r,
+            'pra': k,
+        }
         if isinstance(ret, Node):
             ret.detach_graph()
         return ret
 
     def _get_gpu(self, dy, node):
         node_id = id(node)
-        pdy = self._params.get(node_id, get_gpu(dy).zeros_like_me())
+        pdy = self._params.get(node_id, None)
+        if pdy is None:
+            pdy = {
+                'pmse': get_gpu(dy).zeros_like_me(),
+                'pra': get_gpu(dy).zeros_like_me(),
+            }
+        r = pdy['pmse']
+        k = pdy['pra']
         ndy = get_gpu(dy).empty_like_me()
-        r = get_gpu(pdy).empty_like_me()
-        cu.cu_optimizer_rmsprop(self._lr, self._epsilon, self._g, get_gpu(dy), get_gpu(pdy), ndy, r)
-        self._params[node_id] = r
+        cu.cu_optimizer_rmsprop(self._lr, self._epsilon, self._g, self._ra, get_gpu(dy), k, ndy, r)
+
+        self._params[node_id] = {
+            'pmse': r,
+            'pra': k,
+        }
         return ndy
 
     def reset(self):

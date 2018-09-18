@@ -5,6 +5,7 @@ import traceback
 import contextlib
 import bisect
 import threading
+cimport cuda_base
 
 from libc.stdio cimport printf
 cimport numpy as np
@@ -17,7 +18,6 @@ from libc.string cimport memcpy
 from cuda_utils cimport _VoidPtr
 from renom.config import precision
 import collections
-import renom.core
 import renom.cuda
 
 # Indicate Python started shutdown process
@@ -569,6 +569,3 @@ cpdef _cuSetLimit(limit, value):
     ret = cuCtxGetLimit(&c_value, limit)
 
     cuCtxSetLimit(limit, value)
-
-
-

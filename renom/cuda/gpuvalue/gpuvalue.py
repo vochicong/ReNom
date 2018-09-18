@@ -4,14 +4,14 @@ import itertools
 import collections
 import cython
 import numpy as np
-from renom.debug_graph import *
+import renom.debug_graph as debug
 
 try:
-    from . import is_cuda_active, use_device
-    from .thrust import *
-    from .cuda_base import *
-    from . import cuda_base
-    from . import cublas
+    from renom.cuda import is_cuda_active, use_device
+    from renom.cuda.thrust.thrust import *
+    from renom.cuda.base.cuda_base import *
+    from renom.cuda.base import cuda_base
+    from renom.cuda.cublas import cublas
 except ImportError:
     pass
 
@@ -398,8 +398,8 @@ class GPUValue(object):
         else:
             self.device_id = cuGetDevice()
 
-        if GET_ACTIVE_GPU() is not None:
-            SET_GPU_DICT(id(self), self)
+        if debug.GET_ACTIVE_GPU() is not None:
+            debug.SET_GPU_DICT(id(self), self)
 
         assert self._ptr
         self._ptr.refcount += 1

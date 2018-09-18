@@ -1,4 +1,4 @@
-from cuda_base cimport *
+from renom.cuda.base.cuda_base cimport *
 
 cdef extern from "cudnn.h":
     ctypedef int size_t
@@ -274,6 +274,17 @@ cdef extern from "cudnn.h":
         int * c,
         int * h,
         int * w)
+
+    cudnnStatus_t cudnnSetConvolution2dDescriptor(
+        cudnnConvolutionDescriptor_t    convDesc,
+        int                             pad_h,
+        int                             pad_w,
+        int                             u,
+        int                             v,
+        int                             dilation_h,
+        int                             dilation_w,
+        cudnnConvolutionMode_t          mode,
+        cudnnDataType_t                 computeType)
 
     cudnnStatus_t cudnnSetConvolutionNdDescriptor(
         cudnnConvolutionDescriptor_t convDesc,
@@ -1351,17 +1362,3 @@ cdef extern from "cudnn.h":
         const void * beta,
         const cudnnTensorDescriptor_t       dxDesc,
         void * dx)
-
-cdef extern from "compat.h":
-
-    cudnnStatus_t cudnnSetConvolution2dDescriptor_9(
-        cudnnConvolutionDescriptor_t convDesc,
-        int pad_h,    # zero-padding height
-        int pad_w,    # zero-padding width
-        int u,        # vertical filter stride
-        int v,        # horizontal filter stride
-        int upscalex,  # upscale the input in x-direction
-        int upscaley,  # upscale the input in y-direction
-        cudnnConvolutionMode_t mode,
-        cudnnDataType_t dataType)
-

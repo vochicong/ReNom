@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import numpy as np
-from renom.core import UnaryOp, Node, get_gpu, showmark
+from renom.core import UnaryOp, Node
+from renom.debug_graph import showmark
 from renom.operation import where
 from renom.config import precision
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 
 
 @showmark

@@ -5,10 +5,9 @@ cimport cudnn as cd
 cimport cython
 from libc.stdlib cimport malloc, free
 from libc.stdint cimport uintptr_t, intptr_t
-from renom.core import get_gpu
 from renom.config import precision
-from cuda_utils cimport _VoidPtr
-import cuda_base
+from renom.cuda.base.cuda_utils cimport _VoidPtr
+from renom.cuda.base import cuda_base
 
 cdef cudnnTensorFormat_t tensor_format = cd.cudnnTensorFormat_t.CUDNN_TENSOR_NCHW
 
@@ -90,12 +89,6 @@ cdef class TensorDesc(object):
             for i in range(ndims):
                 size[i] = shape[i]
                 strides[i] = np.prod(shape[ndims-i:])
-            #check(cd.cudnnSetTensorNdDescriptor(
-            #    self.tensor_desc,
-            #    data_type(dtype),
-            #    ndims,
-            #    size,
-            #    strides))
             check(cd.cudnnSetTensorNdDescriptorEx(
               self.tensor_desc,
               tensor_format,
@@ -177,7 +170,7 @@ cdef class ConvolutionDescriptor(BaseConvolutionDescriptor):
         upscalex, upscaley = dilation
 
         check(cudnnCreateConvolutionDescriptor(&(self.conv_desc)))
-        check(cudnnSetConvolution2dDescriptor_9(
+        check(cudnnSetConvolution2dDescriptor(
             self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
 
 cdef class PoolingNDescriptor:
@@ -251,7 +244,6 @@ cdef class LRNDescriptor:
 
 
 def cuPoolingForward(handle, pool_desc, x, y):
-    x, y = map(get_gpu, [x, y])
 
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
 
@@ -274,7 +266,6 @@ def cuPoolingForward(handle, pool_desc, x, y):
 
 
 def cuPoolingBackward(handle, pool_desc, x, y, dy, dx):
-    x, y, dy, dx = map(get_gpu, [x, y, dy, dx])
 
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
 
@@ -347,7 +338,6 @@ cdef class FilterDescriptor:
 
 
 def cuBatchNormalizatoinForward(handle, x, mean, var, w, b, y, rm, rv, momentum=0.0, mode=None, inference=False, eps=1e-5):
-    x, mean, var, w, b, y, rm, rv = map(get_gpu, [x, mean, var, w, b, y, rm, rv])
 
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
 
@@ -406,8 +396,6 @@ def cuBatchNormalizatoinForward(handle, x, mean, var, w, b, y, rm, rv, momentum=
 
 
 def cuBatchNormalizatoinBackward(handle, x, w, dy, saved_mean, saved_var, dx, dw, db, mode=None):
-    x, w, dy, saved_mean, saved_var, dx, dw, db = map(
-        get_gpu, [x, w, dy, saved_mean, saved_var, dx, dw, db])
 
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
 
@@ -446,7 +434,6 @@ def cuBatchNormalizatoinBackward(handle, x, w, dy, saved_mean, saved_var, dx, dw
 
 
 def cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y):
-    x, y = map(get_gpu, [x, y])
 
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
     cdef cudnnConvolutionFwdAlgo_t algo
@@ -469,7 +456,6 @@ def cuGetConvolutionFwdAlgo(handle, conv_desc, filter_desc, x, y):
 
 
 def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):
-    x, w, y = map(get_gpu, [x, w, y])
 
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
 
@@ -501,11 +487,9 @@ def cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y):
 
 
 def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
-    x, w, dy, dw, dx = map(get_gpu, [x, w, dy, dw, dx])
     if db is None:
         cuda_base.check_heap_device(x, w, dy, dw, dx)
     else:
-        db = get_gpu(db)
         cuda_base.check_heap_device(x, w, dy, dw, db, dx)
 
     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
@@ -563,7 +547,6 @@ def cuConvolutionBackward(handle, conv_desc, filter_desc, x, w, dy, dw, db, dx):
 
 
 def cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, dy, dx):
-    w, dy, dx = map(get_gpu, [w, dy, dx])
 
     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=w.dtype))
     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=w.dtype))
@@ -592,7 +575,6 @@ def cuConvolutionBackwardData(handle, conv_desc, filter_desc, w, dy, dx):
 
 
 def cuConvolutionBackwardFilter(handle, conv_desc, filter_desc, x, dy, dw):
-    x, dy, dw = map(get_gpu, [x, dy, dw])
 
     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=x.dtype))
     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=x.dtype))
@@ -621,7 +603,6 @@ def cuConvolutionBackwardFilter(handle, conv_desc, filter_desc, x, dy, dw):
 
 
 def cuConvolutionBackwardBias(handle, dy, db):
-    dy, db = map(get_gpu, [dy, db])
 
     cdef _VoidPtr alf = _VoidPtr(np.array([1.0], dtype=dy.dtype))
     cdef _VoidPtr bt = _VoidPtr(np.array([0.0], dtype=dy.dtype))
@@ -642,7 +623,6 @@ def cuConvolutionBackwardBias(handle, dy, db):
 
 
 def cuSoftmaxForward(handle, x, y, mode=0):
-    x, y = map(get_gpu, [x, y])
 
     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=x.dtype))
     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=x.dtype))
@@ -665,7 +645,6 @@ def cuSoftmaxForward(handle, x, y, mode=0):
 
 
 def cuSoftmaxBackward(handle, y, dy, dx, mode=0):
-    y, dy, dx = map(get_gpu, [y, dy, dx])
 
     cdef _VoidPtr a = _VoidPtr(np.array([1.0], dtype=dy.dtype))
     cdef _VoidPtr b = _VoidPtr(np.array([0.0], dtype=dy.dtype))
@@ -690,7 +669,6 @@ def cuSoftmaxBackward(handle, y, dy, dx, mode=0):
 
 
 def cuLocalResponseNormalizationForward(handle, lrn_desc, x, y):
-    x, y = map(get_gpu, [x, y])
 
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
     cdef cudnnLRNMode_t mode = cudnnLRNMode_t.CUDNN_LRN_CROSS_CHANNEL_DIM1
@@ -714,7 +692,6 @@ def cuLocalResponseNormalizationForward(handle, lrn_desc, x, y):
 
 
 def cuLocalResponseNormalizationBackward(handle, lrn_desc, x, y, dx, dy):
-    x, y, dx, dy = map(get_gpu, [x, y, dx, dy])
 
     cdef cudnnHandle_t handler = <cd.cudnnHandle_t> <uintptr_t> handle
     cdef cudnnLRNMode_t mode = cudnnLRNMode_t.CUDNN_LRN_CROSS_CHANNEL_DIM1

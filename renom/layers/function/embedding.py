@@ -3,10 +3,13 @@
 
 from __future__ import division
 import numpy as np
-from renom.core import Node, get_gpu, precision, GPUValue, Variable
+from renom.core import Node, Variable
+from renom import precision
 from renom.layers.function.parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 class embedding(Node):

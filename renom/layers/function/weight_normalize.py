@@ -1,12 +1,13 @@
 
 from __future__ import division
 import numpy as np
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 from renom.core import Node, Variable, Pow
 import renom.operation as op
 import renom.utility.initializer as init
 from .parameterized import Parametrized
-from renom.cuda.gpuvalue import *
 
 
 def normalized_form(x):
@@ -50,10 +51,10 @@ class weight_normalize(Node):
         weight = self.attrs._weight
         dx = op.dot(dy, w.T)
         normal_dw = op.dot(x.T, dy)
-        w_normed = normalized_form(weight)
-        dgain = normal_dw * weight / w_normed
-        dw = (1 / w_normed * normal_dw - op.sum(weight * normal_dw, keepdims=True) *
-              weight / (op.square(w_normed) * w_normed)) * gain
+
+        dgain = normal_dw * w / gain
+        dw = w / weight * (normal_dw - np.sum(w * normal_dw / gain, keepdims=True) * w / gain)
+        db = np.ones_like(dy) * dy
 
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
@@ -77,24 +78,23 @@ class weight_normalize(Node):
         weight = get_gpu(self.attrs._weight)
         dx = get_gpu(op.dot(dy, w.T))
         normal_dw = get_gpu(op.dot(x.T, dy))
-        w_normed = get_gpu(normalized_form(weight))
-        dgain = normal_dw * weight / w_normed
 
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
 
         if isinstance(self.attrs._gain, Node):
+            dgain = normal_dw * w / gain
             self.attrs._gain._update_diff(context,
                                           op.sum(dgain, axis=0, keepdims=True), **kwargs)
 
         if isinstance(self.attrs._weight, Node):
-            dw = (get_gpu(1 / w_normed * normal_dw) -
-                  get_gpu(get_gpu(op.sum(get_gpu(weight * normal_dw), keepdims=True)) *
-                          weight / (get_gpu(op.square(w_normed)) * w_normed))) * gain
+            dw = w / get_gpu(weight) * get_gpu(normal_dw -
+                                               get_gpu(op.sum(w * get_gpu(normal_dw) / get_gpu(gain), keepdims=True)
+                                                       * w / get_gpu(gain)))
             self.attrs._weight._update_diff(context, dw, **kwargs)
 
         if isinstance(self.attrs._bias, Node):
-            db = get_gpu(dy)
+            db = dy
             self.attrs._bias._update_diff(context,
                                           op.sum(db, axis=0, keepdims=True), **kwargs)
 
@@ -137,7 +137,8 @@ class WeightNormalize(Parametrized):
 
     def weight_initiallize(self, input_size):
         self.params = {
-            "w": Variable(self._initializer((input_size[0], self._units)), auto_update=True, weight_decay=self._weight_decay),
+            "w": Variable(self._initializer((input_size[0], self._units)), auto_update=True,
+                          weight_decay=self._weight_decay),
             "gain": Variable(np.ones((1, self._units)) * self._gain, auto_update=True),
             "bias": Variable(np.ones((1, self._units)), auto_update=True)}
 

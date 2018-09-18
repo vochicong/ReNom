@@ -1,11 +1,12 @@
 
 from __future__ import division
 import numpy as np
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 from renom.core import Node, Variable
 import renom.operation as op
 from .parameterized import Parametrized
-from renom.cuda.gpuvalue import *
 
 
 def get_std_distribution(x):
@@ -61,6 +62,7 @@ class layer_normalize(Node):
         mu = get_mu(x)
         sigma = get_sigma(x, mu) + 1e-5
         normalized = (x - mu) / sigma
+        # ret = cls._create_node(normalized)# * gain + bias)
         ret = cls._create_node(normalized * gain + bias)
         ret.attrs._x = x
         ret.attrs._mu = mu
@@ -82,7 +84,7 @@ class layer_normalize(Node):
         sum2 = op.sum((_x - mu) ** 2, axis=_ax, keepdims=True)
         sigma = op.sqrt(sum2 / H) + 1e-5
         normalized = (_x - mu) / get_gpu(sigma)
-        ret = cls._create_node(normalized * _gain + _bias)
+        ret = cls._create_node(get_gpu(normalized * _gain) + get_gpu(bias))
         ret.attrs._x = x
         ret.attrs._sigma = sigma
         ret.attrs._mu = mu
@@ -126,12 +128,13 @@ class layer_normalize(Node):
         H = float(np.prod(x.shape[1:]))
         mu_diff = get_gpu(get_mu_diff(x))
 
-        sigma_diff = get_gpu(1 / (2 * sigma) * ((2 * x + 2 * mu -
+        sigma_diff = get_gpu(1 / (2 * sigma) * ((get_gpu(2 * x) + get_gpu(2 * mu) -
                                                  get_gpu(2 * (op.sum(x, axis=_ax, keepdims=True) / H + mu))) / H))
         dx = get_gpu(dy / sigma) \
-            - get_gpu(sigma_diff * get_gpu(op.sum(x * dy, axis=_ax, keepdims=True)) / (sigma ** 2)) \
+            - get_gpu(sigma_diff * get_gpu(op.sum(x * dy, axis=_ax, keepdims=True)) / get_gpu(sigma ** 2)) \
             - get_gpu(get_gpu(op.sum(mu_diff * dy, axis=_ax, keepdims=True)) / sigma) \
-            + get_gpu(sigma_diff * get_gpu(op.sum(dy, axis=_ax, keepdims=True)) * mu / (sigma ** 2))
+            + get_gpu(sigma_diff * get_gpu(op.sum(dy, axis=_ax, keepdims=True))
+                      * get_gpu(mu / get_gpu(sigma ** 2)))
         dx *= gain
 
         if isinstance(self.attrs._x, Node):

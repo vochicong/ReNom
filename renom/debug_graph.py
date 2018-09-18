@@ -1,7 +1,8 @@
+from __future__ import absolute_import
 import itertools
 import collections
 import weakref
-import renom.core
+import renom
 
 try:
     from graphviz import Digraph, Graph
@@ -429,6 +430,11 @@ def SET_MODEL_GRAPH(use):
 
     global MODEL_GRAPH
     MODEL_GRAPH = use
+
+
+def showmark(cls):
+    cls.SHOWMARK = True
+    return cls
 
 
 def BUILD_MODEL_GRAPH(model, value):

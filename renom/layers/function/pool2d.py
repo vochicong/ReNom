@@ -3,9 +3,11 @@
 
 from __future__ import division
 import numpy as np
-from renom.core import Node, GPUValue, get_gpu
+from renom.core import Node
 from renom.layers.function.utils import im2col, col2im, out_size, tuplize
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 class pool_base(Node):
@@ -20,7 +22,8 @@ class pool_base(Node):
     def _backward_gpu(self, context, dy, **kwargs):
         dx = get_gpu(self.attrs._x).empty_like_me()
         with cu.cudnn_handler() as handle:
-            cu.cuPoolingBackward(handle, self.attrs._pool_desc, self.attrs._x, self, dy, dx)
+            cu.cuPoolingBackward(handle, self.attrs._pool_desc, get_gpu(
+                self.attrs._x), get_gpu(self), get_gpu(dy), dx)
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
 
@@ -49,9 +52,10 @@ class max_pool2d(pool_base):
     def _oper_gpu(cls, x, in_shape, out_shape, karnel, stride, padding):
         N = x.shape[0]
         pool_desc = cu.PoolingDescriptor(karnel, padding, stride, pool_mode=0)
+        _x = get_gpu(x)
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
-            cu.cuPoolingForward(handle, pool_desc, x, y)
+            cu.cuPoolingForward(handle, pool_desc, _x, y)
         ret = cls._create_node(y)
         ret.attrs._pool_desc = pool_desc
         ret.attrs._x = x
@@ -95,7 +99,7 @@ class average_pool2d(pool_base):
         pool_desc = cu.PoolingDescriptor(karnel, padding, stride, pool_mode=1)
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
-            cu.cuPoolingForward(handle, pool_desc, x, y)
+            cu.cuPoolingForward(handle, pool_desc, get_gpu(x), y)
         ret = cls._create_node(y)
         ret.attrs._pool_desc = pool_desc
         ret.attrs._x = x

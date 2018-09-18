@@ -1,6 +1,7 @@
 # -*- coding: utf - 8 -*-
 import numpy as np
-from renom.core import precision, to_value
+from renom.core import to_value
+from renom import precision
 
 
 def out_size(size, k, s, p, d=(1, 1)):

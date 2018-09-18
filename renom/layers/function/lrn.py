@@ -3,8 +3,10 @@
 
 from __future__ import division
 import numpy as np
-from renom.core import Node, get_gpu, to_value
-from renom.cuda import cuda as cu
+from renom.core import Node, to_value
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 
 
 class lrn(Node):
@@ -53,7 +55,7 @@ class lrn(Node):
         lrn_desc = cu.LRNDescriptor(n, a, b, k)
         y = get_gpu(x).empty_like_me()
         with cu.cudnn_handler() as handle:
-            cu.cuLocalResponseNormalizationForward(handle, lrn_desc, x, y)
+            cu.cuLocalResponseNormalizationForward(handle, lrn_desc, get_gpu(x), get_gpu(y))
         ret = cls._create_node(y)
         ret.attrs._x = x
         ret.attrs._lrn_desc = lrn_desc
@@ -64,7 +66,7 @@ class lrn(Node):
             dx = get_gpu(self).empty_like_me()
             with cu.cudnn_handler() as handle:
                 cu.cuLocalResponseNormalizationBackward(
-                    handle, self.attrs._lrn_desc, self.attrs._x, self, dx, dy)
+                    handle, self.attrs._lrn_desc, get_gpu(self.attrs._x), get_gpu(self), dx, get_gpu(dy))
             self.attrs._x._update_diff(context, dx, **kwargs)
 
 

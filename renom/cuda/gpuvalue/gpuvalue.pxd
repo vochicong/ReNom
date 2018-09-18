@@ -1,7 +1,7 @@
 # distutils: language=c++
 
-from . cimport cublas
-from . cimport cuda_base
+from renom.cuda.cublas cimport cublas
+from renom.cuda.base cimport cuda_base
 
 cdef class _AdvIndex:
     cdef public object org_index
@@ -9,7 +9,6 @@ cdef class _AdvIndex:
     cdef public object shape
 
 
-cpdef get_gpu(array)
 cpdef _parse_index(arr, indexes)
 cpdef build_shapes(arr, indexes)
 cpdef _build_broadcast_mask(left, right)
@@ -40,4 +39,3 @@ cdef class GPUValue:
     cpdef transpose(self, axis)
     cpdef split(self, indices_or_sections, axis=*)
     cpdef hsplit(self, indices_or_sections)
-

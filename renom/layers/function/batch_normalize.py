@@ -3,10 +3,13 @@
 
 from __future__ import division, print_function
 import numpy as np
-from renom.core import Node, Variable, to_value, get_gpu, precision, GPUValue
+from renom.core import Node, Variable, to_value
+from renom import precision
 from renom.layers.function.parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 BATCH_NORMALIZE_FEATUREMAP = 1
 BATCH_NORMALIZE_ELEMENTWISE = 2
@@ -17,6 +20,8 @@ mode_dict = {
 
 class batch_normalize(Node):
     def __new__(cls, x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon):
+        assert inference is True or x.shape[0] > 1, "Batch Normalize expects more than" \
+            + " one batch when not in inference mode."
         return cls.calc_value(x, w, b, momentum, mov_m, mov_s, inference, mode, epsilon)
 
     @classmethod
@@ -70,7 +75,7 @@ class batch_normalize(Node):
         mv_v = mov_s if isinstance(mov_s, GPUValue) else get_gpu(w).zeros_like_me()
 
         with cu.cudnn_handler() as handle:
-            cu.cuBatchNormalizatoinForward(handle, x, mv_m, mv_v, w, b,
+            cu.cuBatchNormalizatoinForward(handle, get_gpu(x), mv_m, mv_v, get_gpu(w), get_gpu(b),
                                            y, mean, sq_var, momentum=momentum,
                                            mode=axs, inference=inference, eps=epsilon)
         ret = cls._create_node(y)

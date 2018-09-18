@@ -8,9 +8,11 @@ import inspect
 import weakref
 import copy
 import numpy as np
-from renom.core import Node, Variable, GPUValue, Pos, get_model_graph, EnterModel, LeaveModel
-from renom.operation import sum
+from renom import get_model_graph, EnterModel, LeaveModel, Pos
+from renom.core import Node, Variable
 import renom.cuda
+if renom.cuda.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue
 from renom.cuda import use_device, is_cuda_active
 from future.utils import with_metaclass
 

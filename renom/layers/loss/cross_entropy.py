@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division
 import numpy as np
-from renom.core import Node, get_gpu, to_value
-from renom.cuda import cuda as cu
+from renom.core import Node, to_value
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 from renom.operation import log
 
 

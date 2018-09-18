@@ -3,10 +3,13 @@
 
 import numpy as np
 from renom.layers.function.utils import im2col, col2im, out_size, tuplize
-from renom.core import Node, Variable, to_value, GPUValue, get_gpu, precision
+from renom.core import Node, Variable, to_value
+from renom import precision
 from .parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 class conv2d(Node):
@@ -50,7 +53,7 @@ class conv2d(Node):
 
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
-            cu.cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y)
+            cu.cuConvolutionForward(handle, conv_desc, filter_desc, get_gpu(x), get_gpu(w), y)
             if b is not None:
                 cu.cu_add_bias(get_gpu(b), y)
 
@@ -89,7 +92,8 @@ class conv2d(Node):
             if db is None:
                 db = np.zeros((1, self.attrs._w.shape[0], 1, 1))
             cu.cuConvolutionBackward(handle, self.attrs._conv_desc, self.attrs._filter_desc,
-                                     self.attrs._x, self.attrs._w, dy, dw, db, dx, **kwargs)
+                                     get_gpu(self.attrs._x), get_gpu(self.attrs._w), get_gpu(dy),
+                                     get_gpu(dw), get_gpu(db), get_gpu(dx), **kwargs)
         if isinstance(self.attrs._w, Node):
             self.attrs._w._update_diff(context, dw, **kwargs)
 
