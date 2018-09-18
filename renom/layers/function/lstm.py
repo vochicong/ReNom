@@ -280,3 +280,20 @@ class Lstm(Parametrized):
         """Truncates temporal connection."""
         self._z = None
         self._state = None
+
+class ChainedLSTM(Lstm):
+    '''
+    This chained LSTM model assumes an input of shape (N, T, X) where N is batch size, T is time size and X is the data.
+
+    The model automates the process of chaining together several LSTM calls.
+    '''
+    def __init__(self, *args, **kwargs):
+        super(ChainedLSTM, self).__init__(*args, **kwargs)
+
+    def forward(self, x):
+        lstm_model = super(ChainedLSTM, self)
+        lstm_model.truncate()
+        length = x.shape[1]
+        for i in range(length):
+            ret = lstm_model.forward(x[:,i])
+        return ret
