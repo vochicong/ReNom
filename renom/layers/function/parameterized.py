@@ -8,7 +8,6 @@ import inspect
 import weakref
 import copy
 import numpy as np
-from renom import get_model_graph, EnterModel, LeaveModel, Pos
 from renom.core import Node, Variable
 import renom.cuda
 if renom.cuda.has_cuda():
@@ -53,6 +52,12 @@ class Model(with_metaclass(ABCMeta, object)):
     _device_id = 0
     SERIALIZED = ()
 
+
+    _model_hook = None
+    @classmethod
+    def set_hook(cls, context):
+        cls._model_hook = context
+
     @property
     def params(self):
         if not self._parameters:
@@ -70,9 +75,18 @@ class Model(with_metaclass(ABCMeta, object)):
 
     def __call__(self, x, *args, **kwargs):
         with use_device(self._device_id):
-            x = self.mark_enter(x)
-            ret = self.forward(x, *args, **kwargs)
-            return self.mark_leave(ret)
+            if self._model_hook:
+                x, args, kwargs = self._model_hook.call_enter(self, x, args, kwargs)
+
+            if not self._model_hook:
+                ret = self.forward(x, *args, **kwargs)
+            else:
+                ret = self._model_hook.on_forward(self, self.forward, x, args, kwargs)
+
+            if self._model_hook:
+                ret = self._model_hook.call_leave(self, ret, x, args, kwargs)
+
+            return ret
 
     def set_gpu(self, device_id):
         self.set_models(_device_id=device_id)
@@ -505,10 +519,7 @@ class Sequential(Model):
             setattr(self, "l%d" % (i), ly)
 
     def __call__(self, x):
-        with use_device(self._device_id):
-            x = self.mark_enter(x)
-            ret = self.forward(x)
-            return self.mark_leave(ret)
+        return super(Sequential, self).__call__(x)
 
     def append(self, layer):
         setattr(self, "l%d" % (len(self._layers)), layer)
