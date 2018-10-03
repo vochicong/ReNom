@@ -1404,7 +1404,7 @@ def test_smooth_l1_no_reduce(node, x, delta, use_gpu):
     [Variable(rand((1, 2))), 0],
     [Variable(rand((2, 1))), 1],
     [Variable(rand((1,))), 0],
-#    [Variable(rand((2, 3, 4, 5))), (1, 2, 3)],
+    #    [Variable(rand((2, 3, 4, 5))), (1, 2, 3)],
 ])
 def test_mean(node, axis, use_gpu):
     node = Variable(node)
@@ -1416,4 +1416,3 @@ def test_mean(node, axis, use_gpu):
         return sum(rm.mean(node, axis=axis, keepdims=keepdims))
     compare(func, node, node, True)
     compare(func, node, node, False)
-
