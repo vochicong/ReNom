@@ -702,3 +702,64 @@ class amax(Amax):
          [ 0.,  1.]]
     """
     pass
+
+
+class mean(Node):
+    '''
+    This function calculates the mean of matrix elements.
+    If the argument 'axis' is passed, this function performs
+    mean calculation along the specified axis.
+
+    Args:
+        array (Node): Input array.
+        axis (int): Calculate the mean along this axis
+        keepdims (bool): If this is True, dimension will not be reduced.
+
+    Returns:
+        (Node): Mean array.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>>
+        >>> x = np.random.rand(2, 3)
+        >>> z = rm.mean(x)
+        >>> z
+    '''
+
+    @classmethod
+    def _oper_cpu(cls, arg, axis=None, keepdims=False):
+        return np.mean(arg, axis=axis, keepdims=keepdims)
+
+    def __new__(cls, arg, axis=None, keepdims=False):
+        value = cls.calc_value(arg, axis, keepdims=keepdims)
+        ret = super(mean, cls).__new__(cls, value)
+        ret.attrs._axis = axis
+        ret.attrs._arg = arg
+        ret.attrs._keep = keepdims
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            arg = self.attrs._arg
+            axis = self.attrs._axis
+            if axis is None:
+                dx = np.ones_like(arg) * dy / np.size(arg)
+            else:
+                if not self.attrs._keep:
+                    print("in if!!!")
+                    if isinstance(axis, int):
+                        expanded = np.expand_dims(dy, axis)
+                    else:
+                        expanded = dy
+                        for ax in axis:
+                            expanded = np.expand_dims(expanded, ax)
+                    dx = np.ones_like(arg) * expanded / np.size(arg, axis)
+                else:
+                    print("in else!!!")
+                    if isinstance(axis, int):
+                        dx = np.ones_like(arg) * dy / np.size(arg, axis)
+                    else:
+                        for ax in axis:
+                            dx += np.ones_like(arg) * dy / np.size(arg, ax)
+            arg._update_diff(context, dx, **kwargs)
