@@ -124,7 +124,7 @@ def place_kernels(img, kernel, stride, offset=0):
     kernels = np.zeros(tuple(kernels))
     assert len(kernel) > offset, "{}\{}".format(len(kernel), offset)
     for pos in generate_positions(img, stride, offset, min_space=np.array(kernel.shape) - 1):
-        slices = [slice(pos[i], pos[i] + kernel.shape[i]) for i in range(len(img.shape))]
+        slices = tuple([slice(pos[i], pos[i] + kernel.shape[i]) for i in range(len(img.shape))])
         kern = np.sum(img[slices] * kernel)
         kernels[tuple(np.array(pos) // stride)] = kern
     return kernels
@@ -136,7 +136,7 @@ def place_back_kernels(img, kernel, stride=1, offset=0):
     itr_img = ret
     min = np.array(kernel.shape) - 1
     for pos in generate_positions(itr_img, stride, offset, min_space=min):
-        slices = [slice(pos[i], pos[i] + kernel.shape[i]) for i in range(len(img.shape))]
+        slices = tuple([slice(pos[i], pos[i] + kernel.shape[i]) for i in range(len(img.shape))])
         kern = kernel * img[tuple(np.array(pos) // stride)]
         ret[slices] += kern
     return ret
@@ -148,7 +148,7 @@ def place_overlap_kernels(img, kernel, stride=1, offset=0):
     itr_img = img
     min = np.array(ret.shape) - 1
     for pos in generate_positions(itr_img, stride, offset, min_space=min):
-        slices = [slice(pos[i], pos[i] + ret.shape[i]) for i in range(len(img.shape))]
+        slices = tuple([slice(pos[i], pos[i] + ret.shape[i]) for i in range(len(img.shape))])
         kern = img[slices] * kernel[tuple(np.array(pos) // stride)]
         ret += kern
     return ret
