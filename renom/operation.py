@@ -731,6 +731,26 @@ class mean(Node):
     def _oper_cpu(cls, arg, axis=None, keepdims=False):
         return np.mean(arg, axis=axis, keepdims=keepdims)
 
+    @classmethod
+    def _oper_gpu(cls, arg, axis=None, keepdims=False):
+        if isinstance(axis, (int, type(None))):
+            size = np.size(arg, axis)
+            if keepdims == False:
+                if axis is None:
+                    newshape = ()
+                else:
+                    newshape = arg.shape[:axis] + arg.shape[axis+1:]
+            else:
+                axis_list = list(arg.shape)
+                if axis is None:
+                    newshape = tuple([1 for e in list(axis_list)])
+                else:
+                    axis_list[axis] = 1
+                    newshape = tuple(axis_list)
+            ret = GPUValue(shape=newshape)
+            cudiv(cusum(get_gpu(arg), axis=axis, keepdims=keepdims), size, ret)
+        return ret
+
     def __new__(cls, arg, axis=None, keepdims=False):
         value = cls.calc_value(arg, axis, keepdims=keepdims)
         ret = super(mean, cls).__new__(cls, value)
@@ -747,19 +767,28 @@ class mean(Node):
                 dx = np.ones_like(arg) * dy / np.size(arg)
             else:
                 if not self.attrs._keep:
-                    print("in if!!!")
                     if isinstance(axis, int):
                         expanded = np.expand_dims(dy, axis)
-                    else:
-                        expanded = dy
-                        for ax in axis:
-                            expanded = np.expand_dims(expanded, ax)
-                    dx = np.ones_like(arg) * expanded / np.size(arg, axis)
+                        dx = np.ones_like(arg) * expanded / np.size(arg, axis)
                 else:
-                    print("in else!!!")
                     if isinstance(axis, int):
                         dx = np.ones_like(arg) * dy / np.size(arg, axis)
-                    else:
-                        for ax in axis:
-                            dx += np.ones_like(arg) * dy / np.size(arg, ax)
             arg._update_diff(context, dx, **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            arg = self.attrs._arg
+            axis = self.attrs._axis
+            if axis is None:
+                dx = get_gpu(arg).ones_like_me() * get_gpu(dy) / get_gpu(arg).size
+            else:
+                dy = get_gpu(dy).new_array()
+                if not self.attrs._keep:
+                    if isinstance(axis, int):
+                        expanded = np.expand_dims(dy, axis)
+                        dx = np.ones_like(arg, dtype=arg.dtype) * \
+                            expanded / get_gpu(arg.shape[axis])
+                else:
+                    if isinstance(axis, int):
+                        dx = np.ones_like(arg, dtype=arg.dtype) * dy / get_gpu(arg.shape[axis])
+            arg._update_diff(context, get_gpu(dx), **kwargs)

@@ -1408,7 +1408,7 @@ def test_smooth_l1_no_reduce(node, x, delta, use_gpu):
 ])
 def test_mean(node, axis, use_gpu):
     node = Variable(node)
-    assert_cuda_active(False)
+    assert_cuda_active(use_gpu)
     result = sum(node, axis=axis, keepdims=True)
     assert len(result.shape) == len(node.shape)
 
