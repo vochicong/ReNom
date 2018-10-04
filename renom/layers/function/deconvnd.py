@@ -41,7 +41,17 @@ class deconvnd(Node):
         if isinstance(self.attrs._x, Node):
             dx = imncol(dy, self.attrs._w, self.attrs._stride, padding=[
                         0 for _ in range(len(self.attrs._stride))])
-            self.attrs._x._update_diff(context, dx)
+            self.attrs._x._update_diff(context, dx, **kwargs)
+
+        if isinstance(self.attrs._w, Node):
+            l = [x for x in range(len(self.shape))]
+            del(l[1])
+            dw = np.ones_like(self.attrs._w) * np.swapaxes(np.sum(self.attrs._x, axis=tuple(l), keepdims=True), 0, 1)
+            self.attrs._w._update_diff(context, dw, **kwargs)
+
+        if isinstance(self.attrs._b, Node):
+            db = np.sum(np.ones_like(self), axis=tuple([x for x in range(2,len(self.shape),1)]), keepdims=True)
+            self.attrs._b._update_diff(context, np.sum(db, axis=0, keepdims=True))
 
     def _backward_gpu(self, context, dy, **kwargs):
         raise NotImplementedError
@@ -125,7 +135,7 @@ class DeconvNd(Parametrized):
             "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
                 input_size[1:])
 
-        f_lst = [self._channel, input_size[0]]
+        f_lst = [input_size[0], self._channel]
         f_lst.extend(self._kernel)
         size_f = tuple(f_lst)
         size_b = tuple([1, self._channel] + [1 for _ in range(self._dims)])

@@ -633,17 +633,18 @@ def test_deconv2d_with_dilation(node, size, use_gpu):
 
 
 @pytest.mark.parametrize("node", [
-    Variable(rand((2, 3, 3, 3, 3))),
-    Variable(rand((2, 3, 5, 6))),
+    Variable(rand((2, 3, 4, 5))),
 ])
 def test_deconvnd(node):
     node = Variable(node)
 
-    layer = DeconvNd(channel=3)
+    layer = DeconvNd(channel=3, filter=1, stride=1, padding=0)
 
     def func(node):
         return sum(layer(node))
     compare(func, node, node)
+    compare(func, layer.params["w"], node)
+    compare(func, layer.params["b"], node)
 
 
 @pytest.mark.parametrize("node", [

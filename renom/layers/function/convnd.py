@@ -48,8 +48,6 @@ class convnd(Node):
             if b is not None:
                 cu.cu_add_bias(get_gpu(b), y)
 
-        # assert type(x) is not np.ndarray
-
         ret = cls._create_node(y)
         ret.attrs._conv_desc = conv_desc
         ret.attrs._filter_desc = filter_desc
