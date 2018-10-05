@@ -21,7 +21,9 @@ class deconvnd(Node):
 
     @classmethod
     def _oper_cpu(cls, x, w, b, in_shape, kernel, stride, padding):
-        col = colnim(x, w, stride)
+        w_rev = np.reshape(w,(w.shape[0], w.shape[1], -1))
+        w_rev = np.flip(wb,2).reshape(w.shape)
+        col = colnim(x, w_rev, stride)
         if b is not None:
             col += b
         ret = cls._create_node(col)
@@ -35,7 +37,26 @@ class deconvnd(Node):
 
     @classmethod
     def _oper_gpu(cls, x, w, b, in_shape, kernel, stride, padding):
-        raise NotImplementedError
+        conv_desc = cu.ConvolutionNDescriptor(padding, stride, precision)
+        filter_desc = cu.NdFilterDescriptor(w.shape, precision)
+
+        output_shape=[x.shape[0], w.shape[1]]
+        for i in range(len(x.shape[2:])):
+            output_shape.append(stride[i] * (x.shape[i + 2] - 1) + kernel[i] - 2 * padding[i])
+        y = GPUValue(shape=tuple(output_shape))
+
+        with cu.cudnn_handler() as handle:
+            cu.cuConvolutionBackwardData(handle, conv_desc, filter_desc, get_gpu(w), get_gpu(x), y)
+        if b is not None:
+            cu.cu_add_bias(get_gpu(b), y)
+
+        ret = cls._create_node(y)
+        ret.attrs._conv_desc = conv_desc
+        ret.attrs._filter_desc = filter_desc
+        ret.attrs._x = x
+        ret.attrs._w = w
+        ret.attrs._b = b
+        return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
@@ -54,7 +75,19 @@ class deconvnd(Node):
             self.attrs._b._update_diff(context, np.sum(db, axis=0, keepdims=True))
 
     def _backward_gpu(self, context, dy, **kwargs):
-        raise NotImplementedError
+        dw, db, dx = (get_gpu(g).empty_like_me() if g is not None else None for g in (self.attrs._w, self.attrs._b, self.attrs._x))
+
+        with cu.cudnn_handler() as handle:
+            cu.cuConvolutionForward(handle, self.attrs._conv_desc, self.attrs._filter_desc, get_gpu(dy), get_gpu(self.attrs._w), dx)
+            cu.cuConvolutionBackwardFilter(handle, self.attrs._conv_desc, self.attrs._filter_desc, get_gpu(dy), get_gpu(self.attrs._x), dw)
+        if db is not None:
+            cu.cuConvolutionBackwardBias(handle, get_gpu(dy), db)
+        if isinstance(self.attrs._x, Node):
+            self.attrs._x._update_diff(context, dx, **kwargs)
+        if isinstance(self.attrs._w, Node):
+            self.attrs._w._update_diff(context, dw, **kwargs)
+        if isinstance(self.attrs._b, Node):
+            self.attrs._b._update_diff(context, db, **kwargs)
 
 
 def check_input(var, length):
@@ -141,6 +174,7 @@ class DeconvNd(Parametrized):
         size_b = tuple([1, self._channel] + [1 for _ in range(self._dims)])
 
         self.params = {"w": Variable(self._initializer(size_f), auto_update=True)}
+        #self.params = {"w": Variable(np.ones(size_f), auto_update=True)}
         if not self._ignore_bias:
             self.params["b"] = Variable(np.ones(size_b, dtype=precision), auto_update=True)
 

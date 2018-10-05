@@ -635,8 +635,9 @@ def test_deconv2d_with_dilation(node, size, use_gpu):
 @pytest.mark.parametrize("node", [
     Variable(rand((2, 3, 4, 5))),
 ])
-def test_deconvnd(node):
+def test_deconvnd(node, use_gpu):
     node = Variable(node)
+    assert_cuda_active(use_gpu)
 
     layer = DeconvNd(channel=3, filter=1, stride=1, padding=0)
 
