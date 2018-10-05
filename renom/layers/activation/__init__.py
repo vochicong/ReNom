@@ -7,3 +7,4 @@ from .selu import selu, Selu
 from .softmax import softmax, Softmax
 from .maxout import maxout, Maxout
 from .softplus import softplus, Softplus
+from .softsign import softsign, Softsign
