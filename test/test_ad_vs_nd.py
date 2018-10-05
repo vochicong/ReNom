@@ -1388,3 +1388,31 @@ def test_smooth_l1_no_reduce(node, x, delta, use_gpu):
     def func(node, x):
         return sum(rm.smoothed_l1(node, x, delta, reduce_sum=False))
     compare(func, node, node, x)
+
+
+@pytest.mark.parametrize("node, axis", [
+    [Variable(rand((2, 2))), None],
+    [Variable(rand((2, 3))), None],
+    [Variable(rand((2, 3))), 0],
+    [Variable(rand((2, 3))), 1],
+    [Variable(rand((4, 4))), 0],
+    [Variable(rand((2, 2, 1, 1))), 2],
+    [Variable(rand((2, 3, 4, 5))), 0],
+    [Variable(rand((2, 3, 4, 5))), 1],
+    [Variable(rand((2, 3, 4, 5))), 2],
+    [Variable(rand((2, 3, 4, 5))), 3],
+    [Variable(rand((1, 2))), 0],
+    [Variable(rand((2, 1))), 1],
+    [Variable(rand((1,))), 0],
+    #    [Variable(rand((2, 3, 4, 5))), (1, 2, 3)],
+])
+def test_mean(node, axis, use_gpu):
+    node = Variable(node)
+    assert_cuda_active(use_gpu)
+    result = sum(node, axis=axis, keepdims=True)
+    assert len(result.shape) == len(node.shape)
+
+    def func(node, keepdims):
+        return sum(rm.mean(node, axis=axis, keepdims=keepdims))
+    compare(func, node, node, True)
+    compare(func, node, node, False)
