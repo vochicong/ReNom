@@ -376,6 +376,21 @@ def test_softplus(node, use_gpu):
 
 
 @pytest.mark.parametrize("node", [
+    Variable(rand((2, 1))),
+    Variable(rand((2, 2))),
+    Variable(rand((2,))),
+    Variable(rand((2, 2, 2, 2))),
+])
+def test_swish_activation(node, use_gpu):
+    node = Variable(node)
+    assert_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.swish(node))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
     Variable(rand((2, 1))),
     Variable(rand((1, 2))),
@@ -1404,7 +1419,7 @@ def test_smooth_l1_no_reduce(node, x, delta, use_gpu):
     [Variable(rand((1, 2))), 0],
     [Variable(rand((2, 1))), 1],
     [Variable(rand((1,))), 0],
-#    [Variable(rand((2, 3, 4, 5))), (1, 2, 3)],
+    #    [Variable(rand((2, 3, 4, 5))), (1, 2, 3)],
 ])
 def test_mean(node, axis, use_gpu):
     node = Variable(node)
@@ -1416,4 +1431,3 @@ def test_mean(node, axis, use_gpu):
         return sum(rm.mean(node, axis=axis, keepdims=keepdims))
     compare(func, node, node, True)
     compare(func, node, node, False)
-

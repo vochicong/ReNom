@@ -242,6 +242,15 @@ namespace renom{
     struct elu_backward_function;
     void thrust_elu_backward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);
 
+    //Swish forward
+    struct swish_forward_function;
+    void thrust_swish_forward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);
+
+    //Swish backward
+    struct swish_backward_function;
+    void thrust_swish_backward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size);
+
+
 		__global__ void cuda_softplus_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size);
 		void thrust_softplus_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size);
 
