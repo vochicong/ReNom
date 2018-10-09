@@ -1098,6 +1098,37 @@ namespace renom{
 		thrust::transform(thrust::cuda::par.on(GET_STREAM_NAME()), dev_a, dev_a+size, dev_b, dev_b, elu_backward_function(s));
 	}
 
+	// Softsign forward
+	struct softsign_forward_function
+	{
+	    __host__ __device__
+	        VALUE_TYPE operator()(const VALUE_TYPE& x, const VALUE_TYPE& y) const {
+	            return x / (1.0 + abs(x));
+	        }
+	};
+
+	void thrust_softsign_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
+	{
+		thrust::device_ptr<VALUE_TYPE> dev_a((VALUE_TYPE*)a);
+		thrust::device_ptr<VALUE_TYPE> dev_b((VALUE_TYPE*)b);
+		thrust::transform(thrust::cuda::par.on(GET_STREAM_NAME()), dev_a, dev_a+size, dev_b, dev_b, softsign_forward_function());
+	}
+
+	// Softsign backward
+	struct softsign_backward_function
+	{
+	    __host__ __device__
+	        VALUE_TYPE operator()(const VALUE_TYPE& x, const VALUE_TYPE& y) const {
+	            return 1.0 / pow((1.0 + abs(x)), 2.0);
+	        }
+	};
+
+	void thrust_softsign_backward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
+	{
+		thrust::device_ptr<VALUE_TYPE> dev_a((VALUE_TYPE*)a);
+		thrust::device_ptr<VALUE_TYPE> dev_b((VALUE_TYPE*)b);
+		thrust::transform(thrust::cuda::par.on(GET_STREAM_NAME()), dev_a, dev_a+size, dev_b, dev_b, softsign_backward_function());
+	}
 
   __global__ void cuda_softplus_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
   {
