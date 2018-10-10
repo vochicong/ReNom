@@ -8,7 +8,7 @@ import pytest
 import renom.cuda
 import renom.core
 from renom.cuda import set_cuda_active, use_cuda, disable_cuda, use_device
-from renom.core import to_value, Variable, get_gpu
+from renom.core import to_value, Variable
 from renom.operation import dot, sum, sqrt, square
 from renom.config import precision
 from renom.layers.function.gru import Gru

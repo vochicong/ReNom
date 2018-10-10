@@ -735,11 +735,11 @@ class mean(Node):
     def _oper_gpu(cls, arg, axis=None, keepdims=False):
         if isinstance(axis, (int, type(None))):
             size = np.size(arg, axis)
-            if keepdims == False:
+            if not keepdims:
                 if axis is None:
                     newshape = ()
                 else:
-                    newshape = arg.shape[:axis] + arg.shape[axis+1:]
+                    newshape = arg.shape[:axis] + arg.shape[axis + 1:]
             else:
                 axis_list = list(arg.shape)
                 if axis is None:
