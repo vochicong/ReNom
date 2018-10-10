@@ -379,6 +379,21 @@ def test_softplus(node, use_gpu):
 
 
 @pytest.mark.parametrize("node", [
+    Variable(rand((2, 1))),
+    Variable(rand((2, 2))),
+    Variable(rand((2,))),
+    Variable(rand((2, 2, 2, 2))),
+])
+def test_swish_activation(node, use_gpu):
+    node = Variable(node)
+    assert_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.swish(node))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node", [
     Variable(rand((2, 2))),
     Variable(rand((3, 2, 4))),
     Variable(rand((1, 3))),

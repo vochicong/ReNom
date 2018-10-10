@@ -635,6 +635,30 @@ def test_gpu_node_softmax(a):
     rand((1, 3)),
     rand((1, 1)),
     rand((3, 1)),
+    rand((1, 3, 3, 3)),
+])
+def test_gpu_node_swish(a):
+    set_cuda_active(True)
+
+    g1 = Variable(a)
+
+    g3 = rm.sum(rm.swish(g1))
+    g = g3.grad()
+    g_g1 = g.get(g1)
+    g3.to_cpu()
+
+    set_cuda_active(False)
+    c3 = rm.sum(rm.swish(g1))
+    c = c3.grad()
+    c_g1 = c.get(g1)
+
+    close(g3, c3)
+    close(c_g1, g_g1)
+
+
+
+@test_utility.skipgpu
+@pytest.mark.parametrize("a", [
     rand((3, 4, 2)),
     rand((1, 3, 3, 3)),
 ])
@@ -643,18 +667,21 @@ def test_gpu_node_softsign(a):
 
     g1 = Variable(a)
 
-    g3 = sum(rm.softsign(g1))
+    g3 = rm.sum(rm.softsign(g1))
     g = g3.grad()
     g_g1 = g.get(g1)
     g3.to_cpu()
 
     set_cuda_active(False)
-    c3 = sum(rm.softsign(g1))
+    c3 = rm.sum(rm.softsign(g1))
     c = c3.grad()
     c_g1 = c.get(g1)
 
     close(g3, c3)
     close(c_g1, g_g1)
+
+
+
 
 
 @pytest.mark.skip()

@@ -137,6 +137,24 @@ def cutanh(gpu_value1, gpu_value2):
     thrust_tanh(ptr1, ptr2, size)
 
 
+def cuswish_forward(s, gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
+    cdef int size = <int > gpu_value1.size
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+    thrust_swish_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
+
+
+def cuswish_backward(s, gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
+    cdef int size = <int > gpu_value1.size
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+    thrust_swish_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
+
+
 ctypedef void(*BINOP_FUNC)(
     VALUE_TYPE * a, VALUE_TYPE * b, VALUE_TYPE * c,
     size_t size, binop_strides * strides)

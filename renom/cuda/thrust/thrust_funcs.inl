@@ -1130,6 +1130,45 @@ namespace renom{
 		thrust::transform(thrust::cuda::par.on(GET_STREAM_NAME()), dev_a, dev_a+size, dev_b, dev_b, softsign_backward_function());
 	}
 
+  // Swish forward
+  struct swish_forward_function
+  {
+
+    const VALUE_TYPE s;
+    swish_forward_function(VALUE_TYPE s_) : s(s_){}
+
+      __host__ __device__
+          VALUE_TYPE operator()(const VALUE_TYPE& x, const VALUE_TYPE& y) const {
+              return x*(1.0/(1.0 + exp(-s*x)));
+          }
+  };
+
+  void thrust_swish_forward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size)
+  {
+    thrust::device_ptr<VALUE_TYPE> dev_a((VALUE_TYPE*)a);
+    thrust::device_ptr<VALUE_TYPE> dev_b((VALUE_TYPE*)b);
+    thrust::transform(thrust::cuda::par.on(GET_STREAM_NAME()), dev_a, dev_a+size, dev_b, dev_b, swish_forward_function(s));
+  }
+
+  // Swish backward
+  struct swish_backward_function
+  {
+    const VALUE_TYPE s;
+    swish_backward_function(VALUE_TYPE s_) : s(s_){}
+
+      __host__ __device__
+          VALUE_TYPE operator()(const VALUE_TYPE& x, const VALUE_TYPE& y) const {
+              return s*x*(1.0/(1.0 + exp(-s*x))) + (1.0/(1.0 + exp(-s*x)))*(1.0 - s*x*(1.0/(1.0 + exp(-s*x))));
+          }
+  };
+
+  void thrust_swish_backward(VALUE_TYPE s, VALUE_TYPE *a, VALUE_TYPE *b, int size)
+  {
+    thrust::device_ptr<VALUE_TYPE> dev_a((VALUE_TYPE*)a);
+    thrust::device_ptr<VALUE_TYPE> dev_b((VALUE_TYPE*)b);
+    thrust::transform(thrust::cuda::par.on(GET_STREAM_NAME()), dev_a, dev_a+size, dev_b, dev_b, swish_backward_function(s));
+  }
+
   __global__ void cuda_softplus_forward(VALUE_TYPE *a, VALUE_TYPE *b, int size)
   {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
