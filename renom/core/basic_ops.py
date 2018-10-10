@@ -893,31 +893,7 @@ class Transpose2d(UnaryOp):
             self.attrs._arg._update_diff(context, get_gpu(dy).T, **kwargs)
 
 
-class _TransposeProperty:
-    def __get__(self, obj, type=None):
-        """Returns 2d transposed array.
-
-        Returns:
-            (Node): Transposed array.
-
-        Example:
-            >>> import numpy as np
-            >>> import renom as rm
-            >>> a = rm.Variable(np.arange(4).reshape(2, 2))
-            >>> print(a)
-            [[ 0.  1.]
-             [ 2.  3.]]
-            >>> print(a.T)
-            [[ 0.  2.]
-             [ 1.  3.]]
-        """
-        if obj is None:
-            raise AttributeError(
-                "Make sure you are taking the transpose of an instance of the Node class, not the Node class itself.")
-        return Transpose2d(obj)
-
-
-Node.T = _TransposeProperty()
+Node.T = property(lambda self: Transpose2d(self))
 
 
 class Transpose(Node):
