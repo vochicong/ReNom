@@ -26,6 +26,7 @@ from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
 from renom.layers.function.convnd import ConvNd, Conv3d
 from renom.layers.function.deconv2d import Deconv2d
+from renom.layers.function.deconvnd import DeconvNd
 from renom.layers.function.pool2d import MaxPool2d, AveragePool2d
 from renom.layers.function.unpool2d import MaxUnPool2d, AverageUnPool2d
 from renom.layers.function.poolnd import MaxPoolNd, AveragePoolNd
@@ -641,6 +642,22 @@ def test_deconv2d_with_dilation(node, size, use_gpu):
     assert_cuda_active(use_gpu)
 
     layer = Deconv2d(channel=3, dilation=size)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
+    compare(func, layer.params["b"], node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 3, 4, 5))),
+])
+def test_deconvnd(node, use_gpu):
+    node = Variable(node)
+    assert_cuda_active(use_gpu)
+
+    layer = DeconvNd(channel=3, filter=1, stride=1, padding=0)
 
     def func(node):
         return sum(layer(node))

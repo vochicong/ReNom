@@ -925,6 +925,39 @@ def test_gpu_node_deconvolution2d(a):
     close(c_g2, g_g2)
     close(c_g3, g_g3)
 
+@test_utility.skipgpu
+@pytest.mark.parametrize("a", [
+    rand((2, 3, 4, 5)),
+])
+def test_gpu_node_deconvolutionnd(a):
+    a = np.ones_like(a)
+    with use_cuda():
+
+        layer = rm.DeconvNd(channel=2,filter=3,stride=1,padding=0)
+
+        g1 = Variable(a)
+        g2 = layer(g1)
+        g3 = rm.sum(g2)
+        g = g3.grad()
+        g_g1 = g.get(layer.params["w"])
+        g_g2 = g.get(layer.params["b"])
+        g_g3 = g.get(g1)
+        g2.to_cpu()
+        g3.to_cpu()
+
+    c2 = layer(g1)
+    c3 = rm.sum(c2)
+    c = c3.grad()
+    c_g1 = c.get(layer.params["w"])
+    c_g2 = c.get(layer.params["b"])
+    c_g3 = g.get(g1)
+
+
+    close(g2, c2)
+    close(g3, c3)
+    close(c_g1, g_g1)
+    close(c_g2, g_g2)
+    close(c_g3, g_g3)
 
 @test_utility.skipgpu
 @pytest.mark.parametrize("a", [

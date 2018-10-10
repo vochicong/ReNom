@@ -10,6 +10,7 @@ from .pool2d import MaxPool2d, max_pool2d, AveragePool2d, average_pool2d
 from .poolnd import MaxPoolNd, max_poolnd, AveragePoolNd, average_poolnd
 from .dropout import Dropout, SpatialDropout, dropout, spatial_dropout
 from .deconv2d import Deconv2d
+from .deconvnd import DeconvNd
 from .flatten import Flatten, flatten
 from .lrn import Lrn
 from .unpool2d import MaxUnPool2d, max_unpool2d
