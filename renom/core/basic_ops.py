@@ -334,6 +334,9 @@ class Div(BinOp):
             self.attrs._rhs._update_diff(context, dxr, **kwargs)
 
 
+Node.__div__ = lambda self, other: Div(self, other)
+
+
 class RDiv(Div):
 
     @classmethod
