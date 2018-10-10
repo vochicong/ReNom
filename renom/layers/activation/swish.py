@@ -36,7 +36,7 @@ class swish(UnaryOp):
             beta = self.attrs._beta
             arg = self.attrs._arg
             self.attrs._arg._update_diff(
-                context, (beta * self + (1. / (1. + np.exp(-arg*beta))) * (1. - beta * self)) * dy, **kwargs)
+                context, (beta * self + (1. / (1. + np.exp(-arg * beta))) * (1. - beta * self)) * dy, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._arg, Node):

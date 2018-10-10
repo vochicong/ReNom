@@ -656,7 +656,6 @@ def test_gpu_node_swish(a):
     close(c_g1, g_g1)
 
 
-
 @test_utility.skipgpu
 @pytest.mark.parametrize("a", [
     rand((3, 4, 2)),
@@ -679,9 +678,6 @@ def test_gpu_node_softsign(a):
 
     close(g3, c3)
     close(c_g1, g_g1)
-
-
-
 
 
 @pytest.mark.skip()
