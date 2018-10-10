@@ -759,7 +759,7 @@ def test_dropout(node, seed, use_gpu):
     layer = Dropout()
 
     def func(node):
-        if use_gpu:
+        if is_cuda_active():
             curand_generator().set_seed(seed)
         else:
             np.random.seed(seed)
@@ -780,7 +780,7 @@ def test_spatial_dropout(node, seed, use_gpu):
     layer = SpatialDropout()
 
     def func(node):
-        if use_gpu:
+        if is_cuda_active():
             curand_generator().set_seed(seed)
         else:
             np.random.seed(seed)
