@@ -829,6 +829,7 @@ class Reshape(Node):
         ret = super(Reshape, cls).__new__(cls, value)
         ret.attrs._array = array
         ret.attrs._shape = array.shape
+        ret._shape_to = shape
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):

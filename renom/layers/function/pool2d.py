@@ -22,7 +22,7 @@ class pool_base(Node):
     def _backward_gpu(self, context, dy, **kwargs):
         dx = get_gpu(self.attrs._x).empty_like_me()
         with cu.cudnn_handler() as handle:
-            cu.cuPoolingBackward(handle, self.attrs._pool_desc, get_gpu(
+            cu.cuPoolingBackward(handle, self._pool_desc, get_gpu(
                 self.attrs._x), get_gpu(self), get_gpu(dy), dx)
         if isinstance(self.attrs._x, Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
@@ -39,13 +39,13 @@ class max_pool2d(pool_base):
         index = np.argmax(col, axis=2)
         value = np.max(col, axis=2)
         ret = cls._create_node(value)
-        ret.attrs._index = index
+        ret._index = index
         ret.attrs._x = x
-        ret.attrs._in_shape = in_shape
-        ret.attrs._out_shape = out_shape
-        ret.attrs._kernel = karnel
-        ret.attrs._stride = stride
-        ret.attrs._padding = padding
+        ret._in_shape = in_shape
+        ret._out_shape = out_shape
+        ret._kernel = karnel
+        ret._stride = stride
+        ret._padding = padding
         return ret
 
     @classmethod
@@ -57,21 +57,21 @@ class max_pool2d(pool_base):
         with cu.cudnn_handler() as handle:
             cu.cuPoolingForward(handle, pool_desc, _x, y)
         ret = cls._create_node(y)
-        ret.attrs._pool_desc = pool_desc
+        ret._pool_desc = pool_desc
         ret.attrs._x = x
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
             N = len(dy)
-            index = self.attrs._index
-            col = np.zeros((N, self.attrs._in_shape[0], self.attrs._kernel[0],
-                            self.attrs._kernel[1], self.attrs._out_shape[1], self.attrs._out_shape[2]))
+            index = self._index
+            col = np.zeros((N, self._in_shape[0], self._kernel[0],
+                            self._kernel[1], self._out_shape[1], self._out_shape[2]))
             col_k = np.rollaxis(col.reshape(
-                N, self.attrs._in_shape[0], -1, self.attrs._out_shape[1], self.attrs._out_shape[2]), 2)
-            for i in np.ndindex(N, self.attrs._in_shape[0], self.attrs._out_shape[1], self.attrs._out_shape[2]):
+                N, self._in_shape[0], -1, self._out_shape[1], self._out_shape[2]), 2)
+            for i in np.ndindex(N, self._in_shape[0], self._out_shape[1], self._out_shape[2]):
                 col_k[index[i]][i] = dy[i]
-            dx = col2im(col, self.attrs._in_shape[1:], self.attrs._stride, self.attrs._padding)
+            dx = col2im(col, self._in_shape[1:], self._stride, self._padding)
             self.attrs._x._update_diff(context, dx, **kwargs)
 
 
@@ -86,11 +86,11 @@ class average_pool2d(pool_base):
         value = np.mean(col, axis=2)
         ret = cls._create_node(value)
         ret.attrs._x = x
-        ret.attrs._in_shape = in_shape
-        ret.attrs._out_shape = out_shape
-        ret.attrs._kernel = karnel
-        ret.attrs._stride = stride
-        ret.attrs._padding = padding
+        ret._in_shape = in_shape
+        ret._out_shape = out_shape
+        ret._kernel = karnel
+        ret._stride = stride
+        ret._padding = padding
         return ret
 
     @classmethod
@@ -101,19 +101,19 @@ class average_pool2d(pool_base):
         with cu.cudnn_handler() as handle:
             cu.cuPoolingForward(handle, pool_desc, get_gpu(x), y)
         ret = cls._create_node(y)
-        ret.attrs._pool_desc = pool_desc
+        ret._pool_desc = pool_desc
         ret.attrs._x = x
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
         if isinstance(self.attrs._x, Node):
             N = len(dy)
-            col = np.zeros((N, self.attrs._in_shape[0], self.attrs._kernel[0],
-                            self.attrs._kernel[1], self.attrs._out_shape[1], self.attrs._out_shape[2]))
+            col = np.zeros((N, self._in_shape[0], self._kernel[0],
+                            self._kernel[1], self._out_shape[1], self._out_shape[2]))
             col_k = np.rollaxis(col.reshape(
-                N, self.attrs._in_shape[0], -1, self.attrs._out_shape[1], self.attrs._out_shape[2]), 2)
+                N, self._in_shape[0], -1, self._out_shape[1], self._out_shape[2]), 2)
             col_k[:] = dy / float(len(col_k))
-            dx = col2im(col, self.attrs._in_shape[1:], self.attrs._stride, self.attrs._padding)
+            dx = col2im(col, self._in_shape[1:], self._stride, self._padding)
             self.attrs._x._update_diff(context, dx, **kwargs)
 
 
