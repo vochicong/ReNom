@@ -686,6 +686,28 @@ def test_max_pool2d(node, use_gpu):
 
 
 @pytest.mark.parametrize("node", [
+    Variable(rand((2, 3, 3, 3))),
+])
+def test_max_unpool2d(node):
+    node = Variable(node)
+    
+    l0 = MaxPool2d()
+    l1 = MaxUnPool2d()
+
+    def func(node):
+      return sum(l1(l0(node)))
+    
+    for trial in range(3):
+        try:
+            compare(func, node, node)
+            return
+        except AssertionError:
+            node = Variable(rand(node.shape))
+    raise AssertionError("Failed all three attempts.")
+
+
+
+@pytest.mark.parametrize("node", [
     Variable(10 * rand((3, 2, 4, 5, 2))),
     Variable(10 * rand((2, 2, 3, 3))),
     Variable(10 * rand((2, 3, 4, 5)))
