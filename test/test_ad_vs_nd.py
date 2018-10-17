@@ -12,7 +12,7 @@
 from __future__ import division, print_function
 
 import pytest
-
+import warnings
 import numpy as np
 from renom.config import precision
 import renom as rm
@@ -71,7 +71,10 @@ def onehot(shape):
 
 def assert_cuda_active(should_be_active):
     if should_be_active is True:
-        assert has_cuda()  # Make sure we have cuda for the test
+        # assert has_cuda()  # Make sure we have cuda for the test
+        if not has_cuda():
+            warnings.warn("You are trying to use cuda but it's not installed.")
+            return
 
     set_cuda_active(should_be_active)
 
@@ -372,6 +375,36 @@ def test_softplus(node, use_gpu):
 
     def func(node):
         return sum(rm.softplus(node))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 1))),
+    Variable(rand((2, 2))),
+    Variable(rand((2,))),
+    Variable(rand((2, 2, 2, 2))),
+])
+def test_swish_activation(node, use_gpu):
+    node = Variable(node)
+    assert_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.swish(node))
+    compare(func, node, node)
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 2))),
+    Variable(rand((3, 2, 4))),
+    Variable(rand((1, 3))),
+    Variable(rand((2, 2, 1, 3))),
+])
+def test_softsign(node, use_gpu):
+    node = Variable(node)
+    set_cuda_active(use_gpu)
+
+    def func(node):
+        return sum(rm.softsign(node))
     compare(func, node, node)
 
 
@@ -741,7 +774,7 @@ def test_dropout(node, seed, use_gpu):
     layer = Dropout()
 
     def func(node):
-        if use_gpu:
+        if is_cuda_active():
             curand_generator().set_seed(seed)
         else:
             np.random.seed(seed)
@@ -762,7 +795,7 @@ def test_spatial_dropout(node, seed, use_gpu):
     layer = SpatialDropout()
 
     def func(node):
-        if use_gpu:
+        if is_cuda_active():
             curand_generator().set_seed(seed)
         else:
             np.random.seed(seed)
@@ -1388,3 +1421,31 @@ def test_smooth_l1_no_reduce(node, x, delta, use_gpu):
     def func(node, x):
         return sum(rm.smoothed_l1(node, x, delta, reduce_sum=False))
     compare(func, node, node, x)
+
+
+@pytest.mark.parametrize("node, axis", [
+    [Variable(rand((2, 2))), None],
+    [Variable(rand((2, 3))), None],
+    [Variable(rand((2, 3))), 0],
+    [Variable(rand((2, 3))), 1],
+    [Variable(rand((4, 4))), 0],
+    [Variable(rand((2, 2, 1, 1))), 2],
+    [Variable(rand((2, 3, 4, 5))), 0],
+    [Variable(rand((2, 3, 4, 5))), 1],
+    [Variable(rand((2, 3, 4, 5))), 2],
+    [Variable(rand((2, 3, 4, 5))), 3],
+    [Variable(rand((1, 2))), 0],
+    [Variable(rand((2, 1))), 1],
+    [Variable(rand((1,))), 0],
+    #    [Variable(rand((2, 3, 4, 5))), (1, 2, 3)],
+])
+def test_mean(node, axis, use_gpu):
+    node = Variable(node)
+    assert_cuda_active(use_gpu)
+    result = sum(node, axis=axis, keepdims=True)
+    assert len(result.shape) == len(node.shape)
+
+    def func(node, keepdims):
+        return sum(rm.mean(node, axis=axis, keepdims=keepdims))
+    compare(func, node, node, True)
+    compare(func, node, node, False)
