@@ -220,17 +220,27 @@ def average_pool(img):
     return np.average(img)
 
 
-def poolnim(original, dy, kernel, stride, mode="max"):
+def poolnim(original, dy, kernel, stride, padding, mode="max"):
     ret = np.zeros(original.shape)
     if mode is "max":
         func = back_max_pool
     elif mode is "average":
         func = back_average_pool
 
+    N, in_channels, in_dims = original.shape[0], original.shape[1], original.shape[2:]
+    dimensionality = len(in_dims)
+    pad_list = [(0, 0), (0, 0)]
+    pad_list.extend([(padding[i], padding[i] + stride[i] - 1) for i in range(dimensionality)])
+    padded_image = np.pad(original, tuple(pad_list),
+                    mode="constant", constant_values=0)
+
+    ret = np.zeros(original.shape)
+
     for batch in range(original.shape[0]):
         for in_channel in range(original.shape[1]):
+            padding_slices = [slice(padding[i] , padded_image.shape[2 + i] - padding[i]) for i in range(len(original.shape[2:]))]
             ret[batch, in_channel] = place_back_pools(
-                original[batch, in_channel], kernel, stride, func, dy[batch, in_channel])
+                padded_image[batch, in_channel], kernel, stride, func, dy[batch, in_channel])[padding_slices]
     return ret
 
 
