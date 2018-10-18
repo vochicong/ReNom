@@ -30,28 +30,43 @@ class max_unpool2d(Node):
         N = len(x)
         col = np.zeros((N, prev_pool.attrs._in_shape[0], prev_pool.attrs._kernel[0],
                         prev_pool.attrs._kernel[1], prev_pool.attrs._out_shape[1], prev_pool.attrs._out_shape[2]))
+        col_r1 = np.zeros((N, prev_pool.attrs._in_shape[0], prev_pool.attrs._kernel[0],
+                        prev_pool.attrs._kernel[1], prev_pool.attrs._out_shape[1], prev_pool.attrs._out_shape[2]))
+
         col_k = np.rollaxis(col.reshape(
             N, prev_pool.attrs._in_shape[0], -1, prev_pool.attrs._out_shape[1], prev_pool.attrs._out_shape[2]), 2)
+
         for i in np.ndindex(N, prev_pool.attrs._in_shape[0],
                             prev_pool.attrs._out_shape[1], prev_pool.attrs._out_shape[2]):
             col_k[prev_pool.attrs._index[i]][i] = x[i]
+
         ret = col2im(col, prev_pool.attrs._in_shape[1:],
                      prev_pool.attrs._stride, prev_pool.attrs._padding)
+
+        revs = np.zeros_like(ret)
+        revs[ret != 0] = 1
+
         ret = cls._create_node(ret)
         ret.attrs._x = x
+        ret.attrs._stride = prev_pool.attrs._stride
+        ret.attrs._padding = prev_pool.attrs._padding
+        ret.attrs._filter = prev_pool.attrs._kernel
+        ret.attrs._revs = revs
         return ret
 
     @classmethod
     def _oper_gpu(cls, x, prev_pool):
         dx = GPUValue(shape=prev_pool.attrs._x.shape)
         with cu.cudnn_handler() as handle:
-            cu.cuPoolingBackward(handle, prev_pool.attrs._pool_desc, prev_pool.attrs._x, x, x, dx)
+            cu.cuPoolingBackward(handle, prev_pool.attrs._pool_desc, get_gpu(prev_pool.attrs._x), get_gpu(x), get_gpu(x), dx)
         ret = cls._create_node(dx)
         ret.attrs._x = x
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        self.attrs._x._update_diff(context, dy, **kwargs)
+        vvv = dy * self.attrs._revs
+        www = max_pool2d(vvv, filter = self.attrs._filter, padding = self.attrs._padding, stride = self.attrs._stride)
+        self.attrs._x._update_diff(context, www, **kwargs)
 
     def _backward_gpu(self, context, dy, **kwargs):
         self.attrs._x._update_diff(context, dy, **kwargs)

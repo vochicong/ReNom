@@ -1,5 +1,3 @@
-
-
 import numpy as np
 from renom.core import Node
 from renom.layers.function.utils import imnpool, poolnim
@@ -39,7 +37,7 @@ class max_poolnd(npool_base):
     def _oper_gpu(cls, x, karnel, stride, padding):
         N = x.shape[0]
         pool_desc = cu.PoolingNDescriptor(karnel, padding, stride, pool_mode=0)
-        out_shape = (np.array(x.shape[2:]) - np.array(karnel)) // np.array(stride) + 1
+        out_shape = (np.array(x.shape[2:]) - np.array(karnel) + np.array(padding) * 2) // np.array(stride) + 1
         y = GPUValue(shape=tuple([N, x.shape[1]] + list(out_shape)))
         with cu.cudnn_handler() as handle:
             cu.cuPoolingForward(handle, pool_desc, get_gpu(x), get_gpu(y))
@@ -49,7 +47,9 @@ class max_poolnd(npool_base):
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        result = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, mode="max")
+        print(self.attrs._x)
+        print(self)
+        result = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, self.attrs._padding, mode="max")
         self.attrs._x._update_diff(context, result, **kwargs)
 
 
@@ -69,7 +69,7 @@ class average_poolnd(npool_base):
     def _oper_gpu(cls, x, karnel, stride, padding):
         N = x.shape[0]
         pool_desc = cu.PoolingNDescriptor(karnel, padding, stride, pool_mode=1)
-        out_shape = (np.array(x.shape[2:]) - np.array(karnel)) // np.array(stride) + 1
+        out_shape = (np.array(x.shape[2:]) - np.array(karnel) + np.array(padding) * 2) // np.array(stride) + 1
         y = GPUValue(shape=tuple([N, x.shape[1]] + list(out_shape)))
         with cu.cudnn_handler() as handle:
             cu.cuPoolingForward(handle, pool_desc, get_gpu(x), get_gpu(y))
