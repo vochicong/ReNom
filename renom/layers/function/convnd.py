@@ -164,6 +164,11 @@ class ConvNd(Parametrized):
         self._kernel, self._padding, self._stride = map(
             func, [self._kernel, self._padding, self._stride])
 
+        if self._dims == 1:
+            self._kernel = np.append(self._kernel, 1).astype(np.int32)
+            self._padding = np.append(self._padding, 0).astype(np.int32)
+            self._stride = np.append(self._stride, 1).astype(np.int32)
+
         assert all([s > 0 for s in input_size[1:]]), \
             "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
                 input_size[1:])
