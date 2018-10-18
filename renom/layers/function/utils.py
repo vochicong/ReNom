@@ -177,7 +177,7 @@ def imnpool(img, kernel, stride, padding, padWith=0, mode="max", alternate_input
     N, in_channels, in_dims = img.shape[0], img.shape[1], img.shape[2:]
     dimensionality = len(in_dims)
     pad_list = [(0, 0), (0, 0)]
-    pad_list.extend([(padding[i], padding[i] + stride[i] - 1) for i in range(dimensionality)])
+    pad_list.extend([(padding[i], padding[i] ) for i in range(dimensionality)])
     padded_image = np.pad(img, tuple(pad_list),
                           mode="constant", constant_values=padWith)
     if alternate_input is not None:
@@ -254,6 +254,7 @@ def poolnim(original, dy, kernel, stride, padding, mode="max"):
             padding_slices = [slice(padding[i] , padded_image.shape[2 + i] - padding[i]) for i in range(len(original.shape[2:]))]
             ret[batch, in_channel] = place_back_pools(
                 padded_image[batch, in_channel], kernel, stride, func, dy[batch, in_channel])[padding_slices]
+    print(ret)
     return ret
 
 
