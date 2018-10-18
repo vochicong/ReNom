@@ -30,21 +30,26 @@ class max_unpoolnd(Node):
 
     @classmethod
     def _oper_gpu(cls, x, prev_pool):
-        print(prev_pool.attrs._x.shape)
-        #real_shape = (1, 1, 3, 3)
         dx = GPUValue(shape=prev_pool.attrs._x.shape)
-        print(prev_pool.shape, x.shape)
         with cu.cudnn_handler() as handle:
-            try:                                                         # y                 # dy        # x                          # dx
-                cu.cuPoolingBackward(handle, prev_pool.attrs._pool_desc, get_gpu(prev_pool), get_gpu(x), get_gpu(prev_pool.attrs._x), dx)
-            except:
-                assert False
+                cu.cuPoolingBackward(handle, prev_pool.attrs._pool_desc, get_gpu(prev_pool.attrs._x), get_gpu(prev_pool), get_gpu(x), dx)
         ret = cls._create_node(dx)
         ret.attrs._x = x
+        ret.attrs._original_x = prev_pool.attrs._x
+        ret.attrs._kernel = prev_pool.attrs._kernel
+        ret.attrs._stride = prev_pool.attrs._stride
+        ret.attrs._padding = prev_pool.attrs._padding
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
         dx = imnpool(self.attrs._original_x, self.attrs._kernel, self.attrs._stride, self.attrs._padding, mode="max", alternate_input=dy)
+        self.attrs._x._update_diff(context, dx)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        dy.to_cpu()
+        cu.set_cuda_active(False)
+        dx = imnpool(self.attrs._original_x, self.attrs._kernel, self.attrs._stride, self.attrs._padding, mode="max", alternate_input=dy)
+        cu.set_cuda_active(True)
         self.attrs._x._update_diff(context, dx)
 
 class average_unpoolnd(Node):
@@ -62,6 +67,13 @@ class average_unpoolnd(Node):
         ret.attrs._stride = prev_pool.attrs._stride
         ret.attrs._padding = prev_pool.attrs._padding
         return ret
+
+    @classmethod
+    def _oper_gpu(cls, x, prev_pool): pass
+
+    def _backward_cpu(self, context, dy, **kwargs): pass
+
+    def _backward_gpu(self, context, dy, **kwargs): pass
 
 
 class MaxUnPoolNd:

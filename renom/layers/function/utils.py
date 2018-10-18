@@ -231,7 +231,7 @@ def average_pool(img, alternate_input = None):
     if alternate_input is None:
         return np.average(img)
     else:
-        assert False
+        return np.average(alternate_input)
 
 
 def poolnim(original, dy, kernel, stride, padding, mode="max"):
@@ -243,7 +243,7 @@ def poolnim(original, dy, kernel, stride, padding, mode="max"):
     N, in_channels, in_dims = original.shape[0], original.shape[1], original.shape[2:]
     dimensionality = len(in_dims)
     pad_list = [(0, 0), (0, 0)]
-    pad_list.extend([(padding[i], padding[i] + stride[i] - 1) for i in range(dimensionality)])
+    pad_list.extend([(padding[i], padding[i]) for i in range(dimensionality)])
     padded_image = np.pad(original, tuple(pad_list),
                     mode="constant", constant_values=0)
 

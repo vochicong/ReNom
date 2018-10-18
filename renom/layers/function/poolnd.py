@@ -13,6 +13,7 @@ class npool_base(Node):
         return cls.calc_value(x, kernel, stride, padding)
 
     def _backward_gpu(self, context, dy, **kwargs):
+        print("back")
         dx = get_gpu(self.attrs._x).empty_like_me()
         with cu.cudnn_handler() as handle:
             cu.cuPoolingBackward(handle, self.attrs._pool_desc, get_gpu(
@@ -43,12 +44,13 @@ class max_poolnd(npool_base):
             cu.cuPoolingForward(handle, pool_desc, get_gpu(x), get_gpu(y))
         ret = cls._create_node(y)
         ret.attrs._pool_desc = pool_desc
+        ret.attrs._kernel = karnel
+        ret.attrs._stride = stride
+        ret.attrs._padding = padding
         ret.attrs._x = x
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        print(self.attrs._x)
-        print(self)
         result = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, self.attrs._padding, mode="max")
         self.attrs._x._update_diff(context, result, **kwargs)
 

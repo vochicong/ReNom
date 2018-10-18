@@ -58,6 +58,9 @@ class max_pool2d(pool_base):
             cu.cuPoolingForward(handle, pool_desc, _x, y)
         ret = cls._create_node(y)
         ret.attrs._pool_desc = pool_desc
+        ret.attrs._kernel = karnel
+        ret.attrs._stride = stride
+        ret.attrs._padding = padding
         ret.attrs._x = x
         return ret
 
@@ -102,6 +105,9 @@ class average_pool2d(pool_base):
             cu.cuPoolingForward(handle, pool_desc, get_gpu(x), y)
         ret = cls._create_node(y)
         ret.attrs._pool_desc = pool_desc
+        ret.attrs._kernel = karnel
+        ret.attrs._stride = stride
+        ret.attrs._padding = padding
         ret.attrs._x = x
         return ret
 
