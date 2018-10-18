@@ -1,141 +1,41 @@
+from __future__ import print_function, division
+
 import collections
 import onnx.helper
 import onnx.numpy_helper
 from onnx.mapping import NP_TYPE_TO_TENSOR_TYPE
-import numpy as np
 
 import renom
-
-def _to_param_name(obj):
-    return str(id(obj))
+from ._onnx_impl import MODELDEFS, NODEDEFS, _ModelNode, _to_param_name, OBJNAMES
 
 
-MODELDEFS= {}
-def modeldef(target):
-    def wrapper(cls):
-        MODELDEFS[target] = cls
-        return cls
-
-    return wrapper
-
-class _ModelNode(renom.Node):
-    def __new__(cls, model, output, input):
-        ret = super(_ModelNode, cls).__new__(cls, output)
-        ret.attrs.input = input
-        ret.model = model
-        ret.output = output
-
-        return ret
-
-@modeldef(renom.Dense)
-class DenseModel(_ModelNode):
-    def register_params(self, onnx_nodes, inputs, outputs, values):
-        w = self.model.params["w"]
-        inputs.add(w)
-        values.add(w)
-
-        b = self.model.params["b"]
-        inputs.add(b)
-        values.add(b)
-
-        onnx_nodes.append(
-            onnx.helper.make_node(
-                'Gemm', 
-                [_to_param_name(v) for v in (self.attrs.input, w, b)],
-                [_to_param_name(self)]))
-
-@modeldef(renom.Conv2d)
-class Conv2dModel(_ModelNode):
-    def register_params(self, onnx_nodes, inputs, outputs, values):
-        w = self.model.params["w"]
-        inputs.add(w)
-        values.add(w)
-
-        b = self.model.params["b"]
-        inputs.add(b)
-        values.add(b)
-
-        onnx_nodes.append(
-            onnx.helper.make_node(
-                'Conv',
-                [_to_param_name(v) for v in (self.attrs.input, w, b)],
-                [_to_param_name(self)],
-                kernel_shape=self.output.attrs._kernel,
-                pads=self.output.attrs._padding,
-                strides=self.output.attrs._stride,
-                dilations=self.output.attrs._dilation))
-
-
-NODEDEFS = {}
-
-def nodedef(target):
-    def wrapper(f):
-        NODEDEFS[target] = f
-        return f
-    return wrapper
-
-@nodedef(renom.relu)
-def register_relu(onnx_nodes, inputs, outputs, values, node):
-    onnx_nodes.append(
-        onnx.helper.make_node(
-            'Relu',
-            [_to_param_name(node.attrs._arg)],
-            [_to_param_name(node)]))
-
-
-@nodedef(renom.max_pool2d)
-def register_max_pool2d(onnx_nodes, inputs, outputs, values, node):
-    onnx_nodes.append(
-        onnx.helper.make_node(
-            'MaxPool',
-            [_to_param_name(node.attrs._x)],
-            [_to_param_name(node)],
-            kernel_shape=node._kernel))
-
-
-@nodedef(renom.dropout)
-def register_dropout(onnx_nodes, inputs, outputs, values, node):
-    onnx_nodes.append(
-        onnx.helper.make_node(
-            'Dropout',
-            [_to_param_name(node.attrs._x)],
-            [_to_param_name(node)],
-            ratio=node._ratio))
-
-
-@nodedef(renom.Reshape)
-def register_reshape(onnx_nodes, inputs, outputs, values, node):
-    shape = np.array(node._shape_to)
-    inputs.add(shape)
-    values.add(shape)
-
-    onnx_nodes.append(
-        onnx.helper.make_node(
-            'Reshape',
-            [_to_param_name(node.attrs._array), _to_param_name(shape)],
-            [_to_param_name(node)]))
-
-
-
-def register_node(onnx_nodes, inputs, outputs, values, node):
+def _register_node(onnx_nodes, inputs, outputs, values, node):
     if isinstance(node, _ModelNode):
         node.register_params(onnx_nodes, inputs, outputs, values)
         return
-
     f = NODEDEFS.get(type(node))
     if f:
         f(onnx_nodes, inputs, outputs, values, node)
-    elif isinstance(node, renom.Variable):
-        pass
+    elif isinstance(node, renom.Node):
+        values.add(node.__class__.__name__, node)
     else:
         raise ValueError('Unknown node: %s' % type(node))
 
-class IdDict(dict):
+
+class _IdDict(dict):
     def add(self, obj):
         self[id(obj)] = obj
 
 
-class OnnxHook:
+class _NamedIdDict(dict):
+    def add(self, name, obj):
+        k = id(obj)
+        if k not in OBJNAMES:
+            OBJNAMES[k] = "%s_%s" % (name, id(obj))
+        self[id(obj)] = obj
+
+
+class _OnnxHook:
     def call_enter(self, model, x, args, kwargs):
         return x, args, kwargs
 
@@ -154,19 +54,23 @@ class OnnxHook:
         return ret
 
 
-def value_info(value):
+def _value_info(value):
     return onnx.helper.make_tensor_value_info(
-                _to_param_name(value),
-                NP_TYPE_TO_TENSOR_TYPE[value.dtype],
-                value.shape)
+        _to_param_name(value),
+        NP_TYPE_TO_TENSOR_TYPE[value.dtype],
+        value.shape)
 
-def export_onnx(name, model, x):
 
-    hook = OnnxHook()
+def export_onnx(name, model, x, path, printtext=False):
+    OBJNAMES.clear()
+
+    if not isinstance(x, renom.Variable):
+        x = renom.Variable(x)
+
+    hook = _OnnxHook()
     renom.Model.set_hook(hook)
     renom.Node.set_hook(hook)
 
-    x = renom.Variable(x)
     try:
         with model.train():
             ret = model(x)
@@ -177,7 +81,8 @@ def export_onnx(name, model, x):
     parent_nodes = collections.defaultdict(set)
     child_nodes = collections.defaultdict(set)
 
-    nodes = IdDict()
+    nodes = _IdDict()
+    roots = _IdDict()
 
     # build tree
     while cur:
@@ -186,9 +91,12 @@ def export_onnx(name, model, x):
             continue
 
         parents = [n for n in node._get_graph() if isinstance(n, renom.Node)]
-        cur.extend(parents)
+        if not parents:
+            roots.add(node)
 
+        cur.extend(parents)
         nodes.add(node)
+
         for parent in parents:
             nodes.add(parent)
             parent_nodes[id(node)].add(id(parent))
@@ -196,7 +104,7 @@ def export_onnx(name, model, x):
 
     # sort tree
     sorted = []
-    remains = [x]
+    remains = list(roots.values())
     while remains:
         node = remains.pop(0)
         sorted.append(node)
@@ -210,24 +118,31 @@ def export_onnx(name, model, x):
 
     # sort extract params
 
-    inputs = IdDict()
-    inputs.add(x)
+    OBJNAMES[id(x)] = 'input'
+    inputs = _NamedIdDict()
+    inputs.add('input', x)
 
-    outputs = IdDict()
-    outputs.add(ret)
+    OBJNAMES[id(ret)] = 'output'
+    outputs = _NamedIdDict()
+    outputs.add('output', ret)
 
     onnx_nodes = []
 
-    values = IdDict()
+    values = _NamedIdDict()
     for node in sorted:
-        register_node(onnx_nodes, inputs, outputs, values, node)
+        if node is not x:
+            _register_node(onnx_nodes, inputs, outputs, values, node)
 
     if id(x) in values:
         del values[id(x)]
 
+    inputs = [_value_info(v) for v in inputs.values()]
+    outputs = [_value_info(v) for v in outputs.values()]
 
-    inputs = [value_info(v) for v in inputs.values()]
-    outputs = [value_info(v) for v in outputs.values()]
+    for v in values.values():
+        if isinstance(v, renom.Node):
+            v.to_cpu()
+
     initializers = [onnx.numpy_helper.from_array(v, _to_param_name(v))
                     for v in values.values()]
 
@@ -240,8 +155,8 @@ def export_onnx(name, model, x):
         producer_version=renom.__version__
     )
 
-    with open(name+".onnx", 'wb') as f:
+    with open(path, 'wb') as f:
         f.write(model.SerializeToString())
 
-    with open(name+".onnx.txt", 'w') as f:
-        print(model, file=f)
+    if printtext:
+        print(model)

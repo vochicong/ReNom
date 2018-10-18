@@ -65,6 +65,12 @@ class conv2d(Node):
         ret.attrs._x = x
         ret.attrs._w = w
         ret.attrs._b = b
+        ret.attrs._in_shape = in_shape
+        ret.attrs._out_shape = out_shape
+        ret.attrs._kernel = kernel
+        ret.attrs._stride = stride
+        ret.attrs._padding = padding
+        ret.attrs._dilation = dilation
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):

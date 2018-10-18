@@ -59,6 +59,11 @@ class max_pool2d(pool_base):
         ret = cls._create_node(y)
         ret._pool_desc = pool_desc
         ret.attrs._x = x
+        ret._in_shape = in_shape
+        ret._out_shape = out_shape
+        ret._kernel = karnel
+        ret._stride = stride
+        ret._padding = padding
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
