@@ -1,5 +1,3 @@
-
-
 import numpy as np
 from renom.core import Node
 from renom.layers.function.utils import imnpool, poolnim
@@ -47,6 +45,9 @@ class max_poolnd(npool_base):
             cu.cuPoolingForward(handle, pool_desc, get_gpu(x), get_gpu(y))
         ret = cls._create_node(y)
         ret.attrs._pool_desc = pool_desc
+        ret.attrs._kernel = karnel
+        ret.attrs._stride = stride
+        ret.attrs._padding = padding
         ret.attrs._x = x
         return ret
 
@@ -80,6 +81,9 @@ class average_poolnd(npool_base):
             cu.cuPoolingForward(handle, pool_desc, get_gpu(x), get_gpu(y))
         ret = cls._create_node(y)
         ret.attrs._pool_desc = pool_desc
+        ret.attrs._kernel = karnel
+        ret.attrs._stride = stride
+        ret.attrs._padding = padding
         ret.attrs._x = x
         return ret
 
@@ -119,7 +123,7 @@ class NPoolBase:
                 dims = 2
             self._dims = dims
         if is_cuda_active():
-            assert self._dims < 4, "GPU Version can only 2 and 3 dimensions"
+            assert self._dims < 4, "GPU Version can only 1, 2 and 3 dimensions"
 
         if self._dims == 1:
             self._kernel = np.append(self._kernel, 1).astype(np.int32)

@@ -1,0 +1,271 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2018.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.4.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-02-21 14:40+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.0\n"
+
+#: ../../rsts/renomtag.rst:2
+msgid "ReNom TAG"
+msgstr ""
+
+#: ../../rsts/renomtag.rst:5
+msgid "Introduction to ReNom TAG"
+msgstr ""
+
+#: ../../rsts/renomtag.rst:7
+msgid "Tagging tool for object detection."
+msgstr "Object Detectionのためのタグ付けツール"
+
+#: ../../rsts/renomtag.rst:9
+msgid "**How to start**"
+msgstr "**始め方**"
+
+#: ../../rsts/renomtag.rst:11
+msgid "1.Move to ReNomTAG directory using following command."
+msgstr "1.以下のコマンドでReNom TAGディレクトリに移動"
+
+#: ../../rsts/renomtag.rst:13
+msgid "``cd ReNomTAG``"
+msgstr ""
+
+#: ../../rsts/renomtag.rst:15
+msgid "2.Run server.py script and the application server starts."
+msgstr "2.server.pyを実行して、アプリケーションサーバーをスタート"
+
+#: ../../rsts/renomtag.rst:17
+msgid "``python server.py``"
+msgstr ""
+
+#: ../../rsts/renomtag.rst:19
+msgid "If the server starts, you will see a message like below."
+msgstr "もし、サーバーが立ち上がっていたら、以下のようなメッセージが表示されます。"
+
+#: ../../rsts/renomtag.rst:24
+msgid "**How to use**"
+msgstr "**使い方**"
+
+#: ../../rsts/renomtag.rst:26
+msgid ""
+"The following videos describes how to use ReNomTAG. In this video, the "
+"Oxford-IIIT Pet Dataset is used."
+msgstr "以下の動画はどうやってReNomTAGを使うかの説明となっており、動画の中ではOxford-IIIT Pet Datasetが使われています。"
+
+#: ../../rsts/renomtag.rst
+msgid "Cats and Dogs Classification"
+msgstr "猫と犬の分類"
+
+#: ../../rsts/renomtag.rst
+msgid "https://github.com/JDonini/Cats\\_Dogs\\_Classification"
+msgstr ""
+
+#: ../../rsts/renomtag.rst
+msgid "O. M. Parkhi, A. Vedaldi, A. Zisserman, C. V. Jawahar Cats and Dogs"
+msgstr ""
+
+#: ../../rsts/renomtag.rst
+msgid "IEEE Conference on Computer Vision and Pattern Recognition, 2012 Bibtex"
+msgstr ""
+
+#: ../../rsts/renomtag.rst
+msgid "http://www.robots.ox.ac.uk/~vgg/data/pets/"
+msgstr ""
+
+#: ../../rsts/renomtag.rst:38
+msgid "1.Set image data to RaNomTAG."
+msgstr "1.画像データをReNom TAGにセットします。"
+
+#: ../../rsts/renomtag.rst:40
+msgid ""
+"As following video showing, please put the image you want to tag in the "
+"``ReNomTAG/dataset`` folder."
+msgstr "次の動画にあるようにReNomTAG/datasetディレクトリにタグを付けたい画像を置いてください。"
+
+#: ../../rsts/renomtag.rst:43
+msgid ""
+"\\*The introduction movie will be uploaded later. Currently the video is "
+"in the folder ``static/movie/movie01.mp4``."
+msgstr "紹介動画は準備中です。 現在は ``static/movie/movie01.mp4`` に動画を置いています。"
+
+#: ../../rsts/renomtag.rst:47
+msgid "2.Run ReNomTAG"
+msgstr "2.ReNomTAGを実行"
+
+#: ../../rsts/renomtag.rst:49
+msgid ""
+"Same as before mentioned in 'How to start ReNom', following video "
+"describes how to start ReNomTAG."
+msgstr "How to start ReNomでも言及されていたように、以下の動画にReNomTAGの始め方があります。"
+
+#: ../../rsts/renomtag.rst:52
+msgid ""
+"\\*The introduction movie will be uploaded later. Currently the video is "
+"in the folder ``static/movie/movie02.mp4``."
+msgstr "紹介動画は準備中です。 現在は ``static/movie/movie01.mp4`` に動画を置いています。"
+
+#: ../../rsts/renomtag.rst:56
+msgid "3.How to use ReNomTAG"
+msgstr "3.ReNomTAGの使い方"
+
+#: ../../rsts/renomtag.rst:58
+msgid "It is a video tagging by ReNom tag."
+msgstr "ReNom TAGによるタグ付けの動画"
+
+#: ../../rsts/renomtag.rst:60
+msgid ""
+"\\*The introduction movie will be uploaded later. Currently the video is "
+"in the folder ``static/movie/movie03.mp4``."
+msgstr "紹介動画は準備中です。 現在は ``static/movie/movie01.mp4`` に動画を置いています。"
+
+#: ../../rsts/renomtag.rst:64
+msgid "4.Recognize generated xml file."
+msgstr "4.xmlファイルの生成"
+
+#: ../../rsts/renomtag.rst:66
+msgid "Xml files are generated into the label directory."
+msgstr "Xmlファイルはラベルのディレクトリの中に生成されます。"
+
+#: ../../rsts/renomtag.rst:68
+msgid ""
+"\\*The introduction movie will be uploaded later. Currently the video is "
+"in the folder ``static/movie/movie04.mp4``."
+msgstr "紹介動画は準備中です。 現在は ``static/movie/movie01.mp4`` に動画を置いています。"
+
+#: ../../rsts/renomtag.rst:71
+msgid "**Shortcut Keys**"
+msgstr ""
+
+#: ../../rsts/renomtag.rst:73
+msgid "You can use shortcut keys to select the bounding box' class name."
+msgstr "bouding boxからクラス名を選択するときにショートカットキーを使うことができます。"
+
+#: ../../rsts/renomtag.rst:75
+msgid ""
+"In the following class name list, shortcut key 'q' is set to the class "
+"name 'dog'. Similarly, the key 'w' is set to the class name 'cat'."
+msgstr "次のようなクラス名のリストがあるとき、qはdogクラスにセットされており、同じようにwはcatクラスにセットされています。"
+
+#: ../../rsts/renomtag.rst:81
+msgid ""
+"You can use these shortcuts when you select a bounding box. You can "
+"assign the corresponding class name by pressing the shortcut key while "
+"selecting the box."
+msgstr ""
+
+#: ../../rsts/renomtag.rst:85
+msgid ""
+"When you want to save the xml file, you can use the 'space' key as a "
+"saving button. The 'space' key is a shortcut of the button 'Save >>'."
+msgstr "xmlファイルを保存したいときはsavingボタンを押すかスペースキーを押してください。スペースキーはsavingボタンへのショートカットキーとなっています。"
+
+#: ../../rsts/renomtag.rst:91
+msgid "**Notification**"
+msgstr ""
+
+#: ../../rsts/renomtag.rst:93
+msgid ""
+"ReNomTAG only accepts alphanumeric characters. Thus you can't input non "
+"alphanumeric characters to class name list."
+msgstr "ReNomTAGは英数字しか対応しておりませんので、クラスリストとして英数字以外を登録することは出来ません。"
+
+#: ../../rsts/renomtag.rst:96
+msgid "**Format of xml file**"
+msgstr ""
+
+#: ../../rsts/renomtag.rst:98
+msgid ""
+"The format of the xml file which created by ReNomTAG follows `PASCAL VOC "
+"<http://host.robots.ox.ac.uk/pascal/VOC/>`__ format."
+msgstr ""
+"ReNomTAGによって作成されるxmlファイルのフォーマットは以下に従います。 `PASCAL VOC "
+"<http://host.robots.ox.ac.uk/pascal/VOC/>`__ format."
+
+#: ../../rsts/renomtag.rst:101
+msgid "An example is bellow."
+msgstr "例は以下のようになります。"
+
+#: ../../rsts/renomtag.rst:165
+msgid "Installation"
+msgstr ""
+
+#: ../../rsts/renomtag.rst:167
+msgid "For installing ReNomTAG, download this repository."
+msgstr "ReNomTAGをインストールするためにはこのリポジトリをダウンロードします。"
+
+#: ../../rsts/renomtag.rst:169
+msgid "``git clone https://github.com/ReNom-dev-team/ReNomTAG``"
+msgstr ""
+
+#: ../../rsts/renomtag.rst:171
+msgid "And move into ReNomTAG directory. ``cd ReNomTAG``"
+msgstr "ReNomTAGディレクトリに移動します。 ``cd ReNomTAG`` "
+
+#: ../../rsts/renomtag.rst:174
+msgid "Then install all required packages."
+msgstr "全てのrequirementsをインストールします。"
+
+#: ../../rsts/renomtag.rst:176
+msgid "``pip install -r requirements.txt``"
+msgstr " ``pip install -r requirements.txt`` "
+
+#~ msgid "ReNomTAG"
+#~ msgstr ""
+
+#~ msgid "Install"
+#~ msgstr ""
+
+#~ msgid "How to start"
+#~ msgstr ""
+
+#~ msgid "How to use"
+#~ msgstr ""
+
+#~ msgid "Shortcut Keys"
+#~ msgstr ""
+
+#~ msgid "Notification"
+#~ msgstr ""
+
+#~ msgid "Format of xml file"
+#~ msgstr ""
+
+#~ msgid "License"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "“ReNomTAG” is provided by GRID inc., "
+#~ "as subscribed software. By downloading "
+#~ "ReNomTAG, you are agreeing to be "
+#~ "bound by our ReNom Subscription "
+#~ "agreement between you and GRID inc. "
+#~ "To use ReNomTAG for commercial purposes,"
+#~ " you must first obtain a paid "
+#~ "license. Please contact us or one "
+#~ "of our resellers. If you are an"
+#~ " individual wishing to use ReNomTAG "
+#~ "for academic, educational and/or product "
+#~ "evaluation purposes, you may use "
+#~ "ReNomTAG royalty-free. The ReNom "
+#~ "Subscription agreements are subject to "
+#~ "change without notice. You agree to "
+#~ "be bound by any such revisions. "
+#~ "You are responsible for visiting "
+#~ "www.renom.jp to determine the latest "
+#~ "terms to which you are bound."
+#~ msgstr ""
+
+#~ msgid "**Notification*:"
+#~ msgstr ""
+

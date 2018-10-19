@@ -168,36 +168,45 @@ def place_overlap_back_kernels(img, kernel, stride=1, offset=0):
     return ret
 
 
-def imnpool(img, kernel, stride, padding, padWith=0, mode="max"):
-    N, in_channels, in_dims = img.shape[0], img.shape[1], img.shape[2:]
-    dimensionality = len(in_dims)
+def imnpool(img, kernel, stride, padding, padWith=0, mode="max", alternate_input=None):
     if mode is "max":
         func = max_pool
     elif mode is "average":
         func = average_pool
 
+    N, in_channels, in_dims = img.shape[0], img.shape[1], img.shape[2:]
+    dimensionality = len(in_dims)
     pad_list = [(0, 0), (0, 0)]
-    pad_list.extend([(padding[i], padding[i] + stride[i] - 1) for i in range(dimensionality)])
+    pad_list.extend([(padding[i], padding[i]) for i in range(dimensionality)])
     padded_image = np.pad(img, tuple(pad_list),
                           mode="constant", constant_values=padWith)
+    if alternate_input is not None:
+        alternate_input = np.pad(alternate_input, tuple(pad_list),
+                                 mode="constant", constant_values=padWith)
+
     ret = []
     for batch in range(N):
         tmp = []
         for in_channel in range(in_channels):
-            ret2 = place_pools(padded_image[batch, in_channel], kernel, stride, func)
+            ret2 = place_pools(padded_image[batch, in_channel], kernel, stride, func,
+                               alternate_input=alternate_input[batch, in_channel] if alternate_input is not None else None)
             tmp.append(ret2)
         ret.append(tmp)
     ret = np.array(ret)
     return ret
 
 
-def place_pools(img, kernel, stride, mode, offset=0):
+def place_pools(img, kernel, stride, mode, offset=0, alternate_input=None):
     kernal = (np.array(img.shape) - np.array(kernel)) // np.array(stride) + 1
     kernels = np.empty(tuple(kernal))
 
     for pos in generate_positions(img, stride, offset, min_space=np.array(kernel) - 1):
         slices = [slice(pos[i], pos[i] + kernel[i]) for i in range(len(img.shape))]
-        kern = mode(img[slices])
+        if alternate_input is not None:
+            alt = alternate_input[slices]
+        else:
+            alt = None
+        kern = mode(img[slices], alternate_input=alt)
         kernels[tuple(np.array(pos) // stride)] = kern
     return kernels
 
@@ -206,18 +215,25 @@ def place_back_pools(img, kernel, stride, mode, dy, offset=0):
     ret = np.zeros(img.shape)
 
     for pos in generate_positions(img, stride, offset, min_space=np.array(kernel) - 1):
-        slices = [slice(pos[i], pos[i] + kernel[i], 1) for i in range(len(img.shape))]
+        slices = [slice(pos[i] if pos[i] > -1 else 0, pos[i] + kernel[i], 1)
+                  for i in range(len(img.shape))]
         kern = mode(img[slices], dy[tuple(np.array(pos) // stride)])
         ret[slices] += kern[...]
     return ret
 
 
-def max_pool(img):
-    return np.amax(img)
+def max_pool(img, alternate_input=None):
+    if alternate_input is None:
+        return np.amax(img)
+    else:
+        return alternate_input.ravel()[np.argmax(img)]
 
 
-def average_pool(img):
-    return np.average(img)
+def average_pool(img, alternate_input=None):
+    if alternate_input is None:
+        return np.average(img)
+    else:
+        return np.average(alternate_input)
 
 
 def poolnim(original, dy, kernel, stride, padding, mode="max"):
@@ -230,7 +246,7 @@ def poolnim(original, dy, kernel, stride, padding, mode="max"):
     N, in_channels, in_dims = original.shape[0], original.shape[1], original.shape[2:]
     dimensionality = len(in_dims)
     pad_list = [(0, 0), (0, 0)]
-    pad_list.extend([(padding[i], padding[i] + stride[i] - 1) for i in range(dimensionality)])
+    pad_list.extend([(padding[i], padding[i]) for i in range(dimensionality)])
     padded_image = np.pad(original, tuple(pad_list),
                           mode="constant", constant_values=0)
 
@@ -242,6 +258,7 @@ def poolnim(original, dy, kernel, stride, padding, mode="max"):
                               for i in range(len(original.shape[2:]))]
             ret[batch, in_channel] = place_back_pools(
                 padded_image[batch, in_channel], kernel, stride, func, dy[batch, in_channel])[padding_slices]
+    print(ret)
     return ret
 
 
@@ -252,7 +269,7 @@ def back_max_pool(img, dy):
 
 
 def back_average_pool(img, dy):
-    ret = np.zeros(img.shape)
+    ret = np.zeros_like(img)
     ret += dy / ret.size
     return ret
 
