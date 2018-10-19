@@ -35,7 +35,6 @@ class max_poolnd(npool_base):
 
     @classmethod
     def _oper_gpu(cls, x, karnel, stride, padding):
-        N = x.shape[0]
         pool_desc = cu.PoolingNDescriptor(karnel, padding, stride, pool_mode=0)
         output_shape = [x.shape[0], x.shape[1]]
         for i in range(len(x.shape[2:])):
@@ -71,7 +70,6 @@ class average_poolnd(npool_base):
 
     @classmethod
     def _oper_gpu(cls, x, karnel, stride, padding):
-        N = x.shape[0]
         pool_desc = cu.PoolingNDescriptor(karnel, padding, stride, pool_mode=1)
         output_shape = [x.shape[0], x.shape[1]]
         for i in range(len(x.shape[2:])):

@@ -111,8 +111,6 @@ class average_unpoolnd(Node):
 
 class MaxUnPoolNd:
 
-    def __init__(self): pass
-
     def __call__(self, x, prev_pool):
         return self.forward(x, SimpleContainer(prev_pool))
 
@@ -121,8 +119,6 @@ class MaxUnPoolNd:
 
 
 class AverageUnPoolNd:
-
-    def __init__(self): pass
 
     def __call__(self, x, prev_pool):
         return self.forward(x, SimpleContainer(prev_pool))

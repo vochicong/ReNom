@@ -243,7 +243,7 @@ def poolnim(original, dy, kernel, stride, padding, mode="max"):
     elif mode is "average":
         func = back_average_pool
 
-    N, in_channels, in_dims = original.shape[0], original.shape[1], original.shape[2:]
+    _, _, in_dims = original.shape[0], original.shape[1], original.shape[2:]
     dimensionality = len(in_dims)
     pad_list = [(0, 0), (0, 0)]
     pad_list.extend([(padding[i], padding[i]) for i in range(dimensionality)])
