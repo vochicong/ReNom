@@ -51,7 +51,8 @@ class max_poolnd(npool_base):
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        result = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, self.attrs._padding, mode="max")
+        result = poolnim(self.attrs._x, dy, self.attrs._kernel,
+                         self.attrs._stride, self.attrs._padding, mode="max")
         self.attrs._x._update_diff(context, result, **kwargs)
 
 
@@ -83,7 +84,8 @@ class average_poolnd(npool_base):
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        dx = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, self.attrs._padding, mode="average")
+        dx = poolnim(self.attrs._x, dy, self.attrs._kernel,
+                     self.attrs._stride, self.attrs._padding, mode="average")
         self.attrs._x._update_diff(context, dx, **kwargs)
 
 

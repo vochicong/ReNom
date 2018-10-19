@@ -232,13 +232,14 @@ def poolnim(original, dy, kernel, stride, padding, mode="max"):
     pad_list = [(0, 0), (0, 0)]
     pad_list.extend([(padding[i], padding[i] + stride[i] - 1) for i in range(dimensionality)])
     padded_image = np.pad(original, tuple(pad_list),
-                    mode="constant", constant_values=0)
+                          mode="constant", constant_values=0)
 
     ret = np.zeros(original.shape)
 
     for batch in range(original.shape[0]):
         for in_channel in range(original.shape[1]):
-            padding_slices = [slice(padding[i] , padded_image.shape[2 + i] - padding[i]) for i in range(len(original.shape[2:]))]
+            padding_slices = [slice(padding[i], padded_image.shape[2 + i] - padding[i])
+                              for i in range(len(original.shape[2:]))]
             ret[batch, in_channel] = place_back_pools(
                 padded_image[batch, in_channel], kernel, stride, func, dy[batch, in_channel])[padding_slices]
     return ret

@@ -598,17 +598,17 @@ def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
 
 
 @pytest.mark.parametrize("node, error", [
-    #[Variable(rand((1, 1, 3, 3, 3, 3))), True],
-    #[Variable(rand((2, 2, 4, 4))), False],
-    #[Variable(rand((2, 3, 4, 6, 6))), False],
-    #[Variable(rand((1, 1, 4, 8))), False],
+    [Variable(rand((1, 1, 3, 3, 3, 3))), True],
+    [Variable(rand((2, 2, 4, 4))), False],
+    [Variable(rand((2, 3, 4, 6, 6))), False],
+    [Variable(rand((1, 1, 4, 8))), False],
     [Variable(rand((1, 1, 4))), False],
 ])
-def test_convnd(node, error):#, use_gpu, ignore_bias):
+def test_convnd(node, error):  # , use_gpu, ignore_bias):
     node = Variable(node)
-    #assert_cuda_active(use_gpu)
+    # assert_cuda_active(use_gpu)
     assert_cuda_active(True)
-    layer = ConvNd(channel=1, filter=3, stride=1)#, ignore_bias=ignore_bias)
+    layer = ConvNd(channel=1, filter=3, stride=1)  # , ignore_bias=ignore_bias)
 
     def func(node):
         return sum(layer(node))
