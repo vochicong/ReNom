@@ -5,11 +5,14 @@ from __future__ import division
 import numpy as np
 from renom.layers.activation.sigmoid import sigmoid
 from renom.layers.activation.tanh import tanh
-from renom.core import Node, Variable, get_gpu, precision, GPUValue, GetItem
+from renom.core import Node, Variable, GetItem
+from renom import precision
 from renom.operation import dot, sum, concat
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 
 
 def sigmoid_diff(x):
@@ -226,10 +229,12 @@ class Gru(Parametrized):
 
     '''
 
-    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal(),
+                 weight_decay=0):
         self._size_o = output_size
         self._initializer = initializer
         self._ignore_bias = ignore_bias
+        self._weight_decay = weight_decay
         super(Gru, self).__init__(input_size)
 
     def weight_initiallize(self, size_i):
@@ -238,8 +243,8 @@ class Gru(Parametrized):
         bias = np.ones((1, size_o * 3), dtype=precision)
         # At this point, all connected units in the same layer will use the SAME weights
         self.params = {
-            "w": Variable(self._initializer((size_i, size_o * 3)), auto_update=True),
-            "u": Variable(self._initializer((1, size_o * 3)), auto_update=True),
+            "w": Variable(self._initializer((size_i, size_o * 3)), auto_update=True, weight_decay=self._weight_decay),
+            "u": Variable(self._initializer((1, size_o * 3)), auto_update=True, weight_decay=self._weight_decay),
         }
         if not self._ignore_bias:
             self.params["b"] = Variable(bias, auto_update=True)

@@ -2,18 +2,182 @@
 from __future__ import print_function, division
 
 import numpy as np
-from renom.core import Node, get_gpu, GPUValue, BinOp, UnaryOp, to_value, Reshape, Amin, Amax, showmark
+from renom.core import Node, BinOp, UnaryOp, to_value, Reshape
+from renom.debug_graph import showmark
 from renom.config import precision
 
 try:
+    from renom.cuda import *
     from renom.cuda.cublas import *
-    from renom.cuda.cuda_base import *
-    if precision == np.float32:
-        from renom.cuda.thrust_float import *
-    else:
-        from renom.cuda.thrust_double import *
+    from renom.cuda.base.cuda_base import *
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 except ImportError:
     pass
+
+
+class Abase(Node):
+
+    def __new__(cls, arg, axis=None, keepdims=False):
+        assert isinstance(axis, (type(None), int)), 'This function only accepts int or None.'
+        value, index = cls.calc_value(arg, axis, keepdims)
+        ret = super(Abase, cls).__new__(cls, value)
+        ret.attrs._arg = arg
+        ret.attrs._axis = axis
+        ret.attrs._index = index
+        ret.attrs._keepdims = keepdims
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            axis = self.attrs._axis
+            index = self.attrs._index
+            dx = np.zeros(self.attrs._arg.shape, dtype=dy.dtype)
+
+            if axis is None:
+                dxx = dx.reshape(-1)
+                dxx[index] = dy
+            else:
+                axis_list = list(range(len(dx.shape)))
+                axis_list.pop(axis)
+                axis_list.append(axis)
+                rev = [-1] * len(axis_list)
+                for i, a in enumerate(axis_list):
+                    rev[a] = i
+                dxx = np.transpose(dx, axis_list)
+                if(not self.attrs._keepdims):
+                    dyy = dy
+                else:
+                    axis_list = list(range(len(dy.shape)))
+                    axis_list.pop(axis)
+                    axis_list.append(axis)
+                    rev = [-1] * len(axis_list)
+                    for i, a in enumerate(axis_list):
+                        rev[a] = i
+                    dyy = np.transpose(dy, axis_list)
+                for i in np.ndindex(index.shape):
+                    dxx[i][index[i]] = dyy[i]
+
+            # dxx is a representation of the same memory as dx
+
+            self.attrs._arg._update_diff(context, dx, **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            axis = self.attrs._axis
+            index = self.attrs._index.new_array()
+            dx = np.zeros(self.attrs._arg.shape, dy.dtype)
+
+            if axis is None:
+                dxx = dx.reshape(-1)
+                dxx[index] = dy
+            else:
+                axis_list = list(range(len(dx.shape)))
+                axis_list.pop(axis)
+                axis_list.append(axis)
+                rev = [-1] * len(axis_list)
+                for i, a in enumerate(axis_list):
+                    rev[a] = i
+                dxx = np.transpose(dx, axis_list)
+                if(not self.attrs._keepdims):
+                    dyy = dy
+                else:
+                    dyy = np.transpose(dy, axis_list)
+                for i in np.ndindex(index.shape):
+                    dxx[i][index[i]] = dyy[i]
+            self.attrs._arg._update_diff(context, get_gpu(dx), **kwargs)
+
+
+class Amax(Abase):
+    """This function performs max calculation.
+
+    Args:
+        arg (Variable, ndarray): Input matrix.
+        axis (int): Perform calculation along this argument.
+        keepdims (bool): If `True` is passed, reduced dimensions remain.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> # Forward Calculation
+        >>> a = np.arange(4).reshape(2, 2)
+        >>> a
+        [[0 1]
+         [2 3]]
+        >>> rm.amax(a, axis=1)
+        [ 1.  3.]
+        >>>
+        >>> rm.amax(a, axis=0)
+        [ 2.  3.]
+        >>> rm.amax(a, axis=0, keepdims=True)
+        [[ 2.  3.]]
+        >>>
+        >>> # Calculation of differentiation
+        >>> va = rm.Variable(a)
+        >>> out = rm.amax(va)
+        >>> grad = out.grad()
+        >>> grad.get(va) # Getting the gradient of 'va'.
+        [[ 0.,  0.],
+         [ 0.,  1.]]
+    """
+
+    @classmethod
+    def _oper_cpu(cls, arg, axis, keepdims):
+        array = to_value(arg)
+        # Max is calculated twice, update?
+        return np.amax(array, axis, keepdims=keepdims), np.argmax(array, axis)
+
+    @classmethod
+    def _oper_gpu(cls, arg, axis, keepdims):
+        array = get_gpu(arg)
+        value = cu_reduce_max(array, axis, keepdims)
+        index = cu_reduce_argmax(array, axis)
+        return value, index
+
+
+class Amin(Abase):
+    """This function performs min calculation.
+
+    Args:
+        arg (Variable, ndarray): Input matrix.
+        axis (int): Perform calculation along this argument.
+        keepdims (bool): If `Ture` is passed, reduced dimentions remain.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>> # Forward Calculation
+        >>> a = np.arange(4).reshape(2, 2)
+        >>> a
+        [[0 1]
+         [2 3]]
+        >>> rm.amin(a, axis=1)
+        [ 0.  2.]
+        >>>
+        >>> rm.amin(a, axis=0)
+        [ 0.  1.]
+        >>> rm.amin(a, axis=0, keepdims=True)
+        [[ 0.  1.]]
+        >>>
+        >>> # Calculation of differentiation
+        >>> va = rm.Variable(a)
+        >>> out = rm.amin(va)
+        >>> grad = out.grad()
+        >>> grad.get(va) # Getting the gradient of 'va'.
+        [[ 1.,  0.],
+         [ 0.,  0.]]
+    """
+
+    @classmethod
+    def _oper_cpu(cls, arg, axis, keepdims):
+        array = to_value(arg)
+        return np.amin(array, axis, keepdims=keepdims), np.argmin(array, axis)
+
+    @classmethod
+    def _oper_gpu(cls, arg, axis, keepdims):
+        array = get_gpu(arg)
+        value = cu_reduce_min(array, axis, keepdims)
+        index = cu_reduce_argmin(array, axis)
+        return value, index
 
 
 def reshape(array, shape):
@@ -538,3 +702,93 @@ class amax(Amax):
          [ 0.,  1.]]
     """
     pass
+
+
+class mean(Node):
+    '''
+    This function calculates the mean of matrix elements.
+    If the argument 'axis' is passed, this function performs
+    mean calculation along the specified axis.
+
+    Args:
+        array (Node): Input array.
+        axis (int): Calculate the mean along this axis
+        keepdims (bool): If this is True, dimension will not be reduced.
+
+    Returns:
+        (Node): Mean array.
+
+    Example:
+        >>> import numpy as np
+        >>> import renom as rm
+        >>>
+        >>> x = np.random.rand(2, 3)
+        >>> z = rm.mean(x)
+        >>> z
+    '''
+
+    @classmethod
+    def _oper_cpu(cls, arg, axis=None, keepdims=False):
+        return np.mean(arg, axis=axis, keepdims=keepdims)
+
+    @classmethod
+    def _oper_gpu(cls, arg, axis=None, keepdims=False):
+        if isinstance(axis, (int, type(None))):
+            size = np.size(arg, axis)
+            if not keepdims:
+                if axis is None:
+                    newshape = ()
+                else:
+                    newshape = arg.shape[:axis] + arg.shape[axis + 1:]
+            else:
+                axis_list = list(arg.shape)
+                if axis is None:
+                    newshape = tuple([1 for e in list(axis_list)])
+                else:
+                    axis_list[axis] = 1
+                    newshape = tuple(axis_list)
+            ret = GPUValue(shape=newshape)
+            cudiv(cusum(get_gpu(arg), axis=axis, keepdims=keepdims), size, ret)
+        return ret
+
+    def __new__(cls, arg, axis=None, keepdims=False):
+        value = cls.calc_value(arg, axis, keepdims=keepdims)
+        ret = super(mean, cls).__new__(cls, value)
+        ret.attrs._axis = axis
+        ret.attrs._arg = arg
+        ret.attrs._keep = keepdims
+        return ret
+
+    def _backward_cpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            arg = self.attrs._arg
+            axis = self.attrs._axis
+            if axis is None:
+                dx = np.ones_like(arg) * dy / np.size(arg)
+            else:
+                if not self.attrs._keep:
+                    if isinstance(axis, int):
+                        expanded = np.expand_dims(dy, axis)
+                        dx = np.ones_like(arg) * expanded / np.size(arg, axis)
+                else:
+                    if isinstance(axis, int):
+                        dx = np.ones_like(arg) * dy / np.size(arg, axis)
+            arg._update_diff(context, dx, **kwargs)
+
+    def _backward_gpu(self, context, dy, **kwargs):
+        if isinstance(self.attrs._arg, Node):
+            arg = self.attrs._arg
+            axis = self.attrs._axis
+            if axis is None:
+                dx = get_gpu(arg).ones_like_me() * get_gpu(dy) / get_gpu(arg).size
+            else:
+                dy = get_gpu(dy).new_array()
+                if not self.attrs._keep:
+                    if isinstance(axis, int):
+                        expanded = np.expand_dims(dy, axis)
+                        dx = np.ones_like(arg, dtype=arg.dtype) * \
+                            expanded / get_gpu(arg.shape[axis])
+                else:
+                    if isinstance(axis, int):
+                        dx = np.ones_like(arg, dtype=arg.dtype) * dy / get_gpu(arg.shape[axis])
+            arg._update_diff(context, get_gpu(dx), **kwargs)

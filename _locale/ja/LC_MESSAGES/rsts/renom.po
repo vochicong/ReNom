@@ -1,0 +1,262 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) 2017, grid
+# This file is distributed under the same license as the ReNom package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ReNom 2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2018-02-19 01:26+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.3\n"
+
+#: ../../rsts/renom.rst:2
+msgid "renom"
+msgstr ""
+
+#: of renom.core.Grads:1
+msgid "Bases: :class:`object`"
+msgstr ""
+
+#: of renom.core.Grads:1
+msgid "Grads class. This class contains gradients of each Node object."
+msgstr "逆伝播により得られた勾配を保持するクラス."
+
+#: of renom.core.Grads:3
+msgid ""
+"When the function ``grad`` which is instance of Node class is called, an "
+"instance of Grads class will be returned."
+msgstr "Nodeクラスがもつgradメソッドの戻り値としてGradsクラスのオブジェクトが生成される."
+
+#: of renom.core.Grads:6
+msgid ""
+"For getting the gradient with respect to a Variable object 'x' which is "
+"on a computational graph, call the 'get' function of Grads object (An "
+"example is bellow)."
+msgstr "変数 'x'に関する勾配を取得したい場合は Gradsオブジェクトの持つ'get'メソッドを使用する.以下に例を示す."
+
+#: of renom.core.Amax:11 renom.core.Amin:11 renom.core.Grads:10
+#: renom.core.Node:5 renom.core.Variable:12 renom.operation.concat:9
+#: renom.operation.dot:9 renom.operation.reshape:9 renom.operation.sqrt:7
+#: renom.operation.sum:11 renom.operation.where:11
+msgid "Example"
+msgstr ""
+
+#: of renom.core.Grads.get:1
+msgid ""
+"This function returns the gradient with respect to the given node. In the"
+" case of there are not any gradient of the given node, this function "
+"returns 'None'."
+msgstr ""
+"このメソッドは与えられたNodeオブジェクトに関する勾配を返す.Gradsオブジェクトが, "
+"与えられたNodeオブジェクトに関する勾配を保持していない場合, Noneが返される."
+
+#: of renom.core.Amax renom.core.Amin renom.core.Grads.get
+#: renom.core.Grads.update renom.core.Node.grad renom.core.Variable
+#: renom.operation.concat renom.operation.dot renom.operation.exp
+#: renom.operation.log renom.operation.reshape renom.operation.sqrt
+#: renom.operation.sum renom.operation.where
+msgid "Parameters"
+msgstr ""
+
+#: of renom.core.Grads.get:5
+msgid "Returns a gradient with respect to this argument."
+msgstr "この引数に与えられたNodeオブジェクトに関する勾配を返す."
+
+#: of renom.core.Grads.get
+msgid "Returns"
+msgstr ""
+
+#: of renom.core.Grads.get:8
+msgid "Gradient of given node object."
+msgstr "引数に与えられたオブジェクトの勾配を返す."
+
+#: of renom.core.Grads.get
+msgid "Return type"
+msgstr ""
+
+#: of renom.core.Grads.update:1
+msgid ""
+"This function updates variable objects on the computational graph using "
+"obtained gradients."
+msgstr "このメソッドは計算グラフ上のVariableオブジェクトを, 得られた勾配を用いて更新する."
+
+#: of renom.core.Grads.update:4
+msgid ""
+"If an optimizer instance is passed, gradients are rescaled with regard to"
+" the optimization algorithm before updating."
+msgstr "Optimizerオブジェクト(勾配降下アルゴリズム)が与えられた場合、勾配はOptimizerによってリスケールされてから、変数値の更新に使われる."
+
+#: of renom.core.Grads.update:7
+msgid "Algorithm for rescaling gradients."
+msgstr "勾配をリスケーリングするための勾配降下アルゴリズム"
+
+#: of renom.core.Grads.update:9
+msgid ""
+"List of models to update variables. When specified, variables which does "
+"not belong to one of the models are not updated."
+msgstr "アップデート対象のモデルオブジェクト.この引数にモデルオブジェクトが与えられた場合、そのモデルオブジェクト以外に属する変数は更新されない."
+
+#: of renom.core.Node:1
+msgid "Bases: :class:`numpy.ndarray`"
+msgstr ""
+
+#: of renom.core.Node:1
+msgid ""
+"This is the base class of all operation function. Node class inherits "
+"numpy ndarray class."
+msgstr "すべての演算クラスの基底となるクラス.Numpyのndarrayを継承している."
+
+#: of renom.core.Node.to_cpu:1
+msgid "Send the data on GPU device to CPU."
+msgstr "GPUからCPUへデータを転送する."
+
+#: of renom.core.Node.to_gpu:1
+msgid "Send the data on CPU to GPU device."
+msgstr "CPUからGPUへデータおｗ転送する."
+
+#: of renom.core.Node.as_ndarray:1
+msgid "This method returns itself as ndarray object."
+msgstr "Nodeオブジェクトをndarrayオブジェクトに変換して返す."
+
+#: of renom.core.Node.release_gpu:1
+msgid "This method releases memory on GPU."
+msgstr "GPUメモリを開放する."
+
+#: of renom.core.Node.grad:1
+msgid ""
+"This method follows computational graph and returns the gradients of "
+"Variable object."
+msgstr "逆伝播を実行しGradsオブジェクトを返す."
+
+#: of renom.core.Node.grad:4
+msgid "Initial value of following the graph."
+msgstr "逆伝播開始時の初期値."
+
+#: of renom.core.Node.grad:6
+msgid "If it's True, the computational graph will be destroyed."
+msgstr "Trueが与えられた場合、計算グラフはこの関数が呼ばれるたびに破棄される."
+
+#: of renom.core.Node.detach_graph:1
+msgid "This method destroys computational graph."
+msgstr "計算グラフを破棄する."
+
+#: of renom.core.Variable:1 renom.operation.concat:1 renom.operation.sum:1
+#: renom.operation.where:1
+msgid "Bases: :class:`renom.core.Node`"
+msgstr ""
+
+#: of renom.core.Variable:1
+msgid "Variable class."
+msgstr "Variableクラス."
+
+#: of renom.core.Variable:3
+msgid ""
+"The gradient of this object will be calculated. Variable object is "
+"created from ndarray object or Number object."
+msgstr "勾配計算対象の行列クラス.ndarrayを引数に与えてインスタンス化する."
+
+#: of renom.core.Variable:6 renom.operation.dot:3 renom.operation.dot:5
+#: renom.operation.exp:3 renom.operation.log:3 renom.operation.reshape:3
+#: renom.operation.sqrt:3 renom.operation.sum:5 renom.operation.where:5
+#: renom.operation.where:7
+msgid "Input array."
+msgstr "入力データ"
+
+#: of renom.core.Variable:8
+msgid "Auto update flag."
+msgstr "更新フラグ"
+
+#: of renom.core.Amax:1 renom.core.Amin:1
+msgid "Bases: :class:`renom.core.Abase`"
+msgstr ""
+
+#: of renom.core.Amax:1
+msgid "This function performs max calculation."
+msgstr "行列の形を変更する."
+
+#: of renom.core.Amax:3 renom.core.Amin:3
+msgid "Input matrix."
+msgstr "入力データ"
+
+#: of renom.core.Amax:5 renom.core.Amin:5
+msgid "Perform calculation along this argument."
+msgstr "この引数に指定された軸に沿って計算が実行される."
+
+#: of renom.core.Amax:7 renom.core.Amin:7
+msgid "If `Ture` is passed, reduced dimentions remain."
+msgstr "`True`が与えられた場合, 次元が削除されない."
+
+#: of renom.core.Amin:1
+msgid "This function performs min calculation."
+msgstr "行列内における最も小さい値を返す."
+
+#: of renom.operation.reshape:1
+msgid "This function reshapes matrix shape."
+msgstr "行列の形を変更する."
+
+#: of renom.operation.reshape:5
+msgid "Shape."
+msgstr "返還後の行列の形"
+
+#: of renom.operation.sum:1
+msgid ""
+"This function sums up matrix elements. If the argument 'axis' is passed, "
+"this function performs sum along specified axis."
+msgstr "行列の要素を足し合わせた結果を返す. 引数`axis`が指定された場合, その軸に沿って演算が実行される."
+
+#: of renom.operation.sum:7
+msgid "Summing up along this axis."
+msgstr "この軸に沿って足しあわせが実行される."
+
+#: of renom.operation.dot:1
+msgid "Bases: :class:`renom.core.BinOp`"
+msgstr ""
+
+#: of renom.operation.dot:1
+msgid "This function executes dot product of the two matrixes."
+msgstr "二つの行列の内積を返す。"
+
+#: of renom.operation.concat:1
+msgid "Join a sequence of arrays along specified axis."
+msgstr "複数の行列を指定された軸に沿って結合し、ひとつの行列として返す."
+
+#: of renom.operation.concat:3
+msgid "Input arrays or tuple of input arrays."
+msgstr "入力データ,　もしくは入力データのリスト."
+
+#: of renom.operation.concat:5
+msgid "Concatenation will be performed along this axis."
+msgstr "結合はこの引数に指定された軸に沿って実行される."
+
+#: of renom.operation.where:1
+msgid "Return elements, either from a or b, depending on condition."
+msgstr "条件によって行列aもしくはbの要素を持つ行列を返す."
+
+#: of renom.operation.where:3
+msgid "Condition array."
+msgstr "条件を表す行列"
+
+#: of renom.operation.exp:1 renom.operation.log:1 renom.operation.sqrt:1
+msgid "Bases: :class:`renom.core.UnaryOp`"
+msgstr ""
+
+#: of renom.operation.sqrt:1
+msgid "Square root operation."
+msgstr "与えられた行列が持つ各要素の平方根を計算する."
+
+#: of renom.operation.log:1
+msgid "Log operation."
+msgstr "与えられた行列が持つ各要素の自然対数を計算する."
+
+#: of renom.operation.exp:1
+msgid "Exponential operation."
+msgstr "ネイピア数に対し、与えられた行列が持つ各要素数でべき乗した結果を返す."
+

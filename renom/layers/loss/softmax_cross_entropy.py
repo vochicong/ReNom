@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function, division
 import numpy as np
-from renom.core import Node, get_gpu
+from renom.core import Node
 from renom.layers.activation import softmax
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import get_gpu
 import renom as rm
 
 

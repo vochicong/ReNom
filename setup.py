@@ -142,10 +142,9 @@ ext_modules = []
 cuda_sources = []
 
 
-cuda_depends = ['renom/cuda/thrust_func_defs.pxi',
-                'renom/cuda/thrust_funcs.pxi',
-                'renom/cuda/thrust_funcs.h'
-                'renom/cuda/compat.h'
+cuda_depends = ['renom/cuda/thrust/thrust_func_defs.pxi',
+                'renom/cuda/thrust/thrust_funcs.pxi',
+                'renom/cuda/thrust/thrust_funcs.h'
                 ]
 
 
@@ -164,8 +163,8 @@ def setup_cuda():
         os.path.join(cuda_home, "include"),
     ]
 
-    ext_base = Extension('renom.cuda.cuda_base',
-                         sources=['renom/cuda/cuda_base.pyx'],
+    ext_base = Extension('renom.cuda.base.cuda_base',
+                         sources=['renom/cuda/base/cuda_base.pyx'],
                          depends=cuda_depends,
                          libraries=['cublas', 'cuda', 'cudart', 'nvToolsExt'],
                          library_dirs=libraries,
@@ -173,8 +172,8 @@ def setup_cuda():
                          include_dirs=includes,
                          )
 
-    ext_utils = Extension('renom.cuda.cuda_utils',
-                          sources=['renom/cuda/cuda_utils.pyx'],
+    ext_utils = Extension('renom.cuda.base.cuda_utils',
+                          sources=['renom/cuda/base/cuda_utils.pyx'],
                           depends=cuda_depends,
                           libraries=['cublas', 'cuda', 'cudart'],
                           library_dirs=libraries,
@@ -182,8 +181,8 @@ def setup_cuda():
                           include_dirs=includes,
                           )
 
-    ext_cublas = Extension('renom.cuda.cublas',
-                           sources=['renom/cuda/cublas.pyx'],
+    ext_cublas = Extension('renom.cuda.cublas.cublas',
+                           sources=['renom/cuda/cublas/cublas.pyx'],
                            depends=cuda_depends,
                            libraries=['cublas', 'cuda', 'cudart'],
                            library_dirs=libraries,
@@ -191,8 +190,8 @@ def setup_cuda():
                            include_dirs=includes,
                            )
 
-    ext_cudnn = Extension('renom.cuda.cudnn',
-                          sources=['renom/cuda/cudnn.pyx', 'renom/cuda/compat.cpp'],
+    ext_cudnn = Extension('renom.cuda.cudnn.cudnn',
+                          sources=['renom/cuda/cudnn/cudnn.pyx'],
                           depends=cuda_depends,
                           libraries=['cublas', 'cuda', 'cudart', 'cudnn'],
                           library_dirs=libraries,
@@ -200,8 +199,8 @@ def setup_cuda():
                           include_dirs=includes,
                           )
 
-    ext_curand = Extension('renom.cuda.curand',
-                           sources=['renom/cuda/curand.pyx'],
+    ext_curand = Extension('renom.cuda.curand.curand',
+                           sources=['renom/cuda/curand/curand.pyx'],
                            depends=cuda_depends,
                            libraries=['curand', 'cuda', 'cudart'],
                            library_dirs=libraries,
@@ -209,8 +208,8 @@ def setup_cuda():
                            include_dirs=includes,
                            )
 
-    ext_thrust_float = Extension('renom.cuda.thrust_float',
-                                 sources=['renom/cuda/thrust_float.pyx'],
+    ext_thrust_float = Extension('renom.cuda.thrust.thrust_float',
+                                 sources=['renom/cuda/thrust/thrust_float.pyx'],
                                  depends=cuda_depends,
                                  libraries=['cublas', 'cuda', 'cudart'],
                                  library_dirs=libraries,
@@ -218,8 +217,8 @@ def setup_cuda():
                                  include_dirs=includes,
                                  )
 
-    ext_thrust_double = Extension('renom.cuda.thrust_double',
-                                  sources=['renom/cuda/thrust_double.pyx'],
+    ext_thrust_double = Extension('renom.cuda.thrust.thrust_double',
+                                  sources=['renom/cuda/thrust/thrust_double.pyx'],
                                   depends=cuda_depends,
                                   libraries=['cublas', 'cuda', 'cudart'],
                                   library_dirs=libraries,
@@ -227,8 +226,8 @@ def setup_cuda():
                                   include_dirs=includes,
                                   )
 
-    ext_gpuvalue = Extension('renom.cuda.gpuvalue',
-                             sources=['renom/cuda/gpuvalue.py'],
+    ext_gpuvalue = Extension('renom.cuda.gpuvalue.gpuvalue',
+                             sources=['renom/cuda/gpuvalue/gpuvalue.py'],
                              depends=cuda_depends,
                              libraries=['cublas', 'cuda', 'cudart'],
                              library_dirs=libraries,
@@ -250,12 +249,12 @@ def setup_cuda():
 
     cuda_sources = [('cuda_misc_a',
                      {'sources': [
-                         'renom/cuda/thrust_funcs_float.cu',
-                         'renom/cuda/thrust_funcs_double.cu', ],
+                         'renom/cuda/thrust/thrust_funcs_float.cu',
+                         'renom/cuda/thrust/thrust_funcs_double.cu', ],
                       'depends': [
-                         'renom/cuda/thrust_funcs_double.h',
-                         'renom/cuda/thrust_funcs_float.h',
-                         'renom/cuda/thrust_funcs.inl'],
+                         'renom/cuda/thrust/thrust_funcs_double.h',
+                         'renom/cuda/thrust/thrust_funcs_float.h',
+                         'renom/cuda/thrust/thrust_funcs.inl'],
                       })]
 
 
@@ -273,4 +272,4 @@ setup(
     name='renom',
     packages=find_packages(),
     include_dirs=[numpy.get_include()],
-    version='2.6.1')
+    version='2.6.2')

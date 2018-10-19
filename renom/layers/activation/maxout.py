@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 import renom as rm
 #from renom.operation import concat, amax
-from renom.core import Node, showmark
+from renom.core import Node
+from renom.debug_graph import showmark
 
 
 @showmark

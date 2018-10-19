@@ -8,9 +8,16 @@ import inspect
 import weakref
 import copy
 import numpy as np
-from renom.core import Node, Variable, GPUValue, Pos, get_model_graph, EnterModel, LeaveModel
-from renom.operation import sum
+from renom import get_model_graph, EnterModel, LeaveModel, Pos
+from renom.core import Node, Variable
 import renom.cuda
+
+if renom.cuda.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue
+else:
+    GPUValue = None
+
+
 from renom.cuda import use_device, is_cuda_active
 from future.utils import with_metaclass
 
@@ -323,8 +330,11 @@ class Model(with_metaclass(ABCMeta, object)):
                     if not isinstance(diff, Node):
                         diff = Node(diff)
                     with use_device(curdiff.device_id):
-                        if diff.device_id != curdiff.device_id:
-                            diff = Node(diff.get_gpu().copy())
+                        if GPUValue is not None and diff.device_id != curdiff.device_id:
+                            g = GPUValue(shape=diff.shape)
+                            g.copy_from(diff.get_gpu())
+                            diff = Node(g)
+
                         newdiff = curdiff + diff
 
                 grads.set(obj, newdiff)
@@ -392,7 +402,7 @@ class Model(with_metaclass(ABCMeta, object)):
                         t[propname] = 'renom.Node'
 
                 for propname, propvalue in attrs.items():
-                    if isinstance(propvalue, GPUValue):
+                    if GPUValue is not None and isinstance(propvalue, GPUValue):
                         g['__dict__.' + propname] = propvalue.new_array()
                     else:
                         g['__dict__.' + propname] = propvalue

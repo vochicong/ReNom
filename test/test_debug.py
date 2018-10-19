@@ -2,7 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from renom.core import Variable, DEBUG_NODE_STAT, DEBUG_GRAPH_INIT, DEBUG_NODE_GRAPH, SET_MODEL_GRAPH, BUILD_MODEL_GRAPH
+from renom.core import Variable
+from renom import DEBUG_NODE_STAT, DEBUG_GRAPH_INIT, DEBUG_NODE_GRAPH, SET_MODEL_GRAPH, BUILD_MODEL_GRAPH
 from renom import operation as O
 import renom as R
 

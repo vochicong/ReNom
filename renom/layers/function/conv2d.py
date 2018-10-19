@@ -3,10 +3,13 @@
 
 import numpy as np
 from renom.layers.function.utils import im2col, col2im, out_size, tuplize
-from renom.core import Node, Variable, to_value, GPUValue, get_gpu, precision
+from renom.core import Node, Variable, to_value
+from renom import precision
 from .parameterized import Parametrized
 from renom.utility.initializer import GlorotNormal
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 class conv2d(Node):
@@ -50,7 +53,7 @@ class conv2d(Node):
 
         y = GPUValue(shape=tuple([N, ] + list(out_shape)))
         with cu.cudnn_handler() as handle:
-            cu.cuConvolutionForward(handle, conv_desc, filter_desc, x, w, y)
+            cu.cuConvolutionForward(handle, conv_desc, filter_desc, get_gpu(x), get_gpu(w), y)
             if b is not None:
                 cu.cu_add_bias(get_gpu(b), y)
 
@@ -89,7 +92,8 @@ class conv2d(Node):
             if db is None:
                 db = np.zeros((1, self.attrs._w.shape[0], 1, 1))
             cu.cuConvolutionBackward(handle, self.attrs._conv_desc, self.attrs._filter_desc,
-                                     self.attrs._x, self.attrs._w, dy, dw, db, dx, **kwargs)
+                                     get_gpu(self.attrs._x), get_gpu(self.attrs._w), get_gpu(dy),
+                                     get_gpu(dw), get_gpu(db), get_gpu(dx), **kwargs)
         if isinstance(self.attrs._w, Node):
             self.attrs._w._update_diff(context, dw, **kwargs)
 
@@ -147,12 +151,14 @@ class Conv2d(Parametrized):
                  dilation=1,
                  input_size=None,
                  ignore_bias=False,
-                 initializer=GlorotNormal()):
+                 initializer=GlorotNormal(),
+                 weight_decay=0):
         self._padding, self._stride, self._kernel, self._dilation = (tuplize(x)
                                                                      for x in (padding, stride, filter, dilation))
         self._channel = channel
         self._ignore_bias = ignore_bias
         self._initializer = initializer
+        self._weight_decay = weight_decay
         super(Conv2d, self).__init__(input_size)
 
     def weight_initiallize(self, input_size):
@@ -161,7 +167,8 @@ class Conv2d(Parametrized):
         assert all([s > 0 for s in input_size[1:]]), \
             "The shape of input array {} is too small. Please give an array which size is lager than 0.".format(
                 input_size[1:])
-        self.params = {"w": Variable(self._initializer(size_f), auto_update=True)}
+        self.params = {"w": Variable(self._initializer(
+            size_f), auto_update=True, weight_decay=self._weight_decay)}
         if not self._ignore_bias:
             self.params["b"] = Variable(
                 np.zeros((1, self._channel, 1, 1), dtype=precision), auto_update=True)

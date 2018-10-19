@@ -3,12 +3,13 @@
 from __future__ import division
 import warnings
 import numpy as np
-from renom.core import get_gpu, Node
+from renom.core import Node
 from renom.cuda import has_cuda, is_cuda_active
 from renom.config import precision
 
 if has_cuda():
-    import renom.cuda.cuda_base as cu
+    import renom.cuda.base.cuda_base as cu
+    from renom.cuda.gpuvalue import get_gpu
     cuda_imported = True
 else:
     cuda_imported = False

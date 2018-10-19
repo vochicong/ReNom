@@ -5,11 +5,14 @@ from __future__ import division
 import numpy as np
 from renom.layers.activation.sigmoid import sigmoid
 from renom.layers.activation.tanh import tanh
-from renom.core import Node, Variable, get_gpu, precision, GPUValue
+from renom.core import Node, Variable
+from renom import precision
 from renom.operation import dot, sum
 from renom.utility.initializer import GlorotNormal
 from .parameterized import Parametrized
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 def gate(x):
@@ -245,10 +248,11 @@ class Lstm(Parametrized):
     .. [lstm] Learning Precise Timing with LSTM Recurrent Networks
     '''
 
-    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal()):
+    def __init__(self, output_size, input_size=None, ignore_bias=False, initializer=GlorotNormal(), weight_decay=0):
         self._size_o = output_size
         self._ignore_bias = ignore_bias
         self._initializer = initializer
+        self._weight_decay = weight_decay
         super(Lstm, self).__init__(input_size)
 
     def weight_initiallize(self, size_i):
@@ -257,8 +261,8 @@ class Lstm(Parametrized):
         bias = np.zeros((1, size_o * 4), dtype=precision)
         bias[:, size_o:size_o * 2] = 1
         self.params = {
-            "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True),
-            "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True)}
+            "w": Variable(self._initializer((size_i, size_o * 4)), auto_update=True, weight_decay=self._weight_decay),
+            "wr": Variable(self._initializer((size_o, size_o * 4)), auto_update=True, weight_decay=self._weight_decay)}
         if self._ignore_bias:
             self.params["b"] = Variable(bias, auto_update=True)
 
@@ -276,3 +280,22 @@ class Lstm(Parametrized):
         """Truncates temporal connection."""
         self._z = None
         self._state = None
+
+
+class ChainedLSTM(Lstm):
+    '''
+    This chained LSTM model assumes an input of shape (N, T, X) where N is batch size, T is time size and X is the data.
+
+    The model automates the process of chaining together several LSTM calls.
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super(ChainedLSTM, self).__init__(*args, **kwargs)
+
+    def forward(self, x):
+        lstm_model = super(ChainedLSTM, self)
+        lstm_model.truncate()
+        length = x.shape[1]
+        for i in range(length):
+            ret = lstm_model.forward(x[:, i])
+        return ret

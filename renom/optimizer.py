@@ -2,12 +2,14 @@
 # encoding: utf-8
 from __future__ import division, print_function
 import numpy as np
-from renom.core import get_gpu, Node, Variable
+from renom.core import Node, Variable
 from renom.operation import sqrt, square
-from renom.cuda.cuda import is_cuda_active
+from renom.cuda import is_cuda_active
 from abc import ABCMeta, abstractmethod
 from future.utils import with_metaclass
-from renom.cuda import cuda as cu
+import renom.cuda as cu
+if cu.has_cuda():
+    from renom.cuda.gpuvalue import GPUValue, get_gpu
 
 
 class Optimizer(with_metaclass(ABCMeta, object)):
@@ -84,6 +86,23 @@ class Sgd(Optimizer):
 
     def reset(self):
         self._params = {}
+
+
+class ClampedSgd(Sgd):
+    def __init__(self, lr=0.1, momentum=0.4, minimum=-1e4, maximum=+1e4):
+        super(ClampedSgd, self).__init__(lr=lr, momentum=momentum)
+        self._minimum = minimum
+        self._maximum = maximum
+
+    def _get_cpu(self, dy, node):
+        ret = super(ClampedSgd, self)._get_cpu(dy, node)
+        ret = np.clip(ret, self._minimum, self._maximum)
+        return ret
+
+    def _get_gpu(self, dy, node):
+        ret = super(ClampedSgd, self)._get_gpu(dy, node)
+        ret = cu.cu_clip(get_gpu(ret), self._minimum, self._maximum)
+        return ret
 
 
 class Adagrad(Optimizer):
@@ -192,6 +211,81 @@ class Adadelta(Optimizer):
         self._params = {}
 
 
+class Adamax(Optimizer):
+
+    def __init__(self, alpha=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
+        self._alpha = alpha
+        self._beta1 = beta1
+        self._beta2 = beta2
+        self._epsilon = epsilon
+        self._params = {}
+
+    def _get_cpu(self, dy, node):
+        node_id = id(node)
+        g_t = dy
+        pdy = self._params.get(node_id, None)
+        if pdy is None:
+            moment1 = np.zeros_like(dy)
+            moment2 = np.zeros_like(dy)
+            running_beta1 = self._beta1
+            running_beta2 = self._beta2
+            time = 1
+        else:
+            moment1 = pdy['moment1']
+            moment2 = pdy['moment2']
+            time = pdy['time'] + 1
+            # Performs (beta_1 ** (t - 1)) * (beta_1 ** 1) as replacement for beta_1 ** t
+            running_beta1 = pdy['running_beta1'] * self._beta1
+            running_beta2 = pdy['running_beta2'] * self._beta2
+
+        new_moment1 = self._beta1 * moment1 + (1 - self._beta1) * g_t
+        new_moment2 = self._beta2 * moment2 + (1 - self._beta2) * g_t**2
+        moment1_estimate = new_moment1 / (1 - running_beta1)
+        moment2_estimate = new_moment2 / (1 - running_beta2)
+        ret = self._alpha * moment1_estimate / (np.sqrt(moment2_estimate) + self._epsilon)
+        self._params[node_id] = {
+            'moment1': new_moment1,
+            'moment2': new_moment2,
+            'time': time,
+            'running_beta1': running_beta1,
+            'running_beta2': running_beta2,
+        }
+        return ret
+
+    def _get_gpu(self, dy, node):
+        node_id = id(node)
+        pdy = self._params.get(node_id, None)
+        if pdy is None:
+            moment1 = get_gpu(dy).zeros_like_me()
+            moment2 = get_gpu(dy).zeros_like_me()
+            running_beta1 = self._beta1
+            running_beta2 = self._beta2
+            time = 1
+        else:
+            moment1 = pdy['moment1']
+            moment2 = pdy['moment2']
+            time = pdy['time'] + 1
+            # Performs (beta_1 ** (t - 1)) * (beta_1 ** 1) as replacement for beta_1 ** t
+            running_beta1 = pdy['running_beta1'] * self._beta1
+            running_beta2 = pdy['running_beta2'] * self._beta2
+        ndy = get_gpu(dy).empty_like_me()
+        cu.cu_optimizer_adamax(self._alpha, self._epsilon, (self._beta1, running_beta1),
+                               (self._beta2, running_beta2), moment1, moment2, get_gpu(dy), ndy)
+
+        self._params[node_id] = {
+            'moment1': moment1,
+            'moment2': moment2,
+            'time': time,
+            'running_beta1': running_beta1,
+            'running_beta2': running_beta2,
+        }
+        ret = ndy
+        return ret
+
+    def reset(self):
+        self._params = {}
+
+
 class Rmsprop(Optimizer):
     '''Rmsprop described by following formula. [Rmsprop]_
 
@@ -209,29 +303,57 @@ class Rmsprop(Optimizer):
     .. [Rmsprop] Nitish Srivastava, Kevin Swersky, Geoffrey Hinton. Neural Networks for Machine Learning.
     '''
 
-    def __init__(self, lr=0.001, g=0.9, epsilon=1e-8):
+    def __init__(self, lr=0.001, g=0.9, epsilon=1e-8, running_average=1):
         self._lr = lr
         self._g = g
+        self._ra = running_average
         self._epsilon = epsilon
         self._params = {}
 
     def _get_cpu(self, dy, node):
         node_id = id(node)
-        pdy = self._params.get(node_id, 0)
-        r = self._g * pdy + (1 - self._g) * (dy**2)
-        ret = self._lr * dy / (sqrt(r) + self._epsilon)
-        self._params[node_id] = r
+        pdy = self._params.get(node_id, None)
+        if pdy is None:
+            pdy = {
+                'pmse': 0,
+                'pra': 0,
+            }
+        pmse = pdy['pmse']
+        pra = pdy['pra']
+
+        r = self._g * pmse + (1 - self._g) * (dy**2)
+        k = self._ra * pra + (1 - self._ra) * (dy)
+        v = (r - k**2)
+        if hasattr(v, "as_ndarray"):
+            v = v.as_ndarray()
+        v[v < 0] = 0
+        ret = self._lr * dy / sqrt(v + self._epsilon)
+
+        self._params[node_id] = {
+            'pmse': r,
+            'pra': k,
+        }
         if isinstance(ret, Node):
             ret.detach_graph()
         return ret
 
     def _get_gpu(self, dy, node):
         node_id = id(node)
-        pdy = self._params.get(node_id, get_gpu(dy).zeros_like_me())
+        pdy = self._params.get(node_id, None)
+        if pdy is None:
+            pdy = {
+                'pmse': get_gpu(dy).zeros_like_me(),
+                'pra': get_gpu(dy).zeros_like_me(),
+            }
+        r = pdy['pmse']
+        k = pdy['pra']
         ndy = get_gpu(dy).empty_like_me()
-        r = get_gpu(pdy).empty_like_me()
-        cu.cu_optimizer_rmsprop(self._lr, self._epsilon, self._g, get_gpu(dy), get_gpu(pdy), ndy, r)
-        self._params[node_id] = r
+        cu.cu_optimizer_rmsprop(self._lr, self._epsilon, self._g, self._ra, get_gpu(dy), k, ndy, r)
+
+        self._params[node_id] = {
+            'pmse': r,
+            'pra': k,
+        }
         return ndy
 
     def reset(self):
