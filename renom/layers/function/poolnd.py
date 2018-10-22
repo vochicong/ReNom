@@ -1,5 +1,3 @@
-
-
 import numpy as np
 from renom.core import Node
 from renom.layers.function.utils import imnpool, poolnim
@@ -37,19 +35,24 @@ class max_poolnd(npool_base):
 
     @classmethod
     def _oper_gpu(cls, x, karnel, stride, padding):
-        N = x.shape[0]
         pool_desc = cu.PoolingNDescriptor(karnel, padding, stride, pool_mode=0)
-        out_shape = (np.array(x.shape[2:]) - np.array(karnel)) // np.array(stride) + 1
-        y = GPUValue(shape=tuple([N, x.shape[1]] + list(out_shape)))
+        output_shape = [x.shape[0], x.shape[1]]
+        for i in range(len(x.shape[2:])):
+            output_shape.append((x.shape[i + 2] + padding[i] * 2 - karnel[i]) // stride[i] + 1)
+        y = GPUValue(shape=tuple(output_shape))
         with cu.cudnn_handler() as handle:
             cu.cuPoolingForward(handle, pool_desc, get_gpu(x), get_gpu(y))
         ret = cls._create_node(y)
         ret.attrs._pool_desc = pool_desc
+        ret.attrs._kernel = karnel
+        ret.attrs._stride = stride
+        ret.attrs._padding = padding
         ret.attrs._x = x
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        result = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, mode="max")
+        result = poolnim(self.attrs._x, dy, self.attrs._kernel,
+                         self.attrs._stride, self.attrs._padding, mode="max")
         self.attrs._x._update_diff(context, result, **kwargs)
 
 
@@ -67,19 +70,24 @@ class average_poolnd(npool_base):
 
     @classmethod
     def _oper_gpu(cls, x, karnel, stride, padding):
-        N = x.shape[0]
         pool_desc = cu.PoolingNDescriptor(karnel, padding, stride, pool_mode=1)
-        out_shape = (np.array(x.shape[2:]) - np.array(karnel)) // np.array(stride) + 1
-        y = GPUValue(shape=tuple([N, x.shape[1]] + list(out_shape)))
+        output_shape = [x.shape[0], x.shape[1]]
+        for i in range(len(x.shape[2:])):
+            output_shape.append((x.shape[i + 2] + padding[i] * 2 - karnel[i]) // stride[i] + 1)
+        y = GPUValue(shape=tuple(output_shape))
         with cu.cudnn_handler() as handle:
             cu.cuPoolingForward(handle, pool_desc, get_gpu(x), get_gpu(y))
         ret = cls._create_node(y)
         ret.attrs._pool_desc = pool_desc
+        ret.attrs._kernel = karnel
+        ret.attrs._stride = stride
+        ret.attrs._padding = padding
         ret.attrs._x = x
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
-        dx = poolnim(self.attrs._x, dy, self.attrs._kernel, self.attrs._stride, mode="average")
+        dx = poolnim(self.attrs._x, dy, self.attrs._kernel,
+                     self.attrs._stride, self.attrs._padding, mode="average")
         self.attrs._x._update_diff(context, dx, **kwargs)
 
 
@@ -92,6 +100,8 @@ def check_input(var, length):
             tuple([var for _ in range(length)]), dtype=np.int32)
     elif not var.dtype == np.int32:
         var = var.astype(np.int32)
+    if length < 2:
+        length = 2
     assert len(var) is length
     return var
 
@@ -102,14 +112,24 @@ class NPoolBase:
         self._padding = padding
         self._stride = stride
         self._kernel = kernel
+        self._dims = None
 
     def __call__(self, x):
         dims = len(x.shape[2:])
+        if self._dims is None:
+            if dims < 2:
+                dims = 2
+            self._dims = dims
         if is_cuda_active():
-            assert dims < 4 and dims > 1, "GPU Version can only 2 and 3 dimensions"
+            assert self._dims < 4, "GPU Version can only 1, 2 and 3 dimensions"
+
+        if self._dims == 1:
+            self._kernel = np.append(self._kernel, 1).astype(np.int32)
+            self._padding = np.append(self._padding, 0).astype(np.int32)
+            self._stride = np.append(self._stride, 1).astype(np.int32)
 
         def func(var):
-            return check_input(var, dims)
+            return check_input(var, self._dims)
         self._padding, self._stride, self._kernel = map(
             func, [self._padding, self._stride, self._kernel])
 

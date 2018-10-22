@@ -4,7 +4,7 @@ Documents are available on the ReNom.jp web site.
 
 - http://renom.jp/index.html
 
-## ReNom version 2.6.1
+## ReNom version 2.6.2
 - http://renom.jp/rsts/renomdl/main.html
 
 #### Changes from 2.5
@@ -23,10 +23,9 @@ Please refer to `changes` at renom.jp.
 - Add `Max, Avg Pooling 3d, nd`.
 - Add `Unpooling 2d`.
 
-#### Changes from 2.6.0
-- Bug fix of the class LayerNormalize. Not to raise index error when gpu calculation.
-- Add an example of LayerNormalize.
-
+#### Changes from 2.6.1
+- Bug fix of the class ConvNd, PoolNd(To be acceptable 1d data.)
+- Bug fix of the class Unpool2d, Unpoolnd2.
 
 
 ## Requirements
@@ -36,7 +35,7 @@ Please refer to `changes` at renom.jp.
 - pytest 3.0.7
 - cython 0.24
 - cuda-toolkit 8.0, 9.1
-- cudnn 5.1, 6.0, 7.1
+- cudnn 7.1
 - matplotlib 2.0.2
 - pandas 0.20.3
 - scikit-learn 0.18.2

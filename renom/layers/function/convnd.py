@@ -97,6 +97,8 @@ def check_input(var, length):
             tuple([var for _ in range(length)]), dtype=np.int32)
     elif not var.dtype == np.int32:
         var = var.astype(np.int32)
+    if length < 2:
+        length = 2
     assert len(var) is length
     return var
 
@@ -156,6 +158,11 @@ class ConvNd(Parametrized):
         self._dims = len(input_size[1:])
         if is_cuda_active():
             assert self._dims < 4, "GPU Version currently only supports 2 and 3 dimensions"
+
+        if self._dims == 1:
+            self._kernel = np.append(self._kernel, 1).astype(np.int32)
+            self._padding = np.append(self._padding, 0).astype(np.int32)
+            self._stride = np.append(self._stride, 1).astype(np.int32)
 
         def func(var):
             return check_input(var, self._dims)
