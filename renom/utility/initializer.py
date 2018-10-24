@@ -96,7 +96,8 @@ class HeNormal(Initializer):
         &std = sqrt(2/(input\_size)) \\\\
 
     .. [1] https://arxiv.org/abs/1502.01852
-        Understanding the difficulty of training deep feedforward neural networks.
+       Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification
+
     '''
 
     def __init__(self):
