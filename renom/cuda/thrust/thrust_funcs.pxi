@@ -101,6 +101,24 @@ def cusoftplus_backward(gpu_value1, gpu_value2, gpu_value3):
     thrust_softplus_backward(ptr1, ptr2, ptr3, size)
 
 
+def cusoftsign_forward(gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
+    cdef int size = <int > gpu_value1.size
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+    thrust_softsign_forward(ptr1, ptr2, size)
+
+
+def cusoftsign_backward(gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
+    cdef int size = <int > gpu_value1.size
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+    thrust_softsign_backward(ptr1, ptr2, size)
+
+
 def cusigmoid(gpu_value1, gpu_value2):
     cuda_base.check_heap_device(gpu_value1, gpu_value2)
 
@@ -117,6 +135,24 @@ def cutanh(gpu_value1, gpu_value2):
     cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
     thrust_tanh(ptr1, ptr2, size)
+
+
+def cuswish_forward(s, gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
+    cdef int size = <int > gpu_value1.size
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+    thrust_swish_forward(< VALUE_TYPE > s, ptr1, ptr2, size);
+
+
+def cuswish_backward(s, gpu_value1, gpu_value2):
+    cuda_base.check_heap_device(gpu_value1, gpu_value2)
+
+    cdef int size = <int > gpu_value1.size
+    cdef VALUE_TYPE * ptr1 = <VALUE_TYPE * > < uintptr_t > gpu_value1._ptr
+    cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value2._ptr
+    thrust_swish_backward(< VALUE_TYPE > s, ptr1, ptr2, size);
 
 
 ctypedef void(*BINOP_FUNC)(
@@ -853,7 +889,9 @@ def cu_add_bias(bias, gpu_value):
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value._ptr
     cdef int size = <int > gpu_value.size
     cdef int wh
-    if len(gpu_value.shape) < 5:
+    if len(gpu_value.shape) < 4:
+        wh = <int > (gpu_value.shape[2])
+    elif len(gpu_value.shape) < 5:
         wh = <int > (gpu_value.shape[2] * gpu_value.shape[3])
     elif len(gpu_value.shape) is 5:
         wh = <int > (gpu_value.shape[2] * gpu_value.shape[3] * gpu_value.shape[4])
