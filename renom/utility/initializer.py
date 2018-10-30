@@ -85,6 +85,34 @@ class GlorotNormal(Initializer):
         return (np.random.randn(*shape) * std).astype(precision)
 
 
+class HeNormal(Initializer):
+
+    '''He normal initializer.
+       Initializes parameters according to [1]
+
+    .. math::
+
+        &N(0, std) \\\\
+        &std = sqrt(2/(input\_size)) \\\\
+
+    .. [1] https://arxiv.org/abs/1502.01852
+       Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification
+
+    '''
+
+    def __init__(self):
+        super(HeNormal, self).__init__()
+
+    def __call__(self, shape):
+        if len(shape) == 2:
+            fan_in = shape[0]
+        elif len(shape) == 4:
+            size = np.prod(shape[2:])
+            fan_in = shape[1] * size
+        std = np.sqrt(2 / fan_in)
+        return (np.random.randn(*shape) * std).astype(precision)
+
+
 class Gaussian(Initializer):
 
     '''Gaussian initializer.

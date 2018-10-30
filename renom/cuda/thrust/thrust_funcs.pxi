@@ -889,7 +889,9 @@ def cu_add_bias(bias, gpu_value):
     cdef VALUE_TYPE * ptr2 = <VALUE_TYPE * > < uintptr_t > gpu_value._ptr
     cdef int size = <int > gpu_value.size
     cdef int wh
-    if len(gpu_value.shape) < 5:
+    if len(gpu_value.shape) < 4:
+        wh = <int > (gpu_value.shape[2])
+    elif len(gpu_value.shape) < 5:
         wh = <int > (gpu_value.shape[2] * gpu_value.shape[3])
     elif len(gpu_value.shape) is 5:
         wh = <int > (gpu_value.shape[2] * gpu_value.shape[3] * gpu_value.shape[4])

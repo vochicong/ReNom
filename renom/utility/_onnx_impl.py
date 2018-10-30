@@ -144,9 +144,9 @@ def register_max_pool2d(onnx_nodes, inputs, outputs, values, node):
             'MaxPool',
             [_to_param_name(node.attrs._x)],
             [_to_param_name(node)],
-            kernel_shape=node._kernel,
-            pads=node._padding,
-            strides=node._stride,
+            kernel_shape=node.attrs._kernel,
+            pads=node.attrs._padding,
+            strides=node.attrs._stride,
         ))
 
 
