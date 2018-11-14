@@ -173,6 +173,17 @@ cdef class ConvolutionDescriptor(BaseConvolutionDescriptor):
         check(cudnnSetConvolution2dDescriptor(
             self.conv_desc, pad_h, pad_w, u, v, upscalex, upscaley, mode, data_type(dtype)))
 
+
+cdef class GroupConvolutionDescriptor(BaseConvolutionDescriptor):
+
+    def __init__(self, conv_desc, groups):
+        cdef int groupcount
+        cdef cudnnConvolutionDescriptor_t convDesc = <cudnnConvolutionDescriptor_t> <uintptr_t> conv_desc
+        groupcount = groups
+
+        check(cudnnSetConvolutionGroupCount(convDesc, groupcount))
+
+
 cdef class PoolingNDescriptor:
     cdef cudnnPoolingDescriptor_t pool_desc
 
