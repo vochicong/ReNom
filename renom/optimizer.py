@@ -57,18 +57,27 @@ class Sgd(Optimizer):
                   [-0.1523091 , -0.03280939,  0.32063919]], dtype=float32)
     '''
 
-    def __init__(self, lr=0.1, momentum=0.4):
+    def __init__(self, lr=0.1, momentum=0.4, Nesterov = False):
         self._lr = lr
         self._momentum = momentum
         self._params = {}
+        self._nesterov = Nesterov
 
     def _get_cpu(self, dy, node):
 
         node_id = id(node)
         pdy = self._params.get(node_id, 0)
-        ret = self._lr * dy + self._momentum * pdy
+        ret = self._lr * dy 
+
+        if self._nesterov is False:
+          ret += self._momentum * pdy
+
         if self._momentum > 0:
             self._params[node_id] = ret
+
+        if self._nesterov is True:
+          ret += ret * self._momentum
+
         if isinstance(ret, Node):
             ret.detach_graph()
         return ret
@@ -76,12 +85,22 @@ class Sgd(Optimizer):
     def _get_gpu(self, dy, node):
 
         node_id = id(node)
-        pdy = self._params.get(node_id, get_gpu(dy).zeros_like_me())
+        pdy = self._params.get(node_id, None)
+        if pdy is None:
+          pdy = get_gpu(dy).zeros_like_me()
         ndy = get_gpu(dy).empty_like_me()
-        cu.cu_optimizer_sgd(self._lr, self._momentum, get_gpu(dy), get_gpu(pdy), ndy)
+        if self._nesterov is False:
+          cu.cu_optimizer_sgd(self._lr, self._momentum, get_gpu(dy), get_gpu(pdy), ndy)
+        else:
+          cu.cu_optimizer_sgd(self._lr, 0, get_gpu(dy), get_gpu(dy), ndy)
 
         if self._momentum > 0:
             self._params[node_id] = ndy
+
+        if self._nesterov is True:
+          cu.cu_optimizer_sgd(1, self._momentum, get_gpu(ndy), get_gpu(ndy), ndy)
+
+
         return ndy
 
     def reset(self):
