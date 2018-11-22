@@ -60,7 +60,6 @@ class Node(np.ndarray):
 
     SHOWMARK = False
 
-
     _node_hook = None
 
     @classmethod

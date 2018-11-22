@@ -57,8 +57,8 @@ class Model(with_metaclass(ABCMeta, object)):
     _device_id = 0
     SERIALIZED = ()
 
-
     _model_hook = None
+
     @classmethod
     def set_hook(cls, context):
         cls._model_hook = context

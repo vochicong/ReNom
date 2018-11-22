@@ -206,9 +206,11 @@ class GroupConv2d(Parametrized):
         super(GroupConv2d, self).__init__(input_size)
 
     def weight_initiallize(self, input_size):
-        assert (input_size[0] % self._groups) == 0, "Input channels ({}) must be divisible by number of GroupConv2d groups ({})".format(
+        assert (input_size[0] % self._groups) == 0, \
+            "Input channels ({}) must be divisible by number of GroupConv2d groups ({})".format(
             input_size[0], self._groups)
-        assert (self._channel % self._groups) == 0, "Output channels ({}) must be divisible by number of GroupConv2d groups ({})".format(
+        assert (self._channel % self._groups) == 0, \
+            "Output channels ({}) must be divisible by number of GroupConv2d groups ({})".format(
             self._channel, self._groups)
         group_input_size = input_size[0] // self._groups
         size_f = (self._channel, group_input_size,

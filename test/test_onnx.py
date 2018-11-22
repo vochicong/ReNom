@@ -158,10 +158,10 @@ def _test_binop(tmpdir, f, name):
 
 
 def test_binops(tmpdir):
-    _test_binop(tmpdir, (lambda x, y: x+y), 'Add')
-    _test_binop(tmpdir, (lambda x, y: x-y), 'Sub')
-    _test_binop(tmpdir, (lambda x, y: x*y), 'Mul')
-    _test_binop(tmpdir, (lambda x, y: x/y), 'Div')
+    _test_binop(tmpdir, (lambda x, y: x + y), 'Add')
+    _test_binop(tmpdir, (lambda x, y: x - y), 'Sub')
+    _test_binop(tmpdir, (lambda x, y: x * y), 'Mul')
+    _test_binop(tmpdir, (lambda x, y: x / y), 'Div')
 
 
 def test_relu(tmpdir):

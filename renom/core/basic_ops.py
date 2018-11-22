@@ -1010,5 +1010,3 @@ class EnterModel(ModelMark):
 
 class LeaveModel(ModelMark):
     pass
-
-
