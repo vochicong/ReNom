@@ -36,6 +36,7 @@ class Sgd(Optimizer):
     Args:
         lr (float): Learning rate.
         momentum (float): Momentum coefficient of optimization.
+        nesterov (bool): If true, applies nesterov's accelerated gradient.
 
     Example:
         >>> import numpy as np
@@ -57,26 +58,26 @@ class Sgd(Optimizer):
                   [-0.1523091 , -0.03280939,  0.32063919]], dtype=float32)
     '''
 
-    def __init__(self, lr=0.1, momentum=0.4, Nesterov = False):
+    def __init__(self, lr=0.1, momentum=0.4, nesterov=True):
         self._lr = lr
         self._momentum = momentum
+        self._nesterov = nesterov
         self._params = {}
-        self._nesterov = Nesterov
 
     def _get_cpu(self, dy, node):
 
         node_id = id(node)
         pdy = self._params.get(node_id, 0)
-        ret = self._lr * dy 
+        ret = self._lr * dy
 
-        if self._nesterov is False:
-          ret += self._momentum * pdy
+        if not self._nesterov:
+            ret += self._momentum * pdy
 
         if self._momentum > 0:
             self._params[node_id] = ret
 
-        if self._nesterov is True:
-          ret += ret * self._momentum
+        if self._nesterov:
+            ret += ret * self._momentum
 
         if isinstance(ret, Node):
             ret.detach_graph()
@@ -87,19 +88,18 @@ class Sgd(Optimizer):
         node_id = id(node)
         pdy = self._params.get(node_id, None)
         if pdy is None:
-          pdy = get_gpu(dy).zeros_like_me()
+            pdy = get_gpu(dy).zeros_like_me()
         ndy = get_gpu(dy).empty_like_me()
-        if self._nesterov is False:
-          cu.cu_optimizer_sgd(self._lr, self._momentum, get_gpu(dy), get_gpu(pdy), ndy)
+        if not self._nesterov:
+            cu.cu_optimizer_sgd(self._lr, self._momentum, get_gpu(dy), get_gpu(pdy), ndy)
         else:
-          cu.cu_optimizer_sgd(self._lr, 0, get_gpu(dy), get_gpu(dy), ndy)
+            cu.cu_optimizer_sgd(self._lr, 0, get_gpu(dy), get_gpu(dy), ndy)
 
         if self._momentum > 0:
             self._params[node_id] = ndy
 
-        if self._nesterov is True:
-          cu.cu_optimizer_sgd(1, self._momentum, get_gpu(ndy), get_gpu(ndy), ndy)
-
+        if self._nesterov:
+            cu.cu_optimizer_sgd(1, self._momentum, get_gpu(ndy), get_gpu(ndy), ndy)
 
         return ndy
 
