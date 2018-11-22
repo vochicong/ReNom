@@ -65,7 +65,7 @@ class deconvnd(Node):
             self.attrs._x._update_diff(context, dx, **kwargs)
 
         if isinstance(self.attrs._w, Node):
-            l = [x for x in range(len(self.shape))]
+            l = [x for x in range(len(self.shape))]  # noqa
             del(l[1])
             dw = np.ones_like(self.attrs._w) * \
                 np.swapaxes(np.sum(self.attrs._x, axis=tuple(l), keepdims=True), 0, 1)

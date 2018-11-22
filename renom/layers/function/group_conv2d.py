@@ -122,7 +122,6 @@ class group_conv2d(Node):
         if isinstance(self.attrs._b, Node):
             self.attrs._b._update_diff(context, np.sum(dy, (0, 2, 3), keepdims=True), **kwargs)
 
-
     def _backward_gpu(self, context, dy, **kwargs):
         dw, db, dx = (get_gpu(g).empty_like_me() if g is not None else None
                       for g in (self.attrs._w, self.attrs._b, self.attrs._x))

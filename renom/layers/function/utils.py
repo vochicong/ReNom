@@ -188,8 +188,10 @@ def imnpool(img, kernel, stride, padding, padWith=0, mode="max", alternate_input
     for batch in range(N):
         tmp = []
         for in_channel in range(in_channels):
-            ret2 = place_pools(padded_image[batch, in_channel], kernel, stride, func,
-                               alternate_input=alternate_input[batch, in_channel] if alternate_input is not None else None)
+            ret2 = place_pools(padded_image[batch, in_channel],
+                               kernel, stride, func,
+                               alternate_input=alternate_input[batch, in_channel]
+                               if alternate_input is not None else None)
             tmp.append(ret2)
         ret.append(tmp)
     ret = np.array(ret)
@@ -243,7 +245,7 @@ def poolnim(original, dy, kernel, stride, padding, mode="max"):
     elif mode is "average":
         func = back_average_pool
 
-    _, _, in_dims = original.shape[0], original.shape[1], original.shape[2:]
+    _, _, in_dims = original.shape[0], original.shape[1], original.shape[2:]  # noqa
     dimensionality = len(in_dims)
     pad_list = [(0, 0), (0, 0)]
     pad_list.extend([(padding[i], padding[i]) for i in range(dimensionality)])
