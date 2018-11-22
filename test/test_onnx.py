@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import onnx
 import renom as rm
 import renom.utility.onnx
-import onnx
 from onnx.mapping import TENSOR_TYPE_TO_NP_TYPE
 
 
