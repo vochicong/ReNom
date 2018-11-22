@@ -16,7 +16,6 @@ class l2_norm(Node):
     @classmethod
     def _oper_cpu(cls, x, w):
         norm = np.sqrt(np.sum(x * x, axis=1, keepdims=True)) + 1e-5
-        w = w.reshape(-1, 1, 1)
         z = (x / norm) * w
         ret = cls._create_node(z)
         ret.attrs._norm = norm
@@ -27,7 +26,6 @@ class l2_norm(Node):
     @classmethod
     def _oper_gpu(cls, x, w):
         norm = rm.sqrt(rm.sum(x * x, axis=1, keepdims=True)) + 1e-5
-        w = w.reshape(-1, 1, 1)
         z = (x / norm) * w
         ret = cls._create_node(get_gpu(z))
         ret.attrs._norm = norm
@@ -90,7 +88,6 @@ class L2Norm(Parametrized):
     def weight_initiallize(self, input_size):
         self.params = {'w': Variable(
             np.ones((input_size[0], 1, 1)) * self.scale, auto_update=True, weight_decay=self._weight_decay)}
-        print(self.params["w"].shape)
 
     def forward(self, x):
         ret = l2_norm(x, self.params['w'])
