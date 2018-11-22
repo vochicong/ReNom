@@ -4,9 +4,18 @@ from renom.core import to_value
 from renom import precision
 
 
-def out_size(size, k, s, p, d=(1, 1)):
-    return ((np.array(size) + np.array(p) * 2 - np.array(k) - (np.array(k) - 1) *
-             (np.array(d) - 1)) // np.array(s) + 1).astype(np.int)
+def out_size(size, k, s, p, d=(1, 1), ceil_mode=False):
+    size = np.array(size)
+    k = np.array(k)
+    s = np.array(s)
+    p = np.array(p)
+    d = np.array(d)
+    dk = k + (k - 1) * (d - 1)
+    if ceil_mode:
+        out = ((size + p * 2 - dk + s - 1) // s + 1).astype(np.int)
+    else:
+        out = ((size + p * 2 - dk) // s + 1).astype(np.int)
+    return out
 
 
 def transpose_out_size(size, k, s, p, d=(1, 1)):
@@ -31,8 +40,7 @@ def im2col(img, size, kernel, stride, padding, dilation=(1, 1), padWith=0.):
         for j in range(k_w):
             jdw = j * d_w
             ju = jdw + s_w * out_w
-            col[:, :, k_h - 1 - i, k_w - 1 - j, :,
-                :] = img_n[:, :, idh:iu:s_h, jdw:ju:s_w]
+            col[:, :, k_h - 1 - i, k_w - 1 - j, :, :] = img_n[:, :, idh:iu:s_h, jdw:ju:s_w]
     return col
 
 
