@@ -11,6 +11,7 @@ flake8:
 
 pytest:
   script:
+    - cd test
     - export RENOM_PRECISION=64
     - py.test
     - export RENOM_PRECISION=32

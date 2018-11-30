@@ -12,11 +12,11 @@ if cu.has_cuda():
 
 class pool_base(Node):
 
-    def __new__(cls, x, filter=3, stride=1, padding=0):
+    def __new__(cls, x, filter=3, stride=1, padding=0, ceil_mode=False):
         filter, stride, padding = (tuplize(x) for x in (filter, stride, padding))
         in_shape = x.shape[1:]
         out_shape = [x.shape[1], ]
-        out_shape.extend(out_size(x.shape[2:], filter, stride, padding))
+        out_shape.extend(out_size(x.shape[2:], filter, stride, padding, ceil_mode=ceil_mode))
         return cls.calc_value(x, in_shape, out_shape, filter, stride, padding)
 
     def _backward_gpu(self, context, dy, **kwargs):

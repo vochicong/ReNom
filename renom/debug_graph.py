@@ -403,11 +403,18 @@ class ModelGraphContext:
         return self.root.graph
 
 
-MODEL_GRAPH = False
+class GraphHook:
+    def call_enter(self, model, x, args, kwargs):
+        return renom.core.EnterModel(x, model), args, kwargs
 
+    def call_leave(self, model, ret, x, args, kwargs):
+        return renom.core.LeaveModel(ret, model)
 
-def get_model_graph():
-    return MODEL_GRAPH
+    def on_forward(self, model, forward, x, args, kwargs):
+        return forward(x, *args, **kwargs)
+
+    def leave_create(self, nodecls, ret):
+        return renom.core.NodeMark(ret, ret)
 
 
 def SET_MODEL_GRAPH(use):
@@ -428,8 +435,13 @@ def SET_MODEL_GRAPH(use):
 
     '''
 
-    global MODEL_GRAPH
-    MODEL_GRAPH = use
+    if use:
+        hook = GraphHook()
+        renom.Model.set_hook(hook)
+        renom.Node.set_hook(hook)
+    else:
+        renom.Model.set_hook(None)
+        renom.Node.set_hook(None)
 
 
 def showmark(cls):

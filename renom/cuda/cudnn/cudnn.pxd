@@ -286,6 +286,10 @@ cdef extern from "cudnn.h":
         cudnnConvolutionMode_t          mode,
         cudnnDataType_t                 computeType)
 
+    cudnnStatus_t cudnnSetConvolutionGroupCount(
+        cudnnConvolutionDescriptor_t    convDesc,
+        int                             groupCount)
+
     cudnnStatus_t cudnnSetConvolutionNdDescriptor(
         cudnnConvolutionDescriptor_t convDesc,
         int arrayLength,             # nbDims-2 size

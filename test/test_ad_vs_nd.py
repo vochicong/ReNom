@@ -24,6 +24,7 @@ from renom.layers.activation.relu import relu
 from renom.layers.activation.maxout import maxout
 from renom.layers.function.dense import Dense
 from renom.layers.function.conv2d import Conv2d
+from renom.layers.function.group_conv2d import GroupConv2d
 from renom.layers.function.convnd import ConvNd, Conv3d
 from renom.layers.function.deconv2d import Deconv2d
 from renom.layers.function.deconvnd import DeconvNd
@@ -566,6 +567,27 @@ def test_conv2d(node, use_gpu, ignore_bias):
     assert_cuda_active(use_gpu)
 
     layer = Conv2d(channel=3, ignore_bias=ignore_bias)
+
+    def func(node):
+        return sum(layer(node))
+    compare(func, node, node)
+    compare(func, layer.params["w"], node)
+    try:
+        compare(func, layer.params["b"], node)
+    except Exception:
+        assert ignore_bias
+
+
+@pytest.mark.parametrize("node", [
+    Variable(rand((2, 8, 3, 3))),
+    Variable(rand((2, 16, 4, 5))),
+    Variable(rand((2, 32, 4, 4))),
+])
+def test_group_conv2d(node, use_gpu, ignore_bias):
+    node = Variable(node)
+    assert_cuda_active(use_gpu)
+
+    layer = GroupConv2d(channel=32, ignore_bias=ignore_bias, groups=4)
 
     def func(node):
         return sum(layer(node))

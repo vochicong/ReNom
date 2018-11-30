@@ -832,6 +832,7 @@ class Reshape(Node):
         ret = super(Reshape, cls).__new__(cls, value)
         ret.attrs._array = array
         ret.attrs._shape = array.shape
+        ret._shape_to = shape
         return ret
 
     def _backward_cpu(self, context, dy, **kwargs):
@@ -990,6 +991,10 @@ class Mark(Pos):
     def _reduce_graph(self):
         return
 
+    @classmethod
+    def _run_node_hook(cls, ret):
+        return ret
+
 
 class NodeMark(Mark):
     pass
@@ -1001,15 +1006,7 @@ class ModelMark(Mark):
 
 class EnterModel(ModelMark):
     pass
-#    def __init__(self, *args, **kwargs):
-#        super().__init__(*args, **kwargs)
-#        print('enter', [type(a) for a in args])
-#        import pdb;pdb.set_trace()
 
 
 class LeaveModel(ModelMark):
     pass
-#    def __init__(self, *args, **kwargs):
-#        super().__init__(*args, **kwargs)
-#        print('leave', [type(a) for a in args])
-#        import pdb;pdb.set_trace()
