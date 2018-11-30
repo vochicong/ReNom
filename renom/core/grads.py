@@ -195,7 +195,6 @@ class Grads:
                         self.update_node(node, opt)
 
 
-
 def _grad(self, initial=None, detach_graph=True, weight_decay=None, **kwargs):
     '''This method follows computational graph and returns the gradients of
     Variable object.
