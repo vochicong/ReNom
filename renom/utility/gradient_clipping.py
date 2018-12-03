@@ -28,14 +28,13 @@ class GradientClipping(object):
             norm(int): norm of gradient
 
         Examples::
-            >>> from **** import Grads
-            >>> clip = Grads.gradient_clipping
+            >>> from **** import GradientClipping
+            >>> grad_clip = GradientClipping(threshold=0.5,norm=2)
             >>>
             >>> grad = loss.grad()
-            >>> clip(grad, threshold=0.5)
+            >>> grad_clip(grad)
             >>>
             >>> grad.update(Sgd(lr=0.01))
-
         """
 
         threshold = self.threshold
