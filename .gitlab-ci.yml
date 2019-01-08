@@ -1,20 +1,18 @@
-image : python:2
+image : python:3
 
 before_script:
   - apt-get update -qq && apt-get install -y -qq python-pip pandoc
-  - pip install numpy flake8
+  - pip install numpy pytest pytest-flake8
   - pip install -r requirements.txt
   - pip install -e .
 
 flake8:
   script:
-    - flake8 .
+    - export RENOM_PRECISION=64
+    - pytest --flake8 renom test
 
 pytest:
   script:
     - cd test
     - export RENOM_PRECISION=64
-    - py.test
-    - export RENOM_PRECISION=32
-    - py.test
-
+    - pytest
