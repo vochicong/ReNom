@@ -861,7 +861,7 @@ def test_max_poolnd(node, use_gpu):
 
     node = Variable(node)
     assert_cuda_active(True)
-    layer = MaxPoolNd(kernel=3, padding=2, stride=2)
+    layer = MaxPoolNd(kernel=2, padding=2, stride=2)
 
     print('starting testing')
     np.set_printoptions(suppress=True)

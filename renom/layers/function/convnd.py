@@ -159,7 +159,7 @@ class ConvNd(Parametrized):
         if is_cuda_active():
             assert self._dims < 4, "GPU Version currently only supports 2 and 3 dimensions"
 
-        if self._dims == 1:
+        if self._dims == 0:
             self._kernel = np.append(self._kernel, 1).astype(np.int32)
             self._padding = np.append(self._padding, 0).astype(np.int32)
             self._stride = np.append(self._stride, 1).astype(np.int32)
