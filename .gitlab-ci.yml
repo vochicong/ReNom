@@ -9,7 +9,7 @@ before_script:
 flake8:
   script:
     - export RENOM_PRECISION=64
-    - pytest --flake8 renom test
+    - flake8 .
 
 pytest:
   script:
