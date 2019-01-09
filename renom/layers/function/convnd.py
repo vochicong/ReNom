@@ -99,7 +99,7 @@ def check_input(var, length):
         var = var.astype(np.int32)
     if length < 2 and is_cuda_active():
         length = 2
-    assert len(var) is length, str(len(var)) + '/'+ str(length)
+    assert len(var) is length, str(len(var)) + '/' + str(length)
     return var
 
 
