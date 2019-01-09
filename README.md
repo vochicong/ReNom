@@ -5,11 +5,14 @@ Documents are available on the ReNom.jp web site.
 - http://renom.jp/index.html
 
 ## ReNom version 2.7.0
-- http://renom.jp/rsts/renomdl/main.html
+
+- http://renom.jp/packages/renomdl/index.html
 
 #### Changes from 2.6
 
 Please refer to `changes` at renom.jp.
+
+- http://renom.jp/packages/renomdl/rsts/change_history/main.html
 
 
 ## Requirements
