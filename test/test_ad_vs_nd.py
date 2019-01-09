@@ -630,8 +630,7 @@ def test_conv2d_with_dilation(node, size, raise_error, use_gpu):
 ])
 def test_convnd(node, error):  # , use_gpu, ignore_bias):
     node = Variable(node)
-    # assert_cuda_active(use_gpu)
-    assert_cuda_active(True)
+    assert_cuda_active(use_gpu)
     layer = ConvNd(channel=1, filter=3, stride=1)  # , ignore_bias=ignore_bias)
 
     def func(node):
