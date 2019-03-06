@@ -31,9 +31,9 @@ First clone the ReNom repository.
 
 Then move to the ReNom folder, install the module using pip.
 
-	cd ReNom
-  pip install -r requirements.txt
-	pip install -e .
+    cd ReNom
+    pip install -r requirements.txt
+    pip install -e .
 
 To activate CUDA, you have to build cuda modules before `pip install -e .` 
 using following command.
